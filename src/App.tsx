@@ -2,6 +2,8 @@ import MIDIFile from "midifile";
 import MIDIPlayer from "midiplayer";
 import * as React from "react";
 
+import MidiEventsView from "./MidiEventsView";
+
 import "./App.css";
 
 type MidiState = {
@@ -100,6 +102,7 @@ class App extends React.Component<{}, State> {
         </div>
         {this.renderOutputDevices(webMidi)}
         {this.renderMusicControls()}
+        <MidiEventsView />
       </React.Fragment>
     );
   }
