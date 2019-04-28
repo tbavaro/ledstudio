@@ -1,11 +1,14 @@
 {
-  "name": "led-studio",
+  "name": "ledstudio",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "midifile": "^2.0.0",
+    "midiplayer": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts-ts": "3.1.0"
+    "react-scripts-ts": "3.1.0",
+    "timidity": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts-ts start",
