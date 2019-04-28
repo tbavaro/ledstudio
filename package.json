@@ -5,7 +5,6 @@
   "private": true,
   "dependencies": {
     "midifile": "^2.0.0",
-    "midiplayer": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts-ts": "3.1.0",

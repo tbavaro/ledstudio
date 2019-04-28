@@ -15,6 +15,7 @@ declare class MIDIPlayer {
   processPlay(): void;
   resume(endCallback?: () => void): void;
   stop(): void;
+  onSend: (data: Parameters<WebMidi.MIDIOutput["send"]>[0], timestamp: Parameters<WebMidi.MIDIOutput["send"]>[1]) => void | null;
 }
 
 export default MIDIPlayer;

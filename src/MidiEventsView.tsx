@@ -1,21 +1,23 @@
 import * as React from "react";
 
+import MidiEvent from "./MidiEvent";
+
 import "./MidiEventsView.css";
 
 const MAX_EVENTS = 100;
-let nextId = 0;
 
 export default class MidiEventsView extends React.Component<{}, {}> {
-  private interval: NodeJS.Timeout | null = null;
-
-  public componentDidMount() {
-    this.interval = setInterval(this.onTick, 30);
-  }
+  private pendingEvents: MidiEvent[] = [];
+  private latestTimestamp = 0;
+  private nextTimeout: NodeJS.Timeout | null = null;
 
   public componentWillUnmount() {
-    if (this.interval !== null) {
-      clearInterval(this.interval);
-      this.interval = null;
+    if (super.componentWillUnmount) {
+      super.componentWillUnmount();
+    }
+    if (this.nextTimeout !== null) {
+      clearTimeout(this.nextTimeout);
+      this.nextTimeout = null;
     }
   }
 
@@ -25,10 +27,50 @@ export default class MidiEventsView extends React.Component<{}, {}> {
     );
   }
 
-  public addEvent(event: string) {
+  public onSend(event: MidiEvent) {
+    const timestamp = event.timestamp || this.latestTimestamp;
+    if (timestamp < this.latestTimestamp) {
+      throw new Error("got events out of chronological order");
+    }
+    this.pendingEvents.push(event);
+    this.scheduleDequeueIfNeeded();
+  }
+
+  private dequeueEvents = () => {
+    const now = performance.now();
+
+    // show all the events that have happened by now
+    while (this.pendingEvents.length > 0) {
+      const head = this.pendingEvents[0];
+      if (head.timestamp !== undefined && head.timestamp > now) {
+        break;
+      }
+      this.pendingEvents.shift();
+      this.showEvent(head);
+    }
+
+    this.nextTimeout = null;
+    this.scheduleDequeueIfNeeded();
+  }
+
+  private scheduleDequeueIfNeeded() {
+    if (this.nextTimeout === null && this.pendingEvents.length > 0) {
+      const nextTimestamp = this.pendingEvents[0].timestamp;
+      if (nextTimestamp === undefined) {
+        // shouldn't happen because the loop above should eat all the undefineds
+        throw new Error("this shouldn't happen");
+      }
+
+      const now = performance.now();
+      const delay = Math.max(0, nextTimestamp - now);
+      this.nextTimeout = setTimeout(this.dequeueEvents, delay);
+    }
+  }
+
+  private showEvent(event: MidiEvent) {
     const newElement = document.createElement("div");
     newElement.className = "MidiEventsView-entry";
-    newElement.innerText = event;
+    newElement.innerText = event.toString();
 
     const parent = this.ref;
     parent.insertBefore(newElement, parent.firstChild);
@@ -49,9 +91,5 @@ export default class MidiEventsView extends React.Component<{}, {}> {
   }
   private set ref(newRef: HTMLDivElement) {
     this.unsafeRef = newRef;
-  }
-
-  private onTick = () => {
-    this.addEvent(`event ${(nextId++)}: ${new Date().toString()}`);
   }
 }

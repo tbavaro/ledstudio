@@ -1,8 +1,9 @@
 import MIDIFile from "midifile";
-import MIDIPlayer from "midiplayer";
 import * as React from "react";
 
+import MidiEvent from "./MidiEvent";
 import MidiEventsView from "./MidiEventsView";
+import MIDIPlayer from "./MIDIPlayer";
 
 import "./App.css";
 
@@ -37,6 +38,8 @@ class App extends React.Component<{}, State> {
     if (super.componentWillMount) {
       super.componentWillMount();
     }
+
+    this.midiPlayer.onSend = this.onSendMidiEvent;
 
     navigator.requestMIDIAccess().then(webMidi => {
       const outputs = Array.from(webMidi.outputs.values());
@@ -102,7 +105,7 @@ class App extends React.Component<{}, State> {
         </div>
         {this.renderOutputDevices(webMidi)}
         {this.renderMusicControls()}
-        <MidiEventsView />
+        <MidiEventsView ref={this.setMidiEventsViewRef}/>
       </React.Fragment>
     );
   }
@@ -180,6 +183,24 @@ class App extends React.Component<{}, State> {
       this.midiPlayer.output = newValue;
       this.setState({ midiOutput: newValue });
     }
+  }
+
+  private onSendMidiEvent = (
+    data: number[] | Uint8Array,
+    timestamp?: number
+  ) => {
+    const event = new MidiEvent(data, timestamp);
+    this.midiEventsViewRef.onSend(event);
+    // console.log("send", data);
+  }
+
+  private unsafeMidiEventsViewRef: MidiEventsView | null = null;
+  private setMidiEventsViewRef = (newRef: MidiEventsView) => this.unsafeMidiEventsViewRef = newRef;
+  private get midiEventsViewRef(): MidiEventsView {
+    if (this.unsafeMidiEventsViewRef === null) {
+      throw new Error("ref not set");
+    }
+    return this.unsafeMidiEventsViewRef;
   }
 }
 
