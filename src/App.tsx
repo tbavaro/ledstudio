@@ -56,7 +56,7 @@ class App extends React.Component<{}, State> {
 
     this.midiPlayer.onSend = this.onSendMidiEvent;
 
-    if (!navigator.requestMIDIAccess) {
+    if (navigator.requestMIDIAccess) {
       navigator.requestMIDIAccess().then(webMidi => {
         const outputs = Array.from(webMidi.outputs.values());
         const defaultOutput = (outputs.length === 0 ? null : outputs[0]);
