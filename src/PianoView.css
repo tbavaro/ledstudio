@@ -33,7 +33,10 @@
   top: 0;
   height: 66%;
   border: 1px solid gray;
-  border-right: 0px;
   box-sizing: border-box;
-  background-color: gray;
+  background-color: black;
+}
+
+.PianoView .pressed {
+  background-color: red;
 }
