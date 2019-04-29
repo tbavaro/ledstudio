@@ -2,6 +2,7 @@
   border: 2px solid black;
   box-sizing: border-box;
   width: 100%;
+  max-width: 500px;
   height: 300px;
   overflow-y: hidden;
   font-family: monospace;

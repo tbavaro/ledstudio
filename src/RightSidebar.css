@@ -1,0 +1,33 @@
+.RightSidebar {
+  position: relative;
+  flex: 0;
+  flex-basis: 300px;
+  padding: 8px;
+  background-color: #333333;
+  color: lightgray;
+  font-size: 0.8em;
+}
+
+.RightSidebar-musicControls {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.RightSidebar-musicControls a {
+  display: inline-block;
+  cursor: pointer;
+  border: 1px solid gray;
+  padding: 4px 20px;
+  border-radius: 4px;
+  background-color: gray;
+}
+
+.RightSidebar-musicControls a:hover {
+  background-color: #666;
+  color: white;
+}
+
+.RightSidebar-musicControls a:active {
+  background-color: black;
+  color: white;
+}

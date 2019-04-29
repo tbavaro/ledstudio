@@ -2,9 +2,10 @@ import MIDIFile from "midifile";
 import * as React from "react";
 
 import MidiEvent from "./MidiEvent";
-import MidiEventsView from "./MidiEventsView";
+import { MidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
+import * as RightSidebar from "./RightSidebar";
 
 import "./App.css";
 
@@ -33,6 +34,8 @@ interface State {
   midiData: ArrayBuffer | null;
 };
 
+type AllActions = RightSidebar.Actions;
+
 class App extends React.Component<{}, State> {
   public state: State = {
     midiState: {
@@ -44,6 +47,7 @@ class App extends React.Component<{}, State> {
   };
 
   private midiPlayer = new MIDIPlayer();
+  private midiEventEmitter = new MidiEventEmitter();
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -86,89 +90,38 @@ class App extends React.Component<{}, State> {
   public render() {
     return (
       <div className="App">
-        <div className="App-body" children={this.renderBody()}/>
-        <div className="App-pianoContainer">
-          <PianoView ref={this.setPianoViewRef}/>
+        <div className="App-viewportGroup">
+          <div className="App-viewportContainer"/>
+          <div className="App-pianoContainer">
+            <PianoView ref={this.setPianoViewRef}/>
+          </div>
         </div>
+        {this.renderSidebar()}
       </div>
     );
   }
 
-  private renderBody() {
+  private renderSidebar() {
     switch (this.state.midiState.status) {
       case "initializing":
         return "Initializing...";
 
       case "loaded":
-        return this.renderLoadedBody(this.state.midiState.webMidi);
+        return (
+          <RightSidebar.default
+            actions={this.actionManager}
+            webMidi={this.state.midiState.webMidi}
+            midiFilenames={MIDI_FILES}
+            isMidiFileLoaded={this.state.midiData !== null}
+            selectedMidiFilename={this.state.midiFilename}
+            selectedMidiOutput={this.state.midiOutput}
+            midiEventEmitter={this.midiEventEmitter}
+          />
+        );
 
       case "failed":
         return "failed";
     }
-  }
-
-  private renderLoadedBody(webMidi: WebMidi.MIDIAccess) {
-    return (
-      <React.Fragment>
-        {this.renderMidiFileSelector()}
-        {this.renderOutputDevices(webMidi)}
-        {this.renderMusicControls()}
-        <MidiEventsView ref={this.setMidiEventsViewRef}/>
-      </React.Fragment>
-    );
-  }
-
-  private renderMidiFileSelector() {
-    return (
-      <div className="App-midiFiles">
-        <span>MIDI file: </span>
-        <select
-          value={this.state.midiFilename}
-          onChange={this.handleSetMidiFilename}
-        >
-          {
-            MIDI_FILES.map(filename => (
-              <option key={filename} value={filename}>{filename}</option>
-            ))
-          }
-        </select>
-        {this.state.midiData !== null ? " (loaded)" : " (not loaded)" }
-      </div>
-    );
-  }
-
-  private renderOutputDevices(webMidi: WebMidi.MIDIAccess) {
-    const outputs = Array.from(webMidi.outputs.entries());
-    return (
-      <div className="App-outputDevices">
-        <span>Output device: </span>
-        <select
-          value={this.state.midiOutput === null ? "" : this.state.midiOutput.id}
-          onChange={this.handleSetMidiOutput}
-        >
-          <option value="" children={"<none>"}/>
-          {
-            outputs.map(([key, output]) => (
-              <option
-                key={key}
-                value={key}
-                children={output.name}
-              />
-            ))
-          }
-        </select>
-      </div>
-    );
-  }
-
-  private renderMusicControls() {
-    return (
-      <div className="App-musicControls">
-        <a href="#" onClick={this.handlePlayMusic}>Play music</a>
-        <br/>
-        <a href="#" onClick={this.handleStopMusic}>Stop music</a>
-      </div>
-    )
   }
 
   private handlePlayMusic = () => {
@@ -195,17 +148,7 @@ class App extends React.Component<{}, State> {
 
   private handleStopMusic = () => this.midiPlayer.stop();
 
-  private handleSetMidiOutput = (event: React.ChangeEvent<any>) => {
-    const id = event.target.value as string;
-    if (this.state.midiState.status === "loaded") {
-      const output = this.state.midiState.webMidi.outputs.get(id) || null;
-      this.setMidiOutput(output);
-    } else {
-      this.setMidiOutput(null);
-    }
-  }
-
-  private setMidiOutput(newValue: WebMidi.MIDIOutput | null) {
+  private setMidiOutput = (newValue: WebMidi.MIDIOutput | null) => {
     if (newValue !== this.state.midiOutput) {
       this.midiPlayer.stop();
       this.midiPlayer.output = newValue;
@@ -218,7 +161,7 @@ class App extends React.Component<{}, State> {
     timestamp?: number
   ) => {
     const event = new MidiEvent(data, timestamp);
-    this.midiEventsViewRef.onSend(event);
+    this.midiEventEmitter.fire(event);
     switch(event.data[0]) {
       case 0x80:
       case 0x90:
@@ -231,15 +174,6 @@ class App extends React.Component<{}, State> {
     // console.log("send", data);
   }
 
-  private unsafeMidiEventsViewRef: MidiEventsView | null = null;
-  private setMidiEventsViewRef = (newRef: MidiEventsView) => this.unsafeMidiEventsViewRef = newRef;
-  private get midiEventsViewRef(): MidiEventsView {
-    if (this.unsafeMidiEventsViewRef === null) {
-      throw new Error("ref not set");
-    }
-    return this.unsafeMidiEventsViewRef;
-  }
-
   private unsafePianoViewRef: PianoView | null = null;
   private setPianoViewRef = (newRef: PianoView) => this.unsafePianoViewRef = newRef;
   private get pianoViewRef(): PianoView {
@@ -249,7 +183,7 @@ class App extends React.Component<{}, State> {
     return this.unsafePianoViewRef;
   }
 
-  private loadMidiFile(filename: string) {
+  private loadMidiFile = (filename: string) => {
     if (filename !== this.state.midiFilename) {
       this.setState({
         midiData: null,
@@ -268,11 +202,12 @@ class App extends React.Component<{}, State> {
     }
   }
 
-  private handleSetMidiFilename = (event: React.ChangeEvent<any>) => {
-    this.midiPlayer.stop();
-    const filename = event.target.value as string;
-    this.loadMidiFile(filename);
-  }
+  private actionManager: AllActions = {
+    playMusic: this.handlePlayMusic,
+    stopMusic: this.handleStopMusic,
+    setMidiOutput: this.setMidiOutput,
+    setSelectedMidiFilename: this.loadMidiFile
+  };
 }
 
 export default App;
