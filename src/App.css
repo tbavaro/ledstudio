@@ -21,7 +21,11 @@
   flex: 1;
 }
 
-.App-rightSidebar {
+.App-pianoContainer {
+  position: relative;
+}
+
+.App-sidebarContainer {
   position: relative;
   flex: 0;
   flex-basis: 300px;
@@ -31,30 +35,3 @@
   font-size: 0.8em;
 }
 
-.App-pianoContainer {
-  position: relative;
-}
-
-.App-musicControls {
-  margin-top: 4px;
-  margin-bottom: 4px;
-}
-
-.App-musicControls a {
-  display: inline-block;
-  cursor: pointer;
-  border: 1px solid gray;
-  padding: 4px 20px;
-  border-radius: 4px;
-  background-color: gray;
-}
-
-.App-musicControls a:hover {
-  background-color: #666;
-  color: white;
-}
-
-.App-musicControls a:active {
-  background-color: black;
-  color: white;
-}

@@ -6,7 +6,12 @@ import "./MidiEventsView.css";
 
 const MAX_EVENTS = 100;
 
-export default class MidiEventsView extends React.Component<{}, {}> {
+interface Props {
+  className?: string;
+  entryClassName?: string;
+}
+
+export default class MidiEventsView extends React.Component<Props, {}> {
   private pendingEvents: MidiEvent[] = [];
   private latestTimestamp = 0;
   private nextTimeout: NodeJS.Timeout | null = null;
@@ -23,7 +28,7 @@ export default class MidiEventsView extends React.Component<{}, {}> {
 
   public render() {
     return (
-      <div className="MidiEventsView" ref={this.setRef}/>
+      <div className={"MidiEventsView " + (this.props.className || "")} ref={this.setRef}/>
     );
   }
 
@@ -73,7 +78,7 @@ export default class MidiEventsView extends React.Component<{}, {}> {
     // }
 
     const newElement = document.createElement("div");
-    newElement.className = "MidiEventsView-entry";
+    newElement.className = "MidiEventsView-entry " + (this.props.entryClassName || "");
     newElement.innerText = event.toString();
 
     const parent = this.ref;

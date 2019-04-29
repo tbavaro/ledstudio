@@ -56,25 +56,34 @@ class App extends React.Component<{}, State> {
 
     this.midiPlayer.onSend = this.onSendMidiEvent;
 
-    navigator.requestMIDIAccess().then(webMidi => {
-      const outputs = Array.from(webMidi.outputs.values());
-      const defaultOutput = (outputs.length === 0 ? null : outputs[0]);
-      this.setState({
-        midiState: {
-          status: "loaded",
-          webMidi: webMidi,
-        }
+    if (!navigator.requestMIDIAccess) {
+      navigator.requestMIDIAccess().then(webMidi => {
+        const outputs = Array.from(webMidi.outputs.values());
+        const defaultOutput = (outputs.length === 0 ? null : outputs[0]);
+        this.setState({
+          midiState: {
+            status: "loaded",
+            webMidi: webMidi,
+          }
+        });
+        this.setMidiOutput(defaultOutput);
+      }).catch(reason => {
+        console.log("exception requesting MIDI access", reason);
+        this.setState({
+          midiState: {
+            status: "failed",
+            midiFailureReason: reason
+          }
+        });
       });
-      this.setMidiOutput(defaultOutput);
-    }).catch(reason => {
-      console.log("exception requesting MIDI access", reason);
+    } else {
       this.setState({
         midiState: {
           status: "failed",
-          midiFailureReason: reason
+          midiFailureReason: "MIDI access not supported on this browser"
         }
       });
-    });
+    }
 
     this.loadMidiFile(MIDI_FILES[0]);
   }
@@ -96,12 +105,14 @@ class App extends React.Component<{}, State> {
             <PianoView ref={this.setPianoViewRef}/>
           </div>
         </div>
-        {this.renderSidebar()}
+        <div className="App-sidebarContainer">
+          {this.renderSidebarContents()}
+        </div>
       </div>
     );
   }
 
-  private renderSidebar() {
+  private renderSidebarContents() {
     switch (this.state.midiState.status) {
       case "initializing":
         return "Initializing...";
@@ -120,7 +131,7 @@ class App extends React.Component<{}, State> {
         );
 
       case "failed":
-        return "failed";
+        return `error: ${this.state.midiState.midiFailureReason}`;
     }
   }
 
@@ -185,6 +196,7 @@ class App extends React.Component<{}, State> {
 
   private loadMidiFile = (filename: string) => {
     if (filename !== this.state.midiFilename) {
+      this.midiPlayer.stop();
       this.setState({
         midiData: null,
         midiFilename: filename

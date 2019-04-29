@@ -44,10 +44,16 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
 
     return (
       <div className="RightSidebar">
-        {this.renderMidiFileSelector()}
-        {this.renderOutputDevices()}
-        {this.renderMusicControls()}
-        <MidiEventsView ref={this.setMidiEventsViewRef}/>
+        <div className="RightSidebar-optionsGroup">
+          {this.renderMidiFileSelector()}
+          {this.renderOutputDevices()}
+          {this.renderMusicControls()}
+        </div>
+        <MidiEventsView
+          className="RightSidebar-midiEventsView"
+          entryClassName="RightSidebar-midiEventEntry"
+          ref={this.setMidiEventsViewRef}
+        />
       </div>
     );
   }

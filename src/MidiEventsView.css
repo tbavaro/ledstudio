@@ -1,15 +1,5 @@
-.MidiEventsView {
-  border: 2px solid black;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 500px;
-  height: 300px;
-  overflow-y: hidden;
-  font-family: monospace;
-}
-
 .MidiEventsView-entry {
-  border-bottom: 1px solid lightgray;
+  font-family: monospace;
   overflow-x: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

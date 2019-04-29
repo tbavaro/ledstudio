@@ -1,11 +1,20 @@
 .RightSidebar {
-  position: relative;
-  flex: 0;
-  flex-basis: 300px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   padding: 8px;
-  background-color: #333333;
+  background-color: #333;
   color: lightgray;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.RightSidebar-optionsGroup {
   font-size: 0.8em;
+  margin-bottom: 4px;
 }
 
 .RightSidebar-musicControls {
@@ -20,6 +29,8 @@
   padding: 4px 20px;
   border-radius: 4px;
   background-color: gray;
+  color: white;
+  font-weight: bold;
 }
 
 .RightSidebar-musicControls a:hover {
@@ -30,4 +41,20 @@
 .RightSidebar-musicControls a:active {
   background-color: black;
   color: white;
+}
+
+.RightSidebar-midiEventsView {
+  box-sizing: border-box;
+  width: 100%;
+  overflow-y: hidden;
+  font-family: monospace;
+  flex: 1;
+}
+
+.RightSidebar-midiEventEntry {
+  border-bottom: 1px solid #333;
+  background-color: #272727;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
