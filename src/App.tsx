@@ -6,6 +6,7 @@ import { MidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
 import * as RightSidebar from "./RightSidebar";
+import SimulationViewport from "./SimulationViewport";
 
 import "./App.css";
 
@@ -100,7 +101,9 @@ class App extends React.Component<{}, State> {
     return (
       <div className="App">
         <div className="App-viewportGroup">
-          <div className="App-viewportContainer"/>
+          <div className="App-viewportContainer">
+            <SimulationViewport/>
+          </div>
           <div className="App-pianoContainer">
             <PianoView ref={this.setPianoViewRef}/>
           </div>
