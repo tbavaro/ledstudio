@@ -8,6 +8,14 @@ import PianoView from "./PianoView";
 
 import "./App.css";
 
+const MIDI_FILES = [
+  "abovo.mid",
+  "bach_846.mid",
+  "thegift.mid"
+];
+
+const MIDI_FILE_PATH_PREFIX = "./";
+
 type MidiState = {
   status: "initializing"
 } | {
@@ -21,6 +29,7 @@ type MidiState = {
 interface State {
   midiState: Readonly<MidiState>;
   midiOutput: WebMidi.MIDIOutput | null;
+  midiFilename: string;
   midiData: ArrayBuffer | null;
 };
 
@@ -30,6 +39,7 @@ class App extends React.Component<{}, State> {
       status: "initializing"
     },
     midiOutput: null,
+    midiFilename: "<<not assigned>>",
     midiData: null
   };
 
@@ -62,13 +72,7 @@ class App extends React.Component<{}, State> {
       });
     });
 
-    const req = new XMLHttpRequest();
-    req.open("GET", "./bach_846.mid", true);
-    req.responseType = "arraybuffer";
-    req.onload = (event: ProgressEvent) => {
-      this.setState({ midiData: req.response });
-    };
-    req.send();
+    this.loadMidiFile(MIDI_FILES[0]);
   }
 
   public componentWillUnmount() {
@@ -106,9 +110,7 @@ class App extends React.Component<{}, State> {
   private renderLoadedBody(webMidi: WebMidi.MIDIAccess) {
     return (
       <React.Fragment>
-        <div>
-          MIDI Data: {this.state.midiData ? "loaded" : "not loaded" }
-        </div>
+        {this.renderMidiFileSelector()}
         {this.renderOutputDevices(webMidi)}
         {this.renderMusicControls()}
         <MidiEventsView ref={this.setMidiEventsViewRef}/>
@@ -116,11 +118,30 @@ class App extends React.Component<{}, State> {
     );
   }
 
+  private renderMidiFileSelector() {
+    return (
+      <div className="App-midiFiles">
+        <span>MIDI file: </span>
+        <select
+          value={this.state.midiFilename}
+          onChange={this.handleSetMidiFilename}
+        >
+          {
+            MIDI_FILES.map(filename => (
+              <option key={filename} value={filename}>{filename}</option>
+            ))
+          }
+        </select>
+        {this.state.midiData !== null ? " (loaded)" : " (not loaded)" }
+      </div>
+    );
+  }
+
   private renderOutputDevices(webMidi: WebMidi.MIDIAccess) {
     const outputs = Array.from(webMidi.outputs.entries());
     return (
       <div className="App-outputDevices">
-        <span>Devices ({outputs.length}): </span>
+        <span>Output device: </span>
         <select
           value={this.state.midiOutput === null ? "" : this.state.midiOutput.id}
           onChange={this.handleSetMidiOutput}
@@ -226,6 +247,31 @@ class App extends React.Component<{}, State> {
       throw new Error("ref not set");
     }
     return this.unsafePianoViewRef;
+  }
+
+  private loadMidiFile(filename: string) {
+    if (filename !== this.state.midiFilename) {
+      this.setState({
+        midiData: null,
+        midiFilename: filename
+      });
+
+      const req = new XMLHttpRequest();
+      req.open("GET", MIDI_FILE_PATH_PREFIX + filename, true);
+      req.responseType = "arraybuffer";
+      req.onload = () => {
+        if (filename === this.state.midiFilename) {
+          this.setState({ midiData: req.response });
+        }
+      };
+      req.send();
+    }
+  }
+
+  private handleSetMidiFilename = (event: React.ChangeEvent<any>) => {
+    this.midiPlayer.stop();
+    const filename = event.target.value as string;
+    this.loadMidiFile(filename);
   }
 }
 
