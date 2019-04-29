@@ -68,9 +68,9 @@ export default class MidiEventsView extends React.Component<{}, {}> {
   }
 
   private showEvent(event: MidiEvent) {
-    if (!event.isNoteworthy) {
-      return;
-    }
+    // if (!event.isNoteworthy) {
+    //   return;
+    // }
 
     const newElement = document.createElement("div");
     newElement.className = "MidiEventsView-entry";

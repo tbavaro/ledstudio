@@ -84,7 +84,7 @@ class App extends React.Component<{}, State> {
       <div className="App">
         <div className="App-body" children={this.renderBody()}/>
         <div className="App-pianoContainer">
-          <PianoView/>
+          <PianoView ref={this.setPianoViewRef}/>
         </div>
       </div>
     );
@@ -168,6 +168,7 @@ class App extends React.Component<{}, State> {
 
     const file = new MIDIFile(this.state.midiData);
     this.midiPlayer.load(file);
+    this.pianoViewRef.reset();
     this.midiPlayer.play();
   }
 
@@ -197,6 +198,15 @@ class App extends React.Component<{}, State> {
   ) => {
     const event = new MidiEvent(data, timestamp);
     this.midiEventsViewRef.onSend(event);
+    switch(event.data[0]) {
+      case 0x80:
+      case 0x90:
+        this.pianoViewRef.setKeyPressed(event.data[1], event.data[0] === 0x90);
+        break;
+
+      default:
+        break;
+    }
     // console.log("send", data);
   }
 
@@ -207,6 +217,15 @@ class App extends React.Component<{}, State> {
       throw new Error("ref not set");
     }
     return this.unsafeMidiEventsViewRef;
+  }
+
+  private unsafePianoViewRef: PianoView | null = null;
+  private setPianoViewRef = (newRef: PianoView) => this.unsafePianoViewRef = newRef;
+  private get pianoViewRef(): PianoView {
+    if (this.unsafePianoViewRef === null) {
+      throw new Error("ref not set");
+    }
+    return this.unsafePianoViewRef;
   }
 }
 

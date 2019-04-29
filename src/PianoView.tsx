@@ -50,14 +50,6 @@ export default class PianoView extends React.PureComponent<{}, State> {
     keyState: defaultKeyState()
   };
 
-  public componentDidMount() {
-    setInterval(() => {
-      const n = 60;
-      const isPressed = !this.state.keyState[n + MIDI_KEY_OFFSET];
-      this.setKeyPressed(n, isPressed);
-    }, 100);
-  }
-
   public render() {
     console.log("rendering piano");
     const whiteKeys: JSX.Element[] = [];
