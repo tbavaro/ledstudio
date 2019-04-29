@@ -1,9 +1,39 @@
 .PianoView {
+  width: 100%;
+  height: 75px;
+  padding: 5px;
+  box-sizing: border-box;
+  background-color: #333333;
+  font-size: 0.25em;
+}
+
+.PianoView-piano {
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  width: 100%;
+  max-width: 850px;
+  height: 100%;
+  border-right: 1px solid gray;
+  box-sizing: border-box;
+}
+
+.PianoView-whiteKey {
   position: absolute;
-  left: 0;
-  right: 0;
   top: 0;
   bottom: 0;
-  border: 3px green dashed;
-  background-color: black;
+  border: 1px solid gray;
+  border-right: 0px;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.PianoView-blackKey {
+  position: absolute;
+  top: 0;
+  height: 66%;
+  border: 1px solid gray;
+  border-right: 0px;
+  box-sizing: border-box;
+  background-color: gray;
 }
