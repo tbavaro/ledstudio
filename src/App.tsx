@@ -4,6 +4,7 @@ import * as React from "react";
 import MidiEvent from "./MidiEvent";
 import MidiEventsView from "./MidiEventsView";
 import MIDIPlayer from "./MIDIPlayer";
+import PianoView from "./PianoView";
 
 import "./App.css";
 
@@ -80,7 +81,12 @@ class App extends React.Component<{}, State> {
 
   public render() {
     return (
-      <div className="App" children={this.renderBody()}/>
+      <div className="App">
+        <div className="App-body" children={this.renderBody()}/>
+        <div className="App-pianoContainer">
+          <PianoView/>
+        </div>
+      </div>
     );
   }
 
