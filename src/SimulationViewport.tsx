@@ -62,43 +62,66 @@ function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
   );
 }
 
-function addLeds(scene: Three.Scene) {
-  const NUM_LEDS = 20;
-  const LED_SPACING = 1;
-  const LED_RADIUS = 0.075;
+class LedHelper {
+  private static readonly LED_RADIUS = 0.03;
+  private static readonly RADIUS_MULTIPLIERS = [1, 1.3, 1.8];
+  private static readonly COLOR_MULTIPLIERS = [1, 0.3, 0.2];
 
-  const ledGeometry = new Three.SphereGeometry(LED_RADIUS, 4, 4);
-  const glowLedGeometry = new Three.SphereGeometry(LED_RADIUS * 1.3, 6, 6);
-  const glowLed2Geometry = new Three.SphereGeometry(LED_RADIUS * 1.8, 6, 6);
+  private static readonly GEOMETRIES = LedHelper.RADIUS_MULTIPLIERS.map(m => (
+    new Three.SphereGeometry(LedHelper.LED_RADIUS * m, 6, 6)
+  ));
 
-  const ledMaterial = new Three.MeshBasicMaterial({});
-  const glowLedMaterial = new Three.MeshBasicMaterial({
+  // const ledMaterial = new Three.MeshBasicMaterial({});
+  private static readonly MATERIAL = new Three.MeshBasicMaterial({
     blending: Three.AdditiveBlending,
     transparent: true
   });
 
-  for (let i = 0; i < NUM_LEDS; ++i) {
-    const material = ledMaterial.clone();
-    const glowMaterial = glowLedMaterial.clone();
-    const glow2Material = glowLedMaterial.clone();
-    material.color.set(new Three.Color(1, 0, 0));
-    glowMaterial.color.copy(material.color);
-    glowMaterial.color.multiplyScalar(0.33);
-    glow2Material.color.copy(material.color);
-    glow2Material.color.multiplyScalar(0.33);
+  private colors: Three.Color[] = [];
 
-    const led = new Three.Mesh(ledGeometry, material);
-    led.position.set(i * LED_SPACING, 0, 0);
-    scene.add(led);
-
-    const glowLed = new Three.Mesh(glowLedGeometry, glowMaterial);
-    glowLed.position.copy(led.position);
-    scene.add(glowLed);
-
-    const glowLed2 = new Three.Mesh(glowLed2Geometry, glow2Material);
-    glowLed2.position.copy(led.position);
-    scene.add(glowLed2);
+  constructor(scene: Three.Scene, position: Three.Vector3, color: Three.Color) {
+    LedHelper.GEOMETRIES.forEach((geometry) => {
+      geometry = geometry.clone();
+      const material = LedHelper.MATERIAL.clone();
+      this.colors.push(material.color);
+      const mesh = new Three.Mesh(geometry, material);
+      mesh.position.copy(position);
+      scene.add(mesh);
+    });
+    this.setColor(color);
   }
+
+  public setColor(color: Three.Color) {
+    LedHelper.COLOR_MULTIPLIERS.forEach((m, i) => {
+      this.colors[i].set(color);
+      this.colors[i].multiplyScalar(m);
+    });
+  }
+}
+
+function addLeds(scene: Three.Scene) {
+  const NUM_LEDS = 88;
+
+  const start = new Three.Vector3(-6, 1.8, -1.38);
+  const end = new Three.Vector3(6, 1.8, -1.38);
+  const step = end.clone();
+  step.sub(start);
+  step.divideScalar(NUM_LEDS - 1);
+
+  const result: LedHelper[] = [];
+  for (let i = 0; i < NUM_LEDS; ++i) {
+    const position = step.clone();
+    position.multiplyScalar(i);
+    position.add(start);
+    const led = new LedHelper(
+      scene,
+      position,
+      new Three.Color(0, 1, 0)
+    );
+      result.push(led);
+  }
+
+  return result;
 }
 
 export default class SimulationViewport extends React.PureComponent<{}, {}> {
