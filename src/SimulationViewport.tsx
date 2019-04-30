@@ -162,7 +162,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
       this.fpsLastUpdateTime = now;
       this.fpsFramesSinceLastUpdate = 0;
       this.fpsRef.innerText = `${Math.round(fps)}`;
-    }, 250);
+    }, 1000);
   }
 
   public componentWillUnmount() {
