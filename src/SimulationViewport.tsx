@@ -46,7 +46,7 @@ function initializeCamera() {
   return camera;
 }
 
-function loadModel(sceneDef: SceneDef, scene: Three.Scene, onLoad?: () => void) {
+function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
   const loader = new GLTFLoader();
   loader.load(
     sceneDef.modelUrl,
@@ -58,10 +58,7 @@ function loadModel(sceneDef: SceneDef, scene: Three.Scene, onLoad?: () => void) 
       gltf.scene.translateZ(-center.z);
       const size = boundingBox.getSize(new Three.Vector3());
       gltf.scene.translateY(-size.y * (sceneDef.translateDownPercent || 0));
-      scene.add(gltf.scene);
-      if (onLoad) {
-        onLoad();
-      }
+      onLoad(gltf.scene);
     },
     /*onProgress=*/undefined,
     /*onError*/(error) => {
@@ -70,37 +67,68 @@ function loadModel(sceneDef: SceneDef, scene: Three.Scene, onLoad?: () => void) 
   );
 }
 
+function addLeds(scene: Three.Scene, glowScene: Three.Scene) {
+  const NUM_LEDS = 20;
+  const LED_SPACING = 1;
+
+  const ledGeometry = new Three.SphereGeometry(0.075, 4, 4);
+  const glowLedGeometry = new Three.SphereGeometry(0.2, 6, 6);
+
+  const ledMaterial = new Three.MeshBasicMaterial({});
+  const glowLedMaterial = new Three.MeshBasicMaterial({
+    blending: Three.AdditiveBlending,
+    transparent: true
+  });
+
+  for (let i = 0; i < NUM_LEDS; ++i) {
+    const material = ledMaterial.clone();
+    const glowMaterial = glowLedMaterial.clone();
+    glowMaterial.color = material.color;
+    material.color.set(new Three.Color(1, 0, 0));
+
+    const led = new Three.Mesh(ledGeometry, material);
+    led.position.set(i * LED_SPACING, 0, 0);
+    scene.add(led);
+
+    const glowLed = new Three.Mesh(glowLedGeometry, glowMaterial);
+    glowLed.position.copy(led.position);
+    glowScene.add(glowLed);
+  }
+}
 
 export default class SimulationViewport extends React.PureComponent<{}, {}> {
   private scene = initializeScene();
+  private glowScene = new Three.Scene();
   private camera = initializeCamera();
   private controls?: OrbitControls;
-  private renderer = new Three.WebGLRenderer({ antialias: true });
+  private renderer = new Three.WebGLRenderer({ antialias: false });
   private glowHelper: GlowHelper;
 
   public componentDidMount() {
     if (super.componentDidMount) {
       super.componentDidMount();
     }
+    this.renderer.autoClear = true;
+
     this.ref.appendChild(this.renderer.domElement);
     this.controls = new OrbitControls(this.camera, this.ref);
     this.controls.update();
 
-    const glowScene = this.scene; // new Three.Scene();
-
-    this.renderer.autoClear = false;
     this.glowHelper = new GlowHelper({
       renderer: this.renderer,
       camera: this.camera,
       scene: this.scene,
-      glowScene: glowScene
+      glowScene: this.glowScene
     });
 
     this.updateSizes();
 
     window.addEventListener("resize", this.updateSizes);
 
-    loadModel(SCENE_DEF, this.scene, () => {
+    loadModel(SCENE_DEF, (model: Three.Scene) => {
+      this.scene.add(model);
+      this.glowScene.add(model.clone());
+      addLeds(this.scene, this.glowScene);
       this.animate();
     });
   }
@@ -134,7 +162,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
     this.glowHelper.setSize(width, height);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // this.renderer.setPixelRatio(window.devicePixelRatio);
     if (this.controls) {
       this.controls.update();
     }
@@ -142,6 +170,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
 
   private animate = () => {
     requestAnimationFrame(this.animate);
+    // this.renderer.render(this.scene, this.camera);
     this.glowHelper.render();
   }
 }

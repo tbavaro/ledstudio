@@ -9,7 +9,7 @@ type XCXCBuffer = any;
 
 export class EffectComposer {
   private renderer: Three.WebGLRenderer;
-  private renderTarget1: Three.WebGLRenderTarget;
+  public renderTarget1: Three.WebGLRenderTarget;
   public renderTarget2: Three.WebGLRenderTarget;
   private writeBuffer: any;
   private readBuffer: any;

@@ -18,7 +18,7 @@ function createGlowComposer(
   const hBlur = new ThreeEx.ShaderPass(ThreeEx.HorizontalBlurShader);
   const vBlur = new ThreeEx.ShaderPass(ThreeEx.VerticalBlurShader);
 
-  const blurriness = 20.0;
+  const blurriness = 2.0;
   hBlur.uniforms.h.value = blurriness / width;
   vBlur.uniforms.v.value = blurriness / height;
 
@@ -44,7 +44,7 @@ function createFinalShader(glowComposer: ThreeEx.EffectComposer): ThreeEx.Shader
       // the glow scene buffer
       tGlow: {
         type: "t",
-        value: glowComposer.renderTarget2.texture
+        value: glowComposer.renderTarget1
       }
     },
 
@@ -63,7 +63,7 @@ function createFinalShader(glowComposer: ThreeEx.EffectComposer): ThreeEx.Shader
       "void main() {",
         "vec4 texel = texture2D( tDiffuse, vUv );",
         "vec4 glow = texture2D( tGlow, vUv );",
-        "gl_FragColor = texel + (glow * glow) * 1.5;",
+        "gl_FragColor = texel + (glow * glow) * 0.5;",
       "}"
     ].join("\n")
   };
@@ -114,10 +114,10 @@ export default class GlowHelper {
 
     // prepare the additive blending pass
     const finalPass = new ThreeEx.ShaderPass(finalShader);
-    finalPass.needsSwap = true
+    finalPass.needsSwap = true;
 
     // make sure the additive blending is rendered to the screen (since it's the last pass)
-    finalPass.renderToScreen = true
+    finalPass.renderToScreen = true;
 
     // prepare the composer's render target
     const renderTarget = new Three.WebGLRenderTarget(width, height, renderTargetParameters);
