@@ -3,6 +3,8 @@ import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
+import MidiEvent from "./MidiEvent";
+import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
 import { SceneDef, sceneDefs } from "./SceneDefs";
 
 import "./SimulationViewport.css";
@@ -71,8 +73,8 @@ class LedHelper {
     new Three.SphereGeometry(LedHelper.LED_RADIUS * m, 6, 6)
   ));
 
-  // const ledMaterial = new Three.MeshBasicMaterial({});
-  private static readonly MATERIAL = new Three.MeshBasicMaterial({
+  private static readonly MATERIAL = new Three.MeshBasicMaterial({});
+  private static readonly ADDITIVE_MATERIAL = new Three.MeshBasicMaterial({
     blending: Three.AdditiveBlending,
     transparent: true
   });
@@ -80,9 +82,9 @@ class LedHelper {
   private colors: Three.Color[] = [];
 
   constructor(scene: Three.Scene, position: Three.Vector3, color: Three.Color) {
-    LedHelper.GEOMETRIES.forEach((geometry) => {
+    LedHelper.GEOMETRIES.forEach((geometry, i) => {
       geometry = geometry.clone();
-      const material = LedHelper.MATERIAL.clone();
+      const material = (i === 0 ? LedHelper.MATERIAL : LedHelper.ADDITIVE_MATERIAL).clone();
       this.colors.push(material.color);
       const mesh = new Three.Mesh(geometry, material);
       mesh.position.copy(position);
@@ -98,6 +100,9 @@ class LedHelper {
     });
   }
 }
+
+const LED_COLOR_KEY_DOWN = new Three.Color(0, 0.7, 1);
+const LED_COLOR_KEY_UP = new Three.Color(0, 0, 0);
 
 function addLeds(scene: Three.Scene) {
   const NUM_LEDS = 88;
@@ -116,7 +121,7 @@ function addLeds(scene: Three.Scene) {
     const led = new LedHelper(
       scene,
       position,
-      new Three.Color(0, 1, 0)
+      LED_COLOR_KEY_UP
     );
       result.push(led);
   }
@@ -124,7 +129,11 @@ function addLeds(scene: Three.Scene) {
   return result;
 }
 
-export default class SimulationViewport extends React.PureComponent<{}, {}> {
+interface Props {
+  midiEventEmitter: MidiEventEmitter;
+}
+
+export default class SimulationViewport extends React.PureComponent<Props, {}> implements MidiEventListener {
   private scene = initializeScene();
   private camera = initializeCamera();
   private controls?: OrbitControls;
@@ -132,6 +141,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
   private fpsInterval?: NodeJS.Timeout;
   private fpsLastUpdateTime: number = 0;
   private fpsFramesSinceLastUpdate: number = 0;
+  private leds?: LedHelper[];
 
   public componentDidMount() {
     if (super.componentDidMount) {
@@ -149,7 +159,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
 
     loadModel(SCENE_DEF, (model: Three.Scene) => {
       this.scene.add(model);
-      addLeds(this.scene);
+      this.leds = addLeds(this.scene);
       this.animate();
     });
 
@@ -163,6 +173,8 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
       this.fpsFramesSinceLastUpdate = 0;
       this.fpsRef.innerText = `${Math.round(fps)}`;
     }, 1000);
+
+    this.props.midiEventEmitter.addListener(this);
   }
 
   public componentWillUnmount() {
@@ -208,7 +220,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // this.renderer.setPixelRatio(window.devicePixelRatio);
     if (this.controls) {
       this.controls.update();
     }
@@ -219,5 +231,20 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     this.renderer.render(this.scene, this.camera);
     // this.glowHelper.render();
     this.fpsFramesSinceLastUpdate++;
+  }
+
+  // TODO don't actually pass raw midi events in here, obv
+  public onMidiEvent = (event: MidiEvent) => {
+    const MIDI_KEY_OFFSET = -21;
+
+    if (this.leds && event.data.length >= 2) {
+      if (event.data[0] === 0x80 || event.data[0] === 0x90) {
+        const keyDown = event.data[0] === 0x90;
+        const note = event.data[1] + MIDI_KEY_OFFSET;
+        if (note >= 0 && note < this.leds.length) {
+          this.leds[note].setColor(keyDown ? LED_COLOR_KEY_DOWN : LED_COLOR_KEY_UP);
+        }
+      }
+    }
   }
 }

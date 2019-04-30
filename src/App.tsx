@@ -102,7 +102,7 @@ class App extends React.Component<{}, State> {
       <div className="App">
         <div className="App-viewportGroup">
           <div className="App-viewportContainer">
-            <SimulationViewport/>
+            <SimulationViewport midiEventEmitter={this.midiEventEmitter}/>
           </div>
           <div className="App-pianoContainer">
             <PianoView ref={this.setPianoViewRef}/>
