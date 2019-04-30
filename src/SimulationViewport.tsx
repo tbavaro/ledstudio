@@ -4,7 +4,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import { SceneDef, sceneDefs } from "./SceneDefs";
-import GlowHelper from "./webgl/GlowHelper";
 
 import "./SimulationViewport.css";
 
@@ -63,7 +62,7 @@ function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
   );
 }
 
-function addLeds(scene: Three.Scene, glowScene: Three.Scene) {
+function addLeds(scene: Three.Scene) {
   const NUM_LEDS = 20;
   const LED_SPACING = 1;
   const LED_RADIUS = 0.075;
@@ -104,11 +103,9 @@ function addLeds(scene: Three.Scene, glowScene: Three.Scene) {
 
 export default class SimulationViewport extends React.PureComponent<{}, {}> {
   private scene = initializeScene();
-  private glowScene = new Three.Scene();
   private camera = initializeCamera();
   private controls?: OrbitControls;
   private renderer = new Three.WebGLRenderer({ antialias: false });
-  private glowHelper: GlowHelper;
   private fpsInterval?: NodeJS.Timeout;
   private fpsLastUpdateTime: number = 0;
   private fpsFramesSinceLastUpdate: number = 0;
@@ -123,21 +120,13 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     this.controls = new OrbitControls(this.camera, this.ref);
     this.controls.update();
 
-    this.glowHelper = new GlowHelper({
-      renderer: this.renderer,
-      camera: this.camera,
-      scene: this.scene,
-      glowScene: this.glowScene
-    });
-
     this.updateSizes();
 
     window.addEventListener("resize", this.updateSizes);
 
     loadModel(SCENE_DEF, (model: Three.Scene) => {
       this.scene.add(model);
-      this.glowScene.add(model.clone());
-      addLeds(this.scene, this.glowScene);
+      addLeds(this.scene);
       this.animate();
     });
 
@@ -196,8 +185,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
-    this.glowHelper.setSize(width, height);
-    // this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
     if (this.controls) {
       this.controls.update();
     }
