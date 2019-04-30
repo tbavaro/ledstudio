@@ -66,9 +66,11 @@ function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
 function addLeds(scene: Three.Scene, glowScene: Three.Scene) {
   const NUM_LEDS = 20;
   const LED_SPACING = 1;
+  const LED_RADIUS = 0.075;
 
-  const ledGeometry = new Three.SphereGeometry(0.075, 4, 4);
-  const glowLedGeometry = new Three.SphereGeometry(0.2, 6, 6);
+  const ledGeometry = new Three.SphereGeometry(LED_RADIUS, 4, 4);
+  const glowLedGeometry = new Three.SphereGeometry(LED_RADIUS * 1.3, 6, 6);
+  const glowLed2Geometry = new Three.SphereGeometry(LED_RADIUS * 1.8, 6, 6);
 
   const ledMaterial = new Three.MeshBasicMaterial({});
   const glowLedMaterial = new Three.MeshBasicMaterial({
@@ -79,8 +81,12 @@ function addLeds(scene: Three.Scene, glowScene: Three.Scene) {
   for (let i = 0; i < NUM_LEDS; ++i) {
     const material = ledMaterial.clone();
     const glowMaterial = glowLedMaterial.clone();
-    glowMaterial.color = material.color;
+    const glow2Material = glowLedMaterial.clone();
     material.color.set(new Three.Color(1, 0, 0));
+    glowMaterial.color.copy(material.color);
+    glowMaterial.color.multiplyScalar(0.33);
+    glow2Material.color.copy(material.color);
+    glow2Material.color.multiplyScalar(0.33);
 
     const led = new Three.Mesh(ledGeometry, material);
     led.position.set(i * LED_SPACING, 0, 0);
@@ -88,7 +94,11 @@ function addLeds(scene: Three.Scene, glowScene: Three.Scene) {
 
     const glowLed = new Three.Mesh(glowLedGeometry, glowMaterial);
     glowLed.position.copy(led.position);
-    glowScene.add(glowLed);
+    scene.add(glowLed);
+
+    const glowLed2 = new Three.Mesh(glowLed2Geometry, glow2Material);
+    glowLed2.position.copy(led.position);
+    scene.add(glowLed2);
   }
 }
 
@@ -195,8 +205,8 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
 
   private animate = () => {
     requestAnimationFrame(this.animate);
-    // this.renderer.render(this.scene, this.camera);
-    this.glowHelper.render();
+    this.renderer.render(this.scene, this.camera);
+    // this.glowHelper.render();
     this.fpsFramesSinceLastUpdate++;
   }
 }
