@@ -4,6 +4,7 @@
   "version": "0.1.5",
   "private": true,
   "dependencies": {
+    "midievents": "^2.0.0",
     "midifile": "^2.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
