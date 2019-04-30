@@ -27,10 +27,6 @@ function initializeScene() {
   light.position.set(100, 100, -100);
   scene.add(light);
 
-  // const geometry = new Three.BoxGeometry( 1, 1, 1 );
-  // const material = new Three.MeshBasicMaterial( { color: 0x00ff00 } );
-  // const cube = new Three.Mesh( geometry, material );
-  // scene.add( cube );
   return scene;
 }
 
@@ -103,6 +99,9 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
   private controls?: OrbitControls;
   private renderer = new Three.WebGLRenderer({ antialias: false });
   private glowHelper: GlowHelper;
+  private fpsInterval?: NodeJS.Timeout;
+  private fpsLastUpdateTime: number = 0;
+  private fpsFramesSinceLastUpdate: number = 0;
 
   public componentDidMount() {
     if (super.componentDidMount) {
@@ -131,6 +130,17 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
       addLeds(this.scene, this.glowScene);
       this.animate();
     });
+
+    this.fpsLastUpdateTime = performance.now();
+    this.fpsFramesSinceLastUpdate = 0;
+    this.fpsInterval = setInterval(() => {
+      const now = performance.now();
+      const timeElapsed = now - this.fpsLastUpdateTime;
+      const fps = this.fpsFramesSinceLastUpdate / timeElapsed * 1000;
+      this.fpsLastUpdateTime = now;
+      this.fpsFramesSinceLastUpdate = 0;
+      this.fpsRef.innerText = `${Math.round(fps)}`;
+    }, 250);
   }
 
   public componentWillUnmount() {
@@ -138,11 +148,17 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
       super.componentWillUnmount();
     }
     window.removeEventListener("resize", this.updateSizes);
+    if (this.fpsInterval) {
+      clearInterval(this.fpsInterval);
+      this.fpsInterval = undefined;
+    }
   }
 
   public render() {
     return (
-      <div className="SimulationViewport" ref={this.setRef}/>
+      <div className="SimulationViewport" ref={this.setRef}>
+        <div className="SimulationViewport-fpsDisplay" ref={this.setFpsRef}/>
+      </div>
     );
   }
 
@@ -153,6 +169,15 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
       throw new Error("ref not set");
     }
     return this.unsafeRef;
+  }
+
+  private unsafeFpsRef: HTMLDivElement | null = null;
+  private setFpsRef = (newRef: HTMLDivElement) => this.unsafeFpsRef = newRef;
+  private get fpsRef() {
+    if (this.unsafeFpsRef === null) {
+      throw new Error("fps ref not set");
+    }
+    return this.unsafeFpsRef;
   }
 
   private updateSizes = () => {
@@ -172,5 +197,6 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     requestAnimationFrame(this.animate);
     // this.renderer.render(this.scene, this.camera);
     this.glowHelper.render();
+    this.fpsFramesSinceLastUpdate++;
   }
 }
