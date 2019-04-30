@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import { SceneDef, sceneDefs } from "./SceneDefs";
+import GlowHelper from "./webgl/GlowHelper";
 
 import "./SimulationViewport.css";
 
@@ -45,7 +46,7 @@ function initializeCamera() {
   return camera;
 }
 
-function loadModel(sceneDef: SceneDef, scene: Three.Scene) {
+function loadModel(sceneDef: SceneDef, scene: Three.Scene, onLoad?: () => void) {
   const loader = new GLTFLoader();
   loader.load(
     sceneDef.modelUrl,
@@ -58,6 +59,9 @@ function loadModel(sceneDef: SceneDef, scene: Three.Scene) {
       const size = boundingBox.getSize(new Three.Vector3());
       gltf.scene.translateY(-size.y * (sceneDef.translateDownPercent || 0));
       scene.add(gltf.scene);
+      if (onLoad) {
+        onLoad();
+      }
     },
     /*onProgress=*/undefined,
     /*onError*/(error) => {
@@ -71,7 +75,8 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
   private scene = initializeScene();
   private camera = initializeCamera();
   private controls?: OrbitControls;
-  private renderer = new Three.WebGLRenderer();
+  private renderer = new Three.WebGLRenderer({ antialias: true });
+  private glowHelper: GlowHelper;
 
   public componentDidMount() {
     if (super.componentDidMount) {
@@ -81,13 +86,23 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     this.controls = new OrbitControls(this.camera, this.ref);
     this.controls.update();
 
+    const glowScene = this.scene; // new Three.Scene();
+
+    this.renderer.autoClear = false;
+    this.glowHelper = new GlowHelper({
+      renderer: this.renderer,
+      camera: this.camera,
+      scene: this.scene,
+      glowScene: glowScene
+    });
+
     this.updateSizes();
 
     window.addEventListener("resize", this.updateSizes);
 
-    this.animate();
-
-    loadModel(SCENE_DEF, this.scene);
+    loadModel(SCENE_DEF, this.scene, () => {
+      this.animate();
+    });
   }
 
   public componentWillUnmount() {
@@ -118,6 +133,7 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+    this.glowHelper.setSize(width, height);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     if (this.controls) {
       this.controls.update();
@@ -126,6 +142,6 @@ export default class SimulationViewport extends React.PureComponent<{}, {}> {
 
   private animate = () => {
     requestAnimationFrame(this.animate);
-    this.renderer.render(this.scene, this.camera);
+    this.glowHelper.render();
   }
 }
