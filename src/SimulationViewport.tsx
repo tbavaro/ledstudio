@@ -14,16 +14,16 @@ const SCENE_DEF: SceneDef = sceneDefs[0];
 
 function initializeScene() {
   const scene = new Three.Scene();
-  // scene.background = new Three.Color(1, 0, 0);
+  // scene.background = new Three.Color(.1, .1, .1);
 
-  scene.add(new Three.AmbientLight(0x777777));
+  scene.add(new Three.AmbientLight(0x333333));
 
   let light = new Three.DirectionalLight(0xaaaaaa);
   light.position.set(-100, 100, 100);
   scene.add(light);
 
   light = new Three.DirectionalLight(0x444444);
-  light.position.set(100, 100, 100);
+  light.position.set(100, 100, -100);
   scene.add(light);
 
   // const geometry = new Three.BoxGeometry( 1, 1, 1 );
@@ -40,8 +40,8 @@ function initializeCamera() {
     CAMERA_NEAR_DISTANCE,
     CAMERA_FAR_DISTANCE
   );
-  camera.position.y = 1;
-  camera.position.z = -2;
+  camera.position.y = 7;
+  camera.position.z = -14;
   return camera;
 }
 
