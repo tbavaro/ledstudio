@@ -1,6 +1,8 @@
 import PianoEvent, { Key } from "./base/PianoEvent";
 import * as PianoVisualization from "./base/PianoVisualization";
 
+const MIDI_KEY_OFFSET = -21;
+
 export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
   if (data.length < 1) {
     return null;
@@ -12,10 +14,15 @@ export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
       if (data.length < 2) {
         return null;
       } else {
-        return {
-          type: (data[0] === 0x80 ? "keyReleased" : "keyPressed"),
-          key: data[1]
-        };
+        const key = data[1] + MIDI_KEY_OFFSET;
+        if (key < 0 || key >= NUM_KEYS) {
+          return null;
+        } else {
+          return {
+            type: (data[0] === 0x80 ? "keyReleased" : "keyPressed"),
+            key: data[1] + MIDI_KEY_OFFSET
+          };
+        }
       }
 
     default:
@@ -52,18 +59,16 @@ export class PianoVisualizationStateHelper {
     };
   }
 
-  public stateFromEvents(events: ReadonlyArray<PianoEvent>): PianoVisualization.State {
-    this.startFrame();
-    events.forEach(this.applyEvent);
-    return this.state;
-  }
-
-  private startFrame() {
+  public startFrame() {
     this.state.newlyPressedKeys = [];
     this.state.newlyReleasedKeys = [];
   }
 
-  private applyEvent = (event: PianoEvent) => {
+  public endFrame(): PianoVisualization.State {
+    return this.state;
+  }
+
+  public applyEvent(event: PianoEvent) {
     switch (event.type) {
       case "keyPressed":
       case "keyReleased":

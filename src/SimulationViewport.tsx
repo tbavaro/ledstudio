@@ -3,16 +3,23 @@ import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
+import Colors, { Color } from "./portable/base/Colors";
+import LedStrip from "./portable/base/LedStrip";
+import PianoEvent from "./portable/base/PianoEvent";
+import PianoVisualization from "./portable/base/PianoVisualization";
+import * as PianoVisualizations from "./portable/visualizations/PianoVisualizations";
+
+import * as PianoHelpers from "./portable/PianoHelpers";
+
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
-import { SceneDef, sceneDefs } from "./SceneDefs";
+import { SceneDef } from "./SceneDefs";
 
 import "./SimulationViewport.css";
 
 const CAMERA_FOV_DEG = 50;
 const CAMERA_NEAR_DISTANCE = 0.1;
 const CAMERA_FAR_DISTANCE = 1000;
-const SCENE_DEF: SceneDef = sceneDefs[0];
 
 function initializeScene() {
   const scene = new Three.Scene();
@@ -81,7 +88,7 @@ class LedHelper {
 
   private colors: Three.Color[] = [];
 
-  constructor(scene: Three.Scene, position: Three.Vector3, color: Three.Color) {
+  constructor(scene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
     LedHelper.GEOMETRIES.forEach((geometry, i) => {
       geometry = geometry.clone();
       const material = (i === 0 ? LedHelper.MATERIAL : LedHelper.ADDITIVE_MATERIAL).clone();
@@ -90,7 +97,9 @@ class LedHelper {
       mesh.position.copy(position);
       scene.add(mesh);
     });
-    this.setColor(color);
+    if (color !== undefined) {
+      this.setColor(color);
+    }
   }
 
   public setColor(color: Three.Color) {
@@ -101,36 +110,62 @@ class LedHelper {
   }
 }
 
-const LED_COLOR_KEY_DOWN = new Three.Color(0, 0.7, 1);
-const LED_COLOR_KEY_UP = new Three.Color(0, 0, 0);
-
-function addLeds(scene: Three.Scene) {
-  const NUM_LEDS = 88;
-
-  const start = new Three.Vector3(-6, 1.8, -1.38);
-  const end = new Three.Vector3(6, 1.8, -1.38);
-  const step = end.clone();
-  step.sub(start);
-  step.divideScalar(NUM_LEDS - 1);
-
-  const result: LedHelper[] = [];
-  for (let i = 0; i < NUM_LEDS; ++i) {
-    const position = step.clone();
-    position.multiplyScalar(i);
-    position.add(start);
-    const led = new LedHelper(
-      scene,
-      position,
-      LED_COLOR_KEY_UP
-    );
-      result.push(led);
-  }
-
-  return result;
-}
-
 interface Props {
   midiEventEmitter: MidiEventEmitter;
+  sceneDef: SceneDef;
+  visualizationName: PianoVisualizations.Name;
+}
+
+class LedSceneStrip implements LedStrip {
+  public readonly size: number;
+  private readonly ledHelpers: LedHelper[];
+
+  constructor(ledHelpers: LedHelper[]) {
+    this.size = ledHelpers.length;
+    this.ledHelpers = ledHelpers;
+    this.reset();
+  }
+
+  public setColor(n: number, color: Color) {
+    if (n >= 0 && n < this.ledHelpers.length) {
+      this.ledHelpers[n].setColor(LedSceneStrip.convertColor(color));
+    }
+  }
+
+  public reset(color?: Color): void {
+    for (let i = 0; i < this.size; ++i) {
+      this.setColor(i, color || Colors.BLACK);
+    }
+  }
+
+  private static convertColor(color: Color): Three.Color {
+    return new Three.Color(color);
+  }
+}
+
+class LedScene {
+  public readonly sceneDef: SceneDef;
+  public readonly ledStrip: LedStrip;
+
+  constructor(ledSceneDef: SceneDef, scene: Three.Scene) {
+    this.sceneDef = ledSceneDef;
+
+    const numLeds = ledSceneDef.ledSegment.numLeds;
+
+    // place 3d Leds
+    const segment = ledSceneDef.ledSegment;
+    const step = segment.endPoint.clone();
+    step.sub(segment.startPoint);
+    step.divideScalar(segment.numLeds - 1);
+    const ledHelpers: LedHelper[] = [];
+    for (let i = 0; i < numLeds; ++i) {
+      const position = step.clone();
+      position.multiplyScalar(i);
+      position.add(segment.startPoint);
+      ledHelpers.push(new LedHelper(scene, position));
+    }
+    this.ledStrip = new LedSceneStrip(ledHelpers);
+  }
 }
 
 export default class SimulationViewport extends React.PureComponent<Props, {}> implements MidiEventListener {
@@ -141,7 +176,10 @@ export default class SimulationViewport extends React.PureComponent<Props, {}> i
   private fpsInterval?: NodeJS.Timeout;
   private fpsLastUpdateTime: number = 0;
   private fpsFramesSinceLastUpdate: number = 0;
-  private leds?: LedHelper[];
+  private ledScene?: LedScene;
+  private stateHelper: PianoHelpers.PianoVisualizationStateHelper;
+  private lastRenderTime: number = 0;
+  private visualization?: PianoVisualization;
 
   public componentDidMount() {
     if (super.componentDidMount) {
@@ -157,9 +195,14 @@ export default class SimulationViewport extends React.PureComponent<Props, {}> i
 
     window.addEventListener("resize", this.updateSizes);
 
-    loadModel(SCENE_DEF, (model: Three.Scene) => {
+    this.lastRenderTime = performance.now();
+
+    this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
+
+    loadModel(this.props.sceneDef, (model: Three.Scene) => {
       this.scene.add(model);
-      this.leds = addLeds(this.scene);
+      this.ledScene = new LedScene(this.props.sceneDef, this.scene);
+      this.visualization = PianoVisualizations.create(this.props.visualizationName, this.ledScene.ledStrip);
       this.animate();
     });
 
@@ -175,6 +218,7 @@ export default class SimulationViewport extends React.PureComponent<Props, {}> i
     }, 1000);
 
     this.props.midiEventEmitter.addListener(this);
+
   }
 
   public componentWillUnmount() {
@@ -228,6 +272,18 @@ export default class SimulationViewport extends React.PureComponent<Props, {}> i
 
   private animate = () => {
     requestAnimationFrame(this.animate);
+
+    const now = performance.now();
+
+    const vis = this.visualization;
+    if (vis) {
+      const visState = this.stateHelper.endFrame();
+      const elapsedMillis = now - this.lastRenderTime;
+      vis.render(elapsedMillis, visState);
+      this.stateHelper.startFrame();
+      this.lastRenderTime = now;
+    }
+
     this.renderer.render(this.scene, this.camera);
     // this.glowHelper.render();
     this.fpsFramesSinceLastUpdate++;
@@ -235,16 +291,10 @@ export default class SimulationViewport extends React.PureComponent<Props, {}> i
 
   // TODO don't actually pass raw midi events in here, obv
   public onMidiEvent = (event: MidiEvent) => {
-    const MIDI_KEY_OFFSET = -21;
-
-    if (this.leds && event.data.length >= 2) {
-      if (event.data[0] === 0x80 || event.data[0] === 0x90) {
-        const keyDown = event.data[0] === 0x90;
-        const note = event.data[1] + MIDI_KEY_OFFSET;
-        if (note >= 0 && note < this.leds.length) {
-          this.leds[note].setColor(keyDown ? LED_COLOR_KEY_DOWN : LED_COLOR_KEY_UP);
-        }
-      }
+    if (event.pianoEvent !== null) {
+      this.onPianoEvent(event.pianoEvent);
     }
   }
+
+  public onPianoEvent = (event: PianoEvent) => this.stateHelper.applyEvent(event);
 }

@@ -6,7 +6,9 @@ import { MidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
 import * as RightSidebar from "./RightSidebar";
+import SceneDefs from "./SceneDefs";
 import SimulationViewport from "./SimulationViewport";
+
 
 import "./App.css";
 
@@ -102,7 +104,11 @@ class App extends React.Component<{}, State> {
       <div className="App">
         <div className="App-viewportGroup">
           <div className="App-viewportContainer">
-            <SimulationViewport midiEventEmitter={this.midiEventEmitter}/>
+            <SimulationViewport
+              midiEventEmitter={this.midiEventEmitter}
+              sceneDef={SceneDefs[0]}
+              visualizationName="bounce"
+            />
           </div>
           <div className="App-pianoContainer">
             <PianoView ref={this.setPianoViewRef}/>

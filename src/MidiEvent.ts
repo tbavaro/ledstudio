@@ -1,4 +1,9 @@
+import PianoEvent from "./portable/base/PianoEvent";
+import * as PianoHelpers from "./portable/PianoHelpers";
+
 // tslint:disable no-bitwise
+
+// TODO clean up redundancy between this and PianoEvent
 
 function toHex(n: number): string {
   const s = n.toString(16);
@@ -22,6 +27,7 @@ export default class MidiEvent {
   public readonly data: number[];
   public readonly timestamp: number | undefined;
   public readonly isNoteworthy: boolean;
+  public readonly pianoEvent: PianoEvent | null;
   private readonly statusDescription: string | null;
 
   constructor(data: number[] | Uint8Array, timestamp?: number) {
@@ -37,12 +43,19 @@ export default class MidiEvent {
     );
     this.isNoteworthy = this.statusDescription !== null;
     this.timestamp = timestamp;
+    this.pianoEvent = PianoHelpers.pianoEventFromMidiData(this.data);
   }
 
   public toString() {
-    const parts: string[] = this.data.map(toHex);
-    if (this.statusDescription !== null) {
-      parts[0] = this.statusDescription;
+    let parts: string[];
+
+    if (this.pianoEvent === null) {
+      parts = ["raw:", ...this.data.map(toHex)];
+      if (this.statusDescription !== null) {
+        parts[0] = this.statusDescription;
+      }
+    } else {
+      parts = [PianoHelpers.describePianoEvent(this.pianoEvent)];
     }
     if (this.timestamp !== undefined) {
       parts.unshift(`${Math.floor(this.timestamp) || 0}:`);
