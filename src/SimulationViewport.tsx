@@ -264,7 +264,7 @@ export default class SimulationViewport extends React.PureComponent<Props, State
     }, 1000);
 
     this.props.midiEventEmitter.addListener(this);
-
+    this.setState({ registeredMidiEventEmitter: this.props.midiEventEmitter });
   }
 
   public componentWillUnmount() {
