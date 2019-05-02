@@ -2,11 +2,13 @@ import LedStrip from "../base/LedStrip";
 import PianoVisualization from "../base/PianoVisualization";
 
 import TestBounceVisualization from "./TestBounceVisualization";
+import TestKeyFadeVisualization from "./TestKeyFadeVisualization";
 import TestKeyVisualization from "./TestKeyVisualization";
 
 const visFuncs = {
   "testBounce": (ledStrip: LedStrip) => new TestBounceVisualization(ledStrip),
-  "testKey": (ledStrip: LedStrip) => new TestKeyVisualization(ledStrip)
+  "testKey": (ledStrip: LedStrip) => new TestKeyVisualization(ledStrip),
+  "testKeyFade": (ledStrip: LedStrip) => new TestKeyFadeVisualization(ledStrip)
 };
 
 export type Name = keyof typeof visFuncs;
