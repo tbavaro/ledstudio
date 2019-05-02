@@ -107,7 +107,7 @@ class App extends React.Component<{}, State> {
             <SimulationViewport
               midiEventEmitter={this.midiEventEmitter}
               sceneDef={SceneDefs[0]}
-              visualizationName="bounce"
+              visualizationName="testKey"
             />
           </div>
           <div className="App-pianoContainer">

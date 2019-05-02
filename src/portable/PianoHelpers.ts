@@ -54,17 +54,16 @@ export class PianoVisualizationStateHelper {
   private static freshState(): AccessibleState {
     return {
       keys: new Array<boolean>(NUM_KEYS).fill(false),
-      newlyPressedKeys: [],
-      newlyReleasedKeys: []
+      changedKeys: []
     };
   }
 
   public startFrame() {
-    this.state.newlyPressedKeys = [];
-    this.state.newlyReleasedKeys = [];
+    this.state.changedKeys = [];
   }
 
   public endFrame(): PianoVisualization.State {
+    this.state.changedKeys.sort();
     return this.state;
   }
 
@@ -84,8 +83,9 @@ export class PianoVisualizationStateHelper {
   private applyPressOrReleaseEvent(isPress: boolean, key: Key) {
     if (this.state.keys[key] !== isPress) {
       this.state.keys[key] = isPress;
-      const arr = (isPress ? this.state.newlyPressedKeys : this.state.newlyReleasedKeys);
-      arr.push(key)
+      if (!this.state.changedKeys.includes(key)) {
+        this.state.changedKeys.push(key);
+      }
     }
   }
 }

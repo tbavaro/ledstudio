@@ -2,7 +2,7 @@ import Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
 import PianoVisualization, { State } from "../base/PianoVisualization";
 
-export default class BounceVisualization extends PianoVisualization {
+export default class TestBounceVisualization extends PianoVisualization {
   private position: number;
   private index: number;
   private speed: number;  // LEDs per millis
