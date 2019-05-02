@@ -5,10 +5,10 @@ import MidiEvent from "./MidiEvent";
 import { MidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
+import * as PianoVisualizations from "./portable/visualizations/PianoVisualizations";
 import * as RightSidebar from "./RightSidebar";
 import SceneDefs from "./SceneDefs";
 import SimulationViewport from "./SimulationViewport";
-
 
 import "./App.css";
 
@@ -31,6 +31,7 @@ type MidiState = {
 };
 
 interface State {
+  visualizationName: PianoVisualizations.Name;
   midiState: Readonly<MidiState>;
   midiOutput: WebMidi.MIDIOutput | null;
   midiFilename: string;
@@ -41,6 +42,7 @@ type AllActions = RightSidebar.Actions;
 
 class App extends React.Component<{}, State> {
   public state: State = {
+    visualizationName: PianoVisualizations.defaultName,
     midiState: {
       status: "initializing"
     },
@@ -107,7 +109,7 @@ class App extends React.Component<{}, State> {
             <SimulationViewport
               midiEventEmitter={this.midiEventEmitter}
               sceneDef={SceneDefs[0]}
-              visualizationName="testKeyFade"
+              visualizationName={this.state.visualizationName}
             />
           </div>
           <div className="App-pianoContainer">
@@ -130,6 +132,8 @@ class App extends React.Component<{}, State> {
         return (
           <RightSidebar.default
             actions={this.actionManager}
+            visualizationNames={PianoVisualizations.names}
+            selectedVisualizationName={this.state.visualizationName}
             webMidi={this.state.midiState.webMidi}
             midiFilenames={MIDI_FILES}
             isMidiFileLoaded={this.state.midiData !== null}
@@ -227,7 +231,10 @@ class App extends React.Component<{}, State> {
     playMusic: this.handlePlayMusic,
     stopMusic: this.handleStopMusic,
     setMidiOutput: this.setMidiOutput,
-    setSelectedMidiFilename: this.loadMidiFile
+    setSelectedMidiFilename: this.loadMidiFile,
+    setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
+      this.setState({ visualizationName: newValue });
+    }
   };
 }
 

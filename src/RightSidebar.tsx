@@ -1,5 +1,7 @@
 import * as React from "react";
 
+import * as PianoVisualizations from "./portable/visualizations/PianoVisualizations";
+
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
 import MidiEventsView from "./MidiEventsView";
@@ -11,10 +13,13 @@ export interface Actions {
   stopMusic: () => void;
   setSelectedMidiFilename: (newValue: string) => void;
   setMidiOutput: (newValue: WebMidi.MIDIOutput | null) => void;
+  setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => void;
 }
 
 interface Props {
   actions: Actions;
+  visualizationNames: ReadonlyArray<PianoVisualizations.Name>;
+  selectedVisualizationName: PianoVisualizations.Name;
   webMidi: WebMidi.MIDIAccess;
   midiFilenames: string[];
   selectedMidiFilename: string;
@@ -45,6 +50,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
     return (
       <div className="RightSidebar">
         <div className="RightSidebar-optionsGroup">
+          {this.renderVisualizationSelector()}
           {this.renderMidiFileSelector()}
           {this.renderOutputDevices()}
           {this.renderMusicControls()}
@@ -54,6 +60,25 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
           entryClassName="RightSidebar-midiEventEntry"
           ref={this.setMidiEventsViewRef}
         />
+      </div>
+    );
+  }
+
+  private renderVisualizationSelector() {
+    return (
+      <div className="RightSidebar-visualizations">
+        <span>Visualization: </span>
+        <select
+          value={this.props.selectedVisualizationName}
+          onChange={this.handleSetVisualizationName}
+        >
+          {
+            this.props.visualizationNames.map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))
+          }
+        </select>
+        {this.props.isMidiFileLoaded ? " (loaded)" : " (not loaded)" }
       </div>
     );
   }
@@ -134,5 +159,10 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
   private handleSetMidiFilename = (event: React.ChangeEvent<any>) => {
     const filename = event.target.value as string;
     this.props.actions.setSelectedMidiFilename(filename);
+  }
+
+  private handleSetVisualizationName = (event: React.ChangeEvent<any>) => {
+    const name = event.target.value as PianoVisualizations.Name;
+    this.props.actions.setSelectedVisualizationName(name);
   }
 }

@@ -33,8 +33,6 @@ export default class TestKeyVisualization extends PianoVisualization {
   }
 
   public render(elapsedMillis: number, state: State): void {
-    const startTime = performance.now();
-
     // decay
     const decayAmount = elapsedMillis * this.decayRate;
     updateValues(this.values, (oldValue: number) => Math.max(0, oldValue - decayAmount));
@@ -48,8 +46,5 @@ export default class TestKeyVisualization extends PianoVisualization {
 
     // set colors
     this.values.forEach((v, i) => this.ledStrip.setColor(i, colorForValue(v)));
-
-    const endTime = performance.now();
-    console.log(endTime - startTime);
   }
 }
