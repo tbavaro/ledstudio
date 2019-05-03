@@ -21,6 +21,34 @@ const CAMERA_FOV_DEG = 50;
 const CAMERA_NEAR_DISTANCE = 0.1;
 const CAMERA_FAR_DISTANCE = 1000;
 
+const TARGET_FPS = 60;
+
+class MovingAverageHelper {
+  private readonly values: number[];
+  private numValues: number = 0;
+  private sum: number = 0;
+  private nextIndex: number = 0;
+
+  constructor(size: number) {
+    this.values = new Array(size);
+  }
+
+  public get movingAverage() {
+    return this.sum / this.numValues;
+  }
+
+  public addValue(value: number) {
+    if (this.numValues === this.values.length) {
+      this.sum -= this.values[this.nextIndex];
+    } else {
+      this.numValues ++;
+    }
+    this.values[this.nextIndex] = value;
+    this.sum += value;
+    this.nextIndex = (this.nextIndex + 1) % this.values.length;
+  }
+}
+
 function initializeScene() {
   const scene = new Three.Scene();
   // scene.background = new Three.Color(.1, .1, .1);
@@ -201,6 +229,8 @@ export default class SimulationViewport extends React.PureComponent<Props, State
   private fpsFramesSinceLastUpdate: number = 0;
   private stateHelper: PianoHelpers.PianoVisualizationStateHelper;
   private lastRenderTime: number = 0;
+  private renderTimeMovingAverageHelper = new MovingAverageHelper(20);
+  private visTimeMovingAverageHelper = new MovingAverageHelper(20);
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
@@ -260,7 +290,18 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       const fps = this.fpsFramesSinceLastUpdate / timeElapsed * 1000;
       this.fpsLastUpdateTime = now;
       this.fpsFramesSinceLastUpdate = 0;
-      this.fpsRef.innerText = `${Math.round(fps)}`;
+
+      const averageRenderMillis = this.renderTimeMovingAverageHelper.movingAverage;
+      const rLoad = averageRenderMillis / (1000 / TARGET_FPS);
+
+      const averageVisMillis = this.visTimeMovingAverageHelper.movingAverage;
+      const vLoad = averageVisMillis / (1000 / TARGET_FPS);
+
+      this.fpsRef.innerText = [
+        `${Math.round(fps)} fps`,
+        `r=${Math.round(rLoad * 100)}%`,
+        `v=${Math.round(vLoad * 100)}%`
+      ].join(" / ");
     }, 1000);
 
     this.props.midiEventEmitter.addListener(this);
@@ -320,20 +361,26 @@ export default class SimulationViewport extends React.PureComponent<Props, State
   private animate = () => {
     requestAnimationFrame(this.animate);
 
-    const now = performance.now();
+    const startTime = performance.now();
 
     const vis = this.state.visualization;
     if (vis) {
       const visState = this.stateHelper.endFrame();
-      const elapsedMillis = now - this.lastRenderTime;
+      const elapsedMillis = startTime - this.lastRenderTime;
       vis.render(elapsedMillis, visState);
       this.stateHelper.startFrame();
-      this.lastRenderTime = now;
+      this.lastRenderTime = startTime;
+
+      const visTimeMillis = performance.now() - startTime;
+      this.visTimeMovingAverageHelper.addValue(visTimeMillis);
     }
 
     this.renderer.render(this.state.scene, this.camera);
     // this.glowHelper.render();
     this.fpsFramesSinceLastUpdate++;
+
+    const renderTimeMillis = performance.now() - startTime;
+    this.renderTimeMovingAverageHelper.addValue(renderTimeMillis);
   }
 
   // TODO don't actually pass raw midi events in here, obv
