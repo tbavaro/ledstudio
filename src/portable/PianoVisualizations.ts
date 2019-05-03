@@ -1,10 +1,10 @@
-import LedStrip from "../base/LedStrip";
-import PianoVisualization from "../base/PianoVisualization";
+import LedStrip from "./base/LedStrip";
+import PianoVisualization from "./base/PianoVisualization";
 
-import TestBounceVisualization from "./TestBounceVisualization";
-import TestKeyFadeVisualization from "./TestKeyFadeVisualization";
-import TestKeyVisualization from "./TestKeyVisualization";
-import TestRainbowVisualization from "./TestRainbowVisualization";
+import TestBounceVisualization from "./visualizations/TestBounceVisualization";
+import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
+import TestKeyVisualization from "./visualizations/TestKeyVisualization";
+import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
 
 const visFuncs = {
   "testBounce": (ledStrip: LedStrip) => new TestBounceVisualization(ledStrip),

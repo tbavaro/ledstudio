@@ -7,7 +7,7 @@ import * as Colors from "./portable/base/Colors";
 import LedStrip from "./portable/base/LedStrip";
 import PianoEvent from "./portable/base/PianoEvent";
 import PianoVisualization from "./portable/base/PianoVisualization";
-import * as PianoVisualizations from "./portable/visualizations/PianoVisualizations";
+import * as PianoVisualizations from "./portable/PianoVisualizations";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 

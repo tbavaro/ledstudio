@@ -5,7 +5,7 @@ import MidiEvent from "./MidiEvent";
 import { MidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
-import * as PianoVisualizations from "./portable/visualizations/PianoVisualizations";
+import * as PianoVisualizations from "./portable/PianoVisualizations";
 import * as RightSidebar from "./RightSidebar";
 import SceneDefs from "./SceneDefs";
 import SimulationViewport from "./SimulationViewport";

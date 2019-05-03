@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import * as PianoVisualizations from "./portable/visualizations/PianoVisualizations";
+import * as PianoVisualizations from "./portable/PianoVisualizations";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
