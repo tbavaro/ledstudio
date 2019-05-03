@@ -1,6 +1,13 @@
-import Colors from "../base/Colors";
+import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
 import PianoVisualization, { State } from "../base/PianoVisualization";
+import * as Utils from "../Utils";
+
+const COLOR_PRESSED = Colors.WHITE;
+const COLOR_RELEASED = Colors.multiply(Colors.RED, 0.25);
+
+const PALETTE_SIZE = 64;
+const PALETTE: Colors.Color[] = Colors.createPaletteFadeLinear(COLOR_RELEASED, COLOR_PRESSED, PALETTE_SIZE);
 
 function colorForValue(v: number) {
   if (v < 0) {
@@ -9,16 +16,8 @@ function colorForValue(v: number) {
     v = 1;
   }
 
-  const x = Math.floor(v * 255);
-
-  // tslint:disable-next-line: no-bitwise
-  return (x << 16) + (x << 8) + x;
-}
-
-function updateValues<T>(arr: T[], func: (oldValue: T) => T) {
-  for (let i = 0; i < arr.length; ++i) {
-    arr[i] = func(arr[i]);
-  }
+  const x = Math.floor(v * (PALETTE_SIZE - 1));
+  return PALETTE[x];
 }
 
 export default class TestKeyVisualization extends PianoVisualization {
@@ -27,7 +26,7 @@ export default class TestKeyVisualization extends PianoVisualization {
 
   constructor(ledStrip: LedStrip) {
     super(ledStrip);
-    ledStrip.reset(Colors.BLACK);
+    ledStrip.reset(colorForValue(0));
 
     this.values = new Array(ledStrip.size).fill(0);
   }
@@ -35,7 +34,7 @@ export default class TestKeyVisualization extends PianoVisualization {
   public render(elapsedMillis: number, state: State): void {
     // decay
     const decayAmount = elapsedMillis * this.decayRate;
-    updateValues(this.values, (oldValue: number) => Math.max(0, oldValue - decayAmount));
+    Utils.updateValues(this.values, (oldValue: number) => Math.max(0, oldValue - decayAmount));
 
     // turn on newly-pressed keys
     state.changedKeys.forEach(n => {

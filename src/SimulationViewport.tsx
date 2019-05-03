@@ -3,7 +3,7 @@ import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-import Colors, { Color } from "./portable/base/Colors";
+import * as Colors from "./portable/base/Colors";
 import LedStrip from "./portable/base/LedStrip";
 import PianoEvent from "./portable/base/PianoEvent";
 import PianoVisualization from "./portable/base/PianoVisualization";
@@ -127,19 +127,19 @@ class LedSceneStrip implements LedStrip {
     this.reset();
   }
 
-  public setColor(n: number, color: Color) {
+  public setColor(n: number, color: Colors.Color) {
     if (n >= 0 && n < this.ledHelpers.length) {
       this.ledHelpers[n].setColor(LedSceneStrip.convertColor(color));
     }
   }
 
-  public reset(color?: Color): void {
+  public reset(color?: Colors.Color): void {
     for (let i = 0; i < this.size; ++i) {
       this.setColor(i, color || Colors.BLACK);
     }
   }
 
-  private static convertColor(color: Color): Three.Color {
+  private static convertColor(color: Colors.Color): Three.Color {
     return new Three.Color(color);
   }
 }

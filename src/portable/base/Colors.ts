@@ -1,18 +1,18 @@
+import * as Utils from "../Utils";
+
 export type Color = number;
 
 const MAX_VALUE = 0xff;
-
-const colors = {
-  BLACK: rgb(0, 0, 0),
-  WHITE: rgb(1, 1, 1),
-  RED: rgb(1, 0, 0)
-};
-export default colors;
 
 // 0-MAX_VALUE for each
 function rgbUnchecked(r: number, g: number, b: number): Color {
   // tslint:disable-next-line: no-bitwise
   return (r << 16) | (g << 8) | b;
+}
+
+function splitUnchecked(color: Color): [number, number, number] {
+  // tslint:disable-next-line: no-bitwise
+  return [color >> 16, (color >> 8) & 0xff, color & 0xff];
 }
 
 // h in [0., 360.0)
@@ -69,15 +69,20 @@ function hsvUnchecked(h: number, s: number, v: number): Color {
   return rgbUnchecked(r * MAX_VALUE, g * MAX_VALUE, b * MAX_VALUE);
 }
 
-function bracket01(v: number): number {
-  if (v < 0) {
-    return 0;
-  } else if (v > 1) {
-    return 1;
-  } else {
-    return v;
-  }
+function createBracketFunc(min: number, max: number): (v: number) => number {
+  return (v: number) => {
+    if (v < min) {
+      return min;
+    } else if (v > max) {
+      return max;
+    } else {
+      return v;
+    }
+  };
 }
+
+const bracket01 = createBracketFunc(0, 1);
+const bracket0MAX = createBracketFunc(0, MAX_VALUE);
 
 export function rgb(r: number, g: number, b: number): Color {
   return rgbUnchecked(
@@ -94,3 +99,54 @@ export function hsv(h: number, s: number, v: number): Color {
   }
   return hsvUnchecked(h, bracket01(s), bracket01(v));
 }
+
+export function add(a: Color, b: Color): Color {
+  const [ar, ag, ab] = splitUnchecked(a);
+  const [br, bg, bb] = splitUnchecked(b);
+  return rgbUnchecked(
+    bracket0MAX(ar + br),
+    bracket0MAX(ag + bg),
+    bracket0MAX(ab + bb)
+  );
+}
+
+export function average(a: Color, b: Color): Color {
+  const [ar, ag, ab] = splitUnchecked(a);
+  const [br, bg, bb] = splitUnchecked(b);
+  return rgbUnchecked(
+    bracket0MAX(Math.floor((ar + br) / 2)),
+    bracket0MAX(Math.floor((ag + bg) / 2)),
+    bracket0MAX(Math.floor((ab + bb) / 2))
+  );
+}
+
+export function multiply(a: Color, factor: number): Color {
+  const [ar, ag, ab] = splitUnchecked(a);
+  return rgbUnchecked(
+    bracket0MAX(Math.floor(ar * factor)),
+    bracket0MAX(Math.floor(ag * factor)),
+    bracket0MAX(Math.floor(ab * factor))
+  );
+}
+
+function fadeLinearUnchecked(fromColor: Color, toColor: Color, v: number): Color {
+  return add(
+    multiply(fromColor, (1 - v)),
+    multiply(toColor, v)
+  );
+}
+
+export function fadeLinear(fromColor: Color, toColor: Color, v: number): Color {
+  return fadeLinearUnchecked(fromColor, toColor, bracket01(v));
+}
+
+export function createPaletteFadeLinear(fromColor: Color, toColor: Color, size: number): Color[] {
+  return Utils.fillArray(size, (i: number) => {
+    const v = i / (size - 1);
+    return fadeLinearUnchecked(fromColor, toColor, v);
+  });
+}
+
+export const BLACK = rgb(0, 0, 0);
+export const WHITE = rgb(1, 1, 1);
+export const RED = rgb(1, 0, 0);

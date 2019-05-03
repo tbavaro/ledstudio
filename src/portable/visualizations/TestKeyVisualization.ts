@@ -1,4 +1,4 @@
-import Colors from "../base/Colors";
+import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
 import PianoVisualization, { State } from "../base/PianoVisualization";
 
