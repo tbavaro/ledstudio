@@ -87,7 +87,6 @@ export function rgb(r: number, g: number, b: number): Color {
   );
 }
 
-
 export function hsv(h: number, s: number, v: number): Color {
   h = h % 360;
   if (h < 0) {
