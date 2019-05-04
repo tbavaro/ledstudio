@@ -5,7 +5,7 @@ type PianoEvent = {
   readonly type: Type;
 } & {
   readonly type: "keyPressed" | "keyReleased"
-  readonly key: Key;
-  readonly velocity: number;
+  readonly key: Key;  // 0 to 87
+  readonly velocity: number;  // 0 to 1
 };
 export default PianoEvent;

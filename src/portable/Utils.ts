@@ -11,3 +11,23 @@ export function updateValues<T>(arr: T[], func: (oldValue: T) => T) {
     arr[i] = func(arr[i]);
   }
 }
+
+export function floatToString(n: number, precision: number): string {
+  if (precision === 0) {
+    return `${Math.round(n)}`;
+  }
+  const roundAdjustment = Math.pow(10, precision);
+  n = Math.round(n * roundAdjustment) / roundAdjustment;
+
+  // tslint:disable-next-line: prefer-const
+  let [intPart, fracPart] = `${n}`.split(".");
+  if (fracPart === undefined) {
+    fracPart = "";
+  } else {
+    fracPart = fracPart.slice(0, precision);
+  }
+  while (fracPart.length < precision) {
+    fracPart += "0";
+  }
+  return `${intPart}.${fracPart}`;
+}

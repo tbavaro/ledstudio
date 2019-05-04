@@ -1,7 +1,9 @@
 import PianoEvent, { Key } from "./base/PianoEvent";
 import * as PianoVisualization from "./base/PianoVisualization";
+import * as Utils from "./Utils";
 
 const MIDI_KEY_OFFSET = -21;
+const MIDI_MAX_VELOCITY = 127;
 
 export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
   if (data.length < 1) {
@@ -21,7 +23,7 @@ export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
           return {
             type: (data[0] === 0x80 ? "keyReleased" : "keyPressed"),
             key: data[1] + MIDI_KEY_OFFSET,
-            velocity: data.length >= 3 ? data[2] : 0
+            velocity: data.length >= 3 ? (data[2] / MIDI_MAX_VELOCITY) : 1
           };
         }
       }
@@ -34,10 +36,10 @@ export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
 export function describePianoEvent(event: PianoEvent): string {
   const parts = Object.keys(event).map(key => {
     const value = event[key];
-    if (key === "type") {
-      return `${value}`;
-    } else {
-      return `${key[0]}=${JSON.stringify(value)}`;
+    switch (key) {
+      case "type": return `${value}`;
+      case "velocity": return `v=${Utils.floatToString(value, 2)}`;
+      default: return `${key[0]}=${JSON.stringify(value)}`;
     }
   });
 
@@ -64,6 +66,7 @@ export class PianoVisualizationStateHelper {
   private static freshState(): AccessibleState {
     return {
       keys: new Array<boolean>(NUM_KEYS).fill(false),
+      keyVelocities: new Array<number>(NUM_KEYS).fill(0),
       changedKeys: []
     };
   }
@@ -81,7 +84,7 @@ export class PianoVisualizationStateHelper {
     switch (event.type) {
       case "keyPressed":
       case "keyReleased":
-        this.applyPressOrReleaseEvent(event.type === "keyPressed", event.key);
+        this.applyPressOrReleaseEvent(/*isPress=*/event.type === "keyPressed", event.key, event.velocity);
         break;
 
       default:
@@ -90,9 +93,10 @@ export class PianoVisualizationStateHelper {
     }
   };
 
-  private applyPressOrReleaseEvent(isPress: boolean, key: Key) {
+  private applyPressOrReleaseEvent(isPress: boolean, key: Key, velocity: number) {
     if (this.state.keys[key] !== isPress) {
       this.state.keys[key] = isPress;
+      this.state.keyVelocities[key] = velocity;
       if (!this.state.changedKeys.includes(key)) {
         this.state.changedKeys.push(key);
       }
