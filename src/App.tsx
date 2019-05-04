@@ -14,8 +14,12 @@ import "./App.css";
 
 const MIDI_FILES = [
   "abovo.mid",
+  "thegift.mid",
   "bach_846.mid",
-  "thegift.mid"
+  "beethoven_opus10_2.mid",
+  "chpn_op27_1.mid",
+  "chpn_op66.mid",
+  "grieg_zwerge.mid"
 ];
 
 const MIDI_FILE_PATH_PREFIX = "./";
