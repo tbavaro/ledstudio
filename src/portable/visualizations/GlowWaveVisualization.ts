@@ -1,12 +1,16 @@
 import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
 import PianoVisualization, { State } from "../base/PianoVisualization";
+import * as Utils from "../Utils";
 
 const WAVE_SPACING = 18;
 const WAVE_DROPOFF = 0.7;
 const LED_DROPOFF = 0.2;
 const FADE_DROPOFF = 3.0;
 const DEREZ = 0.8;
+
+// full brightness requires at least this velocity
+const MAX_BRIGHTNESS_VELOCITY = 0.6;
 
 // starting at n, call func outward in + and - directions, until passing min/max
 function doSymmetric(n: number, stepSize: number, min: number, max: number, func: (v: number, steps: number) => void) {
@@ -49,7 +53,8 @@ export default class GlowWaveVisualization extends PianoVisualization {
     // assign colors to newly pressed keys
     state.changedKeys.forEach(n => {
       if (state.keys[n]) {
-        this.pressedKeyColors.set(n, Colors.hsv(n * 10, 1,1 ));
+        const initialValue = Utils.bracket01(state.keyVelocities[n] / MAX_BRIGHTNESS_VELOCITY);
+        this.pressedKeyColors.set(n, Colors.hsv(n * 10, 1, initialValue));
       }
     });
 

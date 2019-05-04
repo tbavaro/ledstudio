@@ -69,20 +69,8 @@ function hsvUnchecked(h: number, s: number, v: number): Color {
   return rgbUnchecked(r * MAX_VALUE, g * MAX_VALUE, b * MAX_VALUE);
 }
 
-function createBracketFunc(min: number, max: number): (v: number) => number {
-  return (v: number) => {
-    if (v < min) {
-      return min;
-    } else if (v > max) {
-      return max;
-    } else {
-      return v;
-    }
-  };
-}
-
-const bracket01 = createBracketFunc(0, 1);
-const bracket0MAX = createBracketFunc(0, MAX_VALUE);
+const bracket01 = Utils.bracket01;
+const bracket0MAX = Utils.createBracketFunc(0, MAX_VALUE);
 
 export function rgb(r: number, g: number, b: number): Color {
   return rgbUnchecked(
