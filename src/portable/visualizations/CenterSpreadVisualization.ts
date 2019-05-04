@@ -7,7 +7,6 @@ const TAIL_LENGTH_CONST = 0.02;
 interface Info {
     time: number;
     velocity: number;
-    key: number;
     randomHue: number;
 }
 
@@ -39,11 +38,14 @@ export default class CenterSpreadVisualization extends PianoVisualization {
 
         this.info = this.info.filter(kt => kt.time - this.time < 1000);
 
+        let sumVelocity = 0;
         for (const key of state.changedKeys) {
             if (state.keys[key]) {
-                this.info.push({time: this.time, velocity: state.keyVelocities[key], key: key, randomHue: randomHue()});
-                break;
+                sumVelocity += state.keyVelocities[key];
             }
+        }
+        if (sumVelocity > 0) {
+            this.info.push({time: this.time, velocity: Math.min(1, sumVelocity), randomHue: randomHue()});
         }
 
         const colors = new Array<Colors.Color>(this.ledStrip.size).fill(Colors.BLACK);
@@ -75,7 +77,7 @@ export default class CenterSpreadVisualization extends PianoVisualization {
         for (let i = 0; i < colors.length; ++i) {
             const rgb = Colors.split(colors[i]);
             const v = Math.max(rgb[0], rgb[1], rgb[2]);
-            if (v > 0 && Math.random() < 0.02) {
+            if (v > 0 && Math.random() < 0.02 && this.sparkles.findIndex(si => si.led === i) < 0) {
                 this.sparkles.push({value: v, led: i});
             }
         }
