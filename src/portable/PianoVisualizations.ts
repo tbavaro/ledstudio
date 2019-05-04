@@ -1,6 +1,7 @@
 import LedStrip from "./base/LedStrip";
 import PianoVisualization from "./base/PianoVisualization";
 
+import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import GlowWaveisualization from "./visualizations/GlowWaveVisualization";
 import TestBounceVisualization from "./visualizations/TestBounceVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
@@ -9,6 +10,7 @@ import TestRainbowVisualization from "./visualizations/TestRainbowVisualization"
 
 const visFuncs = {
   "glowWave": (ledStrip: LedStrip) => new GlowWaveisualization(ledStrip),
+  "centerSpread": (ledStrip: LedStrip) => new CenterSpreadVisualization(ledStrip),
   "testBounce": (ledStrip: LedStrip) => new TestBounceVisualization(ledStrip),
   "testKey": (ledStrip: LedStrip) => new TestKeyVisualization(ledStrip),
   "testKeyFade": (ledStrip: LedStrip) => new TestKeyFadeVisualization(ledStrip),

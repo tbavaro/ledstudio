@@ -80,6 +80,11 @@ export function rgb(r: number, g: number, b: number): Color {
   );
 }
 
+export function split(color: Color): [number, number, number] {
+  const splitRgb = splitUnchecked(color);
+  return [splitRgb[0] / MAX_VALUE, splitRgb[1] / MAX_VALUE, splitRgb[2] / MAX_VALUE];
+}
+
 export function hsv(h: number, s: number, v: number): Color {
   h = h % 360;
   if (h < 0) {
