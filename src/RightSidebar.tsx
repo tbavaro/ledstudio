@@ -134,7 +134,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
         &nbsp;
         <a onClick={this.props.actions.stopMusic}>Stop</a>
       </div>
-    )
+    );
   }
 
   private handleSetMidiOutput = (event: React.ChangeEvent<any>) => {

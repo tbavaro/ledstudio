@@ -40,7 +40,7 @@ interface State {
   midiOutput: WebMidi.MIDIOutput | null;
   midiFilename: string;
   midiData: ArrayBuffer | null;
-};
+}
 
 type AllActions = RightSidebar.Actions;
 

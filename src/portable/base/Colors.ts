@@ -54,15 +54,15 @@ function hsvUnchecked(h: number, s: number, v: number): Color {
       break;
 
     case 4:
-      r = t
-      g = p
-      b = v
+      r = t;
+      g = p;
+      b = v;
       break;
 
     default: // (5)
-      r = v
-      g = p
-      b = q
+      r = v;
+      g = p;
+      b = q;
       break;
   }
 

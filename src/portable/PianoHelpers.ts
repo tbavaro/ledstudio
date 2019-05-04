@@ -91,7 +91,7 @@ export class PianoVisualizationStateHelper {
         // unrecognized event; throw?
         break;
     }
-  };
+  }
 
   private applyPressOrReleaseEvent(isPress: boolean, key: Key, velocity: number) {
     if (this.state.keys[key] !== isPress) {

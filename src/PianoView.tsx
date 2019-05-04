@@ -37,7 +37,7 @@ const BLACK_KEY_WIDTH_PCT_STR = `${BLACK_KEY_WIDTH_PCT}%`;
 
 interface State {
   keyState: boolean[];
-};
+}
 
 function defaultKeyState(): boolean[] {
   const arr: boolean[] = [];
