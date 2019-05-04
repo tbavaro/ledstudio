@@ -20,7 +20,8 @@ export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
         } else {
           return {
             type: (data[0] === 0x80 ? "keyReleased" : "keyPressed"),
-            key: data[1] + MIDI_KEY_OFFSET
+            key: data[1] + MIDI_KEY_OFFSET,
+            velocity: data.length >= 3 ? data[2] : 0
           };
         }
       }
@@ -31,7 +32,16 @@ export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
 }
 
 export function describePianoEvent(event: PianoEvent): string {
-  return JSON.stringify(event);
+  const parts = Object.keys(event).map(key => {
+    const value = event[key];
+    if (key === "type") {
+      return `${value}`;
+    } else {
+      return `${key[0]}=${JSON.stringify(value)}`;
+    }
+  });
+
+  return parts.join(" ");
 }
 
 const NUM_KEYS = 88;
