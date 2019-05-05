@@ -161,10 +161,25 @@ class LedSceneStrip implements LedStrip {
     }
   }
 
-  public reset(color?: Colors.Color): void {
-    for (let i = 0; i < this.size; ++i) {
-      this.setColor(i, color || Colors.BLACK);
+  public setRange(startIndex: number, numLeds: number, color: Colors.Color) {
+    const convertedColor = LedSceneStrip.convertColor(color);
+
+    if (startIndex < 0) {
+      numLeds += startIndex;
+      startIndex = 0;
     }
+
+    numLeds = Math.min(numLeds, this.size - startIndex);
+
+    if (numLeds > 0) {
+      for (let i = startIndex; i < (startIndex + numLeds); ++i) {
+        this.ledHelpers[i].setColor(convertedColor);
+      }
+    }
+  }
+
+  public reset(color?: Colors.Color): void {
+    this.setRange(0, this.size, color || Colors.BLACK);
   }
 
   private static convertColor(color: Colors.Color): Three.Color {
