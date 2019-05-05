@@ -15,16 +15,22 @@ export default interface LedStrip {
 export class PartialLedStrip implements LedStrip {
   private readonly delegateStrip: LedStrip;
   private readonly indexOffset: number;
+  private readonly reverse: boolean;
   public readonly size: number;
 
-  constructor(delegateStrip: LedStrip, indexOffset: number, numLeds: number) {
+  constructor(delegateStrip: LedStrip, indexOffset: number, numLeds: number, reverse?: boolean) {
+    console.log("instantiating", reverse);
     this.delegateStrip = delegateStrip;
     this.indexOffset = indexOffset;
     this.size = numLeds;
+    this.reverse = reverse || false;
   }
 
   public setColor(n: number, color: Colors.Color) {
     if (n >= 0 && n < this.size) {
+      if (this.reverse) {
+        n = this.size - 1 - n;
+      }
       this.delegateStrip.setColor(this.indexOffset + n, color);
     }
   }

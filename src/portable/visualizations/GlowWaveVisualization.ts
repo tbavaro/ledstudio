@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
-import PianoVisualization, { State } from "../base/PianoVisualization";
+import * as PianoVisualization from "../base/PianoVisualization";
+import StandardPianoVisualization from "../base/StandardPianoVisualization";
 import * as Utils from "../Utils";
 
 const WAVE_SPACING = 18;
@@ -29,7 +30,7 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
   });
 }
 
-export default class GlowWaveVisualization extends PianoVisualization {
+export default class GlowWaveVisualization extends StandardPianoVisualization {
   private pressedKeyColors = new Map<number, Colors.Color>();
 
   constructor(ledStrip: LedStrip) {
@@ -37,7 +38,7 @@ export default class GlowWaveVisualization extends PianoVisualization {
     ledStrip.reset(Colors.BLACK);
   }
 
-  public render(elapsedMillis: number, state: State): void {
+  public render(elapsedMillis: number, state: PianoVisualization.State): void {
     // decay the unpressed keys
     this.pressedKeyColors.forEach((c, n) => {
       if (!state.keys[n]) {
@@ -60,14 +61,14 @@ export default class GlowWaveVisualization extends PianoVisualization {
 
     // overshoot so edges get glow even if the wave center is out of bounds
     const min = -1 * WAVE_SPACING;
-    const max = this.ledStrip.size + WAVE_SPACING;
+    const max = this.frontLedStrip.size + WAVE_SPACING;
 
-    const colors = new Array<Colors.Color>(this.ledStrip.size).fill(Colors.BLACK);
+    const colors = new Array<Colors.Color>(this.frontLedStrip.size).fill(Colors.BLACK);
     this.pressedKeyColors.forEach((color, n) => {
       doSymmetric(n, WAVE_SPACING, min, max, (waveCenter: number, waveNum: number) => {
         const waveColor = Colors.multiply(color, Math.pow(1 - WAVE_DROPOFF, waveNum));
         doSymmetric(waveCenter, 1, min, max, (pos: number, step: number) => {
-          if (pos >= 0 && pos < this.ledStrip.size) {
+          if (pos >= 0 && pos < this.frontLedStrip.size) {
             const ledColor = Colors.multiply(waveColor, Math.pow(1 - LED_DROPOFF, step));
             colors[pos] = Colors.add(colors[pos], ledColor);
           }
@@ -77,7 +78,7 @@ export default class GlowWaveVisualization extends PianoVisualization {
 
     colors.forEach((c, i) => {
       if (Math.random() < (1 - DEREZ)) {
-        this.ledStrip.setColor(i, c);
+        this.frontLedStrip.setColor(i, c);
       }
     });
   }

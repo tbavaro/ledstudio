@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
-import PianoVisualization, { State } from "../base/PianoVisualization";
+import * as PianoVisualization from "../base/PianoVisualization";
+import StandardPianoVisualization from "../base/StandardPianoVisualization";
 
 const TAIL_LENGTH_CONST = 0.02;
 
@@ -19,7 +20,7 @@ function randomHue() {
     return Math.floor(Math.random() * 360);
 }
 
-export default class CenterSpreadVisualization extends PianoVisualization {
+export default class CenterSpreadVisualization extends StandardPianoVisualization {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private time = 0;
@@ -33,7 +34,7 @@ export default class CenterSpreadVisualization extends PianoVisualization {
         }
     }
 
-    public render(elapsedMillis: number, state: State): void {
+    public render(elapsedMillis: number, state: PianoVisualization.State): void {
         this.time += elapsedMillis;
 
         this.info = this.info.filter(kt => kt.time - this.time < 1000);
@@ -48,24 +49,24 @@ export default class CenterSpreadVisualization extends PianoVisualization {
             this.info.push({time: this.time, velocity: Math.min(1, sumVelocity), randomHue: randomHue()});
         }
 
-        const colors = new Array<Colors.Color>(this.ledStrip.size).fill(Colors.BLACK);
+        const colors = new Array<Colors.Color>(this.frontLedStrip.size).fill(Colors.BLACK);
 
         // main reaction to key press by placing random colors spreading from the center
         for (const kt of this.info) {
             const elapsed = this.time - kt.time;
-            const idx = Math.round((elapsed / 1000.0) * (this.ledStrip.size / 2));
+            const idx = Math.round((elapsed / 1000.0) * (this.frontLedStrip.size / 2));
 
-            const hi = idx + this.ledStrip.size / 2;
+            const hi = idx + this.frontLedStrip.size / 2;
             let brightness = 1;
-            for (let i = hi; i >= this.ledStrip.size / 2 && brightness > 0; --i) {
+            for (let i = hi; i >= this.frontLedStrip.size / 2 && brightness > 0; --i) {
                 const c = Colors.hsv(kt.randomHue, 1, brightness);
                 brightness -= TAIL_LENGTH_CONST / kt.velocity;
                 colors[i] = Colors.add(c, colors[i]);
             }
 
-            const lo = this.ledStrip.size / 2 - idx;
+            const lo = this.frontLedStrip.size / 2 - idx;
             brightness = 1;
-            for (let i = lo; i <= this.ledStrip.size / 2 && brightness > 0; ++i) {
+            for (let i = lo; i <= this.frontLedStrip.size / 2 && brightness > 0; ++i) {
                 const c = Colors.hsv(kt.randomHue, 1, brightness);
                 brightness -= TAIL_LENGTH_CONST/ kt.velocity;
                 colors[i] = Colors.add(c, colors[i]);
@@ -89,7 +90,7 @@ export default class CenterSpreadVisualization extends PianoVisualization {
 
         // write colors
         colors.forEach((c, i) => {
-            this.ledStrip.setColor(i, c);
+            this.frontLedStrip.setColor(i, c);
         });
     }
 }

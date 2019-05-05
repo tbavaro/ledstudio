@@ -195,19 +195,20 @@ class LedScene {
   constructor(ledSceneDef: SceneDef, scene: Three.Scene) {
     this.sceneDef = ledSceneDef;
 
-    const numLeds = ledSceneDef.ledSegment.numLeds;
-
     // place 3d Leds
-    const segment = ledSceneDef.ledSegment;
-    const step = segment.endPoint.clone();
-    step.sub(segment.startPoint);
-    step.divideScalar(segment.numLeds - 1);
-    for (let i = 0; i < numLeds; ++i) {
-      const position = step.clone();
-      position.multiplyScalar(i);
-      position.add(segment.startPoint);
-      this.ledHelpers.push(new LedHelper(scene, position));
-    }
+    ledSceneDef.ledSegments.forEach(segment => {
+      const numLeds = segment.numLeds;
+      const step = segment.endPoint.clone();
+      step.sub(segment.startPoint);
+      step.divideScalar(segment.numLeds - 1);
+      for (let i = 0; i < numLeds; ++i) {
+        const position = step.clone();
+        position.multiplyScalar(i);
+        position.add(segment.startPoint);
+        this.ledHelpers.push(new LedHelper(scene, position));
+      }
+    });
+
     this.ledStrip = new LedSceneStrip(this.ledHelpers);
   }
 

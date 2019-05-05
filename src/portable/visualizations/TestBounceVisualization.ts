@@ -3,13 +3,15 @@ import LedStrip from "../base/LedStrip";
 import PianoVisualization, { State } from "../base/PianoVisualization";
 
 export default class TestBounceVisualization extends PianoVisualization {
+  private ledStrip: LedStrip;
   private position: number;
   private index: number;
   private speed: number;  // LEDs per millis
 
   constructor(ledStrip: LedStrip) {
+    super();
     ledStrip.reset();
-    super(ledStrip);
+    this.ledStrip = ledStrip;
     this.position = 0;
     this.speed = 50 / 1000;
   }

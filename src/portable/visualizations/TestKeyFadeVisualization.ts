@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
-import PianoVisualization, { State } from "../base/PianoVisualization";
+import * as PianoVisualization from "../base/PianoVisualization";
+import StandardPianoVisualization from "../base/StandardPianoVisualization";
 import * as Utils from "../Utils";
 
 const COLOR_PRESSED = Colors.WHITE;
@@ -20,7 +21,7 @@ function colorForValue(v: number) {
   return PALETTE[x];
 }
 
-export default class TestKeyVisualization extends PianoVisualization {
+export default class TestKeyVisualization extends StandardPianoVisualization {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
 
@@ -31,7 +32,7 @@ export default class TestKeyVisualization extends PianoVisualization {
     this.values = new Array(ledStrip.size).fill(0);
   }
 
-  public render(elapsedMillis: number, state: State): void {
+  public render(elapsedMillis: number, state: PianoVisualization.State): void {
     // decay
     const decayAmount = elapsedMillis * this.decayRate;
     Utils.updateValues(this.values, (oldValue: number) => Math.max(0, oldValue - decayAmount));
@@ -44,6 +45,6 @@ export default class TestKeyVisualization extends PianoVisualization {
     });
 
     // set colors
-    this.values.forEach((v, i) => this.ledStrip.setColor(i, colorForValue(v)));
+    this.values.forEach((v, i) => this.frontLedStrip.setColor(i, colorForValue(v)));
   }
 }

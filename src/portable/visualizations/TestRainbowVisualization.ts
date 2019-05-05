@@ -3,12 +3,14 @@ import LedStrip from "../base/LedStrip";
 import PianoVisualization, { State } from "../base/PianoVisualization";
 
 export default class TestRainbowVisualization extends PianoVisualization {
+  private ledStrip: LedStrip;
   private offset = 0;
   private width = 88; // pixels per 360 degrees
   private speed = 120 / 1000;  // degrees per millis
 
   constructor(ledStrip: LedStrip) {
-    super(ledStrip);
+    super();
+    this.ledStrip = ledStrip;
     ledStrip.reset();
   }
 
