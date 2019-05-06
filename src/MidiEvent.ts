@@ -33,7 +33,7 @@ export default class MidiEvent {
     if (data instanceof Uint8Array) {
       this.data = Array.from(data);
     } else {
-      this.data = data;
+      this.data = [...data];
     }
     this.statusDescription = (
       this.data.length === 0

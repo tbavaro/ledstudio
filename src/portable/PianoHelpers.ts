@@ -20,10 +20,12 @@ export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
         if (key < 0 || key >= NUM_KEYS) {
           return null;
         } else {
+          const velocity = data.length >= 3 ? (data[2] / MIDI_MAX_VELOCITY) : 1;
+          const isKeyPress = (data[0] === 0x90 && velocity > 0);
           return {
-            type: (data[0] === 0x80 ? "keyReleased" : "keyPressed"),
+            type: (isKeyPress ? "keyPressed": "keyReleased"),
             key: data[1] + MIDI_KEY_OFFSET,
-            velocity: data.length >= 3 ? (data[2] / MIDI_MAX_VELOCITY) : 1
+            velocity: velocity
           };
         }
       }
@@ -31,6 +33,17 @@ export function pianoEventFromMidiData(data: number[]): PianoEvent | null {
     default:
       return null;
   }
+}
+
+export function resetAllKeysMidiDatas(): number[][] {
+  const output: number[][] = [];
+
+  for (let i = 0; i < 88; ++i) {
+    const midiKey = i - MIDI_KEY_OFFSET;
+    output.push([ 0x80, midiKey, 0 ]);
+  }
+
+  return output;
 }
 
 export function describePianoEvent(event: PianoEvent): string {

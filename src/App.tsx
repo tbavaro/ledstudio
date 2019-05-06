@@ -5,6 +5,7 @@ import MidiEvent from "./MidiEvent";
 import { QueuedMidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
+import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import * as RightSidebar from "./RightSidebar";
 import SceneDefs from "./SceneDefs";
@@ -201,6 +202,13 @@ class App extends React.Component<{}, State> {
 
   private setMidiInput = (newValue: WebMidi.MIDIInput | null) => {
     if (newValue !== this.state.midiInput) {
+      if (this.state.midiInput) {
+        this.state.midiInput.removeEventListener("midimessage", this.onMidiInputMessage);
+        this.resetAllKeys();
+      }
+      if (newValue) {
+        newValue.addEventListener("midimessage", this.onMidiInputMessage);
+      }
       this.setState({ midiInput: newValue });
     }
   }
@@ -271,6 +279,19 @@ class App extends React.Component<{}, State> {
       this.setState({ visualizationName: newValue });
     }
   };
+
+  private onMidiInputMessage = (message: WebMidi.MIDIMessageEvent) => {
+    console.log("message", Array.from(message.data));
+    const event = new MidiEvent(message.data);
+    this.midiEventEmitter.fire(event);
+  }
+
+  private resetAllKeys = () => {
+    this.midiEventEmitter.reset();
+    PianoHelpers.resetAllKeysMidiDatas().forEach(data => {
+      this.midiEventEmitter.fire(new MidiEvent(data));
+    });
+  }
 }
 
 export default App;

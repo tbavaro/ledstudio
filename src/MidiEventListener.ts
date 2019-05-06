@@ -80,4 +80,13 @@ export class QueuedMidiEventEmitter extends MidiEventEmitter {
     this.nextTimeout = null;
     this.scheduleDequeueIfNeeded();
   }
+
+  public reset() {
+    this.pendingEvents = [];
+    if (this.nextTimeout) {
+      clearTimeout(this.nextTimeout);
+      this.nextTimeout = null;
+    }
+    this.latestTimestamp = 0;
+  }
 }
