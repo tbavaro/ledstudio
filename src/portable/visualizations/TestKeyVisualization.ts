@@ -14,7 +14,7 @@ export default class TestKeyVisualization extends PianoVisualization.default {
     super();
     ledStrip.reset(COLOR_RELEASED);
 
-    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.75);
+    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {

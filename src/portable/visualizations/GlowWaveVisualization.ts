@@ -39,7 +39,7 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
     super();
     ledStrip.reset(Colors.BLACK);
 
-    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.5);
+    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.25);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {

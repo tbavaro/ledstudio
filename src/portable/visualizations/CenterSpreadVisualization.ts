@@ -35,7 +35,7 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
             this.keyToHue[i] = randomHue();
         }
 
-        this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.75);
+        this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.6);
     }
 
     public render(elapsedMillis: number, state: PianoVisualization.State): void {

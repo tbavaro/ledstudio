@@ -5,7 +5,11 @@ import { ColorTransformLedStrip, MultipleLedStrip, PartialLedStrip } from "./Com
 
 const FRONT_LENGTH = 88;
 
-export function createBurrowSingleRowLedStrip(ledStrip: LedStrip, dropoffFactor?: number): LedStrip {
+export interface BurrowLedStrips {
+  readonly frontLedStrips: LedStrip[];
+}
+
+export function createBurrowLedStrips(ledStrip: LedStrip): BurrowLedStrips {
   if (ledStrip.size % FRONT_LENGTH !== 0) {
     throw new Error(`expected led strip length to be a multiple of ${FRONT_LENGTH}`);
   }
@@ -16,6 +20,14 @@ export function createBurrowSingleRowLedStrip(ledStrip: LedStrip, dropoffFactor?
     frontLedStrips.push(new PartialLedStrip(ledStrip, i, 88, reverse));
     reverse = !reverse;
   }
+
+  return {
+    frontLedStrips: frontLedStrips
+  };
+}
+
+export function createBurrowSingleRowLedStrip(ledStrip: LedStrip, dropoffFactor?: number): LedStrip {
+  const { frontLedStrips } = createBurrowLedStrips(ledStrip);
 
   // hacky way to do this but ok
   if (frontLedStrips.length === 3) {
