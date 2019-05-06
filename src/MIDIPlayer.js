@@ -131,7 +131,9 @@ MIDIPlayer.prototype.stop = function() {
 };
 
 MIDIPlayer.prototype.doSend = function(data, timestamp) {
-  this.output.send(data, timestamp);
+  if (this.output) {
+    this.output.send(data, timestamp);
+  }
   if (this.onSend) {
     this.onSend(data, timestamp);
   }

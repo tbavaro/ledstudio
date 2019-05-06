@@ -188,11 +188,6 @@ class App extends React.Component<{}, State> {
       return;
     }
 
-    if (this.midiPlayer.output === null) {
-      alert("No MIDI output");
-      return;
-    }
-
     const file = new MIDIFile(this.state.midiData);
     this.midiPlayer.load(file);
     this.midiPlayer.play();
@@ -216,7 +211,6 @@ class App extends React.Component<{}, State> {
 
   private setMidiOutput = (newValue: WebMidi.MIDIOutput | null) => {
     if (newValue !== this.state.midiOutput) {
-      this.midiPlayer.stop();
       this.midiPlayer.output = newValue;
       this.setState({ midiOutput: newValue });
     }
