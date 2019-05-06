@@ -31,6 +31,10 @@ export default class MidiEventsView extends React.Component<Props, {}> implement
   }
 
   public onMidiEvent(event: MidiEvent) {
+    if (event.suppressDisplay) {
+      return;
+    }
+
     const newElement = document.createElement("div");
     newElement.className = "MidiEventsView-entry " + (this.props.entryClassName || "");
     newElement.innerText = event.toString();

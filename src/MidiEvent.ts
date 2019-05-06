@@ -28,8 +28,9 @@ export default class MidiEvent {
   public readonly isNoteworthy: boolean;
   public readonly pianoEvent: PianoEvent | null;
   private readonly statusDescription: string | null;
+  public readonly suppressDisplay: boolean;
 
-  constructor(data: number[] | Uint8Array) {
+  constructor(data: number[] | Uint8Array, suppressDisplay?: true) {
     if (data instanceof Uint8Array) {
       this.data = Array.from(data);
     } else {
@@ -42,6 +43,7 @@ export default class MidiEvent {
     );
     this.isNoteworthy = this.statusDescription !== null;
     this.pianoEvent = PianoHelpers.pianoEventFromMidiData(this.data);
+    this.suppressDisplay = suppressDisplay || false;
   }
 
   public toString() {

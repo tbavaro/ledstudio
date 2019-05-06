@@ -58,3 +58,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.RightSidebar-inAppInputUI {
+  padding-left: 8px;
+  padding-bottom: 8px;
+}

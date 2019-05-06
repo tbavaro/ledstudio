@@ -2,8 +2,7 @@ import * as React from "react";
 
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 
-import MidiEvent from "./MidiEvent";
-import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
+import { MidiEventEmitter } from "./MidiEventListener";
 import MidiEventsView from "./MidiEventsView";
 
 import "./RightSidebar.css";
@@ -35,25 +34,8 @@ function findById<T extends { readonly id: string }>(entries: T[], id: string): 
   return entries.find(e => e.id === id);
 }
 
-export default class RightSidebar extends React.PureComponent<Props, {}> implements MidiEventListener {
-  private registeredEventEmitter: MidiEventEmitter | null;
-
-  public componentWillMount() {
-    this.props.midiEventEmitter.addListener(this);
-    this.registeredEventEmitter = this.props.midiEventEmitter;
-  }
-
-  public componentWillUnmount() {
-    this.props.midiEventEmitter.removeListener(this);
-  }
-
+export default class RightSidebar extends React.PureComponent<Props, {}> {
   public render() {
-    // if this actually happens, detect when it occurs so we can deregister
-    // from old emitter and register with the new one
-    if (this.registeredEventEmitter !== this.props.midiEventEmitter) {
-      throw new Error("changing event emitter not supported");
-    }
-
     return (
       <div className="RightSidebar">
         <div className="RightSidebar-optionsGroup">
@@ -62,15 +44,11 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
           {this.renderInputDevices()}
           {this.renderOutputDevices()}
           <p/>
-          {this.renderMidiFileSelector()}
-          {this.renderMusicControls()}
-          <p/>
         </div>
         <MidiEventsView
           className="RightSidebar-midiEventsView"
           entryClassName="RightSidebar-midiEventEntry"
           midiEventEmitter={this.props.midiEventEmitter}
-          ref={this.setMidiEventsViewRef}
         />
       </div>
     );
@@ -115,6 +93,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
 
   private renderInputDevices() {
     const { selectedMidiInput } = this.props;
+    const showInAppInputUI = (selectedMidiInput === null);
     return (
       <div className="RightSidebar-inputDevices">
         <span>Input device: </span>
@@ -122,7 +101,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
           value={selectedMidiInput === null ? "" : selectedMidiInput.id}
           onChange={this.handleSetMidiInput}
         >
-          <option value="" children={"<none>"}/>
+          <option value="" children={"<in-app>"}/>
           {
             this.props.midiInputs.map(input => (
               <option
@@ -133,6 +112,16 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
             ))
           }
         </select>
+        {
+          showInAppInputUI
+            ? (
+                <div className="RightSidebar-inAppInputUI">
+                  {this.renderMidiFileSelector()}
+                  {this.renderMusicControls()}
+                </div>
+              )
+            : null
+        }
       </div>
     );
   }
@@ -179,19 +168,6 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
   private handleSetMidiOutput = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
     this.props.actions.setMidiOutput(findById(this.props.midiOutputs, id) || null);
-  }
-
-  public onMidiEvent = (event: MidiEvent) => {
-    this.midiEventsViewRef.onMidiEvent(event);
-  }
-
-  private unsafeMidiEventsViewRef: MidiEventsView | null = null;
-  private setMidiEventsViewRef = (newRef: MidiEventsView) => this.unsafeMidiEventsViewRef = newRef;
-  private get midiEventsViewRef(): MidiEventsView {
-    if (this.unsafeMidiEventsViewRef === null) {
-      throw new Error("ref not set");
-    }
-    return this.unsafeMidiEventsViewRef;
   }
 
   private handleSetMidiFilename = (event: React.ChangeEvent<any>) => {

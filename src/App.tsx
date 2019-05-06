@@ -202,6 +202,7 @@ class App extends React.Component<{}, State> {
 
   private setMidiInput = (newValue: WebMidi.MIDIInput | null) => {
     if (newValue !== this.state.midiInput) {
+      this.midiPlayer.stop();
       if (this.state.midiInput) {
         this.state.midiInput.removeEventListener("midimessage", this.onMidiInputMessage);
         this.resetAllKeys();
@@ -296,7 +297,7 @@ class App extends React.Component<{}, State> {
   private resetAllKeys = () => {
     this.midiEventEmitter.reset();
     PianoHelpers.resetAllKeysMidiDatas().forEach(data => {
-      this.midiEventEmitter.fire(new MidiEvent(data));
+      this.midiEventEmitter.fire(new MidiEvent(data, /*suppressDisplay=*/true));
     });
   }
 }
