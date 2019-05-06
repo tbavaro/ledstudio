@@ -2,7 +2,7 @@ import MIDIFile from "midifile";
 import * as React from "react";
 
 import MidiEvent from "./MidiEvent";
-import { MidiEventEmitter } from "./MidiEventListener";
+import { QueuedMidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
@@ -62,7 +62,7 @@ class App extends React.Component<{}, State> {
   };
 
   private midiPlayer = new MIDIPlayer();
-  private midiEventEmitter = new MidiEventEmitter();
+  private midiEventEmitter = new QueuedMidiEventEmitter();
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -137,7 +137,9 @@ class App extends React.Component<{}, State> {
             />
           </div>
           <div className="App-pianoContainer">
-            <PianoView ref={this.setPianoViewRef}/>
+            <PianoView
+              midiEventEmitter={this.midiEventEmitter}
+            />
           </div>
         </div>
         <div className="App-sidebarContainer">
@@ -192,7 +194,6 @@ class App extends React.Component<{}, State> {
 
     const file = new MIDIFile(this.state.midiData);
     this.midiPlayer.load(file);
-    this.pianoViewRef.reset();
     this.midiPlayer.play();
   }
 
@@ -216,27 +217,8 @@ class App extends React.Component<{}, State> {
     data: number[] | Uint8Array,
     timestamp?: number
   ) => {
-    const event = new MidiEvent(data, timestamp);
-    this.midiEventEmitter.fire(event);
-    switch(event.data[0]) {
-      case 0x80:
-      case 0x90:
-        this.pianoViewRef.setKeyPressed(event.data[1], event.data[0] === 0x90);
-        break;
-
-      default:
-        break;
-    }
-    // console.log("send", data);
-  }
-
-  private unsafePianoViewRef: PianoView | null = null;
-  private setPianoViewRef = (newRef: PianoView) => this.unsafePianoViewRef = newRef;
-  private get pianoViewRef(): PianoView {
-    if (this.unsafePianoViewRef === null) {
-      throw new Error("ref not set");
-    }
-    return this.unsafePianoViewRef;
+    const event = new MidiEvent(data);
+    this.midiEventEmitter.fireLater(event, timestamp || performance.now());
   }
 
   private loadMidiFile = (filename: string) => {

@@ -69,6 +69,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
         <MidiEventsView
           className="RightSidebar-midiEventsView"
           entryClassName="RightSidebar-midiEventEntry"
+          midiEventEmitter={this.props.midiEventEmitter}
           ref={this.setMidiEventsViewRef}
         />
       </div>
@@ -181,7 +182,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> impleme
   }
 
   public onMidiEvent = (event: MidiEvent) => {
-    this.midiEventsViewRef.onSend(event);
+    this.midiEventsViewRef.onMidiEvent(event);
   }
 
   private unsafeMidiEventsViewRef: MidiEventsView | null = null;

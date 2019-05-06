@@ -1,5 +1,8 @@
 import * as React from "react";
 
+import MidiEvent from "./MidiEvent";
+import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
+
 import "./PianoView.css";
 
 const NUM_KEYS = 88;
@@ -28,8 +31,6 @@ const NUM_WHITE_KEYS = (() => {
   return n;
 })();
 
-const MIDI_KEY_OFFSET = -21;
-
 const WHITE_KEY_WIDTH_PCT = 100 / NUM_WHITE_KEYS;
 const WHITE_KEY_WIDTH_PCT_STR = `${WHITE_KEY_WIDTH_PCT}%`;
 const BLACK_KEY_WIDTH_PCT = WHITE_KEY_WIDTH_PCT * 0.6;
@@ -45,12 +46,26 @@ function defaultKeyState(): boolean[] {
   return arr;
 }
 
-export default class PianoView extends React.PureComponent<{}, State> {
+interface Props {
+  midiEventEmitter: MidiEventEmitter;
+}
+
+export default class PianoView extends React.PureComponent<Props, State> implements MidiEventListener {
   public state: State = {
     keyState: defaultKeyState()
   };
 
+  private registeredMidiEventEmitter: MidiEventEmitter | null = null;
+
+  public componentWillUnmount() {
+    if (super.componentWillUnmount) {
+      super.componentWillUnmount();
+    }
+    this.unregisterMidiEventEmitter();
+  }
+
   public render() {
+    this.refreshMidiEventEmitter();
     console.log("rendering piano");
     const whiteKeys: JSX.Element[] = [];
     const blackKeys: JSX.Element[] = [];
@@ -103,10 +118,9 @@ export default class PianoView extends React.PureComponent<{}, State> {
     return funcs;
   })();
 
-  public setKeyPressed(midiKeyNumber: number, isPressed: boolean) {
-    const n = midiKeyNumber + MIDI_KEY_OFFSET;
+  private setKeyPressed(n: number, isPressed: boolean) {
     if (n < 0 || n >= NUM_KEYS) {
-      console.log("got out-of-range note", midiKeyNumber);
+      console.log("got out-of-range note", n);
       return;
     }
 
@@ -124,5 +138,40 @@ export default class PianoView extends React.PureComponent<{}, State> {
       keyState: defaultKeyState()
     });
     this.forceUpdate();
+  }
+
+  public onMidiEvent(event: MidiEvent) {
+    const pianoEvent = event.pianoEvent;
+    if (pianoEvent !== null) {
+      switch (pianoEvent.type) {
+        case "keyPressed":
+          this.setKeyPressed(pianoEvent.key, /*isPressed=*/true);
+          break;
+
+        case "keyReleased":
+          this.setKeyPressed(pianoEvent.key, /*isPressed=*/false);
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+
+  private refreshMidiEventEmitter() {
+    if (this.props.midiEventEmitter === this.registeredMidiEventEmitter) {
+      return;
+    }
+
+    this.unregisterMidiEventEmitter();
+    this.props.midiEventEmitter.addListener(this);
+    this.registeredMidiEventEmitter = this.props.midiEventEmitter;
+  }
+
+  private unregisterMidiEventEmitter() {
+    if (this.registeredMidiEventEmitter !== null) {
+      this.registeredMidiEventEmitter.removeListener(this);
+      this.registeredMidiEventEmitter = null;
+    }
   }
 }

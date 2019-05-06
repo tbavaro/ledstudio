@@ -25,12 +25,11 @@ function describeStatusByte(n: number): string | null {
 
 export default class MidiEvent {
   public readonly data: number[];
-  public readonly timestamp: number | undefined;
   public readonly isNoteworthy: boolean;
   public readonly pianoEvent: PianoEvent | null;
   private readonly statusDescription: string | null;
 
-  constructor(data: number[] | Uint8Array, timestamp?: number) {
+  constructor(data: number[] | Uint8Array) {
     if (data instanceof Uint8Array) {
       this.data = Array.from(data);
     } else {
@@ -42,7 +41,6 @@ export default class MidiEvent {
         : describeStatusByte(this.data[0])
     );
     this.isNoteworthy = this.statusDescription !== null;
-    this.timestamp = timestamp;
     this.pianoEvent = PianoHelpers.pianoEventFromMidiData(this.data);
   }
 
@@ -56,9 +54,6 @@ export default class MidiEvent {
       }
     } else {
       parts = [PianoHelpers.describePianoEvent(this.pianoEvent)];
-    }
-    if (this.timestamp !== undefined) {
-      parts.unshift(`${Math.floor(this.timestamp) || 0}:`);
     }
     return parts.join(" ");
   }
