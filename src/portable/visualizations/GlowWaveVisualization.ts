@@ -3,13 +3,14 @@ import LedStrip from "../base/LedStrip";
 import * as PianoVisualization from "../base/PianoVisualization";
 
 import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
+import { DerezLedStrip } from "../CompositeLedStrips";
 import * as Utils from "../Utils";
 
 const WAVE_SPACING = 18;
 const WAVE_DROPOFF = 0.7;
 const LED_DROPOFF = 0.2;
 const FADE_DROPOFF = 3.0;
-const DEREZ = 0.8;
+const DEREZ = 0.6;
 
 // full brightness requires at least this velocity
 const MAX_BRIGHTNESS_VELOCITY = 0.6;
@@ -34,12 +35,17 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
 export default class GlowWaveVisualization extends PianoVisualization.default {
   private readonly pressedKeyColors = new Map<number, Colors.Color>();
   private readonly frontLedStrip: LedStrip;
+  private readonly applyDerez: () => void;
 
   constructor(ledStrip: LedStrip) {
     super();
-    ledStrip.reset(Colors.BLACK);
 
-    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.25);
+    // do everything derezed
+    const derezLedStrip = new DerezLedStrip(ledStrip, DEREZ);
+    this.applyDerez = () => derezLedStrip.apply();
+
+    derezLedStrip.reset(Colors.BLACK);
+    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(derezLedStrip, 0.5);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
@@ -80,10 +86,7 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
       });
     });
 
-    colors.forEach((c, i) => {
-      if (Math.random() < (1 - DEREZ)) {
-        this.frontLedStrip.setColor(i, c);
-      }
-    });
+    colors.forEach((c, i) => this.frontLedStrip.setColor(i, c));
+    this.applyDerez();
   }
 }

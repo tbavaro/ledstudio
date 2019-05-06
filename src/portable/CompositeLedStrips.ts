@@ -1,6 +1,17 @@
 import * as Colors from "./base/Colors";
 import LedStrip from "./base/LedStrip";
 
+function ensureValidRange(startIndex: number, length: number, validLength: number): [number, number] {
+  if (startIndex < 0) {
+    length += startIndex;
+    startIndex = 0;
+  }
+
+  length = Math.min(length, validLength - startIndex);
+
+  return [startIndex, length];
+}
+
 // represents a subset of an LedStrip as its own LedStrip
 export class PartialLedStrip implements LedStrip {
   private readonly delegateStrip: LedStrip;
@@ -9,7 +20,6 @@ export class PartialLedStrip implements LedStrip {
   public readonly size: number;
 
   constructor(delegateStrip: LedStrip, indexOffset: number, numLeds: number, reverse?: boolean) {
-    console.log("instantiating", reverse);
     this.delegateStrip = delegateStrip;
     this.indexOffset = indexOffset;
     this.size = numLeds;
@@ -26,13 +36,7 @@ export class PartialLedStrip implements LedStrip {
   }
 
   public setRange(startIndex: number, numLeds: number, color: Colors.Color) {
-    if (startIndex < 0) {
-      numLeds += startIndex;
-      startIndex = 0;
-    }
-
-    numLeds = Math.min(numLeds, this.size - startIndex);
-
+    [startIndex, numLeds] = ensureValidRange(startIndex, numLeds, this.size);
     if (numLeds > 0) {
       this.delegateStrip.setRange(this.indexOffset + startIndex, numLeds, color);
     }
@@ -88,5 +92,54 @@ export class ColorTransformLedStrip implements LedStrip {
   public reset(color?: Colors.Color) {
     color = this.transform(color || Colors.BLACK);
     this.delegateStrip.reset(color);
+  }
+}
+
+// "Derez" means only update Leds some % of the time; makes it looks
+// sparkly/dirty
+// NB: you must call "apply" at the end of each render
+export class DerezLedStrip implements LedStrip {
+  public readonly size: number;
+  private readonly delegateStrip: LedStrip;
+  private readonly derezAmount: number;
+  private readonly colors: Colors.Color[];
+
+  constructor(delegateStrip: LedStrip, derezAmount: number) {
+    this.size = delegateStrip.size;
+    this.delegateStrip = delegateStrip;
+    this.derezAmount = derezAmount;
+    this.colors = new Array(this.size).fill(Colors.BLACK);
+  }
+
+  public setColor(n: number, color: Colors.Color) {
+    if (n >= 0 && n < this.size) {
+      this.colors[n] = color;
+    }
+  }
+
+  public setRange(startIndex: number, numLeds: number, color: Colors.Color) {
+    [startIndex, numLeds] = ensureValidRange(startIndex, numLeds, this.size);
+    if (numLeds > 0) {
+      for (let n = startIndex; n < (startIndex + numLeds); ++n) {
+        this.colors[n] = color;
+      }
+    }
+  }
+
+  // NB: this sets them immediately, ignoring derez effect
+  public reset(color?: Colors.Color) {
+    color = color || Colors.BLACK;
+    this.setRange(0, this.size, color);
+    this.delegateStrip.reset(color);
+  }
+
+  // TODO consider making this pay attention to elapsed time; otherwise
+  // it behaves inconsistently at different FPS
+  public apply() {
+    for (let n = 0; n < this.colors.length; ++n) {
+      if (Math.random() > this.derezAmount) {
+        this.delegateStrip.setColor(n, this.colors[n]);
+      }
+    }
   }
 }
