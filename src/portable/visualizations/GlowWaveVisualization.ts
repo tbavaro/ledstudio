@@ -1,7 +1,8 @@
 import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
 import * as PianoVisualization from "../base/PianoVisualization";
-import StandardPianoVisualization from "../base/StandardPianoVisualization";
+
+import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
 import * as Utils from "../Utils";
 
 const WAVE_SPACING = 18;
@@ -30,12 +31,15 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
   });
 }
 
-export default class GlowWaveVisualization extends StandardPianoVisualization {
-  private pressedKeyColors = new Map<number, Colors.Color>();
+export default class GlowWaveVisualization extends PianoVisualization.default {
+  private readonly pressedKeyColors = new Map<number, Colors.Color>();
+  private readonly frontLedStrip: LedStrip;
 
   constructor(ledStrip: LedStrip) {
-    super(ledStrip);
+    super();
     ledStrip.reset(Colors.BLACK);
+
+    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.5);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {

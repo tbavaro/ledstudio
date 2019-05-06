@@ -1,7 +1,8 @@
 import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
 import * as PianoVisualization from "../base/PianoVisualization";
-import StandardPianoVisualization from "../base/StandardPianoVisualization";
+
+import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
 import * as Utils from "../Utils";
 
 const COLOR_PRESSED = Colors.WHITE;
@@ -21,14 +22,16 @@ function colorForValue(v: number) {
   return PALETTE[x];
 }
 
-export default class TestKeyVisualization extends StandardPianoVisualization {
+export default class TestKeyVisualization extends PianoVisualization.default {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
+  private readonly frontLedStrip: LedStrip;
 
   constructor(ledStrip: LedStrip) {
-    super(ledStrip);
+    super();
     ledStrip.reset(colorForValue(0));
 
+    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.75);
     this.values = new Array(ledStrip.size).fill(0);
   }
 

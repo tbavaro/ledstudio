@@ -1,7 +1,8 @@
 import * as Colors from "../base/Colors";
 import LedStrip from "../base/LedStrip";
 import * as PianoVisualization from "../base/PianoVisualization";
-import StandardPianoVisualization from "../base/StandardPianoVisualization";
+
+import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
 
 const TAIL_LENGTH_CONST = 0.02;
 
@@ -20,18 +21,21 @@ function randomHue() {
     return Math.floor(Math.random() * 360);
 }
 
-export default class CenterSpreadVisualization extends StandardPianoVisualization {
+export default class CenterSpreadVisualization extends PianoVisualization.default {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private time = 0;
     private keyToHue = new Array<number>();
+    private readonly frontLedStrip: LedStrip;
 
     constructor(ledStrip: LedStrip) {
-        super(ledStrip);
+        super();
         ledStrip.reset(Colors.BLACK);
         for(let i = 0; i < 88; ++i) {
             this.keyToHue[i] = randomHue();
         }
+
+        this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0.75);
     }
 
     public render(elapsedMillis: number, state: PianoVisualization.State): void {
