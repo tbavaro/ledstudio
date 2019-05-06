@@ -281,9 +281,16 @@ class App extends React.Component<{}, State> {
   };
 
   private onMidiInputMessage = (message: WebMidi.MIDIMessageEvent) => {
-    console.log("message", Array.from(message.data));
     const event = new MidiEvent(message.data);
     this.midiEventEmitter.fire(event);
+
+    if (
+      this.state.midiOutput !== null &&
+      this.state.midiInput !== null &&
+      this.state.midiOutput.name !== this.state.midiInput.name
+    ) {
+      this.state.midiOutput.send(message.data);
+    }
   }
 
   private resetAllKeys = () => {
