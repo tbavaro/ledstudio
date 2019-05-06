@@ -12,6 +12,10 @@
   flex-direction: column;
 }
 
+.RightSidebar select {
+  width: 150px;
+}
+
 .RightSidebar-optionsGroup {
   font-size: 0.8em;
   margin-bottom: 4px;
