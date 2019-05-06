@@ -99,47 +99,72 @@ function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
   );
 }
 
+let cachedLedGlowSpriteMap: Three.Texture | undefined;
+function ledGlowSpriteMap() {
+  if (!cachedLedGlowSpriteMap) {
+    cachedLedGlowSpriteMap = new Three.TextureLoader().load("led.png");
+  }
+  return cachedLedGlowSpriteMap;
+}
+
 class LedHelper {
   private static readonly LED_RADIUS = 0.03;
-  private static readonly RADIUS_MULTIPLIERS = [1, 1.3, 1.8];
-  private static readonly COLOR_MULTIPLIERS = [1, 0.3, 0.2];
 
-  private static readonly GEOMETRIES = LedHelper.RADIUS_MULTIPLIERS.map(m => (
-    new Three.SphereGeometry(LedHelper.LED_RADIUS * m, 6, 6)
-  ));
+  private static readonly GEOMETRY = new Three.SphereGeometry(LedHelper.LED_RADIUS, 6, 6);
 
   private static readonly MATERIAL = new Three.MeshBasicMaterial({});
-  private static readonly ADDITIVE_MATERIAL = new Three.MeshBasicMaterial({
-    blending: Three.AdditiveBlending,
-    transparent: true
-  });
 
   private colors: Three.Color[] = [];
 
+  private spriteMaterial: Three.SpriteMaterial;
+  private glowSpriteMaterial: Three.SpriteMaterial;
+  private sprites: Three.Sprite[] = [];
+
   constructor(scene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
-    const meshes: Three.Object3D[] = [];
-    LedHelper.GEOMETRIES.forEach((geometry, i) => {
-      geometry = geometry.clone();
-      const material = (i === 0 ? LedHelper.MATERIAL : LedHelper.ADDITIVE_MATERIAL).clone();
-      this.colors.push(material.color);
-      const mesh = new Three.Mesh(geometry, material);
-      mesh.position.copy(position);
-      scene.add(mesh);
-      meshes.push(mesh);
+    this.spriteMaterial = new Three.SpriteMaterial({
+      map: ledGlowSpriteMap(),
+      color: color || 0x000000
     });
+    this.glowSpriteMaterial = new Three.SpriteMaterial({
+      map: ledGlowSpriteMap(),
+      color: color || 0x000000,
+      blending: Three.AdditiveBlending
+    });
+    const meshes: Three.Object3D[] = [];
+    const geometry = LedHelper.GEOMETRY.clone();
+    const material = LedHelper.MATERIAL.clone();
+    this.colors.push(material.color);
+    const mesh = new Three.Mesh(geometry, material);
+    mesh.position.copy(position);
+    // scene.add(mesh);
+    meshes.push(mesh);
+
+    const ledSprite = new Three.Sprite(this.spriteMaterial);
+    ledSprite.position.copy(position);
+    ledSprite.scale.setScalar(0.1);
+    scene.add(ledSprite);
+    this.sprites.push(ledSprite);
+    this.colors.push(ledSprite.material.color);
+
+    const glowSprite = new Three.Sprite(this.glowSpriteMaterial);
+    glowSprite.position.copy(position);
+    glowSprite.scale.setScalar(0.3);
+    scene.add(glowSprite);
+    this.sprites.push(glowSprite);
+
     if (color !== undefined) {
       this.setColor(color);
     }
+
     this.removeFromScene = () => {
-      meshes.forEach(mesh => scene.remove(mesh));
+      meshes.forEach(m => scene.remove(m));
+      this.sprites.forEach(s => scene.remove(s));
     };
   }
 
   public setColor(color: Three.Color) {
-    LedHelper.COLOR_MULTIPLIERS.forEach((m, i) => {
-      this.colors[i].set(color);
-      this.colors[i].multiplyScalar(m);
-    });
+    this.glowSpriteMaterial.setValues({ color: color.multiplyScalar(0.1) });
+    this.colors.forEach(c => c.set(color.multiplyScalar(2)));
   }
 
   public readonly removeFromScene: () => void;
