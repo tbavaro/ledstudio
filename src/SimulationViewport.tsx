@@ -51,7 +51,7 @@ class MovingAverageHelper {
 
 function initializeScene() {
   const scene = new Three.Scene();
-  // scene.background = new Three.Color(.1, .1, .1);
+  scene.background = new Three.Color(.1, .3, .1);
 
   scene.add(new Three.AmbientLight(0x333333));
 
@@ -97,6 +97,18 @@ function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
       alert(`gltf error: ${error}`);
     }
   );
+}
+
+const FLAT_BLACK_MATERIAL = new Three.MeshBasicMaterial({ color: 0 });
+
+function replaceAllObjectMaterialsWithFlatBlack(obj: Three.Object3D) {
+  if (obj instanceof Three.Mesh) {
+    obj.material = FLAT_BLACK_MATERIAL;
+  }
+  if (obj instanceof Three.Scene) {
+    obj.overrideMaterial = FLAT_BLACK_MATERIAL;
+  }
+  obj.children.forEach(replaceAllObjectMaterialsWithFlatBlack);
 }
 
 class LedHelper {
@@ -294,6 +306,8 @@ export default class SimulationViewport extends React.PureComponent<Props, State
     this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
 
     loadModel(this.props.sceneDef, (model: Three.Scene) => {
+      model = model.clone();
+      replaceAllObjectMaterialsWithFlatBlack(model);
       this.state.scene.add(model);
       this.animate();
     });
