@@ -51,7 +51,6 @@ class MovingAverageHelper {
 
 function initializeScene() {
   const scene = new Three.Scene();
-  scene.background = new Three.Color(.1, .3, .1);
 
   scene.add(new Three.AmbientLight(0x333333));
 
@@ -63,6 +62,12 @@ function initializeScene() {
   light.position.set(100, 100, -100);
   scene.add(light);
 
+  return scene;
+}
+
+function initializeGlowScene() {
+  const scene = new Three.Scene();
+  scene.background = new Three.Color(.1, .3, .1);
   return scene;
 }
 
@@ -78,7 +83,7 @@ function initializeCamera() {
   return camera;
 }
 
-function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
+function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Object3D) => void) {
   const loader = new GLTFLoader();
   loader.load(
     sceneDef.modelUrl,
@@ -113,48 +118,54 @@ function replaceAllObjectMaterialsWithFlatBlack(obj: Three.Object3D) {
 
 class LedHelper {
   private static readonly LED_RADIUS = 0.03;
-  private static readonly RADIUS_MULTIPLIERS = [1, 1.3, 1.8];
-  private static readonly COLOR_MULTIPLIERS = [1, 0.3, 0.2];
+  private static readonly LED_GLOW_RADIUS = LedHelper.LED_RADIUS * 2;
 
-  private static readonly GEOMETRIES = LedHelper.RADIUS_MULTIPLIERS.map(m => (
-    new Three.SphereGeometry(LedHelper.LED_RADIUS * m, 6, 6)
-  ));
-
+  private static readonly GEOMETRY = new Three.SphereGeometry(LedHelper.LED_RADIUS, 6, 6);
   private static readonly MATERIAL = new Three.MeshBasicMaterial({});
-  private static readonly ADDITIVE_MATERIAL = new Three.MeshBasicMaterial({
+
+  private static readonly GLOW_GEOMETRY = new Three.SphereGeometry(LedHelper.LED_GLOW_RADIUS, 6, 6);
+  private static readonly GLOW_MATERIAL = new Three.MeshBasicMaterial({
     blending: Three.AdditiveBlending,
     transparent: true
   });
 
   private colors: Three.Color[] = [];
 
-  constructor(scene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
-    const meshes: Three.Object3D[] = [];
-    LedHelper.GEOMETRIES.forEach((geometry, i) => {
-      geometry = geometry.clone();
-      const material = (i === 0 ? LedHelper.MATERIAL : LedHelper.ADDITIVE_MATERIAL).clone();
-      this.colors.push(material.color);
-      const mesh = new Three.Mesh(geometry, material);
-      mesh.position.copy(position);
-      scene.add(mesh);
-      meshes.push(mesh);
-    });
+  constructor(scene: Three.Scene, glowScene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
+    const mesh = this.createMesh(LedHelper.GEOMETRY, LedHelper.MATERIAL, position);
+    scene.add(mesh);
+
+    const glowMesh = this.createMesh(LedHelper.GLOW_GEOMETRY, LedHelper.GLOW_MATERIAL, position);
+    glowScene.add(glowMesh);
+
     if (color !== undefined) {
       this.setColor(color);
     }
+
     this.removeFromScene = () => {
-      meshes.forEach(mesh => scene.remove(mesh));
+      scene.remove(mesh);
+      glowScene.remove(glowMesh);
     };
   }
 
   public setColor(color: Three.Color) {
-    LedHelper.COLOR_MULTIPLIERS.forEach((m, i) => {
-      this.colors[i].set(color);
-      this.colors[i].multiplyScalar(m);
-    });
+    this.colors.forEach(c => c.set(color));
   }
 
   public readonly removeFromScene: () => void;
+
+  private createMesh(
+    geometry: Three.Geometry,
+    material: Three.MeshBasicMaterial,
+    position: Three.Vector3
+  ): Three.Mesh {
+    geometry = geometry.clone();
+    material = material.clone();
+    this.colors.push(material.color);
+    const mesh = new Three.Mesh(geometry, material);
+    mesh.position.copy(position);
+    return mesh;
+  }
 }
 
 class LedSceneStrip implements LedStrip {
@@ -204,7 +215,7 @@ class LedScene {
   public readonly ledStrip: LedStrip;
   private ledHelpers: LedHelper[] = [];
 
-  constructor(ledSceneDef: SceneDef, scene: Three.Scene) {
+  constructor(ledSceneDef: SceneDef, scene: Three.Scene, glowScene: Three.Scene) {
     this.sceneDef = ledSceneDef;
 
     // place 3d Leds
@@ -217,7 +228,7 @@ class LedScene {
         const position = step.clone();
         position.multiplyScalar(i);
         position.add(segment.startPoint);
-        this.ledHelpers.push(new LedHelper(scene, position));
+        this.ledHelpers.push(new LedHelper(scene, glowScene, position));
       }
     });
 
@@ -237,6 +248,7 @@ interface Props {
 
 type State = {
   readonly scene: Three.Scene;
+  readonly glowScene: Three.Scene;
   registeredMidiEventEmitter?: MidiEventEmitter;
   currentSceneDef?: SceneDef;
   currentVisualizationName?: PianoVisualizations.Name;
@@ -246,7 +258,8 @@ type State = {
 
 export default class SimulationViewport extends React.PureComponent<Props, State> implements MidiEventListener {
   public state: State = {
-    scene: initializeScene()
+    scene: initializeScene(),
+    glowScene: initializeGlowScene()
   };
 
   private camera = initializeCamera();
@@ -279,7 +292,7 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       if (prevState.currentLedScene !== undefined) {
         prevState.currentLedScene.remove();
       }
-      const ledScene = new LedScene(nextProps.sceneDef, prevState.scene);
+      const ledScene = new LedScene(nextProps.sceneDef, prevState.scene, prevState.glowScene);
       result.visualization = PianoVisualizations.create(nextProps.visualizationName, ledScene.ledStrip);
       result.currentLedScene = ledScene;
     }
@@ -305,10 +318,13 @@ export default class SimulationViewport extends React.PureComponent<Props, State
 
     this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
 
-    loadModel(this.props.sceneDef, (model: Three.Scene) => {
-      model = model.clone();
-      replaceAllObjectMaterialsWithFlatBlack(model);
+    loadModel(this.props.sceneDef, (model: Three.Object3D) => {
       this.state.scene.add(model);
+
+      const glowModel = model.clone(/*recursive=*/true);
+      replaceAllObjectMaterialsWithFlatBlack(glowModel);
+      this.state.glowScene.add(glowModel);
+
       this.animate();
     });
 
@@ -405,8 +421,9 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       this.visTimeMovingAverageHelper.addValue(visTimeMillis);
     }
 
-    this.renderer.render(this.state.scene, this.camera);
-    // this.glowHelper.render();
+    // this.renderer.render(this.state.scene, this.camera);
+    this.renderer.render(this.state.glowScene, this.camera);
+
     this.fpsFramesSinceLastUpdate++;
 
     const renderTimeMillis = performance.now() - startTime;
