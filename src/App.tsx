@@ -44,9 +44,14 @@ interface State {
   midiData: ArrayBuffer | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
+  simulationEnabled: boolean;
 }
 
 type AllActions = RightSidebar.Actions;
+
+function shouldEnableSimulation() {
+  return window.location.search !== "?disableSimulation";
+}
 
 class App extends React.Component<{}, State> {
   public state: State = {
@@ -59,7 +64,8 @@ class App extends React.Component<{}, State> {
     midiFilename: "<<not assigned>>",
     midiData: null,
     midiInputs: [],
-    midiOutputs: []
+    midiOutputs: [],
+    simulationEnabled: shouldEnableSimulation()
   };
 
   private midiPlayer = new MIDIPlayer();
@@ -131,11 +137,17 @@ class App extends React.Component<{}, State> {
       <div className="App">
         <div className="App-viewportGroup">
           <div className="App-viewportContainer">
-            <SimulationViewport
-              midiEventEmitter={this.midiEventEmitter}
-              sceneDef={SceneDefs[0]}
-              visualizationName={this.state.visualizationName}
-            />
+            {
+              this.state.simulationEnabled
+                ? (
+                    <SimulationViewport
+                      midiEventEmitter={this.midiEventEmitter}
+                      sceneDef={SceneDefs[0]}
+                      visualizationName={this.state.visualizationName}
+                    />
+                  )
+                : null
+            }
           </div>
           <div className="App-pianoContainer">
             <PianoView
