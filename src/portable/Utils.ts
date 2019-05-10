@@ -45,3 +45,14 @@ export function createBracketFunc(min: number, max: number): (v: number) => numb
 }
 
 export const bracket01 = createBracketFunc(0, 1);
+
+export function ensureValidRange(startIndex: number, length: number, validLength: number): [number, number] {
+  if (startIndex < 0) {
+    length += startIndex;
+    startIndex = 0;
+  }
+
+  length = Math.min(length, validLength - startIndex);
+
+  return [startIndex, length];
+}

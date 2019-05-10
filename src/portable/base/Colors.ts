@@ -10,9 +10,9 @@ function rgbUnchecked(r: number, g: number, b: number): Color {
   return (r << 16) | (g << 8) | b;
 }
 
-function splitUnchecked(color: Color): [number, number, number] {
+export function splitRGB(color: Color): [number, number, number] {
   // tslint:disable-next-line: no-bitwise
-  return [color >> 16, (color >> 8) & 0xff, color & 0xff];
+  return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
 }
 
 // h in [0., 360.0)
@@ -81,7 +81,7 @@ export function rgb(r: number, g: number, b: number): Color {
 }
 
 export function split(color: Color): [number, number, number] {
-  const splitRgb = splitUnchecked(color);
+  const splitRgb = splitRGB(color);
   return [splitRgb[0] / MAX_VALUE, splitRgb[1] / MAX_VALUE, splitRgb[2] / MAX_VALUE];
 }
 
@@ -94,8 +94,8 @@ export function hsv(h: number, s: number, v: number): Color {
 }
 
 export function add(a: Color, b: Color): Color {
-  const [ar, ag, ab] = splitUnchecked(a);
-  const [br, bg, bb] = splitUnchecked(b);
+  const [ar, ag, ab] = splitRGB(a);
+  const [br, bg, bb] = splitRGB(b);
   return rgbUnchecked(
     bracket0MAX(ar + br),
     bracket0MAX(ag + bg),
@@ -104,8 +104,8 @@ export function add(a: Color, b: Color): Color {
 }
 
 export function average(a: Color, b: Color): Color {
-  const [ar, ag, ab] = splitUnchecked(a);
-  const [br, bg, bb] = splitUnchecked(b);
+  const [ar, ag, ab] = splitRGB(a);
+  const [br, bg, bb] = splitRGB(b);
   return rgbUnchecked(
     bracket0MAX(Math.floor((ar + br) / 2)),
     bracket0MAX(Math.floor((ag + bg) / 2)),
@@ -114,7 +114,7 @@ export function average(a: Color, b: Color): Color {
 }
 
 export function multiply(a: Color, factor: number): Color {
-  const [ar, ag, ab] = splitUnchecked(a);
+  const [ar, ag, ab] = splitRGB(a);
   return rgbUnchecked(
     bracket0MAX(Math.floor(ar * factor)),
     bracket0MAX(Math.floor(ag * factor)),

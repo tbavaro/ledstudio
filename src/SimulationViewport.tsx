@@ -7,9 +7,12 @@ import * as Colors from "./portable/base/Colors";
 import LedStrip from "./portable/base/LedStrip";
 import PianoEvent from "./portable/base/PianoEvent";
 import PianoVisualization from "./portable/base/PianoVisualization";
-import * as PianoVisualizations from "./portable/PianoVisualizations";
 
+import { MultipleLedStrip } from "./portable/CompositeLedStrips";
+import FadecandyClient from "./portable/FadecandyClient";
+import FadecandyLedStrip from "./portable/FadecandyLedStrip";
 import * as PianoHelpers from "./portable/PianoHelpers";
+import * as PianoVisualizations from "./portable/PianoVisualizations";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
@@ -47,6 +50,12 @@ class MovingAverageHelper {
     this.sum += value;
     this.nextIndex = (this.nextIndex + 1) % this.values.length;
   }
+}
+
+// TODO move this somewhere more reasonable
+function initializeFadeCandyLedStrip(): FadecandyLedStrip {
+  const client = new FadecandyClient();
+  return new FadecandyLedStrip(client);
 }
 
 function initializeScene() {
@@ -230,11 +239,13 @@ type State = {
   currentVisualizationName?: PianoVisualizations.Name;
   currentLedScene?: LedScene;
   visualization?: PianoVisualization;
+  fadeCandyLedStrip?: FadecandyLedStrip;
 };
 
 export default class SimulationViewport extends React.PureComponent<Props, State> implements MidiEventListener {
   public state: State = {
-    scene: initializeScene()
+    scene: initializeScene(),
+    fadeCandyLedStrip: initializeFadeCandyLedStrip()
   };
 
   private camera = initializeCamera();
@@ -268,7 +279,13 @@ export default class SimulationViewport extends React.PureComponent<Props, State
         prevState.currentLedScene.remove();
       }
       const ledScene = new LedScene(nextProps.sceneDef, prevState.scene);
-      result.visualization = PianoVisualizations.create(nextProps.visualizationName, ledScene.ledStrip);
+
+      let ledStrip = ledScene.ledStrip;
+      if (prevState.fadeCandyLedStrip !== undefined) {
+        ledStrip = new MultipleLedStrip([ledScene.ledStrip, prevState.fadeCandyLedStrip]);
+      }
+
+      result.visualization = PianoVisualizations.create(nextProps.visualizationName, ledStrip);
       result.currentLedScene = ledScene;
     }
 
@@ -392,6 +409,10 @@ export default class SimulationViewport extends React.PureComponent<Props, State
     }
 
     this.renderer.render(this.state.scene, this.camera);
+    if (this.state.fadeCandyLedStrip) {
+      this.state.fadeCandyLedStrip.send();
+    }
+
     // this.glowHelper.render();
     this.fpsFramesSinceLastUpdate++;
 

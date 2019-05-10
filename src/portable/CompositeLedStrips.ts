@@ -1,16 +1,6 @@
 import * as Colors from "./base/Colors";
 import LedStrip from "./base/LedStrip";
-
-function ensureValidRange(startIndex: number, length: number, validLength: number): [number, number] {
-  if (startIndex < 0) {
-    length += startIndex;
-    startIndex = 0;
-  }
-
-  length = Math.min(length, validLength - startIndex);
-
-  return [startIndex, length];
-}
+import { ensureValidRange } from "./Utils";
 
 // represents a subset of an LedStrip as its own LedStrip
 export class PartialLedStrip implements LedStrip {
@@ -62,11 +52,11 @@ export class MultipleLedStrip implements LedStrip {
   }
 
   public setRange(startIndex: number, numLeds: number, color: Colors.Color) {
-    this.delegateStrips.forEach(strip => this.setRange(startIndex, numLeds, color));
+    this.delegateStrips.forEach(strip => strip.setRange(startIndex, numLeds, color));
   }
 
   public reset(color?: Colors.Color) {
-    this.delegateStrips.forEach(strip => this.reset(color));
+    this.delegateStrips.forEach(strip => strip.reset(color));
   }
 }
 
