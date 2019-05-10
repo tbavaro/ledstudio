@@ -27,7 +27,7 @@ class FadecandyLedSingleStrip implements LedStrip {
     // header
     this.buffer.writeUInt8(0, channel); // channel
     this.buffer.writeUInt8(0, 1); // command
-    this.buffer.writeUInt16BE(colorDataLength, 2); // length
+    this.buffer.writeUInt16BE(0, 2); // length is supposed to be 0 over websocket
 
     this.reset();
   }
