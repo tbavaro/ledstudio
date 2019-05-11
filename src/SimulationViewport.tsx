@@ -5,17 +5,16 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import * as Colors from "./portable/base/Colors";
 import LedStrip from "./portable/base/LedStrip";
-import PianoEvent from "./portable/base/PianoEvent";
-import PianoVisualization from "./portable/base/PianoVisualization";
 
 import { MultipleLedStrip } from "./portable/CompositeLedStrips";
 import FadecandyClient from "./portable/FadecandyClient";
 import FadecandyLedStrip from "./portable/FadecandyLedStrip";
-import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
+import { MovingAverageHelper } from "./portable/Utils";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
+import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import { SceneDef } from "./SceneDefs";
 
 import "./SimulationViewport.css";
@@ -25,32 +24,6 @@ const CAMERA_NEAR_DISTANCE = 0.1;
 const CAMERA_FAR_DISTANCE = 1000;
 
 const TARGET_FPS = 60;
-
-class MovingAverageHelper {
-  private readonly values: number[];
-  private numValues: number = 0;
-  private sum: number = 0;
-  private nextIndex: number = 0;
-
-  constructor(size: number) {
-    this.values = new Array(size);
-  }
-
-  public get movingAverage() {
-    return this.sum / this.numValues;
-  }
-
-  public addValue(value: number) {
-    if (this.numValues === this.values.length) {
-      this.sum -= this.values[this.nextIndex];
-    } else {
-      this.numValues ++;
-    }
-    this.values[this.nextIndex] = value;
-    this.sum += value;
-    this.nextIndex = (this.nextIndex + 1) % this.values.length;
-  }
-}
 
 // TODO move this somewhere more reasonable
 function initializeFadeCandyLedStrip(): FadecandyLedStrip {
@@ -238,7 +211,7 @@ type State = {
   currentSceneDef?: SceneDef;
   currentVisualizationName?: PianoVisualizations.Name;
   currentLedScene?: LedScene;
-  visualization?: PianoVisualization;
+  visualizationRunner?: PianoVisualizationRunner;
   fadeCandyLedStrip?: FadecandyLedStrip;
 };
 
@@ -254,10 +227,7 @@ export default class SimulationViewport extends React.PureComponent<Props, State
   private fpsInterval?: NodeJS.Timeout;
   private fpsLastUpdateTime: number = 0;
   private fpsFramesSinceLastUpdate: number = 0;
-  private stateHelper: PianoHelpers.PianoVisualizationStateHelper;
-  private lastRenderTime: number = 0;
   private renderTimeMovingAverageHelper = new MovingAverageHelper(20);
-  private visTimeMovingAverageHelper = new MovingAverageHelper(20);
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
@@ -285,7 +255,8 @@ export default class SimulationViewport extends React.PureComponent<Props, State
         ledStrip = new MultipleLedStrip([ledScene.ledStrip, prevState.fadeCandyLedStrip]);
       }
 
-      result.visualization = PianoVisualizations.create(nextProps.visualizationName, ledStrip);
+      const vis = PianoVisualizations.create(nextProps.visualizationName, ledStrip);
+      result.visualizationRunner = new PianoVisualizationRunner(vis);
       result.currentLedScene = ledScene;
     }
 
@@ -306,10 +277,6 @@ export default class SimulationViewport extends React.PureComponent<Props, State
 
     window.addEventListener("resize", this.updateSizes);
 
-    this.lastRenderTime = performance.now();
-
-    this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
-
     loadModel(this.props.sceneDef, (model: Three.Scene) => {
       this.state.scene.add(model);
       this.animate();
@@ -327,7 +294,7 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       const averageRenderMillis = this.renderTimeMovingAverageHelper.movingAverage;
       const rLoad = averageRenderMillis / (1000 / TARGET_FPS);
 
-      const averageVisMillis = this.visTimeMovingAverageHelper.movingAverage;
+      const averageVisMillis = this.state.visualizationRunner ? this.state.visualizationRunner.averageRenderTime : 0;
       const vLoad = averageVisMillis / (1000 / TARGET_FPS);
 
       this.fpsRef.innerText = [
@@ -396,16 +363,8 @@ export default class SimulationViewport extends React.PureComponent<Props, State
 
     const startTime = performance.now();
 
-    const vis = this.state.visualization;
-    if (vis) {
-      const visState = this.stateHelper.endFrame();
-      const elapsedMillis = startTime - this.lastRenderTime;
-      vis.render(elapsedMillis, visState);
-      this.stateHelper.startFrame();
-      this.lastRenderTime = startTime;
-
-      const visTimeMillis = performance.now() - startTime;
-      this.visTimeMovingAverageHelper.addValue(visTimeMillis);
+    if (this.state.visualizationRunner) {
+      this.state.visualizationRunner.renderFrame();
     }
 
     this.renderer.render(this.state.scene, this.camera);
@@ -422,10 +381,8 @@ export default class SimulationViewport extends React.PureComponent<Props, State
 
   // TODO don't actually pass raw midi events in here, obv
   public onMidiEvent = (event: MidiEvent) => {
-    if (event.pianoEvent !== null) {
-      this.onPianoEvent(event.pianoEvent);
+    if (this.state.visualizationRunner) {
+      this.state.visualizationRunner.onMidiEvent(event);
     }
   }
-
-  public onPianoEvent = (event: PianoEvent) => this.stateHelper.applyEvent(event);
 }

@@ -56,3 +56,29 @@ export function ensureValidRange(startIndex: number, length: number, validLength
 
   return [startIndex, length];
 }
+
+export class MovingAverageHelper {
+  private readonly values: number[];
+  private numValues: number = 0;
+  private sum: number = 0;
+  private nextIndex: number = 0;
+
+  constructor(size: number) {
+    this.values = new Array(size);
+  }
+
+  public get movingAverage() {
+    return this.sum / this.numValues;
+  }
+
+  public addValue(value: number) {
+    if (this.numValues === this.values.length) {
+      this.sum -= this.values[this.nextIndex];
+    } else {
+      this.numValues ++;
+    }
+    this.values[this.nextIndex] = value;
+    this.sum += value;
+    this.nextIndex = (this.nextIndex + 1) % this.values.length;
+  }
+}
