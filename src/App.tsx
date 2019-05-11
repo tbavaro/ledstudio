@@ -1,6 +1,8 @@
 import MIDIFile from "midifile";
 import * as React from "react";
 
+import FadecandyClient from "./portable/FadecandyClient";
+import FadecandyLedStrip from "./portable/FadecandyLedStrip";
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import RouterLedStrip from "./portable/RouterLedStrip";
@@ -15,6 +17,7 @@ import SceneDefs from "./SceneDefs";
 import SimulationViewport from "./SimulationViewport";
 
 import "./App.css";
+import { MovingAverageHelper } from "./portable/Utils";
 
 const MIDI_FILES = [
   "abovo.mid",
@@ -57,10 +60,17 @@ function shouldEnableSimulation() {
   return window.location.search !== "?disableSimulation";
 }
 
+function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
+  const routerLedStrip = new RouterLedStrip(88 * 3);
+  routerLedStrip.addStrip(fadeCandyLedStrip);
+  return routerLedStrip;
+}
+
 class App extends React.Component<{}, State> {
-  private midiPlayer = new MIDIPlayer();
-  private midiEventEmitter = new QueuedMidiEventEmitter();
-  private routerLedStrip = new RouterLedStrip(88 * 3);
+  private readonly midiPlayer = new MIDIPlayer();
+  private readonly midiEventEmitter = new QueuedMidiEventEmitter();
+  private readonly fadeCandyLedStrip = new FadecandyLedStrip(new FadecandyClient());
+  private readonly routerLedStrip = initRouterLedStrip(this.fadeCandyLedStrip);
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -315,8 +325,19 @@ class App extends React.Component<{}, State> {
     onMidiEvent: (event: MidiEvent) => this.state.visualizationRunner.onMidiEvent(event)
   };
 
-  private renderVisualization = () => this.state.visualizationRunner.renderFrame();
-  private getTiming = () => ({ visualizationRenderMillis: this.state.visualizationRunner.averageRenderTime });
+  private readonly fadeCandyTimingHelper: MovingAverageHelper = new MovingAverageHelper(20);
+
+  private renderVisualization = () => {
+    this.state.visualizationRunner.renderFrame();
+
+    // send to physical LEDs
+    this.fadeCandyTimingHelper.addTiming(() => this.fadeCandyLedStrip.send());
+  }
+
+  private getTiming = () => ({
+    visualizationRenderMillis: this.state.visualizationRunner.averageRenderTime,
+    fadeCandyMillis: this.fadeCandyTimingHelper.movingAverage
+  })
 
   public state: State = {
     visualizationName: PianoVisualizations.defaultName,

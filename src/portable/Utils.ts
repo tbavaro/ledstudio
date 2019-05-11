@@ -81,4 +81,13 @@ export class MovingAverageHelper {
     this.sum += value;
     this.nextIndex = (this.nextIndex + 1) % this.values.length;
   }
+
+  public addTiming<T>(func: () => T): T {
+    const startTime = performance.now();
+    try {
+      return func();
+    } finally {
+      this.addValue(performance.now() - startTime);
+    }
+  }
 }

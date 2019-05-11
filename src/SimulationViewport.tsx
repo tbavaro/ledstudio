@@ -6,8 +6,6 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import * as Colors from "./portable/base/Colors";
 import LedStrip from "./portable/base/LedStrip";
 
-import FadecandyClient from "./portable/FadecandyClient";
-import FadecandyLedStrip from "./portable/FadecandyLedStrip";
 import RouterLedStrip from "./portable/RouterLedStrip";
 import { MovingAverageHelper } from "./portable/Utils";
 
@@ -20,12 +18,6 @@ const CAMERA_NEAR_DISTANCE = 0.1;
 const CAMERA_FAR_DISTANCE = 1000;
 
 const TARGET_FPS = 60;
-
-// TODO move this somewhere more reasonable
-function initializeFadeCandyLedStrip(): FadecandyLedStrip {
-  const client = new FadecandyClient();
-  return new FadecandyLedStrip(client);
-}
 
 function initializeScene() {
   const scene = new Three.Scene();
@@ -199,7 +191,7 @@ interface Props {
   sceneDef: SceneDef;
   routerLedStrip: RouterLedStrip;
   renderVisualization: () => void;
-  getTiming: () => { visualizationRenderMillis: number };
+  getTiming: () => { visualizationRenderMillis: number, fadeCandyMillis: number };
 }
 
 type State = {
@@ -221,7 +213,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
   private fpsLastUpdateTime: number = 0;
   private fpsFramesSinceLastUpdate: number = 0;
   private renderTimeMovingAverageHelper = new MovingAverageHelper(20);
-  private fadeCandyLedStrip = initializeFadeCandyLedStrip();
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
@@ -272,8 +263,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
       this.animate();
     });
 
-    this.props.routerLedStrip.addStrip(this.fadeCandyLedStrip);
-
     this.fpsLastUpdateTime = performance.now();
     this.fpsFramesSinceLastUpdate = 0;
     this.fpsInterval = setInterval(() => {
@@ -286,13 +275,22 @@ export default class SimulationViewport extends React.Component<Props, State> {
       const averageRenderMillis = this.renderTimeMovingAverageHelper.movingAverage;
       const rLoad = averageRenderMillis / (1000 / TARGET_FPS);
 
-      const averageVisMillis = this.props.getTiming().visualizationRenderMillis;
+      const timing = this.props.getTiming();
+
+      const averageVisMillis = timing.visualizationRenderMillis;
       const vLoad = averageVisMillis / (1000 / TARGET_FPS);
+
+      const averageFadeCandyMillis = timing.fadeCandyMillis;
+      const fcLoad = averageFadeCandyMillis / (1000 / TARGET_FPS);
+
+      const load = vLoad + fcLoad + rLoad;
 
       this.fpsRef.innerText = [
         `${Math.round(fps)} fps`,
+        `v=${Math.round(vLoad * 100)}%`,
+        `f=${Math.round(fcLoad * 100)}%`,
         `r=${Math.round(rLoad * 100)}%`,
-        `v=${Math.round(vLoad * 100)}%`
+        `t=${Math.round(load * 100)}%`
       ].join(" / ");
     }, 1000);
   }
@@ -310,7 +308,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
     if (this.state.currentLedScene) {
       this.props.routerLedStrip.removeStrip(this.state.currentLedScene.ledStrip);
     }
-    this.props.routerLedStrip.removeStrip(this.fadeCandyLedStrip);
   }
 
   public shouldComponentUpdate() {
@@ -359,21 +356,13 @@ export default class SimulationViewport extends React.Component<Props, State> {
   private animate = () => {
     requestAnimationFrame(this.animate);
 
-    const startTime = performance.now();
-
     // render visualization frame
     this.props.renderVisualization();
 
-    // send to physical LEDs
-    this.fadeCandyLedStrip.send();
-
     // render 3d scene
-    this.renderer.render(this.state.scene, this.camera);
-
-    // this.glowHelper.render();
-    this.fpsFramesSinceLastUpdate++;
-
-    const renderTimeMillis = performance.now() - startTime;
-    this.renderTimeMovingAverageHelper.addValue(renderTimeMillis);
+    this.renderTimeMovingAverageHelper.addTiming(() => {
+      this.renderer.render(this.state.scene, this.camera);
+      this.fpsFramesSinceLastUpdate++;
+    });
   }
 }
