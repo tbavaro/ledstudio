@@ -18,6 +18,10 @@ export default class RouterLedStrip implements LedStrip {
     this.strips.forEach(strip => strip.setRange(startIndex, numLeds, color));
   }
 
+  public send() {
+    this.strips.forEach(strip => strip.send());
+  }
+
   public reset(color?: Colors.Color) {
     this.strips.forEach(strip => strip.reset(color));
   }

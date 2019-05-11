@@ -35,6 +35,10 @@ export class PartialLedStrip implements LedStrip {
   public reset(color?: Colors.Color) {
     this.setRange(0, this.size, color || Colors.BLACK);
   }
+
+  public send() {
+    this.delegateStrip.send();
+  }
 }
 
 // displays the same thing across multiple LedStrips
@@ -57,6 +61,10 @@ export class MultipleLedStrip implements LedStrip {
 
   public reset(color?: Colors.Color) {
     this.delegateStrips.forEach(strip => strip.reset(color));
+  }
+
+  public send() {
+    this.delegateStrips.forEach(strip => strip.send());
   }
 }
 
@@ -82,6 +90,10 @@ export class ColorTransformLedStrip implements LedStrip {
   public reset(color?: Colors.Color) {
     color = this.transform(color || Colors.BLACK);
     this.delegateStrip.reset(color);
+  }
+
+  public send() {
+    this.delegateStrip.send();
   }
 }
 
@@ -131,5 +143,9 @@ export class DerezLedStrip implements LedStrip {
         this.delegateStrip.setColor(n, this.colors[n]);
       }
     }
+  }
+
+  public send() {
+    this.delegateStrip.send();
   }
 }

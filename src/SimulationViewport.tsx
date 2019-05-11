@@ -118,10 +118,12 @@ class LedHelper {
 class LedSceneStrip implements LedStrip {
   public readonly size: number;
   private readonly ledHelpers: LedHelper[];
+  private readonly onSend: () => void;
 
-  constructor(ledHelpers: LedHelper[]) {
+  constructor(ledHelpers: LedHelper[], onSend: () => void) {
     this.size = ledHelpers.length;
     this.ledHelpers = ledHelpers;
+    this.onSend = onSend;
     this.reset();
   }
 
@@ -152,6 +154,10 @@ class LedSceneStrip implements LedStrip {
     this.setRange(0, this.size, color || Colors.BLACK);
   }
 
+  public send() {
+    this.onSend();
+  }
+
   private static convertColor(color: Colors.Color): Three.Color {
     return new Three.Color(color);
   }
@@ -162,7 +168,7 @@ class LedScene {
   public readonly ledStrip: LedStrip;
   private ledHelpers: LedHelper[] = [];
 
-  constructor(ledSceneDef: SceneDef, scene: Three.Scene) {
+  constructor(ledSceneDef: SceneDef, scene: Three.Scene, doRender: () => void) {
     this.sceneDef = ledSceneDef;
 
     // place 3d Leds
@@ -179,7 +185,7 @@ class LedScene {
       }
     });
 
-    this.ledStrip = new LedSceneStrip(this.ledHelpers);
+    this.ledStrip = new LedSceneStrip(this.ledHelpers, doRender);
   }
 
   public remove() {
@@ -199,13 +205,10 @@ type State = {
   registeredRouterLedStrip?: RouterLedStrip;
   currentSceneDef?: SceneDef;
   currentLedScene?: LedScene;
+  doRender: () => void;
 };
 
 export default class SimulationViewport extends React.Component<Props, State> {
-  public state: State = {
-    scene: initializeScene()
-  };
-
   private camera = initializeCamera();
   private controls?: OrbitControls;
   private renderer = new Three.WebGLRenderer({ antialias: false });
@@ -236,7 +239,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
         nextProps.routerLedStrip.removeStrip(prevState.currentLedScene.ledStrip);
       }
 
-      const ledScene = new LedScene(nextProps.sceneDef, prevState.scene);
+      const ledScene = new LedScene(nextProps.sceneDef, prevState.scene, prevState.doRender);
       nextProps.routerLedStrip.addStrip(ledScene.ledStrip);
       result.currentLedScene = ledScene;
     }
@@ -356,13 +359,18 @@ export default class SimulationViewport extends React.Component<Props, State> {
   private animate = () => {
     requestAnimationFrame(this.animate);
 
-    // render visualization frame
+    // render visualization frame; causes LedStrip.send and eventually this.doRender to get called
     this.props.renderVisualization();
-
-    // render 3d scene
-    this.renderTimeMovingAverageHelper.addTiming(() => {
-      this.renderer.render(this.state.scene, this.camera);
-      this.fpsFramesSinceLastUpdate++;
-    });
   }
+
+  public state: State = {
+    scene: initializeScene(),
+    doRender: () => {
+      // render 3d scene
+      this.renderTimeMovingAverageHelper.addTiming(() => {
+        this.renderer.render(this.state.scene, this.camera);
+        this.fpsFramesSinceLastUpdate++;
+      });
+    }
+  };
 }

@@ -3,7 +3,7 @@ import LedStrip from "./base/LedStrip";
 
 import { PartialLedStrip } from "./CompositeLedStrips";
 import FadecandyClient from "./FadecandyClient";
-import { ensureValidRange } from "./Utils";
+import { ensureValidRange, MovingAverageHelper } from "./Utils";
 
 const HEADER_LENGTH = 4;
 
@@ -73,6 +73,7 @@ export default class FadecandyLedStrip implements LedStrip {
 
   private readonly part: FadecandyLedSingleStrip;
   private readonly delegate: LedStrip;
+  private readonly timingHelper: MovingAverageHelper = new MovingAverageHelper(20);
 
   constructor(client: FadecandyClient) {
     this.size = 88 * 3;
@@ -93,6 +94,10 @@ export default class FadecandyLedStrip implements LedStrip {
   }
 
   public send() {
-    this.part.send();
+    this.timingHelper.addTiming(() => this.part.send());
+  }
+
+  public get averageSendTime() {
+    return this.timingHelper.movingAverage;
   }
 }

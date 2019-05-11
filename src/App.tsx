@@ -17,7 +17,6 @@ import SceneDefs from "./SceneDefs";
 import SimulationViewport from "./SimulationViewport";
 
 import "./App.css";
-import { MovingAverageHelper } from "./portable/Utils";
 
 const MIDI_FILES = [
   "abovo.mid",
@@ -325,18 +324,14 @@ class App extends React.Component<{}, State> {
     onMidiEvent: (event: MidiEvent) => this.state.visualizationRunner.onMidiEvent(event)
   };
 
-  private readonly fadeCandyTimingHelper: MovingAverageHelper = new MovingAverageHelper(20);
-
   private renderVisualization = () => {
     this.state.visualizationRunner.renderFrame();
-
-    // send to physical LEDs
-    this.fadeCandyTimingHelper.addTiming(() => this.fadeCandyLedStrip.send());
+    this.routerLedStrip.send();
   }
 
   private getTiming = () => ({
     visualizationRenderMillis: this.state.visualizationRunner.averageRenderTime,
-    fadeCandyMillis: this.fadeCandyTimingHelper.movingAverage
+    fadeCandyMillis: this.fadeCandyLedStrip.averageSendTime
   })
 
   public state: State = {
