@@ -5,8 +5,6 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import * as Colors from "./portable/base/Colors";
 
-import { MovingAverageHelper } from "./portable/Utils";
-
 import RootLedStrip from "./RootLedStrip";
 import { SceneDef } from "./SceneDefs";
 import { SendableLedStrip } from "./SendableLedStrip";
@@ -16,8 +14,6 @@ import "./SimulationViewport.css";
 const CAMERA_FOV_DEG = 50;
 const CAMERA_NEAR_DISTANCE = 0.1;
 const CAMERA_FAR_DISTANCE = 1000;
-
-const TARGET_FPS = 60;
 
 function initializeScene() {
   const scene = new Three.Scene();
@@ -197,7 +193,7 @@ interface Props {
   sceneDef: SceneDef;
   routerLedStrip: RootLedStrip;
   renderVisualization: () => void;
-  getTiming: () => { visualizationRenderMillis: number, fadeCandyMillis: number };
+  frameDidRender: (renderMillis: number) => void;
 }
 
 type State = {
@@ -213,9 +209,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
   private controls?: OrbitControls;
   private renderer = new Three.WebGLRenderer({ antialias: false });
   private fpsInterval?: NodeJS.Timeout;
-  private fpsLastUpdateTime: number = 0;
-  private fpsFramesSinceLastUpdate: number = 0;
-  private renderTimeMovingAverageHelper = new MovingAverageHelper(20);
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
@@ -265,37 +258,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
       this.state.scene.add(model);
       this.animate();
     });
-
-    this.fpsLastUpdateTime = performance.now();
-    this.fpsFramesSinceLastUpdate = 0;
-    this.fpsInterval = setInterval(() => {
-      const now = performance.now();
-      const timeElapsed = now - this.fpsLastUpdateTime;
-      const fps = this.fpsFramesSinceLastUpdate / timeElapsed * 1000;
-      this.fpsLastUpdateTime = now;
-      this.fpsFramesSinceLastUpdate = 0;
-
-      const averageRenderMillis = this.renderTimeMovingAverageHelper.movingAverage;
-      const rLoad = averageRenderMillis / (1000 / TARGET_FPS);
-
-      const timing = this.props.getTiming();
-
-      const averageVisMillis = timing.visualizationRenderMillis;
-      const vLoad = averageVisMillis / (1000 / TARGET_FPS);
-
-      const averageFadeCandyMillis = timing.fadeCandyMillis;
-      const fcLoad = averageFadeCandyMillis / (1000 / TARGET_FPS);
-
-      const load = vLoad + fcLoad + rLoad;
-
-      this.fpsRef.innerText = [
-        `${Math.round(fps)} fps`,
-        `v=${Math.round(vLoad * 100)}%`,
-        `f=${Math.round(fcLoad * 100)}%`,
-        `r=${Math.round(rLoad * 100)}%`,
-        `t=${Math.round(load * 100)}%`
-      ].join(" / ");
-    }, 1000);
   }
 
   public componentWillUnmount() {
@@ -320,9 +282,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
   public render() {
     console.log("rendering viewport");
     return (
-      <div className="SimulationViewport" ref={this.setRef}>
-        <div className="SimulationViewport-fpsDisplay" ref={this.setFpsRef}/>
-      </div>
+      <div className="SimulationViewport" ref={this.setRef} />
     );
   }
 
@@ -333,15 +293,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
       throw new Error("ref not set");
     }
     return this.unsafeRef;
-  }
-
-  private unsafeFpsRef: HTMLDivElement | null = null;
-  private setFpsRef = (newRef: HTMLDivElement) => this.unsafeFpsRef = newRef;
-  private get fpsRef() {
-    if (this.unsafeFpsRef === null) {
-      throw new Error("fps ref not set");
-    }
-    return this.unsafeFpsRef;
   }
 
   private updateSizes = () => {
@@ -367,10 +318,10 @@ export default class SimulationViewport extends React.Component<Props, State> {
     scene: initializeScene(),
     doRender: () => {
       // render 3d scene
-      this.renderTimeMovingAverageHelper.addTiming(() => {
-        this.renderer.render(this.state.scene, this.camera);
-        this.fpsFramesSinceLastUpdate++;
-      });
+      const startTime = performance.now();
+      this.renderer.render(this.state.scene, this.camera);
+      const renderMillis = performance.now() - startTime;
+      this.props.frameDidRender(renderMillis);
     }
   };
 }

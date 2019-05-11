@@ -5,7 +5,7 @@ import FadecandyClient from "./FadecandyClient";
 import FadecandyLedStrip from "./FadecandyLedStrip";
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
-import RootLedStrip from "./RootLedStrip";
+import { MovingAverageHelper } from "./portable/Utils";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
@@ -13,10 +13,12 @@ import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
+import RootLedStrip from "./RootLedStrip";
 import SceneDefs from "./SceneDefs";
 import SimulationViewport from "./SimulationViewport";
 
 import "./App.css";
+import TimingStatsView from "./TimingStatsView";
 
 const MIDI_FILES = [
   "abovo.mid",
@@ -146,11 +148,12 @@ class App extends React.Component<{}, State> {
                       sceneDef={SceneDefs[0]}
                       routerLedStrip={this.routerLedStrip}
                       renderVisualization={this.renderVisualization}
-                      getTiming={this.getTiming}
+                      frameDidRender={this.simulationFrameDidRender}
                     />
                   )
                 : null
             }
+            <TimingStatsView getTimings={this.getTimings}/>
           </div>
           <div className="App-pianoContainer">
             <PianoView
@@ -329,10 +332,24 @@ class App extends React.Component<{}, State> {
     this.routerLedStrip.send();
   }
 
-  private getTiming = () => ({
-    visualizationRenderMillis: this.state.visualizationRunner.averageRenderTime,
-    fadeCandyMillis: this.fadeCandyLedStrip.averageSendTime
-  })
+  private getTimings = () => {
+    const result = {
+      visualizationMillis: this.state.visualizationRunner.averageRenderTime,
+      fadeCandyMillis: this.fadeCandyLedStrip.averageSendTime,
+      renderMillis: this.renderTimingHelper.movingAverage,
+      framesRenderedSinceLastCall: this.framesRenderedSinceLastTimingsCall
+    };
+    this.framesRenderedSinceLastTimingsCall = 0;
+    return result;
+  }
+
+  private readonly renderTimingHelper: MovingAverageHelper = new MovingAverageHelper(20);
+  private framesRenderedSinceLastTimingsCall = 0;
+
+  private simulationFrameDidRender = (renderMillis: number) => {
+    this.renderTimingHelper.addValue(renderMillis);
+    ++this.framesRenderedSinceLastTimingsCall;
+  }
 
   public state: State = {
     visualizationName: PianoVisualizations.defaultName,

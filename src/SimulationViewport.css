@@ -8,13 +8,3 @@
   background-color: black;
   cursor: grab;
 }
-
-.SimulationViewport-fpsDisplay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  color: lightgray;
-  padding: 4px;
-  font-size: 10px;
-  opacity: 0.5;
-}
