@@ -28,6 +28,9 @@ export default class RouterLedStrip implements LedStrip {
 
   public addStrip(strip: LedStrip) {
     if (!this.strips.includes(strip)) {
+      if (strip.size > this.size) {
+        throw new Error("adding bigger LedStrip into smaller RouterLedStrip");
+      }
       this.strips.push(strip);
     }
   }
