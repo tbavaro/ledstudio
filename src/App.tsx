@@ -6,7 +6,7 @@ import * as PianoVisualizations from "./portable/PianoVisualizations";
 import RouterLedStrip from "./portable/RouterLedStrip";
 
 import MidiEvent from "./MidiEvent";
-import { QueuedMidiEventEmitter } from "./MidiEventListener";
+import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
@@ -108,6 +108,7 @@ class App extends React.Component<{}, State> {
     }
 
     this.loadMidiFile(MIDI_FILES[0]);
+    this.midiEventEmitter.addListener(this.myMidiListener);
   }
 
   public componentWillUnmount() {
@@ -121,6 +122,7 @@ class App extends React.Component<{}, State> {
     if (midiState.status === "loaded") {
       midiState.webMidi.removeEventListener("statechange", this.updateMidiDevices);
     }
+    this.midiEventEmitter.removeListener(this.myMidiListener);
   }
 
   public render() {
@@ -132,10 +134,10 @@ class App extends React.Component<{}, State> {
               this.state.simulationEnabled
                 ? (
                     <SimulationViewport
-                      midiEventEmitter={this.midiEventEmitter}
                       sceneDef={SceneDefs[0]}
                       routerLedStrip={this.routerLedStrip}
-                      visualizationRunner={this.state.visualizationRunner}
+                      renderVisualization={this.renderVisualization}
+                      getTiming={this.getTiming}
                     />
                   )
                 : null
@@ -308,6 +310,13 @@ class App extends React.Component<{}, State> {
     const vis = PianoVisualizations.create(name, this.routerLedStrip);
     return new PianoVisualizationRunner(vis);
   }
+
+  private myMidiListener: MidiEventListener = {
+    onMidiEvent: (event: MidiEvent) => this.state.visualizationRunner.onMidiEvent(event)
+  };
+
+  private renderVisualization = () => this.state.visualizationRunner.renderFrame();
+  private getTiming = () => ({ visualizationRenderMillis: this.state.visualizationRunner.averageRenderTime });
 
   public state: State = {
     visualizationName: PianoVisualizations.defaultName,
