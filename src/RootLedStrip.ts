@@ -2,7 +2,7 @@ import * as Colors from "./portable/base/Colors";
 
 import { SendableLedStrip } from "./SendableLedStrip";
 
-export default class RouterRootLedStrip implements SendableLedStrip {
+export default class RootLedStrip implements SendableLedStrip {
   public readonly size: number;
   private strips: SendableLedStrip[];
 

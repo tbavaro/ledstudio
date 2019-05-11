@@ -7,7 +7,7 @@ import * as Colors from "./portable/base/Colors";
 
 import { MovingAverageHelper } from "./portable/Utils";
 
-import RouterRootLedStrip from "./RouterRootLedStrip";
+import RootLedStrip from "./RootLedStrip";
 import { SceneDef } from "./SceneDefs";
 import { SendableLedStrip } from "./SendableLedStrip";
 
@@ -195,14 +195,14 @@ class LedScene {
 
 interface Props {
   sceneDef: SceneDef;
-  routerLedStrip: RouterRootLedStrip;
+  routerLedStrip: RootLedStrip;
   renderVisualization: () => void;
   getTiming: () => { visualizationRenderMillis: number, fadeCandyMillis: number };
 }
 
 type State = {
   readonly scene: Three.Scene;
-  registeredRouterLedStrip?: RouterRootLedStrip;
+  registeredRouterLedStrip?: RootLedStrip;
   currentSceneDef?: SceneDef;
   currentLedScene?: LedScene;
   doRender: () => void;

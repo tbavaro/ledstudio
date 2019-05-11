@@ -5,7 +5,7 @@ import FadecandyClient from "./FadecandyClient";
 import FadecandyLedStrip from "./FadecandyLedStrip";
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
-import RouterRootLedStrip from "./RouterRootLedStrip";
+import RootLedStrip from "./RootLedStrip";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
@@ -60,7 +60,7 @@ function shouldEnableSimulation() {
 }
 
 function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
-  const routerLedStrip = new RouterRootLedStrip(88 * 3);
+  const routerLedStrip = new RootLedStrip(88 * 3);
   routerLedStrip.addStrip(fadeCandyLedStrip);
   return routerLedStrip;
 }
