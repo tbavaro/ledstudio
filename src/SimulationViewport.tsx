@@ -214,7 +214,7 @@ type State = {
   currentLedScene?: LedScene;
 };
 
-export default class SimulationViewport extends React.PureComponent<Props, State> implements MidiEventListener {
+export default class SimulationViewport extends React.Component<Props, State> implements MidiEventListener {
   public state: State = {
     scene: initializeScene()
   };
@@ -330,6 +330,10 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       this.props.routerLedStrip.removeStrip(this.state.currentLedScene.ledStrip);
     }
     this.props.routerLedStrip.removeStrip(this.fadeCandyLedStrip);
+  }
+
+  public shouldComponentUpdate() {
+    return false;
   }
 
   public render() {
