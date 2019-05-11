@@ -192,7 +192,6 @@ class LedScene {
 interface Props {
   sceneDef: SceneDef;
   routerLedStrip: RootLedStrip;
-  renderVisualization: () => void;
   frameDidRender: (renderMillis: number) => void;
 }
 
@@ -208,7 +207,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
   private camera = initializeCamera();
   private controls?: OrbitControls;
   private renderer = new Three.WebGLRenderer({ antialias: false });
-  private fpsInterval?: NodeJS.Timeout;
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
@@ -253,10 +251,11 @@ export default class SimulationViewport extends React.Component<Props, State> {
     this.updateSizes();
 
     window.addEventListener("resize", this.updateSizes);
+    window.addEventListener("blur", this.onWindowBlur);
+    window.addEventListener("focus", this.onWindowFocus);
 
     loadModel(this.props.sceneDef, (model: Three.Scene) => {
       this.state.scene.add(model);
-      this.animate();
     });
   }
 
@@ -264,11 +263,10 @@ export default class SimulationViewport extends React.Component<Props, State> {
     if (super.componentWillUnmount) {
       super.componentWillUnmount();
     }
+
     window.removeEventListener("resize", this.updateSizes);
-    if (this.fpsInterval) {
-      clearInterval(this.fpsInterval);
-      this.fpsInterval = undefined;
-    }
+    window.removeEventListener("blur", this.onWindowBlur);
+    window.removeEventListener("focus", this.onWindowFocus);
 
     if (this.state.currentLedScene) {
       this.props.routerLedStrip.removeStrip(this.state.currentLedScene.ledStrip);
@@ -307,19 +305,18 @@ export default class SimulationViewport extends React.Component<Props, State> {
     }
   }
 
-  private animate = () => {
-    requestAnimationFrame(this.animate);
-
-    // render visualization frame; causes LedStrip.send and eventually this.doRender to get called
-    this.props.renderVisualization();
-  }
+  private isWindowFocused = true;
+  private onWindowBlur = () => this.isWindowFocused = false;
+  private onWindowFocus = () => this.isWindowFocused = true;
 
   public state: State = {
     scene: initializeScene(),
     doRender: () => {
       // render 3d scene
       const startTime = performance.now();
-      this.renderer.render(this.state.scene, this.camera);
+      if (this.isWindowFocused) {
+        this.renderer.render(this.state.scene, this.camera);
+      }
       const renderMillis = performance.now() - startTime;
       this.props.frameDidRender(renderMillis);
     }

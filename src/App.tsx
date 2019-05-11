@@ -42,6 +42,9 @@ type MidiState = {
   midiFailureReason: any
 };
 
+const TARGET_FPS = 60;
+const TARGET_FRAME_MILLIS = 1000 / TARGET_FPS;
+
 interface State {
   visualizationName: PianoVisualizations.Name;
   visualizationRunner: PianoVisualizationRunner;
@@ -52,14 +55,11 @@ interface State {
   midiData: ArrayBuffer | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
-  simulationEnabled: boolean;
 }
 
 type AllActions = RightSidebar.Actions;
 
-function shouldEnableSimulation() {
-  return window.location.search !== "?disableSimulation";
-}
+const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
 function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
   const routerLedStrip = new RootLedStrip(88 * 3);
@@ -122,11 +122,19 @@ class App extends React.Component<{}, State> {
     this.midiEventEmitter.addListener(this.myMidiListener);
   }
 
+  public componentDidMount() {
+    if (super.componentDidMount) {
+      super.componentDidMount();
+    }
+    this.startAnimation();
+  }
+
   public componentWillUnmount() {
     if (super.componentWillUnmount) {
       super.componentWillUnmount();
     }
 
+    this.stopAnimation();
     this.midiPlayer.stop();
 
     const { midiState } = this.state;
@@ -142,12 +150,11 @@ class App extends React.Component<{}, State> {
         <div className="App-viewportGroup">
           <div className="App-viewportContainer">
             {
-              this.state.simulationEnabled
+              ENABLE_SIMULATION
                 ? (
                     <SimulationViewport
                       sceneDef={SceneDefs[0]}
                       routerLedStrip={this.routerLedStrip}
-                      renderVisualization={this.renderVisualization}
                       frameDidRender={this.simulationFrameDidRender}
                     />
                   )
@@ -327,16 +334,46 @@ class App extends React.Component<{}, State> {
     onMidiEvent: (event: MidiEvent) => this.state.visualizationRunner.onMidiEvent(event)
   };
 
-  private renderVisualization = () => {
-    this.state.visualizationRunner.renderFrame();
-    this.routerLedStrip.send();
+  private animating = false;
+  private startAnimation() {
+    if (!this.animating) {
+      this.animating = true;
+      this.scheduleNextAnimationFrame();
+    }
+  }
+  private stopAnimation() {
+    this.animating = false;
+  }
+
+  private prevAnimationStartTimeTarget = 0;
+  private nextAnimationTimeout?: NodeJS.Timeout;
+
+  private scheduleNextAnimationFrame = () => {
+    if (this.nextAnimationTimeout !== undefined) {
+      clearTimeout(this.nextAnimationTimeout);
+      this.nextAnimationTimeout = undefined;
+    }
+
+    const now = performance.now();
+    const nextAnimationStartTime = Math.max(now, this.prevAnimationStartTimeTarget + TARGET_FRAME_MILLIS);
+    this.nextAnimationTimeout = setTimeout(this.animate, nextAnimationStartTime - now);
+    this.prevAnimationStartTimeTarget = nextAnimationStartTime;
+  }
+
+  private animate = () => {
+    if (this.animating) {
+      this.scheduleNextAnimationFrame();
+      this.state.visualizationRunner.renderFrame();
+      this.routerLedStrip.send();
+      ++this.framesRenderedSinceLastTimingsCall;
+    }
   }
 
   private getTimings = () => {
     const result = {
       visualizationMillis: this.state.visualizationRunner.averageRenderTime,
       fadeCandyMillis: this.fadeCandyLedStrip.averageSendTime,
-      renderMillis: this.renderTimingHelper.movingAverage,
+      renderMillis: (ENABLE_SIMULATION ? this.renderTimingHelper.movingAverage : 0),
       framesRenderedSinceLastCall: this.framesRenderedSinceLastTimingsCall
     };
     this.framesRenderedSinceLastTimingsCall = 0;
@@ -348,7 +385,6 @@ class App extends React.Component<{}, State> {
 
   private simulationFrameDidRender = (renderMillis: number) => {
     this.renderTimingHelper.addValue(renderMillis);
-    ++this.framesRenderedSinceLastTimingsCall;
   }
 
   public state: State = {
@@ -362,8 +398,7 @@ class App extends React.Component<{}, State> {
     midiFilename: "<<not assigned>>",
     midiData: null,
     midiInputs: [],
-    midiOutputs: [],
-    simulationEnabled: shouldEnableSimulation()
+    midiOutputs: []
   };
 }
 

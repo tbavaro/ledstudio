@@ -25,12 +25,13 @@ export default class TimingStatsView extends React.Component<Props, State> {
   private lastUpdateTime?: number;
   private updateInterval?: NodeJS.Timeout;
 
-  public componentDidMount() {
-    if (super.componentDidMount) {
-      super.componentDidMount();
+  public componentWillMount() {
+    if (super.componentWillMount) {
+      super.componentWillMount();
     }
 
     this.updateInterval = setInterval(this.update, UPDATE_FREQ_MILLIS);
+    this.update();
   }
 
   public componentWillUnmount() {
@@ -56,25 +57,23 @@ export default class TimingStatsView extends React.Component<Props, State> {
     const timings = this.props.getTimings();
 
     const now = performance.now();
-    if (this.lastUpdateTime !== undefined) {
-      const timeElapsed = now - this.lastUpdateTime;
-      const fps = timings.framesRenderedSinceLastCall / timeElapsed * 1000;
+    const timeElapsed = this.lastUpdateTime ? (now - this.lastUpdateTime) : 0;
+    const fps = timings.framesRenderedSinceLastCall / timeElapsed * 1000;
 
-      const vLoad = timings.visualizationMillis / TARGET_MILLIS;
-      const fLoad = timings.fadeCandyMillis / TARGET_MILLIS;
-      const rLoad = timings.renderMillis / TARGET_MILLIS;
-      const load = vLoad + fLoad + rLoad;
+    const vLoad = timings.visualizationMillis / TARGET_MILLIS;
+    const fLoad = timings.fadeCandyMillis / TARGET_MILLIS;
+    const rLoad = timings.renderMillis / TARGET_MILLIS;
+    const load = vLoad + fLoad + rLoad;
 
-      this.setState({
-        message: [
-          `${Math.round(fps)} fps`,
-          `v=${Math.round(vLoad * 100)}%`,
-          `f=${Math.round(fLoad * 100)}%`,
-          `r=${Math.round(rLoad * 100)}%`,
-          `t=${Math.round(load * 100)}%`
-        ].join(" / ")
-      });
-    }
+    this.setState({
+      message: [
+        `${Math.round(fps)} fps`,
+        `v=${Math.round(vLoad * 100)}%`,
+        `f=${Math.round(fLoad * 100)}%`,
+        `r=${Math.round(rLoad * 100)}%`,
+        `t=${Math.round(load * 100)}%`
+      ].join(" / ")
+    });
     this.lastUpdateTime = now;
   }
 }
