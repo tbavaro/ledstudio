@@ -6,10 +6,9 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import * as Colors from "./portable/base/Colors";
 import LedStrip from "./portable/base/LedStrip";
 
-import { MultipleLedStrip } from "./portable/CompositeLedStrips";
 import FadecandyClient from "./portable/FadecandyClient";
 import FadecandyLedStrip from "./portable/FadecandyLedStrip";
-import * as PianoVisualizations from "./portable/PianoVisualizations";
+import RouterLedStrip from "./portable/RouterLedStrip";
 import { MovingAverageHelper } from "./portable/Utils";
 
 import MidiEvent from "./MidiEvent";
@@ -202,23 +201,22 @@ class LedScene {
 interface Props {
   midiEventEmitter: MidiEventEmitter;
   sceneDef: SceneDef;
-  visualizationName: PianoVisualizations.Name;
+  routerLedStrip: RouterLedStrip;
+  visualizationRunner: PianoVisualizationRunner;
 }
 
 type State = {
   readonly scene: Three.Scene;
   registeredMidiEventEmitter?: MidiEventEmitter;
+  registeredRouterLedStrip?: RouterLedStrip;
   currentSceneDef?: SceneDef;
-  currentVisualizationName?: PianoVisualizations.Name;
+  currentVisualizationRunner?: PianoVisualizationRunner;
   currentLedScene?: LedScene;
-  visualizationRunner?: PianoVisualizationRunner;
-  fadeCandyLedStrip?: FadecandyLedStrip;
 };
 
 export default class SimulationViewport extends React.PureComponent<Props, State> implements MidiEventListener {
   public state: State = {
-    scene: initializeScene(),
-    fadeCandyLedStrip: initializeFadeCandyLedStrip()
+    scene: initializeScene()
   };
 
   private camera = initializeCamera();
@@ -228,11 +226,14 @@ export default class SimulationViewport extends React.PureComponent<Props, State
   private fpsLastUpdateTime: number = 0;
   private fpsFramesSinceLastUpdate: number = 0;
   private renderTimeMovingAverageHelper = new MovingAverageHelper(20);
+  private fadeCandyLedStrip = initializeFadeCandyLedStrip();
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
       currentSceneDef: nextProps.sceneDef,
-      currentVisualizationName: nextProps.visualizationName
+      currentVisualizationRunner: nextProps.visualizationRunner,
+      registeredMidiEventEmitter: nextProps.midiEventEmitter,
+      registeredRouterLedStrip: nextProps.routerLedStrip
     };
 
     if (
@@ -242,21 +243,26 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       throw new Error("changing midiEventEmitter prop is unsupported");
     }
 
+    if (
+      prevState.registeredRouterLedStrip !== undefined &&
+      nextProps.routerLedStrip !== prevState.registeredRouterLedStrip
+    ) {
+      throw new Error("changing routerLedStrip prop is unsupported");
+    }
+
     const sceneDefChanged = (nextProps.sceneDef !== prevState.currentSceneDef);
-    const visualizationNameChanged = (nextProps.visualizationName !== prevState.currentVisualizationName);
-    if (sceneDefChanged || visualizationNameChanged) {
+    const visualizationChanged = (nextProps.visualizationRunner !== prevState.currentVisualizationRunner);
+    if (sceneDefChanged || visualizationChanged) {
       if (prevState.currentLedScene !== undefined) {
         prevState.currentLedScene.remove();
       }
-      const ledScene = new LedScene(nextProps.sceneDef, prevState.scene);
 
-      let ledStrip = ledScene.ledStrip;
-      if (prevState.fadeCandyLedStrip !== undefined) {
-        ledStrip = new MultipleLedStrip([ledScene.ledStrip, prevState.fadeCandyLedStrip]);
+      if (prevState.currentLedScene) {
+        nextProps.routerLedStrip.removeStrip(prevState.currentLedScene.ledStrip);
       }
 
-      const vis = PianoVisualizations.create(nextProps.visualizationName, ledStrip);
-      result.visualizationRunner = new PianoVisualizationRunner(vis);
+      const ledScene = new LedScene(nextProps.sceneDef, prevState.scene);
+      nextProps.routerLedStrip.addStrip(ledScene.ledStrip);
       result.currentLedScene = ledScene;
     }
 
@@ -282,6 +288,8 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       this.animate();
     });
 
+    this.props.routerLedStrip.addStrip(this.fadeCandyLedStrip);
+
     this.fpsLastUpdateTime = performance.now();
     this.fpsFramesSinceLastUpdate = 0;
     this.fpsInterval = setInterval(() => {
@@ -294,7 +302,7 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       const averageRenderMillis = this.renderTimeMovingAverageHelper.movingAverage;
       const rLoad = averageRenderMillis / (1000 / TARGET_FPS);
 
-      const averageVisMillis = this.state.visualizationRunner ? this.state.visualizationRunner.averageRenderTime : 0;
+      const averageVisMillis = this.props.visualizationRunner.averageRenderTime;
       const vLoad = averageVisMillis / (1000 / TARGET_FPS);
 
       this.fpsRef.innerText = [
@@ -317,6 +325,11 @@ export default class SimulationViewport extends React.PureComponent<Props, State
       clearInterval(this.fpsInterval);
       this.fpsInterval = undefined;
     }
+
+    if (this.state.currentLedScene) {
+      this.props.routerLedStrip.removeStrip(this.state.currentLedScene.ledStrip);
+    }
+    this.props.routerLedStrip.removeStrip(this.fadeCandyLedStrip);
   }
 
   public render() {
@@ -363,14 +376,14 @@ export default class SimulationViewport extends React.PureComponent<Props, State
 
     const startTime = performance.now();
 
-    if (this.state.visualizationRunner) {
-      this.state.visualizationRunner.renderFrame();
-    }
+    // render visualization frame
+    this.props.visualizationRunner.renderFrame();
 
+    // send to physical LEDs
+    this.fadeCandyLedStrip.send();
+
+    // render 3d scene
     this.renderer.render(this.state.scene, this.camera);
-    if (this.state.fadeCandyLedStrip) {
-      this.state.fadeCandyLedStrip.send();
-    }
 
     // this.glowHelper.render();
     this.fpsFramesSinceLastUpdate++;
@@ -380,9 +393,5 @@ export default class SimulationViewport extends React.PureComponent<Props, State
   }
 
   // TODO don't actually pass raw midi events in here, obv
-  public onMidiEvent = (event: MidiEvent) => {
-    if (this.state.visualizationRunner) {
-      this.state.visualizationRunner.onMidiEvent(event);
-    }
-  }
+  public onMidiEvent = (event: MidiEvent) => this.props.visualizationRunner.onMidiEvent(event);
 }

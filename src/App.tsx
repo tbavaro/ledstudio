@@ -1,12 +1,15 @@
 import MIDIFile from "midifile";
 import * as React from "react";
 
+import * as PianoHelpers from "./portable/PianoHelpers";
+import * as PianoVisualizations from "./portable/PianoVisualizations";
+import RouterLedStrip from "./portable/RouterLedStrip";
+
 import MidiEvent from "./MidiEvent";
 import { QueuedMidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
-import * as PianoHelpers from "./portable/PianoHelpers";
-import * as PianoVisualizations from "./portable/PianoVisualizations";
+import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
 import SceneDefs from "./SceneDefs";
 import SimulationViewport from "./SimulationViewport";
@@ -37,6 +40,7 @@ type MidiState = {
 
 interface State {
   visualizationName: PianoVisualizations.Name;
+  visualizationRunner: PianoVisualizationRunner;
   midiState: Readonly<MidiState>;
   midiInput: WebMidi.MIDIInput | null;
   midiOutput: WebMidi.MIDIOutput | null;
@@ -54,22 +58,9 @@ function shouldEnableSimulation() {
 }
 
 class App extends React.Component<{}, State> {
-  public state: State = {
-    visualizationName: PianoVisualizations.defaultName,
-    midiState: {
-      status: "initializing"
-    },
-    midiInput: null,
-    midiOutput: null,
-    midiFilename: "<<not assigned>>",
-    midiData: null,
-    midiInputs: [],
-    midiOutputs: [],
-    simulationEnabled: shouldEnableSimulation()
-  };
-
   private midiPlayer = new MIDIPlayer();
   private midiEventEmitter = new QueuedMidiEventEmitter();
+  private routerLedStrip = new RouterLedStrip(88 * 3);
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -143,7 +134,8 @@ class App extends React.Component<{}, State> {
                     <SimulationViewport
                       midiEventEmitter={this.midiEventEmitter}
                       sceneDef={SceneDefs[0]}
-                      visualizationName={this.state.visualizationName}
+                      routerLedStrip={this.routerLedStrip}
+                      visualizationRunner={this.state.visualizationRunner}
                     />
                   )
                 : null
@@ -283,7 +275,12 @@ class App extends React.Component<{}, State> {
     setMidiOutput: this.setMidiOutput,
     setSelectedMidiFilename: this.loadMidiFile,
     setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
-      this.setState({ visualizationName: newValue });
+      if (this.state.visualizationName !== newValue) {
+        this.setState({
+          visualizationRunner: this.visualizationRunnerForName(newValue),
+          visualizationName: newValue
+        });
+      }
     }
   };
 
@@ -306,6 +303,26 @@ class App extends React.Component<{}, State> {
       this.midiEventEmitter.fire(new MidiEvent(data, /*suppressDisplay=*/true));
     });
   }
+
+  private visualizationRunnerForName = (name: PianoVisualizations.Name) => {
+    const vis = PianoVisualizations.create(name, this.routerLedStrip);
+    return new PianoVisualizationRunner(vis);
+  }
+
+  public state: State = {
+    visualizationName: PianoVisualizations.defaultName,
+    visualizationRunner: this.visualizationRunnerForName(PianoVisualizations.defaultName),
+    midiState: {
+      status: "initializing"
+    },
+    midiInput: null,
+    midiOutput: null,
+    midiFilename: "<<not assigned>>",
+    midiData: null,
+    midiInputs: [],
+    midiOutputs: [],
+    simulationEnabled: shouldEnableSimulation()
+  };
 }
 
 export default App;
