@@ -1,9 +1,10 @@
-import * as Colors from "./base/Colors";
-import LedStrip from "./base/LedStrip";
+import * as Colors from "./portable/base/Colors";
 
-export default class RouterLedStrip implements LedStrip {
+import { SendableLedStrip } from "./SendableLedStrip";
+
+export default class RouterRootLedStrip implements SendableLedStrip {
   public readonly size: number;
-  private strips: LedStrip[];
+  private strips: SendableLedStrip[];
 
   constructor(size: number) {
     this.size = size;
@@ -26,7 +27,7 @@ export default class RouterLedStrip implements LedStrip {
     this.strips.forEach(strip => strip.reset(color));
   }
 
-  public addStrip(strip: LedStrip) {
+  public addStrip(strip: SendableLedStrip) {
     if (!this.strips.includes(strip)) {
       if (strip.size > this.size) {
         throw new Error("adding bigger LedStrip into smaller RouterLedStrip");
@@ -35,7 +36,7 @@ export default class RouterLedStrip implements LedStrip {
     }
   }
 
-  public removeStrip(strip: LedStrip) {
+  public removeStrip(strip: SendableLedStrip) {
     this.strips = this.strips.filter(s => s !== strip);
   }
 }

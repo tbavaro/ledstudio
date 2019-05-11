@@ -1,9 +1,10 @@
-import * as Colors from "./base/Colors";
-import LedStrip from "./base/LedStrip";
+import * as Colors from "./portable/base/Colors";
+import LedStrip from "./portable/base/LedStrip";
 
-import { PartialLedStrip } from "./CompositeLedStrips";
+import { PartialLedStrip } from "./portable/CompositeLedStrips";
+import { ensureValidRange, MovingAverageHelper } from "./portable/Utils";
+
 import FadecandyClient from "./FadecandyClient";
-import { ensureValidRange, MovingAverageHelper } from "./Utils";
 
 const HEADER_LENGTH = 4;
 

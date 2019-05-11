@@ -9,6 +9,4 @@ export default interface LedStrip {
   setRange(startIndex: number, numLeds: number, color: Colors.Color): void;
 
   reset(color?: Colors.Color): void;
-
-  send(): void;
 }

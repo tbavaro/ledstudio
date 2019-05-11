@@ -4,12 +4,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import * as Colors from "./portable/base/Colors";
-import LedStrip from "./portable/base/LedStrip";
 
-import RouterLedStrip from "./portable/RouterLedStrip";
 import { MovingAverageHelper } from "./portable/Utils";
 
+import RouterRootLedStrip from "./RouterRootLedStrip";
 import { SceneDef } from "./SceneDefs";
+import { SendableLedStrip } from "./SendableLedStrip";
 
 import "./SimulationViewport.css";
 
@@ -115,7 +115,7 @@ class LedHelper {
   public readonly removeFromScene: () => void;
 }
 
-class LedSceneStrip implements LedStrip {
+class LedSceneStrip implements SendableLedStrip {
   public readonly size: number;
   private readonly ledHelpers: LedHelper[];
   private readonly onSend: () => void;
@@ -165,7 +165,7 @@ class LedSceneStrip implements LedStrip {
 
 class LedScene {
   public readonly sceneDef: SceneDef;
-  public readonly ledStrip: LedStrip;
+  public readonly ledStrip: SendableLedStrip;
   private ledHelpers: LedHelper[] = [];
 
   constructor(ledSceneDef: SceneDef, scene: Three.Scene, doRender: () => void) {
@@ -195,14 +195,14 @@ class LedScene {
 
 interface Props {
   sceneDef: SceneDef;
-  routerLedStrip: RouterLedStrip;
+  routerLedStrip: RouterRootLedStrip;
   renderVisualization: () => void;
   getTiming: () => { visualizationRenderMillis: number, fadeCandyMillis: number };
 }
 
 type State = {
   readonly scene: Three.Scene;
-  registeredRouterLedStrip?: RouterLedStrip;
+  registeredRouterLedStrip?: RouterRootLedStrip;
   currentSceneDef?: SceneDef;
   currentLedScene?: LedScene;
   doRender: () => void;
