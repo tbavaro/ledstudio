@@ -66,7 +66,7 @@ class FadecandyLedSingleStrip implements LedStrip {
 }
 
 // hack for now to show it on just part of it
-const HACK_OFFSET = -88;
+const HACK_OFFSET = -95;
 const HACK_LENGTH = 88 * 3;
 
 export default class FadecandyLedStrip implements LedStrip {
