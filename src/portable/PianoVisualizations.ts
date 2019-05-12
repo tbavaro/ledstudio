@@ -7,6 +7,7 @@ import TestBounceVisualization from "./visualizations/TestBounceVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
+import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 
 const visFuncs = {
   "glowWave": (ledStrip: LedStrip) => new GlowWaveisualization(ledStrip),
@@ -14,7 +15,8 @@ const visFuncs = {
   "testBounce": (ledStrip: LedStrip) => new TestBounceVisualization(ledStrip),
   "testKey": (ledStrip: LedStrip) => new TestKeyVisualization(ledStrip),
   "testKeyFade": (ledStrip: LedStrip) => new TestKeyFadeVisualization(ledStrip),
-  "testRainbow": (ledStrip: LedStrip) => new TestRainbowVisualization(ledStrip)
+  "testRainbow": (ledStrip: LedStrip) => new TestRainbowVisualization(ledStrip),
+  "testStripAddress": (ledStrip: LedStrip) => new TestStripAddressVisualization(ledStrip)
 };
 
 export type Name = keyof typeof visFuncs;

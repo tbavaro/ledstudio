@@ -210,11 +210,6 @@ const KEYBOARD_VENUE = {
 registry.register([
   {
     ...KEYBOARD_VENUE,
-    name: "keyboard:wings",
-    leds: { calculatePositions: calculateWingsPositions }
-  },
-  {
-    ...KEYBOARD_VENUE,
     name: "keyboard:3stripes",
     leds: makeLedSegments([
       {
@@ -233,5 +228,10 @@ registry.register([
         endPoint: new Three.Vector3(6, 7.10, -1.43)
       }
     ])
+  },
+  {
+    ...KEYBOARD_VENUE,
+    name: "keyboard:wings",
+    leds: { calculatePositions: calculateWingsPositions }
   }
 ]);
