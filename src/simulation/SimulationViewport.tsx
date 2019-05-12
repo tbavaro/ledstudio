@@ -32,18 +32,6 @@ function initializeScene() {
   return scene;
 }
 
-function initializeCamera() {
-  const camera = new Three.PerspectiveCamera(
-    CAMERA_FOV_DEG,
-    /* aspect will get set in updateSizes */1,
-    CAMERA_NEAR_DISTANCE,
-    CAMERA_FAR_DISTANCE
-  );
-  camera.position.y = 7;
-  camera.position.z = -14;
-  return camera;
-}
-
 class LedHelper {
   private static readonly LED_RADIUS = 0.03;
   private static readonly RADIUS_MULTIPLIERS = [1, 1.3, 1.8];
@@ -181,6 +169,8 @@ interface Props {
 
 type State = {
   readonly scene: Three.Scene;
+  readonly camera: Three.PerspectiveCamera;
+  readonly controls: OrbitControls;
   registeredRouterLedStrip?: RootLedStrip;
   currentStage?: Stage;
   currentLedScene?: LedScene;
@@ -188,8 +178,6 @@ type State = {
 };
 
 export default class SimulationViewport extends React.Component<Props, State> {
-  private camera = initializeCamera();
-  private controls?: OrbitControls;
   private renderer = new Three.WebGLRenderer({ antialias: false });
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
@@ -217,6 +205,11 @@ export default class SimulationViewport extends React.Component<Props, State> {
       const ledScene = new LedScene(nextProps.stage, prevState.scene, prevState.doRender);
       nextProps.routerLedStrip.addStrip(ledScene.ledStrip);
       result.currentLedScene = ledScene;
+
+      // point at target
+      prevState.camera.position.copy(nextProps.stage.cameraStartPosition);
+      prevState.controls.target = nextProps.stage.cameraTarget;
+      prevState.controls.update();
     }
 
     return result;
@@ -229,8 +222,8 @@ export default class SimulationViewport extends React.Component<Props, State> {
     this.renderer.autoClear = true;
 
     this.ref.appendChild(this.renderer.domElement);
-    this.controls = new OrbitControls(this.camera, this.ref);
-    this.controls.update();
+    this.state.controls.domElement = this.ref;
+    this.state.controls.update();
 
     this.updateSizes();
 
@@ -278,29 +271,40 @@ export default class SimulationViewport extends React.Component<Props, State> {
   private updateSizes = () => {
     const width = this.ref.clientWidth;
     const height = this.ref.clientHeight;
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.state.camera.aspect = width / height;
+    this.state.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
     // this.renderer.setPixelRatio(window.devicePixelRatio);
-    if (this.controls) {
-      this.controls.update();
-    }
+    this.state.controls.update();
   }
 
   private isWindowFocused = true;
   private onWindowBlur = () => this.isWindowFocused = false;
   private onWindowFocus = () => this.isWindowFocused = true;
 
-  public state: State = {
-    scene: initializeScene(),
-    doRender: () => {
-      // render 3d scene
-      const startTime = performance.now();
-      if (this.isWindowFocused) {
-        this.renderer.render(this.state.scene, this.camera);
+  private initialState(): State {
+    const camera = new Three.PerspectiveCamera(
+      CAMERA_FOV_DEG,
+      /* aspect will get set in updateSizes */1,
+      CAMERA_NEAR_DISTANCE,
+      CAMERA_FAR_DISTANCE
+    );
+
+    return {
+      scene: initializeScene(),
+      camera: camera,
+      controls: new OrbitControls(camera),
+      doRender: () => {
+        // render 3d scene
+        const startTime = performance.now();
+        if (this.isWindowFocused) {
+          this.renderer.render(this.state.scene, this.state.camera);
+        }
+        const renderMillis = performance.now() - startTime;
+        this.props.frameDidRender(renderMillis);
       }
-      const renderMillis = performance.now() - startTime;
-      this.props.frameDidRender(renderMillis);
-    }
-  };
+    };
+  }
+
+  public state = this.initialState();
 }

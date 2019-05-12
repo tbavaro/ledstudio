@@ -1,20 +1,26 @@
 import * as Three from "three";
+import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-type Vector3 = Three.Vector3;
+interface ModelDef {
+  url: string;
+}
 
-interface LedSegment {
-  readonly numLeds: number;
-  readonly startPoint: Three.Vector3;
-  readonly endPoint: Three.Vector3;
+interface CameraDef {
+  target?: Vector3;
+  startPosition?: Vector3;
+}
+
+interface LedsDef {
+  calculatePositions: () => Vector3[];
 }
 
 interface StageDef {
   name: string;
-  modelUrl: string;
-  translateDownPercent?: number;
-  ledSegments: LedSegment[];
+  camera?: CameraDef;
+  model: ModelDef;
+  leds: LedsDef;
 }
 
 export default class Stage {
@@ -33,14 +39,9 @@ export default class Stage {
 
   public get ledPositions(): Vector3[] {
     if (this.lazyLoadedLedPositions === undefined) {
-      this.lazyLoadedLedPositions = this.loadLedPositions();
+      this.lazyLoadedLedPositions = this.def.leds.calculatePositions();
     }
-
     return this.lazyLoadedLedPositions.map(p => p.clone());
-  }
-
-  private loadLedPositions(): Vector3[] {
-    return [];
   }
 
   public async loadModel(): Promise<Three.Scene> {
@@ -48,15 +49,14 @@ export default class Stage {
       this.lazyModelPromise = promisify<Three.Scene>(callback => {
         const loader = new GLTFLoader();
         loader.load(
-          this.def.modelUrl,
+          this.def.model.url,
           /*onLoad=*/(gltf) => {
             const boundingBox = new Three.Box3().setFromObject(gltf.scene);
             const center = boundingBox.getCenter(new Three.Vector3());
+            const bottomY = boundingBox.min.y;
             gltf.scene.translateX(-center.x);
-            gltf.scene.translateY(-center.y);
+            gltf.scene.translateY(-bottomY);
             gltf.scene.translateZ(-center.z);
-            const size = boundingBox.getSize(new Three.Vector3());
-            gltf.scene.translateY(-size.y * (this.def.translateDownPercent || 0));
             callback(null, gltf.scene);
           },
           /*onProgress=*/undefined,
@@ -67,6 +67,22 @@ export default class Stage {
       })();
     }
     return this.lazyModelPromise;
+  }
+
+  public get cameraTarget(): Vector3 {
+    if (this.def.camera !== undefined && this.def.camera.target !== undefined) {
+      return this.def.camera.target;
+    } else {
+      return new Vector3(0, 0, 0);
+    }
+  }
+
+  public get cameraStartPosition(): Vector3 {
+    if (this.def.camera !== undefined && this.def.camera.startPosition !== undefined) {
+      return this.def.camera.startPosition.clone();
+    } else {
+      return new Vector3(0, 0, -10);
+    }
   }
 }
 
@@ -105,14 +121,48 @@ export class StageRegistry {
   }
 }
 
+function makeLedSegments(segments: Array<{
+  numLeds: number;
+  startPoint: Three.Vector3;
+  endPoint: Three.Vector3;
+}>): LedsDef {
+  return {
+    calculatePositions: () => {
+      const positions: Three.Vector3[] = [];
+      segments.forEach(segment => {
+        const numLeds = segment.numLeds;
+        const step = segment.endPoint.clone();
+        step.sub(segment.startPoint);
+        step.divideScalar(segment.numLeds - 1);
+        for (let i = 0; i < numLeds; ++i) {
+          const position = step.clone();
+          position.multiplyScalar(i);
+          position.add(segment.startPoint);
+          positions.push(position);
+        }
+      });
+      return positions;
+    }
+  };
+}
+
 export const registry = new StageRegistry();
+
+const KEYBOARD_VENUE = {
+  model: {
+    url: "./keyboard.gltf"
+  },
+  camera: {
+    startPosition: new Vector3(0, 12, -14),
+    target: new Vector3(0, 5, 0)
+  }
+};
 
 registry.register([
   {
-    name: "keyboard",
-    modelUrl: "./keyboard.gltf",
-    translateDownPercent: 0.2,
-    ledSegments: [
+    ...KEYBOARD_VENUE,
+    name: "keyboard:3stripes",
+    leds: makeLedSegments([
       {
         numLeds: 88,
         startPoint: new Three.Vector3(-6, 1.95, -1.33),
@@ -128,6 +178,6 @@ registry.register([
         startPoint: new Three.Vector3(-6, 1.65, -1.43),
         endPoint: new Three.Vector3(6, 1.65, -1.43)
       }
-    ]
+    ])
   }
 ]);
