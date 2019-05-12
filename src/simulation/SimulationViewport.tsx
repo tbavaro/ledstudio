@@ -3,12 +3,12 @@ import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-import * as Colors from "./portable/base/Colors";
+import * as Colors from "../portable/base/Colors";
 
-import RootLedStrip from "./RootLedStrip";
-import { SceneDef } from "./SceneDefs";
-import { SendableLedStrip } from "./SendableLedStrip";
+import RootLedStrip from "../RootLedStrip";
+import { SendableLedStrip } from "../SendableLedStrip";
 import * as SimulationUtils from "./SimulationUtils";
+import { StageDef } from "./StageDefs";
 
 import "./SimulationViewport.css";
 
@@ -45,7 +45,7 @@ function initializeCamera() {
   return camera;
 }
 
-function loadModel(sceneDef: SceneDef, onLoad: (model: Three.Scene) => void) {
+function loadModel(sceneDef: StageDef, onLoad: (model: Three.Scene) => void) {
   const loader = new GLTFLoader();
   loader.load(
     sceneDef.modelUrl,
@@ -161,11 +161,11 @@ class LedSceneStrip implements SendableLedStrip {
 }
 
 class LedScene {
-  public readonly sceneDef: SceneDef;
+  public readonly sceneDef: StageDef;
   public readonly ledStrip: SendableLedStrip;
   private ledHelpers: LedHelper[] = [];
 
-  constructor(ledSceneDef: SceneDef, scene: Three.Scene, doRender: () => void) {
+  constructor(ledSceneDef: StageDef, scene: Three.Scene, doRender: () => void) {
     this.sceneDef = ledSceneDef;
 
     // place 3d Leds
@@ -196,7 +196,7 @@ class LedScene {
 }
 
 interface Props {
-  sceneDef: SceneDef;
+  sceneDef: StageDef;
   routerLedStrip: RootLedStrip;
   frameDidRender: (renderMillis: number) => void;
 }
@@ -204,7 +204,7 @@ interface Props {
 type State = {
   readonly scene: Three.Scene;
   registeredRouterLedStrip?: RootLedStrip;
-  currentSceneDef?: SceneDef;
+  currentSceneDef?: StageDef;
   currentLedScene?: LedScene;
   doRender: () => void;
 };

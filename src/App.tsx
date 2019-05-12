@@ -7,6 +7,9 @@ import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
 
+import SimulationViewport from "./simulation/SimulationViewport";
+import StageDefs from "./simulation/StageDefs";
+
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
 import MIDIPlayer from "./MIDIPlayer";
@@ -14,8 +17,6 @@ import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
 import RootLedStrip from "./RootLedStrip";
-import SceneDefs from "./SceneDefs";
-import SimulationViewport from "./SimulationViewport";
 
 import "./App.css";
 import TimingStatsView from "./TimingStatsView";
@@ -153,7 +154,7 @@ class App extends React.Component<{}, State> {
               ENABLE_SIMULATION
                 ? (
                     <SimulationViewport
-                      sceneDef={SceneDefs[0]}
+                      sceneDef={StageDefs[0]}
                       routerLedStrip={this.routerLedStrip}
                       frameDidRender={this.simulationFrameDidRender}
                     />

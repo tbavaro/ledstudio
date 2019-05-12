@@ -6,14 +6,14 @@ interface LedSegment {
   readonly endPoint: Three.Vector3;
 }
 
-export interface SceneDef {
+export interface StageDef {
   name: string;
   modelUrl: string;
   translateDownPercent?: number;
   ledSegments: LedSegment[];
 }
 
-const sceneDefs: SceneDef[] = [
+const sceneDefs: StageDef[] = [
   {
     name: "keyboard",
     modelUrl: "./keyboard.gltf",
