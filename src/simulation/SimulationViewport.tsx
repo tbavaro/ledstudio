@@ -6,7 +6,6 @@ import * as Colors from "../portable/base/Colors";
 
 import RootLedStrip from "../RootLedStrip";
 import { SendableLedStrip } from "../SendableLedStrip";
-import * as SimulationUtils from "./SimulationUtils";
 import Stage from "./Stage";
 
 import "./SimulationViewport.css";
@@ -133,23 +132,7 @@ class LedScene {
 
   constructor(stage: Stage, scene: Three.Scene, doRender: () => void) {
     this.stage = stage;
-
-    // place 3d Leds
-    // ledSceneDef.ledSegments.forEach(segment => {
-    //   const numLeds = segment.numLeds;
-    //   const step = segment.endPoint.clone();
-    //   step.sub(segment.startPoint);
-    //   step.divideScalar(segment.numLeds - 1);
-    //   for (let i = 0; i < numLeds; ++i) {
-    //     const position = step.clone();
-    //     position.multiplyScalar(i);
-    //     position.add(segment.startPoint);
-    //     this.ledHelpers.push(new LedHelper(scene, position));
-    //   }
-    // });
-
-    const points = SimulationUtils.wings();
-    points.forEach(point => {
+    stage.ledPositions.forEach(point => {
       this.ledHelpers.push(new LedHelper(scene, point));
     });
 
@@ -293,7 +276,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
     return {
       scene: initializeScene(),
       camera: camera,
-      controls: new OrbitControls(camera),
+      controls: new OrbitControls(camera, this.renderer.domElement),
       doRender: () => {
         // render 3d scene
         const startTime = performance.now();

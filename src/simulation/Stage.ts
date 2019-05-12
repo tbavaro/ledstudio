@@ -1,7 +1,11 @@
 import * as Three from "three";
-import { Vector3 } from "three";
+import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
+
+import { pushAll } from "../portable/Utils";
+
+import * as SimulationUtils from "./SimulationUtils";
 
 interface ModelDef {
   url: string;
@@ -146,6 +150,51 @@ function makeLedSegments(segments: Array<{
   };
 }
 
+export function calculateWingsPositions() {
+  const middleCenter = new Vector2(0, 3);
+  const leftLegTop = new Vector2(-2.5, 0);
+  const leftLegBottom = new Vector2(-2.5, 3);
+  const leftWingTip = new Vector2(-6.5, 4.5);
+
+  const LED_SPACING = 0.2;
+
+  const ribs = 6;
+
+  const legPoints = SimulationUtils.pointsFromTo({
+    start: leftLegTop,
+    end: leftLegBottom,
+    spacing: leftLegTop.clone().sub(leftLegBottom).length() / (ribs - 1)
+  });
+
+  const leftSidePoints: Vector2[] = [];
+  legPoints.forEach(legPoint => {
+    pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
+      start: middleCenter,
+      end: legPoint,
+      spacing: LED_SPACING,
+      skipFirst: true
+    }));
+    pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
+      start: legPoint,
+      end: leftWingTip,
+      spacing: LED_SPACING,
+      skipFirst: true
+    }));
+  });
+
+  const rightSidePoints = leftSidePoints.map(p => new Vector2(-1 * p.x, p.y));
+
+  const points = [...leftSidePoints, ...rightSidePoints];
+
+  return SimulationUtils.map2dTo3d({
+    points: points,
+    bottomLeft: new Vector3(0, -2, 4.5),
+    rightDirection: new Vector3(1, 0, 0),
+    upDirection: new Vector3(0, 1, 0),
+    scale: 2.5
+  });
+}
+
 export const registry = new StageRegistry();
 
 const KEYBOARD_VENUE = {
@@ -165,19 +214,24 @@ registry.register([
     leds: makeLedSegments([
       {
         numLeds: 88,
-        startPoint: new Three.Vector3(-6, 1.95, -1.33),
-        endPoint: new Three.Vector3(6, 1.95, -1.33)
+        startPoint: new Three.Vector3(-6, 7.40, -1.33),
+        endPoint: new Three.Vector3(6, 7.40, -1.33)
       },
       {
         numLeds: 88,
-        startPoint: new Three.Vector3(6, 1.8, -1.38),
-        endPoint: new Three.Vector3(-6, 1.8, -1.38)
+        startPoint: new Three.Vector3(6, 7.25, -1.38),
+        endPoint: new Three.Vector3(-6, 7.25, -1.38)
       },
       {
         numLeds: 88,
-        startPoint: new Three.Vector3(-6, 1.65, -1.43),
-        endPoint: new Three.Vector3(6, 1.65, -1.43)
+        startPoint: new Three.Vector3(-6, 7.10, -1.43),
+        endPoint: new Three.Vector3(6, 7.10, -1.43)
       }
     ])
+  },
+  {
+    ...KEYBOARD_VENUE,
+    name: "keyboard:wings",
+    leds: { calculatePositions: calculateWingsPositions }
   }
 ]);

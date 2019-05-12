@@ -57,6 +57,10 @@ export function ensureValidRange(startIndex: number, length: number, validLength
   return [startIndex, length];
 }
 
+export function pushAll<T>(arr: T[], items: T[]) {
+  items.forEach(item => arr.push(item));
+}
+
 export class MovingAverageHelper {
   private readonly values: number[];
   private numValues: number = 0;
