@@ -66,7 +66,7 @@ class FadecandyLedSingleStrip implements LedStrip {
 }
 
 // hack for now to show it on just part of it
-const HACK_OFFSET = -95;
+const HACK_OFFSET = -100;
 const HACK_LENGTH = 88 * 3;
 
 export default class FadecandyLedStrip implements LedStrip {
@@ -83,7 +83,7 @@ export default class FadecandyLedStrip implements LedStrip {
   }
 
   public setColor(index: number, color: Colors.Color) {
-    this.delegate.setColor(index, color);
+    this.delegate.setColor(index, Colors.multiply(color, 0.5));
   }
 
   public setRange(startIndex: number, numLeds: number, color: Colors.Color) {

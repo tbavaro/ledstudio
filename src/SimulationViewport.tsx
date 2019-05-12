@@ -8,6 +8,7 @@ import * as Colors from "./portable/base/Colors";
 import RootLedStrip from "./RootLedStrip";
 import { SceneDef } from "./SceneDefs";
 import { SendableLedStrip } from "./SendableLedStrip";
+import * as SimulationUtils from "./SimulationUtils";
 
 import "./SimulationViewport.css";
 
@@ -168,17 +169,22 @@ class LedScene {
     this.sceneDef = ledSceneDef;
 
     // place 3d Leds
-    ledSceneDef.ledSegments.forEach(segment => {
-      const numLeds = segment.numLeds;
-      const step = segment.endPoint.clone();
-      step.sub(segment.startPoint);
-      step.divideScalar(segment.numLeds - 1);
-      for (let i = 0; i < numLeds; ++i) {
-        const position = step.clone();
-        position.multiplyScalar(i);
-        position.add(segment.startPoint);
-        this.ledHelpers.push(new LedHelper(scene, position));
-      }
+    // ledSceneDef.ledSegments.forEach(segment => {
+    //   const numLeds = segment.numLeds;
+    //   const step = segment.endPoint.clone();
+    //   step.sub(segment.startPoint);
+    //   step.divideScalar(segment.numLeds - 1);
+    //   for (let i = 0; i < numLeds; ++i) {
+    //     const position = step.clone();
+    //     position.multiplyScalar(i);
+    //     position.add(segment.startPoint);
+    //     this.ledHelpers.push(new LedHelper(scene, position));
+    //   }
+    // });
+
+    const points = SimulationUtils.wings();
+    points.forEach(point => {
+      this.ledHelpers.push(new LedHelper(scene, point));
     });
 
     this.ledStrip = new LedSceneStrip(this.ledHelpers, doRender);

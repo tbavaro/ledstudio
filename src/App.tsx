@@ -62,7 +62,7 @@ type AllActions = RightSidebar.Actions;
 const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
 function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
-  const routerLedStrip = new RootLedStrip(88 * 3);
+  const routerLedStrip = new RootLedStrip(/* 88 * 3 */880 * 4);
   routerLedStrip.addStrip(fadeCandyLedStrip);
   return routerLedStrip;
 }
