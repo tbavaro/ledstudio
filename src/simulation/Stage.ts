@@ -188,7 +188,7 @@ export function calculateWingsPositions() {
 
   return SimulationUtils.map2dTo3d({
     points: points,
-    bottomLeft: new Vector3(0, -2, 4.5),
+    bottomLeft: new Vector3(0, 3, 4.5),
     rightDirection: new Vector3(1, 0, 0),
     upDirection: new Vector3(0, 1, 0),
     scale: 2.5
@@ -210,6 +210,11 @@ const KEYBOARD_VENUE = {
 registry.register([
   {
     ...KEYBOARD_VENUE,
+    name: "keyboard:wings",
+    leds: { calculatePositions: calculateWingsPositions }
+  },
+  {
+    ...KEYBOARD_VENUE,
     name: "keyboard:3stripes",
     leds: makeLedSegments([
       {
@@ -228,10 +233,5 @@ registry.register([
         endPoint: new Three.Vector3(6, 7.10, -1.43)
       }
     ])
-  },
-  {
-    ...KEYBOARD_VENUE,
-    name: "keyboard:wings",
-    leds: { calculatePositions: calculateWingsPositions }
   }
 ]);
