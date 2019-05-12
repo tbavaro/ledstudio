@@ -1,7 +1,8 @@
-import { Vector3 } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-
 import * as Three from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { promisify } from "util";
+
+type Vector3 = Three.Vector3;
 
 interface LedSegment {
   readonly numLeds: number;
@@ -9,7 +10,7 @@ interface LedSegment {
   readonly endPoint: Three.Vector3;
 }
 
-export interface StageDef {
+interface StageDef {
   name: string;
   modelUrl: string;
   translateDownPercent?: number;
@@ -19,6 +20,7 @@ export interface StageDef {
 export default class Stage {
   private readonly def: StageDef;
   private lazyLoadedLedPositions?: Vector3[];
+  private lazyModelPromise?: Promise<Three.Scene>;
 
   constructor(def: StageDef) {
     this.def = def;
@@ -41,25 +43,30 @@ export default class Stage {
     return [];
   }
 
-  public loadModel(onLoad: (model: Three.Scene) => void) {
-    const loader = new GLTFLoader();
-    loader.load(
-      this.def.modelUrl,
-      /*onLoad=*/(gltf) => {
-        const boundingBox = new Three.Box3().setFromObject(gltf.scene);
-        const center = boundingBox.getCenter(new Three.Vector3());
-        gltf.scene.translateX(-center.x);
-        gltf.scene.translateY(-center.y);
-        gltf.scene.translateZ(-center.z);
-        const size = boundingBox.getSize(new Three.Vector3());
-        gltf.scene.translateY(-size.y * (this.def.translateDownPercent || 0));
-        onLoad(gltf.scene);
-      },
-      /*onProgress=*/undefined,
-      /*onError*/(error) => {
-        alert(`gltf error: ${error}`);
-      }
-    );
+  public async loadModel(): Promise<Three.Scene> {
+    if (this.lazyModelPromise === undefined) {
+      this.lazyModelPromise = promisify<Three.Scene>(callback => {
+        const loader = new GLTFLoader();
+        loader.load(
+          this.def.modelUrl,
+          /*onLoad=*/(gltf) => {
+            const boundingBox = new Three.Box3().setFromObject(gltf.scene);
+            const center = boundingBox.getCenter(new Three.Vector3());
+            gltf.scene.translateX(-center.x);
+            gltf.scene.translateY(-center.y);
+            gltf.scene.translateZ(-center.z);
+            const size = boundingBox.getSize(new Three.Vector3());
+            gltf.scene.translateY(-size.y * (this.def.translateDownPercent || 0));
+            callback(null, gltf.scene);
+          },
+          /*onProgress=*/undefined,
+          /*onError*/(error) => {
+            callback(new Error(`gltf error: ${error}`), null as any);
+          }
+        );
+      })();
+    }
+    return this.lazyModelPromise;
   }
 }
 

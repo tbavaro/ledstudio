@@ -238,9 +238,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
     window.addEventListener("blur", this.onWindowBlur);
     window.addEventListener("focus", this.onWindowFocus);
 
-    this.props.stage.loadModel((model: Three.Scene) => {
-      this.state.scene.add(model);
-    });
+    this.props.stage.loadModel().then(model => this.state.scene.add(model));
   }
 
   public componentWillUnmount() {
