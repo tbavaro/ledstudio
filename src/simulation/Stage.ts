@@ -92,6 +92,7 @@ export default class Stage {
 
 export class StageRegistry {
   private readonly map = new Map<string, Stage>();
+  private defaultStage?: Stage;
 
   public get stageNames(): ReadonlyArray<string> {
     return Array.from(this.map.keys());
@@ -116,12 +117,19 @@ export class StageRegistry {
     });
   }
 
-  public defaultStage(): Stage {
-    const stageNames = this.stageNames;
-    if (stageNames.length === 0) {
-      throw new Error("no stages");
+  public getDefaultStage(): Stage {
+    if (this.defaultStage === undefined) {
+      const stageNames = this.stageNames;
+      if (stageNames.length === 0) {
+        throw new Error("no stages");
+      }
+      this.defaultStage = this.getStage(stageNames[0]);
     }
-    return this.getStage(stageNames[0]);
+    return this.defaultStage;
+  }
+
+  public setDefaultStageName(name: string) {
+    this.defaultStage = this.getStage(name);
   }
 }
 
@@ -235,3 +243,5 @@ registry.register([
     leds: { calculatePositions: calculateWingsPositions }
   }
 ]);
+
+// registry.setDefaultStageName("keyboard:wings");

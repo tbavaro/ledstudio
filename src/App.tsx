@@ -154,7 +154,7 @@ class App extends React.Component<{}, State> {
               ENABLE_SIMULATION
                 ? (
                     <SimulationViewport
-                      stage={STAGE_REGISTRY.defaultStage()}
+                      stage={STAGE_REGISTRY.getDefaultStage()}
                       routerLedStrip={this.routerLedStrip}
                       frameDidRender={this.simulationFrameDidRender}
                     />
