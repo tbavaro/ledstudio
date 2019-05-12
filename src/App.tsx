@@ -8,7 +8,7 @@ import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
 
 import SimulationViewport from "./simulation/SimulationViewport";
-import StageDefs from "./simulation/StageDefs";
+import { registry as STAGE_REGISTRY } from "./simulation/Stage";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
@@ -154,7 +154,7 @@ class App extends React.Component<{}, State> {
               ENABLE_SIMULATION
                 ? (
                     <SimulationViewport
-                      sceneDef={StageDefs[0]}
+                      stage={STAGE_REGISTRY.defaultStage()}
                       routerLedStrip={this.routerLedStrip}
                       frameDidRender={this.simulationFrameDidRender}
                     />

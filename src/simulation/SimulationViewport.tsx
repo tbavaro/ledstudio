@@ -1,14 +1,13 @@
 import * as React from "react";
 import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import * as Colors from "../portable/base/Colors";
 
 import RootLedStrip from "../RootLedStrip";
 import { SendableLedStrip } from "../SendableLedStrip";
 import * as SimulationUtils from "./SimulationUtils";
-import { StageDef } from "./StageDefs";
+import Stage from "./Stage";
 
 import "./SimulationViewport.css";
 
@@ -43,27 +42,6 @@ function initializeCamera() {
   camera.position.y = 7;
   camera.position.z = -14;
   return camera;
-}
-
-function loadModel(sceneDef: StageDef, onLoad: (model: Three.Scene) => void) {
-  const loader = new GLTFLoader();
-  loader.load(
-    sceneDef.modelUrl,
-    /*onLoad=*/(gltf) => {
-      const boundingBox = new Three.Box3().setFromObject(gltf.scene);
-      const center = boundingBox.getCenter(new Three.Vector3());
-      gltf.scene.translateX(-center.x);
-      gltf.scene.translateY(-center.y);
-      gltf.scene.translateZ(-center.z);
-      const size = boundingBox.getSize(new Three.Vector3());
-      gltf.scene.translateY(-size.y * (sceneDef.translateDownPercent || 0));
-      onLoad(gltf.scene);
-    },
-    /*onProgress=*/undefined,
-    /*onError*/(error) => {
-      alert(`gltf error: ${error}`);
-    }
-  );
 }
 
 class LedHelper {
@@ -161,12 +139,12 @@ class LedSceneStrip implements SendableLedStrip {
 }
 
 class LedScene {
-  public readonly sceneDef: StageDef;
+  public readonly stage: Stage;
   public readonly ledStrip: SendableLedStrip;
   private ledHelpers: LedHelper[] = [];
 
-  constructor(ledSceneDef: StageDef, scene: Three.Scene, doRender: () => void) {
-    this.sceneDef = ledSceneDef;
+  constructor(stage: Stage, scene: Three.Scene, doRender: () => void) {
+    this.stage = stage;
 
     // place 3d Leds
     // ledSceneDef.ledSegments.forEach(segment => {
@@ -196,7 +174,7 @@ class LedScene {
 }
 
 interface Props {
-  sceneDef: StageDef;
+  stage: Stage;
   routerLedStrip: RootLedStrip;
   frameDidRender: (renderMillis: number) => void;
 }
@@ -204,7 +182,7 @@ interface Props {
 type State = {
   readonly scene: Three.Scene;
   registeredRouterLedStrip?: RootLedStrip;
-  currentSceneDef?: StageDef;
+  currentStage?: Stage;
   currentLedScene?: LedScene;
   doRender: () => void;
 };
@@ -216,7 +194,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
-      currentSceneDef: nextProps.sceneDef,
+      currentStage: nextProps.stage,
       registeredRouterLedStrip: nextProps.routerLedStrip
     };
 
@@ -227,7 +205,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
       throw new Error("changing routerLedStrip prop is unsupported");
     }
 
-    if (nextProps.sceneDef !== prevState.currentSceneDef) {
+    if (nextProps.stage !== prevState.currentStage) {
       if (prevState.currentLedScene !== undefined) {
         prevState.currentLedScene.remove();
       }
@@ -236,7 +214,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
         nextProps.routerLedStrip.removeStrip(prevState.currentLedScene.ledStrip);
       }
 
-      const ledScene = new LedScene(nextProps.sceneDef, prevState.scene, prevState.doRender);
+      const ledScene = new LedScene(nextProps.stage, prevState.scene, prevState.doRender);
       nextProps.routerLedStrip.addStrip(ledScene.ledStrip);
       result.currentLedScene = ledScene;
     }
@@ -260,7 +238,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
     window.addEventListener("blur", this.onWindowBlur);
     window.addEventListener("focus", this.onWindowFocus);
 
-    loadModel(this.props.sceneDef, (model: Three.Scene) => {
+    this.props.stage.loadModel((model: Three.Scene) => {
       this.state.scene.add(model);
     });
   }
