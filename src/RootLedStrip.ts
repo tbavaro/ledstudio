@@ -1,6 +1,6 @@
 import * as Colors from "./portable/base/Colors";
 
-import { SendableLedStrip } from "./SendableLedStrip";
+import { SendableLedStrip } from "./portable/SendableLedStrip";
 
 export default class RootLedStrip implements SendableLedStrip {
   public readonly size: number;

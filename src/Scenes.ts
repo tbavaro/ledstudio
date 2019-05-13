@@ -3,9 +3,9 @@ import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-import { pushAll } from "../portable/Utils";
+import { pushAll } from "./portable/Utils";
 
-import * as SimulationUtils from "./SimulationUtils";
+import * as SimulationUtils from "./simulation/SimulationUtils";
 
 interface ModelDef {
   url: string;

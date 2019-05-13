@@ -3,10 +3,10 @@ import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import * as Colors from "../portable/base/Colors";
+import { SendableLedStrip } from "../portable/SendableLedStrip";
 
 import RootLedStrip from "../RootLedStrip";
-import { SendableLedStrip } from "../SendableLedStrip";
-import * as Scenes from "./Scenes";
+import * as Scenes from "../Scenes";
 
 import "./SimulationViewport.css";
 

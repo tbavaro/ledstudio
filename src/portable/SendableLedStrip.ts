@@ -1,4 +1,4 @@
-import LedStrip from "./portable/base/LedStrip";
+import LedStrip from "./base/LedStrip";
 
 // most uses of LedStrip don't need to worry about this, but the actual
 // terminal LED strips need a way to flush/send their data. Specifically,

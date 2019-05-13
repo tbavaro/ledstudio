@@ -7,7 +7,7 @@ import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
 
-import * as Scenes from "./simulation/Scenes";
+import * as Scenes from "./Scenes";
 import SimulationViewport from "./simulation/SimulationViewport";
 
 import MidiEvent from "./MidiEvent";
