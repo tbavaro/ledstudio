@@ -13,14 +13,14 @@ export interface Actions {
   setSelectedMidiFilename: (newValue: string) => void;
   setMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setMidiOutput: (newValue: WebMidi.MIDIOutput | null) => void;
-  setSelectedStageName: (newValue: string) => void;
+  setSelectedSceneName: (newValue: string) => void;
   setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => void;
 }
 
 interface Props {
   actions: Actions;
-  stageNames: ReadonlyArray<string>;
-  selectedStageName: string;
+  sceneNames: ReadonlyArray<string>;
+  selectedSceneName: string;
   visualizationNames: ReadonlyArray<PianoVisualizations.Name>;
   selectedVisualizationName: PianoVisualizations.Name;
   midiFilenames: string[];
@@ -42,7 +42,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     return (
       <div className="RightSidebar">
         <div className="RightSidebar-optionsGroup">
-        {this.renderStageSelector()}
+        {this.renderSceneSelector()}
         {this.renderVisualizationSelector()}
           <p/>
           {this.renderInputDevices()}
@@ -58,16 +58,16 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderStageSelector() {
+  private renderSceneSelector() {
     return (
-      <div className="RightSidebar-stages">
-        <span>Stage: </span>
+      <div className="RightSidebar-scenes">
+        <span>Scene: </span>
         <select
-          value={this.props.selectedStageName}
-          onChange={this.handleSetStageName}
+          value={this.props.selectedSceneName}
+          onChange={this.handleSetSceneName}
         >
           {
-            this.props.stageNames.map(name => (
+            this.props.sceneNames.map(name => (
               <option key={name} value={name}>{name}</option>
             ))
           }
@@ -202,8 +202,8 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     this.props.actions.setSelectedVisualizationName(name);
   }
 
-  private handleSetStageName = (event: React.ChangeEvent<any>) => {
+  private handleSetSceneName = (event: React.ChangeEvent<any>) => {
     const name = event.target.value as string;
-    this.props.actions.setSelectedStageName(name);
+    this.props.actions.setSelectedSceneName(name);
   }
 }

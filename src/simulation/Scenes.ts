@@ -20,19 +20,19 @@ interface LedsDef {
   calculatePositions: () => Vector3[];
 }
 
-interface StageDef {
+interface SceneDef {
   name: string;
   camera?: CameraDef;
   model: ModelDef;
   leds: LedsDef;
 }
 
-export class Stage {
-  private readonly def: StageDef;
+export class Scene {
+  private readonly def: SceneDef;
   private lazyLoadedLedPositions?: Vector3[];
   private lazyModelPromise?: Promise<Three.Scene>;
 
-  constructor(def: StageDef) {
+  constructor(def: SceneDef) {
     this.def = def;
     this.lazyLoadedLedPositions = undefined;
   }
@@ -90,40 +90,40 @@ export class Stage {
   }
 }
 
-const map = new Map<string, Stage>();
-let defaultStage: Stage | undefined;
+const registry = new Map<string, Scene>();
+let defaultScene: Scene | undefined;
 
-export function stageNames(): ReadonlyArray<string> {
-  return Array.from(map.keys());
+export function names(): ReadonlyArray<string> {
+  return Array.from(registry.keys());
 }
 
-export function getStage(name: string): Stage {
-  const result = map.get(name);
+export function getScene(name: string): Scene {
+  const result = registry.get(name);
   if (result === undefined) {
-    throw new Error(`no stage with name: ${name}`);
+    throw new Error(`no scene with name: ${name}`);
   }
   return result;
 }
 
-function registerStages(stageDefs: ReadonlyArray<StageDef>) {
-  stageDefs.forEach(stageDef => {
-    const stage = new Stage(stageDef);
-    const name = stage.name;
-    if (map.has(name)) {
-      throw new Error(`stage already registered with name: ${name}`);
+function registerScenes(defs: ReadonlyArray<SceneDef>) {
+  defs.forEach(def => {
+    const scene = new Scene(def);
+    const name = scene.name;
+    if (registry.has(name)) {
+      throw new Error(`scene already registered with name: ${name}`);
     }
-    map.set(name, stage);
+    registry.set(name, scene);
   });
 }
 
-export function getDefaultStage(): Stage {
-  if (defaultStage === undefined) {
-    if (stageNames.length === 0) {
-      throw new Error("no stages");
+export function getDefaultScene(): Scene {
+  if (defaultScene === undefined) {
+    if (names.length === 0) {
+      throw new Error("no scenes");
     }
-    defaultStage = getStage(stageNames[0]);
+    defaultScene = getScene(names[0]);
   }
-  return defaultStage;
+  return defaultScene;
 }
 
 function makeLedSegments(segments: Array<{
@@ -206,7 +206,7 @@ const KEYBOARD_VENUE = {
   }
 };
 
-registerStages([
+registerScenes([
   {
     ...KEYBOARD_VENUE,
     name: "keyboard:3stripes",
@@ -235,4 +235,4 @@ registerStages([
   }
 ]);
 
-defaultStage = getStage("keyboard:wings");
+defaultScene = getScene("keyboard:wings");

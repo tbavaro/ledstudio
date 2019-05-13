@@ -6,7 +6,7 @@ import * as Colors from "../portable/base/Colors";
 
 import RootLedStrip from "../RootLedStrip";
 import { SendableLedStrip } from "../SendableLedStrip";
-import { Stage } from "./Stages";
+import * as Scenes from "./Scenes";
 
 import "./SimulationViewport.css";
 
@@ -15,20 +15,20 @@ const CAMERA_NEAR_DISTANCE = 0.1;
 const CAMERA_FAR_DISTANCE = 1000;
 
 function initializeScene() {
-  const scene = new Three.Scene();
-  // scene.background = new Three.Color(.1, .1, .1);
+  const renderScene = new Three.Scene();
+  // renderScene.background = new Three.Color(.1, .1, .1);
 
-  scene.add(new Three.AmbientLight(0x333333));
+  renderScene.add(new Three.AmbientLight(0x333333));
 
   let light = new Three.DirectionalLight(0xaaaaaa);
   light.position.set(-100, 100, 100);
-  scene.add(light);
+  renderScene.add(light);
 
   light = new Three.DirectionalLight(0x444444);
   light.position.set(100, 100, -100);
-  scene.add(light);
+  renderScene.add(light);
 
-  return scene;
+  return renderScene;
 }
 
 class LedHelper {
@@ -48,7 +48,7 @@ class LedHelper {
 
   private colors: Three.Color[] = [];
 
-  constructor(scene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
+  constructor(renderScene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
     const meshes: Three.Object3D[] = [];
     LedHelper.GEOMETRIES.forEach((geometry, i) => {
       geometry = geometry.clone();
@@ -56,14 +56,14 @@ class LedHelper {
       this.colors.push(material.color);
       const mesh = new Three.Mesh(geometry, material);
       mesh.position.copy(position);
-      scene.add(mesh);
+      renderScene.add(mesh);
       meshes.push(mesh);
     });
     if (color !== undefined) {
       this.setColor(color);
     }
     this.removeFromScene = () => {
-      meshes.forEach(mesh => scene.remove(mesh));
+      meshes.forEach(mesh => renderScene.remove(mesh));
     };
   }
 
@@ -126,14 +126,14 @@ class LedSceneStrip implements SendableLedStrip {
 }
 
 class LedScene {
-  public readonly stage: Stage;
+  public readonly scene: Scenes.Scene;
   public readonly ledStrip: SendableLedStrip;
   private ledHelpers: LedHelper[] = [];
 
-  constructor(stage: Stage, scene: Three.Scene, doRender: () => void) {
-    this.stage = stage;
-    stage.ledPositions.forEach(point => {
-      this.ledHelpers.push(new LedHelper(scene, point));
+  constructor(scene: Scenes.Scene, renderScene: Three.Scene, doRender: () => void) {
+    this.scene = scene;
+    scene.ledPositions.forEach(point => {
+      this.ledHelpers.push(new LedHelper(renderScene, point));
     });
 
     this.ledStrip = new LedSceneStrip(this.ledHelpers, doRender);
@@ -145,17 +145,17 @@ class LedScene {
 }
 
 interface Props {
-  stage: Stage;
+  scene: Scenes.Scene;
   routerLedStrip: RootLedStrip;
   frameDidRender: (renderMillis: number) => void;
 }
 
 type State = {
-  readonly scene: Three.Scene;
+  readonly renderScene: Three.Scene;
   readonly camera: Three.PerspectiveCamera;
   readonly controls: OrbitControls;
   registeredRouterLedStrip?: RootLedStrip;
-  currentStage?: Stage;
+  currentScene?: Scenes.Scene;
   currentLedScene?: LedScene;
   doRender: () => void;
 };
@@ -165,7 +165,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
-      currentStage: nextProps.stage,
+      currentScene: nextProps.scene,
       registeredRouterLedStrip: nextProps.routerLedStrip
     };
 
@@ -176,7 +176,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
       throw new Error("changing routerLedStrip prop is unsupported");
     }
 
-    if (nextProps.stage !== prevState.currentStage) {
+    if (nextProps.scene !== prevState.currentScene) {
       if (prevState.currentLedScene !== undefined) {
         prevState.currentLedScene.remove();
       }
@@ -185,13 +185,13 @@ export default class SimulationViewport extends React.Component<Props, State> {
         nextProps.routerLedStrip.removeStrip(prevState.currentLedScene.ledStrip);
       }
 
-      const ledScene = new LedScene(nextProps.stage, prevState.scene, prevState.doRender);
+      const ledScene = new LedScene(nextProps.scene, prevState.renderScene, prevState.doRender);
       nextProps.routerLedStrip.addStrip(ledScene.ledStrip);
       result.currentLedScene = ledScene;
 
       // point at target
-      prevState.camera.position.copy(nextProps.stage.cameraStartPosition);
-      prevState.controls.target = nextProps.stage.cameraTarget;
+      prevState.camera.position.copy(nextProps.scene.cameraStartPosition);
+      prevState.controls.target = nextProps.scene.cameraTarget;
       prevState.controls.update();
     }
 
@@ -214,7 +214,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
     window.addEventListener("blur", this.onWindowBlur);
     window.addEventListener("focus", this.onWindowFocus);
 
-    this.props.stage.loadModel().then(model => this.state.scene.add(model));
+    this.props.scene.loadModel().then(model => this.state.renderScene.add(model));
   }
 
   public componentWillUnmount() {
@@ -274,14 +274,14 @@ export default class SimulationViewport extends React.Component<Props, State> {
     );
 
     return {
-      scene: initializeScene(),
+      renderScene: initializeScene(),
       camera: camera,
       controls: new OrbitControls(camera, this.renderer.domElement),
       doRender: () => {
         // render 3d scene
         const startTime = performance.now();
         if (this.isWindowFocused) {
-          this.renderer.render(this.state.scene, this.state.camera);
+          this.renderer.render(this.state.renderScene, this.state.camera);
         }
         const renderMillis = performance.now() - startTime;
         this.props.frameDidRender(renderMillis);

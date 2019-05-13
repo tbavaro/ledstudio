@@ -7,8 +7,8 @@ import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
 
+import * as Scenes from "./simulation/Scenes";
 import SimulationViewport from "./simulation/SimulationViewport";
-import * as Stages from "./simulation/Stages";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
@@ -47,7 +47,7 @@ const TARGET_FPS = 60;
 const TARGET_FRAME_MILLIS = 1000 / TARGET_FPS;
 
 interface State {
-  stage: Stages.Stage;
+  scene: Scenes.Scene;
   visualizationName: PianoVisualizations.Name;
   visualizationRunner: PianoVisualizationRunner;
   midiState: Readonly<MidiState>;
@@ -155,7 +155,7 @@ class App extends React.Component<{}, State> {
               ENABLE_SIMULATION
                 ? (
                     <SimulationViewport
-                      stage={this.state.stage}
+                      scene={this.state.scene}
                       routerLedStrip={this.routerLedStrip}
                       frameDidRender={this.simulationFrameDidRender}
                     />
@@ -186,8 +186,8 @@ class App extends React.Component<{}, State> {
         return (
           <RightSidebar.default
             actions={this.actionManager}
-            stageNames={Stages.stageNames()}
-            selectedStageName={this.state.stage.name}
+            sceneNames={Scenes.names()}
+            selectedSceneName={this.state.scene.name}
             visualizationNames={PianoVisualizations.names}
             selectedVisualizationName={this.state.visualizationName}
             midiFilenames={MIDI_FILES}
@@ -299,10 +299,10 @@ class App extends React.Component<{}, State> {
     setMidiInput: this.setMidiInput,
     setMidiOutput: this.setMidiOutput,
     setSelectedMidiFilename: this.loadMidiFile,
-    setSelectedStageName: (name: string) => {
-      if (name !== this.state.stage.name) {
+    setSelectedSceneName: (name: string) => {
+      if (name !== this.state.scene.name) {
         this.setState({
-          stage: Stages.getStage(name)
+          scene: Scenes.getScene(name)
         });
       }
     },
@@ -410,7 +410,7 @@ class App extends React.Component<{}, State> {
     midiData: null,
     midiInputs: [],
     midiOutputs: [],
-    stage: Stages.getDefaultStage()
+    scene: Scenes.getDefaultScene()
   };
 }
 
