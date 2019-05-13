@@ -8,7 +8,7 @@ import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
 
 import SimulationViewport from "./simulation/SimulationViewport";
-import Stage, { registry as STAGE_REGISTRY } from "./simulation/Stages";
+import * as Stages from "./simulation/Stages";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
@@ -47,7 +47,7 @@ const TARGET_FPS = 60;
 const TARGET_FRAME_MILLIS = 1000 / TARGET_FPS;
 
 interface State {
-  stage: Stage;
+  stage: Stages.Stage;
   visualizationName: PianoVisualizations.Name;
   visualizationRunner: PianoVisualizationRunner;
   midiState: Readonly<MidiState>;
@@ -186,7 +186,7 @@ class App extends React.Component<{}, State> {
         return (
           <RightSidebar.default
             actions={this.actionManager}
-            stageNames={STAGE_REGISTRY.stageNames}
+            stageNames={Stages.stageNames()}
             selectedStageName={this.state.stage.name}
             visualizationNames={PianoVisualizations.names}
             selectedVisualizationName={this.state.visualizationName}
@@ -302,7 +302,7 @@ class App extends React.Component<{}, State> {
     setSelectedStageName: (name: string) => {
       if (name !== this.state.stage.name) {
         this.setState({
-          stage: STAGE_REGISTRY.getStage(name)
+          stage: Stages.getStage(name)
         });
       }
     },
@@ -410,7 +410,7 @@ class App extends React.Component<{}, State> {
     midiData: null,
     midiInputs: [],
     midiOutputs: [],
-    stage: STAGE_REGISTRY.getDefaultStage()
+    stage: Stages.getDefaultStage()
   };
 }
 

@@ -27,7 +27,7 @@ interface StageDef {
   leds: LedsDef;
 }
 
-export default class Stage {
+export class Stage {
   private readonly def: StageDef;
   private lazyLoadedLedPositions?: Vector3[];
   private lazyModelPromise?: Promise<Three.Scene>;
@@ -90,47 +90,40 @@ export default class Stage {
   }
 }
 
-export class StageRegistry {
-  private readonly map = new Map<string, Stage>();
-  private defaultStage?: Stage;
+const map = new Map<string, Stage>();
+let defaultStage: Stage | undefined;
 
-  public get stageNames(): ReadonlyArray<string> {
-    return Array.from(this.map.keys());
+export function stageNames(): ReadonlyArray<string> {
+  return Array.from(map.keys());
+}
+
+export function getStage(name: string): Stage {
+  const result = map.get(name);
+  if (result === undefined) {
+    throw new Error(`no stage with name: ${name}`);
   }
+  return result;
+}
 
-  public getStage(name: string): Stage {
-    const result = this.map.get(name);
-    if (result === undefined) {
-      throw new Error(`no stage with name: ${name}`);
+function registerStages(stageDefs: ReadonlyArray<StageDef>) {
+  stageDefs.forEach(stageDef => {
+    const stage = new Stage(stageDef);
+    const name = stage.name;
+    if (map.has(name)) {
+      throw new Error(`stage already registered with name: ${name}`);
     }
-    return result;
-  }
+    map.set(name, stage);
+  });
+}
 
-  public register(stageDefs: ReadonlyArray<StageDef>) {
-    stageDefs.forEach(stageDef => {
-      const stage = new Stage(stageDef);
-      const name = stage.name;
-      if (this.map.has(name)) {
-        throw new Error(`stage already registered with name: ${name}`);
-      }
-      this.map.set(name, stage);
-    });
-  }
-
-  public getDefaultStage(): Stage {
-    if (this.defaultStage === undefined) {
-      const stageNames = this.stageNames;
-      if (stageNames.length === 0) {
-        throw new Error("no stages");
-      }
-      this.defaultStage = this.getStage(stageNames[0]);
+export function getDefaultStage(): Stage {
+  if (defaultStage === undefined) {
+    if (stageNames.length === 0) {
+      throw new Error("no stages");
     }
-    return this.defaultStage;
+    defaultStage = getStage(stageNames[0]);
   }
-
-  public setDefaultStageName(name: string) {
-    this.defaultStage = this.getStage(name);
-  }
+  return defaultStage;
 }
 
 function makeLedSegments(segments: Array<{
@@ -203,8 +196,6 @@ export function calculateWingsPositions() {
   });
 }
 
-export const registry = new StageRegistry();
-
 const KEYBOARD_VENUE = {
   model: {
     url: "./keyboard.gltf"
@@ -215,7 +206,7 @@ const KEYBOARD_VENUE = {
   }
 };
 
-registry.register([
+registerStages([
   {
     ...KEYBOARD_VENUE,
     name: "keyboard:3stripes",
@@ -244,4 +235,4 @@ registry.register([
   }
 ]);
 
-// registry.setDefaultStageName("keyboard:wings");
+defaultStage = getStage("keyboard:wings");
