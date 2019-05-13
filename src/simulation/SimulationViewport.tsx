@@ -6,7 +6,7 @@ import * as Colors from "../portable/base/Colors";
 
 import RootLedStrip from "../RootLedStrip";
 import { SendableLedStrip } from "../SendableLedStrip";
-import Stage from "./Stage";
+import Stage from "./Stages";
 
 import "./SimulationViewport.css";
 
