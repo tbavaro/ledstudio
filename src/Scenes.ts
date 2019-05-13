@@ -199,10 +199,6 @@ export function calculateWingsPositions() {
 const KEYBOARD_VENUE = {
   model: {
     url: "./keyboard.gltf"
-  },
-  camera: {
-    startPosition: new Vector3(0, 12, -14),
-    target: new Vector3(0, 5, 0)
   }
 };
 
@@ -210,27 +206,35 @@ registerScenes([
   {
     ...KEYBOARD_VENUE,
     name: "keyboard:3stripes",
+    camera: {
+      startPosition: new Vector3(0, 12, -14),
+      target: new Vector3(0, 5, 0)
+    },
     leds: makeLedSegments([
       {
         numLeds: 88,
-        startPoint: new Three.Vector3(-6, 7.40, -1.33),
-        endPoint: new Three.Vector3(6, 7.40, -1.33)
+        startPoint: new Three.Vector3(-6, 7.40, -1.38),
+        endPoint: new Three.Vector3(6, 7.40, -1.38)
       },
       {
         numLeds: 88,
-        startPoint: new Three.Vector3(6, 7.25, -1.38),
-        endPoint: new Three.Vector3(-6, 7.25, -1.38)
+        startPoint: new Three.Vector3(6, 7.25, -1.43),
+        endPoint: new Three.Vector3(-6, 7.25, -1.43)
       },
       {
         numLeds: 88,
-        startPoint: new Three.Vector3(-6, 7.10, -1.43),
-        endPoint: new Three.Vector3(6, 7.10, -1.43)
+        startPoint: new Three.Vector3(-6, 7.10, -1.48),
+        endPoint: new Three.Vector3(6, 7.10, -1.48)
       }
     ])
   },
   {
     ...KEYBOARD_VENUE,
     name: "keyboard:wings",
+    camera: {
+      startPosition: new Vector3(0, 21, -21),
+      target: new Vector3(0, 7, 0)
+    },
     leds: { calculatePositions: calculateWingsPositions }
   }
 ]);

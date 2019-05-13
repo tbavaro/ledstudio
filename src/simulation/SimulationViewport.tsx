@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as Three from "three";
+import { Vector3 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import * as Colors from "../portable/base/Colors";
@@ -32,18 +33,22 @@ function initializeScene() {
 }
 
 class LedHelper {
-  private static readonly LED_RADIUS = 0.03;
-  private static readonly RADIUS_MULTIPLIERS = [1, 1.3, 1.8];
-  private static readonly COLOR_MULTIPLIERS = [1, 0.3, 0.2];
+  private static readonly LED_RADIUS = 0.06;
+  private static readonly RADIUS_MULTIPLIERS = [1, 1.5];
+  private static readonly COLOR_MULTIPLIERS = [1, 0.8];
 
   private static readonly GEOMETRIES = LedHelper.RADIUS_MULTIPLIERS.map(m => (
-    new Three.SphereGeometry(LedHelper.LED_RADIUS * m, 6, 6)
+    new Three.PlaneGeometry(LedHelper.LED_RADIUS * m, LedHelper.LED_RADIUS * m)
   ));
 
-  private static readonly MATERIAL = new Three.MeshBasicMaterial({});
+  private static readonly MATERIAL = new Three.MeshBasicMaterial({
+    transparent: true,
+    side: Three.DoubleSide
+  });
   private static readonly ADDITIVE_MATERIAL = new Three.MeshBasicMaterial({
     blending: Three.AdditiveBlending,
-    transparent: true
+    transparent: true,
+    side: Three.DoubleSide
   });
 
   private colors: Three.Color[] = [];
@@ -52,10 +57,17 @@ class LedHelper {
     const meshes: Three.Object3D[] = [];
     LedHelper.GEOMETRIES.forEach((geometry, i) => {
       geometry = geometry.clone();
-      const material = (i === 0 ? LedHelper.MATERIAL : LedHelper.ADDITIVE_MATERIAL).clone();
+      const isGlowMesh = (i > 0);
+      const material = (isGlowMesh ? LedHelper.ADDITIVE_MATERIAL : LedHelper.MATERIAL).clone();
       this.colors.push(material.color);
       const mesh = new Three.Mesh(geometry, material);
+      // if (isGlowMesh) {
+      //   mesh.rotateZ(Math.PI / 4);
+      // }
       mesh.position.copy(position);
+      if (isGlowMesh) {
+        mesh.position.add(new Vector3(0, 0, -0.01));
+      }
       renderScene.add(mesh);
       meshes.push(mesh);
     });
