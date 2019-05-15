@@ -7,8 +7,12 @@ import { pushAll } from "./portable/Utils";
 
 import * as SimulationUtils from "./simulation/SimulationUtils";
 
+const FLOOR_SIZE_DEFAULT = 100;
+const FLOOR_COLOR = 0x070707;
+
 interface ModelDef {
   url: string;
+  floorSizeOverride?: number;
 }
 
 interface CameraDef {
@@ -30,7 +34,7 @@ interface SceneDef {
 export class Scene {
   private readonly def: SceneDef;
   private lazyLoadedLedPositions?: Vector3[];
-  private lazyModelPromise?: Promise<Three.Scene>;
+  private lazyModelPromise?: Promise<Three.Object3D>;
 
   constructor(def: SceneDef) {
     this.def = def;
@@ -48,9 +52,9 @@ export class Scene {
     return this.lazyLoadedLedPositions.map(p => p.clone());
   }
 
-  public async loadModel(): Promise<Three.Scene> {
+  public async loadModel(): Promise<Three.Object3D> {
     if (this.lazyModelPromise === undefined) {
-      this.lazyModelPromise = promisify<Three.Scene>(callback => {
+      this.lazyModelPromise = promisify<Three.Object3D>(callback => {
         const loader = new GLTFLoader();
         loader.load(
           this.def.model.url,
@@ -61,7 +65,7 @@ export class Scene {
             gltf.scene.translateX(-center.x);
             gltf.scene.translateY(-bottomY);
             gltf.scene.translateZ(-center.z);
-            callback(null, gltf.scene);
+            callback(null, this.addExtraObjects(gltf.scene));
           },
           /*onProgress=*/undefined,
           /*onError*/(error) => {
@@ -71,6 +75,26 @@ export class Scene {
       })();
     }
     return this.lazyModelPromise;
+  }
+
+  private addExtraObjects(model: Three.Object3D): Three.Object3D {
+    const allObjects = new Three.Object3D();
+    model.castShadow = true;
+    allObjects.add(model);
+
+    // floor
+    if (this.def.model.floorSizeOverride !== 0) {
+      const floorSize = this.def.model.floorSizeOverride || FLOOR_SIZE_DEFAULT;
+      const floorGeometry = new Three.PlaneGeometry(floorSize, floorSize).rotateX(-1 * Math.PI / 2);
+      const floorMaterial = new Three.MeshBasicMaterial({
+        color: FLOOR_COLOR
+      });
+      const floor = new Three.Mesh(floorGeometry, floorMaterial);
+      floor.receiveShadow = true;
+      allObjects.add(floor);
+    }
+
+    return allObjects;
   }
 
   public get cameraTarget(): Vector3 {
