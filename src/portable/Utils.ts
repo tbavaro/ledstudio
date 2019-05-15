@@ -95,3 +95,8 @@ export class MovingAverageHelper {
     }
   }
 }
+
+export function roundPlaces(v: number, numPlaces: number) {
+  const factor = Math.pow(10, numPlaces);
+  return Math.round(v * factor) / factor;
+}

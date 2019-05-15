@@ -162,7 +162,7 @@ class App extends React.Component<{}, State> {
                   )
                 : null
             }
-            <TimingStatsView getTimings={this.getTimings}/>
+            <TimingStatsView getTimings={this.getTimings} message2={this.getMessage2}/>
           </div>
           <div className="App-pianoContainer">
             <PianoView
@@ -205,6 +205,8 @@ class App extends React.Component<{}, State> {
         return `error: ${this.state.midiState.midiFailureReason}`;
     }
   }
+
+  private getMessage2 = () => this.state.scene.displayMessage;
 
   private handlePlayMusic = () => {
     if (this.state.midiState.status !== "loaded") {

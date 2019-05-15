@@ -13,6 +13,7 @@ interface Props {
     renderMillis: number,
     framesRenderedSinceLastCall: number
   };
+  message2?: () => string;
 }
 
 interface State {
@@ -46,9 +47,20 @@ export default class TimingStatsView extends React.Component<Props, State> {
   }
 
   public render() {
+    const message2: string = (
+      this.props.message2 === undefined
+        ? ""
+        : this.props.message2()
+    );
+
     return (
       <div className="TimingStatsView">
         {this.state.message}
+        {
+          message2 === ""
+            ? null
+            : <div>{message2}</div>
+        }
       </div>
     );
   }

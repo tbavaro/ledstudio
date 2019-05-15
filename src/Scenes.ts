@@ -3,7 +3,7 @@ import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-import { pushAll } from "./portable/Utils";
+import { pushAll, roundPlaces } from "./portable/Utils";
 
 import * as SimulationUtils from "./simulation/SimulationUtils";
 
@@ -43,6 +43,7 @@ interface LedsDef {
 
 interface SceneDef {
   name: string;
+  initialDisplayValues?: () => { [k: string]: string | number };
   camera?: CameraDef;
   model: ModelDef;
   extraObjects?: ExtraObjectFunc[];
@@ -72,6 +73,8 @@ export class Scene {
   private readonly def: SceneDef;
   private lazyLoadedLedPositions?: Vector3[];
   private lazyModelPromise?: Promise<Three.Object3D>;
+  private displayValues: { [k: string]: string | number } | undefined;
+  private cachedDisplayMessage: string | undefined;
 
   constructor(def: SceneDef) {
     this.def = def;
@@ -85,6 +88,7 @@ export class Scene {
   public get ledPositions(): Vector3[] {
     if (this.lazyLoadedLedPositions === undefined) {
       this.lazyLoadedLedPositions = this.def.leds.calculatePositions();
+      this.setDisplayValue("#leds", this.lazyLoadedLedPositions.length);
     }
     return this.lazyLoadedLedPositions.map(p => p.clone());
   }
@@ -161,6 +165,28 @@ export class Scene {
       return new Vector3(0, 0, -10);
     }
   }
+
+  private initDisplayValuesIfNeeded(): { [k: string]: string | number } {
+    if (this.displayValues === undefined) {
+      if (this.def.initialDisplayValues) {
+        this.displayValues = this.def.initialDisplayValues();
+      } else {
+        this.displayValues = {};
+      }
+    }
+    return this.displayValues;
+  }
+
+  private setDisplayValue(key: string, value: string | number) {
+    this.initDisplayValuesIfNeeded()[key] = value;
+  }
+
+  public get displayMessage(): string {
+    if (this.cachedDisplayMessage === undefined) {
+      this.cachedDisplayMessage = Object.entries(this.initDisplayValuesIfNeeded()).map((entry) => `${entry[0]}=${entry[1]}`).join(" / ");
+    }
+    return this.cachedDisplayMessage;
+  }
 }
 
 const registry = new Map<string, Scene>();
@@ -224,56 +250,17 @@ function makeLedSegments(segments: Array<{
   };
 }
 
-export function calculateWingsPositions(ledSpacing: number) {
-  const scale = 2.5;
+function doLazy<T>(func: () => T): () => T {
+  let ran = false;
+  let result: any;
 
-  const middleCenter = new Vector2(0, 0.3).multiplyScalar(scale);
-  const leftLegTop = new Vector2(-0.25, 0).multiplyScalar(scale);
-  const leftLegBottom = new Vector2(-0.25, 0.3).multiplyScalar(scale);
-  const leftWingTip = new Vector2(-0.65, 0.45).multiplyScalar(scale);
-
-  const ribs = 6;
-
-  const legPoints = SimulationUtils.pointsFromTo({
-    start: leftLegTop,
-    end: leftLegBottom,
-    spacing: leftLegTop.clone().sub(leftLegBottom).length() / (ribs - 1)
-  });
-
-  const leftSidePoints: Vector2[] = [];
-  let spanLengths: number[] = [];
-  legPoints.forEach(legPoint => {
-    spanLengths.push(middleCenter.clone().sub(legPoint).length());
-    pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
-      start: middleCenter,
-      end: legPoint,
-      spacing: ledSpacing,
-      skipFirst: true
-    }));
-    spanLengths.push(leftWingTip.clone().sub(legPoint).length());
-    pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
-      start: legPoint,
-      end: leftWingTip,
-      spacing: ledSpacing,
-      skipFirst: true
-    }));
-  });
-
-  // mirror left and right side
-  const rightSidePoints = leftSidePoints.map(p => new Vector2(-1 * p.x, p.y));
-  const points = [...leftSidePoints, ...rightSidePoints];
-  spanLengths = [...spanLengths, ...spanLengths];
-
-  spanLengths.sort();
-  const totalSpanLength = spanLengths.reduce((a, b) => a + b, 0);
-  console.log("wing stats", `# leds: ${points.length}`, "spanLengths", spanLengths, `total span length: ${totalSpanLength}`);
-
-  return SimulationUtils.map2dTo3d({
-    points: points,
-    bottomLeft: new Vector3(0, 0.3, 0.75),
-    rightDirection: new Vector3(1, 0, 0),
-    upDirection: new Vector3(0, 1, 0)
-  });
+  return () => {
+    if (!ran) {
+      result = func();
+      ran = true;
+    }
+    return result;
+  };
 }
 
 const KEYBOARD_VENUE = {
@@ -291,6 +278,80 @@ const KEYBOARD_VENUE = {
     // })
   ]
 };
+
+function createWingsSceneDef(name: string, ledSpacing: number) {
+  const calculate = doLazy(() => {
+    const scale = 2.5;
+
+    const middleCenter = new Vector2(0, 0.3).multiplyScalar(scale);
+    const leftLegTop = new Vector2(-0.25, 0).multiplyScalar(scale);
+    const leftLegBottom = new Vector2(-0.25, 0.3).multiplyScalar(scale);
+    const leftWingTip = new Vector2(-0.65, 0.45).multiplyScalar(scale);
+
+    const ribs = 6;
+
+    const legPoints = SimulationUtils.pointsFromTo({
+      start: leftLegTop,
+      end: leftLegBottom,
+      spacing: leftLegTop.clone().sub(leftLegBottom).length() / (ribs - 1)
+    });
+
+    const leftSidePoints: Vector2[] = [];
+    let spanLengths: number[] = [];
+    legPoints.forEach(legPoint => {
+      spanLengths.push(middleCenter.clone().sub(legPoint).length());
+      pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
+        start: middleCenter,
+        end: legPoint,
+        spacing: ledSpacing,
+        skipFirst: true
+      }));
+      spanLengths.push(leftWingTip.clone().sub(legPoint).length());
+      pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
+        start: legPoint,
+        end: leftWingTip,
+        spacing: ledSpacing,
+        skipFirst: true
+      }));
+    });
+
+    // mirror left and right side
+    const rightSidePoints = leftSidePoints.map(p => new Vector2(-1 * p.x, p.y));
+    const points = [...leftSidePoints, ...rightSidePoints];
+    spanLengths = [...spanLengths, ...spanLengths];
+
+    const maxSpanLength = spanLengths.reduce((a, b) => Math.max(a, b), 0);
+    const totalSpanLength = spanLengths.reduce((a, b) => a + b, 0);
+    // spanLengths.sort();
+    // console.log("wing stats", `# leds: ${points.length}`, "spanLengths", spanLengths, `total span length: ${totalSpanLength}`);
+
+    return {
+      positions: (
+        SimulationUtils.map2dTo3d({
+          points: points,
+          bottomLeft: new Vector3(0, 0.3, 0.75),
+          rightDirection: new Vector3(1, 0, 0),
+          upDirection: new Vector3(0, 1, 0)
+        })
+      ),
+      displayValues: {
+        maxSpan: roundPlaces(maxSpanLength, 2),
+        totalSpan: roundPlaces(totalSpanLength, 2)
+      }
+    };
+  });
+
+  return {
+    ...KEYBOARD_VENUE,
+    name,
+    camera: {
+      startPosition: new Vector3(0, 1.6, -2.2),
+      target: new Vector3(0, 0.7, 0)
+    },
+    leds: { calculatePositions: () => calculate().positions },
+    initialDisplayValues: () => calculate().displayValues
+  };
+}
 
 registerScenes([
   {
@@ -318,24 +379,8 @@ registerScenes([
       }
     ])
   },
-  {
-    ...KEYBOARD_VENUE,
-    name: "keyboard:wings30",
-    camera: {
-      startPosition: new Vector3(0, 1.6, -2.2),
-      target: new Vector3(0, 0.7, 0)
-    },
-    leds: { calculatePositions: () => calculateWingsPositions(LedSpacings.NEOPIXEL_30) }
-  },
-  {
-    ...KEYBOARD_VENUE,
-    name: "keyboard:wings60",
-    camera: {
-      startPosition: new Vector3(0, 1.6, -2.2),
-      target: new Vector3(0, 0.7, 0)
-    },
-    leds: { calculatePositions: () => calculateWingsPositions(LedSpacings.NEOPIXEL_60) }
-  }
+  createWingsSceneDef("keyboard:wings30", LedSpacings.NEOPIXEL_30),
+  createWingsSceneDef("keyboard:wings60", LedSpacings.NEOPIXEL_60)
 ]);
 
 defaultScene = getScene("keyboard:wings30");
