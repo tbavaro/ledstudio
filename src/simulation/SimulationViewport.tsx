@@ -33,7 +33,7 @@ function initializeScene() {
 }
 
 class LedHelper {
-  private static readonly LED_RADIUS = 0.06;
+  private static readonly LED_RADIUS = 0.006;
   private static readonly RADIUS_MULTIPLIERS = [1, 1.5];
   private static readonly COLOR_MULTIPLIERS = [1, 0.8];
 
@@ -66,7 +66,7 @@ class LedHelper {
       // }
       mesh.position.copy(position);
       if (isGlowMesh) {
-        mesh.position.add(new Vector3(0, 0, -0.01));
+        mesh.position.add(new Vector3(0, 0, -0.0001));
       }
       renderScene.add(mesh);
       meshes.push(mesh);

@@ -5,11 +5,9 @@ export function map2dTo3d(attrs: {
   bottomLeft: Vector3,
   rightDirection: Vector3,
   upDirection: Vector3,
-  scale?: number;
 }): Vector3[] {
-  const scale = (attrs.scale === undefined ? 1 : attrs.scale);
-  const rightDelta = attrs.rightDirection.clone().normalize().multiplyScalar(scale);
-  const upDelta = attrs.upDirection.clone().normalize().multiplyScalar(scale);
+  const rightDelta = attrs.rightDirection.clone().normalize();
+  const upDelta = attrs.upDirection.clone().normalize();
 
   // make sure up and right are right angles to one another otherwise things don't make sense
   const angle = rightDelta.angleTo(upDelta) * 180 / Math.PI;

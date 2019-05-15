@@ -25,30 +25,6 @@ it("map2dTo3d: simple", () => {
   ]);
 });
 
-it("map2dTo3d: simple scaled", () => {
-  const points3d = SimulationUtils.map2dTo3d({
-    points: [
-      new Vector2(0, 0),
-      new Vector2(1, 0),
-      new Vector2(1, 1),
-      new Vector2(0, 1),
-      new Vector2(0.25, 0.5),
-    ],
-    bottomLeft: new Vector3(1, 1, 1),
-    rightDirection: new Vector3(1, 0, 0),
-    upDirection: new Vector3(0, 1, 0),
-    scale: 2
-  });
-
-  expect(points3d).toEqual([
-    new Vector3(1, 1, 1),
-    new Vector3(3, 1, 1),
-    new Vector3(3, 3, 1),
-    new Vector3(1, 3, 1),
-    new Vector3(1.5, 2, 1)
-  ]);
-});
-
 it("map2dTo3d: reject nonsense angles", () => {
   expect(() => {
     SimulationUtils.map2dTo3d({
