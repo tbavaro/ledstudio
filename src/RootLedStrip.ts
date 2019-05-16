@@ -1,30 +1,24 @@
 import * as Colors from "./portable/base/Colors";
 
+import { ColorRow } from "./portable/base/PianoVisualization";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 
-export default class RootLedStrip implements SendableLedStrip {
+export default class RootLeds {
   public readonly size: number;
   private strips: SendableLedStrip[];
+  public readonly leds: ColorRow;
 
   constructor(size: number) {
     this.size = size;
+    this.leds = new Array(size).fill(Colors.BLACK);
     this.strips = [];
   }
 
-  public setColor(index: number, color: Colors.Color) {
-    this.strips.forEach(strip => strip.setColor(index, color));
-  }
-
-  public setRange(startIndex: number, numLeds: number, color: Colors.Color) {
-    this.strips.forEach(strip => strip.setRange(startIndex, numLeds, color));
-  }
-
   public send() {
-    this.strips.forEach(strip => strip.send());
-  }
-
-  public reset(color?: Colors.Color) {
-    this.strips.forEach(strip => strip.reset(color));
+    this.strips.forEach(strip => {
+      this.leds.forEach((color, i) => strip.setColor(i, color));
+      strip.send();
+    });
   }
 
   public addStrip(strip: SendableLedStrip) {

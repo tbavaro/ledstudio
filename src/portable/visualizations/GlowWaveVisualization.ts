@@ -38,7 +38,7 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
   private readonly applyDerez: () => void;
 
   constructor(ledStrip: LedStrip) {
-    super();
+    super([]);
 
     // do everything derezed
     const derezLedStrip = new DerezLedStrip(ledStrip, DEREZ);

@@ -1,3 +1,5 @@
+import { Color } from "./Colors";
+
 export interface State {
   // 88 booleans; true = pressed, false = released
   keys: boolean[];
@@ -9,6 +11,14 @@ export interface State {
   changedKeys: ReadonlyArray<number>;
 }
 
+export type ColorRow = Color[];
+
 export default abstract class PianoVisualization {
+  protected readonly leds: ColorRow;
+
+  constructor(leds: ColorRow) {
+    this.leds = leds;
+  }
+
   public abstract render(elapsedMillis: number, state: State): void;
 }

@@ -23,7 +23,7 @@ export default class TestStripAddressVisualization extends PianoVisualization {
   private pulseLocationFloat: number = 0;
 
   constructor(ledStrip: LedStrip) {
-    super();
+    super([]);
     this.ledStrip = ledStrip;
     ledStrip.reset();
   }

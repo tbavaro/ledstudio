@@ -1,17 +1,13 @@
 import * as Colors from "../base/Colors";
-import LedStrip from "../base/LedStrip";
-import PianoVisualization, { State } from "../base/PianoVisualization";
+import PianoVisualization, { ColorRow, State } from "../base/PianoVisualization";
 
 export default class TestRainbowVisualization extends PianoVisualization {
-  private ledStrip: LedStrip;
   private offset = 0;
   private width = 88; // pixels per 360 degrees
   private speed = 120 / 1000;  // degrees per millis
 
-  constructor(ledStrip: LedStrip) {
-    super();
-    this.ledStrip = ledStrip;
-    ledStrip.reset();
+  constructor(leds: ColorRow) {
+    super(leds);
   }
 
   public render(elapsedMillis: number, state: State): void {
@@ -19,9 +15,9 @@ export default class TestRainbowVisualization extends PianoVisualization {
 
     const step = 360 / this.width;
 
-    for (let i = 0; i < this.ledStrip.size; ++i) {
+    for (let i = 0; i < this.leds.length; ++i) {
       const hue = this.offset + step * i;
-      this.ledStrip.setColor(i, Colors.hsv(hue, 1, 1));
+      this.leds[i] = Colors.hsv(hue, 1, 1);
     }
   }
 }

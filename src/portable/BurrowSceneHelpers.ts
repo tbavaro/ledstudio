@@ -1,15 +1,16 @@
 
 import * as Colors from "./base/Colors";
 import LedStrip from "./base/LedStrip";
+import { ColorRow } from "./base/PianoVisualization";
 import { ColorTransformLedStrip, MultipleLedStrip, PartialLedStrip } from "./CompositeLedStrips";
 
 const FRONT_LENGTH = 88;
 
-export interface BurrowLedStrips {
+interface BurrowLedStrips {
   readonly frontLedStrips: LedStrip[];
 }
 
-export function createBurrowLedStrips(ledStrip: LedStrip): BurrowLedStrips {
+function createBurrowLedStrips(ledStrip: LedStrip): BurrowLedStrips {
   if (ledStrip.size % FRONT_LENGTH !== 0) {
     throw new Error(`expected led strip length to be a multiple of ${FRONT_LENGTH}`);
   }
@@ -38,3 +39,19 @@ export function createBurrowSingleRowLedStrip(ledStrip: LedStrip, dropoffFactor?
 
   return new MultipleLedStrip(frontLedStrips);
 }
+
+export function copySingleRow(from: ColorRow, to: ColorRow) {
+  if (to.length % from.length !== 0) {
+    throw new Error(`expcted 'to' to be a multiple of ${from.length}`);
+  }
+
+  const numRows = to.length / from.length;
+  for (let row = 0; row < numRows; ++row) {
+    const offset = row * from.length;
+    const reverse = (row % 2 === 1);
+    for (let i = 0; i < from.length; ++i) {
+      to[offset + i] = from[(reverse ? (from.length - 1 - i) : i)];
+    }
+  }
+}
+

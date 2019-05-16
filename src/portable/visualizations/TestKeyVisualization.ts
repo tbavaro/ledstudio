@@ -11,7 +11,7 @@ export default class TestKeyVisualization extends PianoVisualization.default {
   private readonly frontLedStrip: LedStrip;
 
   constructor(ledStrip: LedStrip) {
-    super();
+    super([]);
     ledStrip.reset(COLOR_RELEASED);
 
     this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0);

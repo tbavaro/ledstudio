@@ -16,7 +16,7 @@ import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
-import RootLedStrip from "./RootLedStrip";
+import RootLeds from "./RootLedStrip";
 
 import "./App.css";
 import TimingStatsView from "./TimingStatsView";
@@ -64,7 +64,7 @@ type AllActions = RightSidebar.Actions;
 const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
 function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
-  const routerLedStrip = new RootLedStrip(/* 88 * 3 */880 * 4);
+  const routerLedStrip = new RootLeds(/* 88 * 3 */880 * 4);
   routerLedStrip.addStrip(fadeCandyLedStrip);
   return routerLedStrip;
 }
@@ -339,7 +339,7 @@ class App extends React.Component<{}, State> {
   }
 
   private visualizationRunnerForName = (name: PianoVisualizations.Name) => {
-    const vis = PianoVisualizations.create(name, this.routerLedStrip);
+    const vis = PianoVisualizations.create(name, this.routerLedStrip.leds);
     return new PianoVisualizationRunner(vis);
   }
 
