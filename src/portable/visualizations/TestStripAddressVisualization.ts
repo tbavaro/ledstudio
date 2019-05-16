@@ -1,6 +1,5 @@
 import * as Colors from "../base/Colors";
-import LedStrip from "../base/LedStrip";
-import PianoVisualization from "../base/PianoVisualization";
+import PianoVisualization, { ColorRow } from "../base/PianoVisualization";
 
 const MINOR_SEGMENT_LENGTH = 64;  // fadecandy channel
 const MAJOR_SEGMENT_LENGTH = 512;  // fadecandy unit
@@ -18,14 +17,11 @@ const PULSE_SPEED_LEDS_PER_SECOND = 16;
 const SEGMENT_HUE_INCREMENT = 210;
 
 export default class TestStripAddressVisualization extends PianoVisualization {
-  private ledStrip: LedStrip;
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
 
-  constructor(ledStrip: LedStrip) {
-    super([]);
-    this.ledStrip = ledStrip;
-    ledStrip.reset();
+  constructor(leds: ColorRow) {
+    super(leds);
   }
 
   public render(elapsedMillis: number): void {
@@ -35,8 +31,8 @@ export default class TestStripAddressVisualization extends PianoVisualization {
     this.timeCounter = (this.timeCounter + elapsedMillis) % LED_ZERO_BLINK_TIME;
     const flashBrightness = 2 * Math.abs(0.5 - this.timeCounter / LED_ZERO_BLINK_TIME);
 
-    for (let i = 0; i < this.ledStrip.size; ++i) {
-      this.ledStrip.setColor(i, this.colorForPixel(i, flashBrightness, pulseLocation));
+    for (let i = 0; i < this.leds.length; ++i) {
+      this.leds[i] = this.colorForPixel(i, flashBrightness, pulseLocation);
     }
   }
 

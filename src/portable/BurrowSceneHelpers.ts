@@ -40,17 +40,24 @@ export function createBurrowSingleRowLedStrip(ledStrip: LedStrip, dropoffFactor?
   return new MultipleLedStrip(frontLedStrips);
 }
 
-export function copySingleRow(from: ColorRow, to: ColorRow) {
+export function copySingleRow(from: ColorRow, to: ColorRow, derezAmount?: number) {
   if (to.length % from.length !== 0) {
-    throw new Error(`expcted 'to' to be a multiple of ${from.length}`);
+    throw new Error(`expected 'to' to be a multiple of ${from.length}`);
   }
 
   const numRows = to.length / from.length;
   for (let row = 0; row < numRows; ++row) {
     const offset = row * from.length;
     const reverse = (row % 2 === 1);
+    const dim = (row % 3 !== 1);
     for (let i = 0; i < from.length; ++i) {
-      to[offset + i] = from[(reverse ? (from.length - 1 - i) : i)];
+      if (derezAmount === undefined || Math.random() > derezAmount) {
+        let color = from[(reverse ? (from.length - 1 - i) : i)];
+        if (dim) {
+          color = Colors.multiply(color, 0.4);
+        }
+        to[offset + i] = color;
+      }
     }
   }
 }

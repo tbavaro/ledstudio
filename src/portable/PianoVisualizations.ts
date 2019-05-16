@@ -1,19 +1,19 @@
 import PianoVisualization, { ColorRow } from "./base/PianoVisualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
-// import GlowWaveisualization from "./visualizations/GlowWaveVisualization";
-// import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
-// import TestKeyVisualization from "./visualizations/TestKeyVisualization";
+import GlowWaveisualization from "./visualizations/GlowWaveVisualization";
+import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
+import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
-// import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
+import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 
 const visFuncs = {
-  // "glowWave": (leds: ColorRow) => new GlowWaveisualization(ledStrip),
+  "glowWave": (leds: ColorRow) => new GlowWaveisualization(leds),
   "centerSpread": (leds: ColorRow) => new CenterSpreadVisualization(leds),
-  // "testKey": (leds: ColorRow) => new TestKeyVisualization(ledStrip),
-  // "testKeyFade": (leds: ColorRow) => new TestKeyFadeVisualization(ledStrip),
+  "testKey": (leds: ColorRow) => new TestKeyVisualization(leds),
+  "testKeyFade": (leds: ColorRow) => new TestKeyFadeVisualization(leds),
   "testRainbow": (leds: ColorRow) => new TestRainbowVisualization(leds),
-  // "testStripAddress": (leds: ColorRow) => new TestStripAddressVisualization(ledStrip)
+  "testStripAddress": (leds: ColorRow) => new TestStripAddressVisualization(leds)
 };
 
 export type Name = keyof typeof visFuncs;

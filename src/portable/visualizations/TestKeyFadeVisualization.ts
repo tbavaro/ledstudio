@@ -1,5 +1,4 @@
 import * as Colors from "../base/Colors";
-import LedStrip from "../base/LedStrip";
 import * as PianoVisualization from "../base/PianoVisualization";
 
 import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
@@ -22,17 +21,15 @@ function colorForValue(v: number) {
   return PALETTE[x];
 }
 
-export default class TestKeyVisualization extends PianoVisualization.default {
+export default class TestKeyFadeVisualization extends PianoVisualization.default {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
-  private readonly frontLedStrip: LedStrip;
+  private readonly singleRowLeds: PianoVisualization.ColorRow;
 
-  constructor(ledStrip: LedStrip) {
-    super([]);
-    ledStrip.reset(colorForValue(0));
-
-    this.frontLedStrip = BurrowSceneHelpers.createBurrowSingleRowLedStrip(ledStrip, 0);
-    this.values = new Array(ledStrip.size).fill(0);
+  constructor(leds: PianoVisualization.ColorRow) {
+    super(leds);
+    this.singleRowLeds = new Array(88).fill(colorForValue(0));
+    this.values = new Array(this.singleRowLeds.length).fill(0);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
@@ -48,6 +45,8 @@ export default class TestKeyVisualization extends PianoVisualization.default {
     });
 
     // set colors
-    this.values.forEach((v, i) => this.frontLedStrip.setColor(i, colorForValue(v)));
+    this.values.forEach((v, i) => this.singleRowLeds[i] = colorForValue(v));
+
+    BurrowSceneHelpers.copySingleRow(this.singleRowLeds, this.leds);
   }
 }
