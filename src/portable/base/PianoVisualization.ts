@@ -1,5 +1,3 @@
-import Visualization from "./Visualization";
-
 export interface State {
   // 88 booleans; true = pressed, false = released
   keys: boolean[];
@@ -11,5 +9,6 @@ export interface State {
   changedKeys: ReadonlyArray<number>;
 }
 
-export default abstract class PianoVisualization extends Visualization<State> {
+export default abstract class PianoVisualization {
+  public abstract render(elapsedMillis: number, state: State): void;
 }
