@@ -2,7 +2,6 @@ import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
-import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
 import * as Utils from "../Utils";
 
 const WAVE_SPACING = 18;
@@ -76,6 +75,6 @@ export default class GlowWaveVisualization extends PianoVisualization.SingleRowP
       });
     });
 
-    BurrowSceneHelpers.copyWithDerez(colors, this.leds, DEREZ);
+    this.leds.copyWithDerez(colors, DEREZ);
   }
 }

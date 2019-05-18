@@ -17,4 +17,16 @@ export default class ColorRow extends FixedArray<Colors.Color> {
   public add(i: number, color: Colors.Color) {
     this.set(i, Colors.add(this.get(i), color));
   }
+
+  public copyWithDerez(from: ColorRow, derezAmount: number) {
+    if (this.length !== from.length) {
+      throw new Error("expected 'this' to be a the same length as 'from'");
+    }
+
+    for (let i = 0; i < from.length; ++i) {
+      if (Math.random() > derezAmount) {
+        this.set(i, from.get(i));
+      }
+    }
+  }
 }
