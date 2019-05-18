@@ -178,29 +178,28 @@ export default class SimulationViewport extends React.Component<Props, State> {
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
       currentScene: nextProps.scene,
+      currentLedScene: prevState.currentLedScene,
       registeredVisualizationRunner: nextProps.visualizationRunner
     };
-
-    if (
-      prevState.registeredVisualizationRunner !== undefined &&
-      nextProps.visualizationRunner !== prevState.registeredVisualizationRunner
-    ) {
-      throw new Error("changing visualizationRunner prop is unsupported");
-    }
 
     if (nextProps.scene !== prevState.currentScene) {
       if (prevState.currentLedScene !== undefined) {
         prevState.currentLedScene.remove();
       }
 
-      const ledScene = new LedScene(nextProps.scene, prevState.renderScene, prevState.doRender);
-      nextProps.visualizationRunner.simulationLedStrip = ledScene.ledStrip;
-      result.currentLedScene = ledScene;
+      result.currentLedScene = new LedScene(nextProps.scene, prevState.renderScene, prevState.doRender);
 
       // point at target
       prevState.camera.position.copy(nextProps.scene.cameraStartPosition);
       prevState.controls.target = nextProps.scene.cameraTarget;
       prevState.controls.update();
+    }
+
+    if (prevState.registeredVisualizationRunner) {
+      prevState.registeredVisualizationRunner.simulationLedStrip = undefined;
+    }
+    if (result.currentLedScene) {
+      nextProps.visualizationRunner.simulationLedStrip = result.currentLedScene.ledStrip;
     }
 
     return result;
