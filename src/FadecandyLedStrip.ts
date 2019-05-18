@@ -1,12 +1,46 @@
 import * as Colors from "./portable/base/Colors";
 import LedStrip from "./portable/base/LedStrip";
 
-import { PartialLedStrip } from "./portable/CompositeLedStrips";
 import { ensureValidRange, MovingAverageHelper } from "./portable/Utils";
 
 import FadecandyClient from "./FadecandyClient";
 
 const HEADER_LENGTH = 4;
+
+// represents a subset of an LedStrip as its own LedStrip
+class PartialLedStrip implements LedStrip {
+    private readonly delegateStrip: LedStrip;
+    private readonly indexOffset: number;
+    private readonly reverse: boolean;
+    public readonly size: number;
+
+    constructor(delegateStrip: LedStrip, indexOffset: number, numLeds: number, reverse?: boolean) {
+      this.delegateStrip = delegateStrip;
+      this.indexOffset = indexOffset;
+      this.size = numLeds;
+      this.reverse = reverse || false;
+    }
+
+    public setColor(n: number, color: Colors.Color) {
+      if (n >= 0 && n < this.size) {
+        if (this.reverse) {
+          n = this.size - 1 - n;
+        }
+        this.delegateStrip.setColor(this.indexOffset + n, color);
+      }
+    }
+
+    public setRange(startIndex: number, numLeds: number, color: Colors.Color) {
+      [startIndex, numLeds] = ensureValidRange(startIndex, numLeds, this.size);
+      if (numLeds > 0) {
+        this.delegateStrip.setRange(this.indexOffset + startIndex, numLeds, color);
+      }
+    }
+
+    public reset(color?: Colors.Color) {
+      this.setRange(0, this.size, color || Colors.BLACK);
+    }
+  }
 
 class FadecandyLedSingleStrip implements LedStrip {
   public readonly size: number;
