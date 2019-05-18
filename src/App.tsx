@@ -63,7 +63,7 @@ type AllActions = RightSidebar.Actions;
 const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
 function visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
-  const vis = PianoVisualizations.create(name, scene.ledPositions.length);
+  const vis = PianoVisualizations.create(name, scene.ledPositions.map(row => row.length));
   return new PianoVisualizationRunner(vis, scene);
 }
 

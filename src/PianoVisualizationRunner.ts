@@ -62,7 +62,12 @@ export default class PianoVisualizationRunner {
     const colors = this.ledMapper.mapLeds();
     [this.simulationLedStrip, this.hardwardLedStrip].forEach(strip => {
       if (strip !== undefined) {
-        colors.forEach((color, i) => strip.setColor(i, color));
+        let i = 0;
+        colors.forEach(row => {
+          row.forEach(color => {
+            strip.setColor(i++, color);
+          });
+        });
         strip.send();
       }
     });

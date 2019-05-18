@@ -20,8 +20,8 @@ export default class TestStripAddressVisualization extends PianoVisualization {
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
 
-  constructor(numLeds: number) {
-    super(numLeds);
+  constructor(numLeds: number[]) {
+    super(numLeds[0]);
   }
 
   public render(elapsedMillis: number): void {

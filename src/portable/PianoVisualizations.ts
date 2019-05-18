@@ -12,8 +12,8 @@ const visFuncs = {
   "centerSpread": () => new CenterSpreadVisualization(),
   "testKey": () => new TestKeyVisualization(),
   "testKeyFade": () => new TestKeyFadeVisualization(),
-  "testRainbow": (numLeds: number) => new TestRainbowVisualization(numLeds),
-  "testStripAddress": (numLeds: number) => new TestStripAddressVisualization(numLeds)
+  "testRainbow": (numLeds: number[]) => new TestRainbowVisualization(numLeds),
+  "testStripAddress": (numLeds: number[]) => new TestStripAddressVisualization(numLeds)
 };
 
 export type Name = keyof typeof visFuncs;
@@ -21,7 +21,7 @@ export type Name = keyof typeof visFuncs;
 export const defaultName: Name = "glowWave";
 
 export const names: ReadonlyArray<Name> = Object.keys(visFuncs) as Name[];
-export function create(name: Name, numLeds: number): PianoVisualization {
+export function create(name: Name, numLeds: number[]): PianoVisualization {
   if (!(name in visFuncs)) {
     throw new Error("unrecognized name");
   }
