@@ -1,6 +1,4 @@
-import * as Colors from "./portable/base/Colors";
-
-import { ColorRow } from "./portable/base/PianoVisualization";
+import ColorRow from "./portable/base/ColorRow";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 
 export default class RootLeds {
@@ -10,7 +8,7 @@ export default class RootLeds {
 
   constructor(size: number) {
     this.size = size;
-    this.leds = new Array(size).fill(Colors.BLACK);
+    this.leds = new ColorRow(size);
     this.strips = [];
   }
 

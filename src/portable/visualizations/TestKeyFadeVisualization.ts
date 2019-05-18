@@ -1,3 +1,4 @@
+import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
@@ -24,11 +25,11 @@ function colorForValue(v: number) {
 export default class TestKeyFadeVisualization extends PianoVisualization.default {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
-  private readonly singleRowLeds: PianoVisualization.ColorRow;
+  private readonly singleRowLeds: ColorRow;
 
-  constructor(leds: PianoVisualization.ColorRow) {
+  constructor(leds: ColorRow) {
     super(leds);
-    this.singleRowLeds = new Array(88).fill(colorForValue(0));
+    this.singleRowLeds = new ColorRow(88);
     this.values = new Array(this.singleRowLeds.length).fill(0);
   }
 
@@ -45,7 +46,7 @@ export default class TestKeyFadeVisualization extends PianoVisualization.default
     });
 
     // set colors
-    this.values.forEach((v, i) => this.singleRowLeds[i] = colorForValue(v));
+    this.values.forEach((v, i) => this.singleRowLeds.set(i, colorForValue(v)));
 
     BurrowSceneHelpers.copySingleRow(this.singleRowLeds, this.leds);
   }

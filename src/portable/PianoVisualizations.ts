@@ -1,4 +1,5 @@
-import PianoVisualization, { ColorRow } from "./base/PianoVisualization";
+import ColorRow from "./base/ColorRow";
+import PianoVisualization from "./base/PianoVisualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import GlowWaveisualization from "./visualizations/GlowWaveVisualization";

@@ -1,5 +1,6 @@
+import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
-import PianoVisualization, { ColorRow } from "../base/PianoVisualization";
+import PianoVisualization from "../base/PianoVisualization";
 
 const MINOR_SEGMENT_LENGTH = 64;  // fadecandy channel
 const MAJOR_SEGMENT_LENGTH = 512;  // fadecandy unit
@@ -32,7 +33,7 @@ export default class TestStripAddressVisualization extends PianoVisualization {
     const flashBrightness = 2 * Math.abs(0.5 - this.timeCounter / LED_ZERO_BLINK_TIME);
 
     for (let i = 0; i < this.leds.length; ++i) {
-      this.leds[i] = this.colorForPixel(i, flashBrightness, pulseLocation);
+      this.leds.set(i, this.colorForPixel(i, flashBrightness, pulseLocation));
     }
   }
 

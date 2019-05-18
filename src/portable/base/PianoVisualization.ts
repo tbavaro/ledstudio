@@ -1,4 +1,4 @@
-import { Color } from "./Colors";
+import ColorRow from "./ColorRow";
 
 export interface State {
   // 88 booleans; true = pressed, false = released
@@ -10,8 +10,6 @@ export interface State {
   // sorted indexes of keys changed since last frame
   changedKeys: ReadonlyArray<number>;
 }
-
-export type ColorRow = Color[];
 
 export default abstract class PianoVisualization {
   protected readonly leds: ColorRow;

@@ -1,3 +1,4 @@
+import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
@@ -25,11 +26,11 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
     private sparkles = new Array<SparkleInfo>();
     private time = 0;
     private keyToHue = new Array<number>();
-    private readonly singleRowLeds: Colors.Color[];
+    private readonly singleRowLeds: ColorRow;
 
-    constructor(leds: PianoVisualization.ColorRow) {
+    constructor(leds: ColorRow) {
         super(leds);
-        this.singleRowLeds = new Array(88).fill(Colors.BLACK);
+        this.singleRowLeds = new ColorRow(88);
         for(let i = 0; i < 88; ++i) {
             this.keyToHue[i] = randomHue();
         }
@@ -64,7 +65,7 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
                 const c = Colors.hsv(kt.randomHue, 1, brightness);
                 brightness -= TAIL_LENGTH_CONST / kt.velocity;
                 if (i < colors.length) {
-                    colors[i] = Colors.add(c, colors[i]);
+                    colors.add(i, c);
                 }
             }
 
@@ -73,14 +74,14 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
             for (let i = lo; i <= colors.length / 2 && brightness > 0; ++i) {
                 const c = Colors.hsv(kt.randomHue, 1, brightness);
                 brightness -= TAIL_LENGTH_CONST/ kt.velocity;
-                colors[i] = Colors.add(c, colors[i]);
+                colors.add(i, c);
             }
         }
 
         // add dem sparkles dat we luv
         this.sparkles = this.sparkles.filter(si => si.value > 0);
         for (let i = 0; i < colors.length; ++i) {
-            const rgb = Colors.split(colors[i]);
+            const rgb = Colors.split(colors.get(i));
             const v = Math.max(rgb[0], rgb[1], rgb[2]);
             if (v > 0 && Math.random() < 0.02 && this.sparkles.findIndex(si => si.led === i) < 0) {
                 this.sparkles.push({value: v, led: i});
@@ -88,7 +89,7 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
         }
         for (const si of this.sparkles) {
             const sparkleColor = Colors.hsv(randomHue(), Math.random()*0.25, si.value);
-            colors[si.led] = Colors.add(colors[si.led], sparkleColor);
+            colors.add(si.led, sparkleColor);
             si.value -= 0.03;
         }
 

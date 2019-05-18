@@ -1,5 +1,6 @@
+import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
-import PianoVisualization, { ColorRow, State } from "../base/PianoVisualization";
+import PianoVisualization, { State } from "../base/PianoVisualization";
 
 export default class TestRainbowVisualization extends PianoVisualization {
   private offset = 0;
@@ -17,7 +18,7 @@ export default class TestRainbowVisualization extends PianoVisualization {
 
     for (let i = 0; i < this.leds.length; ++i) {
       const hue = this.offset + step * i;
-      this.leds[i] = Colors.hsv(hue, 1, 1);
+      this.leds.set(i, Colors.hsv(hue, 1, 1));
     }
   }
 }

@@ -1,3 +1,4 @@
+import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
@@ -32,13 +33,13 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
 
 export default class GlowWaveVisualization extends PianoVisualization.default {
   private readonly pressedKeyColors = new Map<number, Colors.Color>();
-  private readonly singleRowLeds: PianoVisualization.ColorRow;
+  private readonly singleRowLeds: ColorRow;
 
-  constructor(leds: PianoVisualization.ColorRow) {
+  constructor(leds: ColorRow) {
     super(leds);
 
     // do everything derezed
-    this.singleRowLeds = new Array(88).fill(Colors.BLACK);
+    this.singleRowLeds = new ColorRow(88);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
@@ -66,14 +67,14 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
     const min = -1 * WAVE_SPACING;
     const max = this.singleRowLeds.length + WAVE_SPACING;
 
-    const colors = new Array<Colors.Color>(this.singleRowLeds.length).fill(Colors.BLACK);
+    const colors = new ColorRow(this.singleRowLeds.length);
     this.pressedKeyColors.forEach((color, n) => {
       doSymmetric(n, WAVE_SPACING, min, max, (waveCenter: number, waveNum: number) => {
         const waveColor = Colors.multiply(color, Math.pow(1 - WAVE_DROPOFF, waveNum));
         doSymmetric(waveCenter, 1, min, max, (pos: number, step: number) => {
           if (pos >= 0 && pos < this.singleRowLeds.length) {
             const ledColor = Colors.multiply(waveColor, Math.pow(1 - LED_DROPOFF, step));
-            colors[pos] = Colors.add(colors[pos], ledColor);
+            colors.add(pos, ledColor);
           }
         });
       });
