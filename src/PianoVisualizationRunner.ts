@@ -7,7 +7,7 @@ import { MovingAverageHelper } from "./portable/Utils";
 
 export default class PianoVisualizationRunner {
   private readonly stateHelper: PianoHelpers.PianoVisualizationStateHelper;
-  private readonly visualization: PianoVisualization;
+  public readonly visualization: PianoVisualization;
   private readonly timingHelper: MovingAverageHelper;
   private lastRenderTime: number = 0;
 

@@ -4,17 +4,24 @@ import { SendableLedStrip } from "./portable/SendableLedStrip";
 export default class RootLeds {
   public readonly size: number;
   private strips: SendableLedStrip[];
-  public readonly leds: ColorRow;
+  private colorRow?: ColorRow;
 
   constructor(size: number) {
     this.size = size;
-    this.leds = new ColorRow(size);
     this.strips = [];
   }
 
+  public setColorRow(colorRow: ColorRow) {
+    this.colorRow = colorRow;
+  }
+
   public send() {
+    const colorRow = this.colorRow;
+    if (!colorRow) {
+      throw new Error("colorRow not set");
+    }
     this.strips.forEach(strip => {
-      this.leds.forEach((color, i) => strip.setColor(i, color));
+      colorRow.forEach((color, i) => strip.setColor(i, color));
       strip.send();
     });
   }

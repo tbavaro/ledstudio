@@ -10,8 +10,8 @@ const COLOR_RELEASED = Colors.BLACK;
 export default class TestKeyVisualization extends PianoVisualization.default {
   private readonly singleRowLeds: ColorRow;
 
-  constructor(leds: ColorRow) {
-    super(leds);
+  constructor(numLeds: number) {
+    super(numLeds);
     this.singleRowLeds = new ColorRow(88, COLOR_RELEASED);
   }
 

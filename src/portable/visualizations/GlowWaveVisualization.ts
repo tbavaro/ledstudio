@@ -35,8 +35,8 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
   private readonly pressedKeyColors = new Map<number, Colors.Color>();
   private readonly singleRowLeds: ColorRow;
 
-  constructor(leds: ColorRow) {
-    super(leds);
+  constructor(numLeds: number) {
+    super(numLeds);
 
     // do everything derezed
     this.singleRowLeds = new ColorRow(88);

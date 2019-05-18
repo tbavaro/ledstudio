@@ -28,8 +28,8 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
     private keyToHue = new Array<number>();
     private readonly singleRowLeds: ColorRow;
 
-    constructor(leds: ColorRow) {
-        super(leds);
+    constructor(numLeds: number) {
+        super(numLeds);
         this.singleRowLeds = new ColorRow(88);
         for(let i = 0; i < 88; ++i) {
             this.keyToHue[i] = randomHue();

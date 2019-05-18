@@ -1,4 +1,3 @@
-import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import PianoVisualization from "../base/PianoVisualization";
 
@@ -21,8 +20,8 @@ export default class TestStripAddressVisualization extends PianoVisualization {
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
 
-  constructor(leds: ColorRow) {
-    super(leds);
+  constructor(numLeds: number) {
+    super(numLeds);
   }
 
   public render(elapsedMillis: number): void {

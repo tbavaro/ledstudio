@@ -12,10 +12,10 @@ export interface State {
 }
 
 export default abstract class PianoVisualization {
-  protected readonly leds: ColorRow;
+  public readonly leds: ColorRow;
 
-  constructor(leds: ColorRow) {
-    this.leds = leds;
+  constructor(numLeds: number) {
+    this.leds = new ColorRow(numLeds);
   }
 
   public abstract render(elapsedMillis: number, state: State): void;

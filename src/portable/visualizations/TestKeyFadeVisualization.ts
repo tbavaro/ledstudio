@@ -27,8 +27,8 @@ export default class TestKeyFadeVisualization extends PianoVisualization.default
   private readonly decayRate = 3 / 1000;
   private readonly singleRowLeds: ColorRow;
 
-  constructor(leds: ColorRow) {
-    super(leds);
+  constructor(numLeds: number) {
+    super(numLeds);
     this.singleRowLeds = new ColorRow(88);
     this.values = new Array(this.singleRowLeds.length).fill(0);
   }

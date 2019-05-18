@@ -69,6 +69,11 @@ function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
   return routerLedStrip;
 }
 
+function visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
+  const vis = PianoVisualizations.create(name, /* scene.ledPositions.length */880 * 4); // xcxc
+  return new PianoVisualizationRunner(vis);
+}
+
 class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
@@ -310,8 +315,10 @@ class App extends React.Component<{}, State> {
     },
     setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
       if (this.state.visualizationName !== newValue) {
+        const runner = visualizationRunnerForName(newValue, this.state.scene);
+        this.routerLedStrip.setColorRow(runner.visualization.leds);
         this.setState({
-          visualizationRunner: this.visualizationRunnerForName(newValue),
+          visualizationRunner: runner,
           visualizationName: newValue
         });
       }
@@ -336,11 +343,6 @@ class App extends React.Component<{}, State> {
     PianoHelpers.resetAllKeysMidiDatas().forEach(data => {
       this.midiEventEmitter.fire(new MidiEvent(data, /*suppressDisplay=*/true));
     });
-  }
-
-  private visualizationRunnerForName = (name: PianoVisualizations.Name) => {
-    const vis = PianoVisualizations.create(name, this.routerLedStrip.leds);
-    return new PianoVisualizationRunner(vis);
   }
 
   private myMidiListener: MidiEventListener = {
@@ -400,20 +402,25 @@ class App extends React.Component<{}, State> {
     this.renderTimingHelper.addValue(renderMillis);
   }
 
-  public state: State = {
-    visualizationName: PianoVisualizations.defaultName,
-    visualizationRunner: this.visualizationRunnerForName(PianoVisualizations.defaultName),
-    midiState: {
-      status: "initializing"
-    },
-    midiInput: null,
-    midiOutput: null,
-    midiFilename: "<<not assigned>>",
-    midiData: null,
-    midiInputs: [],
-    midiOutputs: [],
-    scene: Scenes.getDefaultScene()
-  };
+  public state = ((): State => {
+    const scene = Scenes.getDefaultScene();
+    const runner = visualizationRunnerForName(PianoVisualizations.defaultName, scene);
+    this.routerLedStrip.setColorRow(runner.visualization.leds);
+    return {
+      visualizationName: PianoVisualizations.defaultName,
+      visualizationRunner: runner,
+      midiState: {
+        status: "initializing"
+      },
+      midiInput: null,
+      midiOutput: null,
+      midiFilename: "<<not assigned>>",
+      midiData: null,
+      midiInputs: [],
+      midiOutputs: [],
+      scene: scene
+    };
+  })();
 }
 
 export default App;

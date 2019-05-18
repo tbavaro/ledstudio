@@ -1,4 +1,3 @@
-import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import PianoVisualization, { State } from "../base/PianoVisualization";
 
@@ -7,8 +6,8 @@ export default class TestRainbowVisualization extends PianoVisualization {
   private width = 88; // pixels per 360 degrees
   private speed = 120 / 1000;  // degrees per millis
 
-  constructor(leds: ColorRow) {
-    super(leds);
+  constructor(numLeds: number) {
+    super(numLeds);
   }
 
   public render(elapsedMillis: number, state: State): void {
