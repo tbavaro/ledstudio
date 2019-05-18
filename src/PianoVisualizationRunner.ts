@@ -1,15 +1,19 @@
 import PianoEvent from "./portable/base/PianoEvent";
+import PianoVisualization from "./portable/base/PianoVisualization";
+
 import * as PianoHelpers from "./portable/PianoHelpers";
+import { SendableLedStrip } from "./portable/SendableLedStrip";
+import { MovingAverageHelper } from "./portable/Utils";
 
 import MidiEvent from "./MidiEvent";
-import PianoVisualization from "./portable/base/PianoVisualization";
-import { MovingAverageHelper } from "./portable/Utils";
 
 export default class PianoVisualizationRunner {
   private readonly stateHelper: PianoHelpers.PianoVisualizationStateHelper;
   public readonly visualization: PianoVisualization;
   private readonly timingHelper: MovingAverageHelper;
   private lastRenderTime: number = 0;
+  public hardwardLedStrip?: SendableLedStrip;
+  public simulationLedStrip?: SendableLedStrip;
 
   constructor(visualization: PianoVisualization) {
     this.visualization = visualization;
@@ -33,6 +37,9 @@ export default class PianoVisualizationRunner {
     // timing
     const visTimeMillis = performance.now() - startTime;
     this.timingHelper.addValue(visTimeMillis);
+
+    // send
+    this.sendToStrips();
   }
 
   // TODO don't actually pass raw midi events in here, obv
@@ -46,5 +53,15 @@ export default class PianoVisualizationRunner {
 
   public get averageRenderTime() {
     return this.timingHelper.movingAverage;
+  }
+
+  private sendToStrips() {
+    const colorRow = this.visualization.leds;
+    [this.simulationLedStrip, this.hardwardLedStrip].forEach(strip => {
+      if (strip !== undefined) {
+        colorRow.forEach((color, i) => strip.setColor(i, color));
+        strip.send();
+      }
+    });
   }
 }

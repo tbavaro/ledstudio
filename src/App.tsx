@@ -16,7 +16,6 @@ import MIDIPlayer from "./MIDIPlayer";
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
-import RootLeds from "./RootLedStrip";
 
 import "./App.css";
 import TimingStatsView from "./TimingStatsView";
@@ -63,12 +62,6 @@ type AllActions = RightSidebar.Actions;
 
 const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
-function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
-  const routerLedStrip = new RootLeds();
-  routerLedStrip.addStrip(fadeCandyLedStrip);
-  return routerLedStrip;
-}
-
 function visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
   const vis = PianoVisualizations.create(name, scene.ledPositions.length);
   return new PianoVisualizationRunner(vis);
@@ -78,7 +71,6 @@ class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly fadeCandyLedStrip = new FadecandyLedStrip(new FadecandyClient());
-  private readonly routerLedStrip = initRouterLedStrip(this.fadeCandyLedStrip);
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -161,7 +153,7 @@ class App extends React.Component<{}, State> {
                 ? (
                     <SimulationViewport
                       scene={this.state.scene}
-                      routerLedStrip={this.routerLedStrip}
+                      visualizationRunner={this.state.visualizationRunner}
                       frameDidRender={this.simulationFrameDidRender}
                     />
                   )
@@ -316,7 +308,7 @@ class App extends React.Component<{}, State> {
     setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
       if (this.state.visualizationName !== newValue) {
         const runner = visualizationRunnerForName(newValue, this.state.scene);
-        this.routerLedStrip.setColorRow(runner.visualization.leds);
+        runner.hardwardLedStrip = this.fadeCandyLedStrip;
         this.setState({
           visualizationRunner: runner,
           visualizationName: newValue
@@ -379,7 +371,6 @@ class App extends React.Component<{}, State> {
     if (this.animating) {
       this.scheduleNextAnimationFrame();
       this.state.visualizationRunner.renderFrame();
-      this.routerLedStrip.send();
       ++this.framesRenderedSinceLastTimingsCall;
     }
   }
@@ -405,7 +396,7 @@ class App extends React.Component<{}, State> {
   public state = ((): State => {
     const scene = Scenes.getDefaultScene();
     const runner = visualizationRunnerForName(PianoVisualizations.defaultName, scene);
-    this.routerLedStrip.setColorRow(runner.visualization.leds);
+    runner.hardwardLedStrip = this.fadeCandyLedStrip;
     return {
       visualizationName: PianoVisualizations.defaultName,
       visualizationRunner: runner,

@@ -6,7 +6,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as Colors from "../portable/base/Colors";
 import { SendableLedStrip } from "../portable/SendableLedStrip";
 
-import RootLeds from "../RootLedStrip";
+import PianoVisualizationRunner from "../PianoVisualizationRunner";
 import * as Scenes from "../Scenes";
 
 import "./SimulationViewport.css";
@@ -158,7 +158,7 @@ class LedScene {
 
 interface Props {
   scene: Scenes.Scene;
-  routerLedStrip: RootLeds;
+  visualizationRunner: PianoVisualizationRunner;
   frameDidRender: (renderMillis: number) => void;
 }
 
@@ -166,7 +166,7 @@ type State = {
   readonly renderScene: Three.Scene;
   readonly camera: Three.PerspectiveCamera;
   readonly controls: OrbitControls;
-  registeredRouterLedStrip?: RootLeds;
+  registeredVisualizationRunner?: PianoVisualizationRunner;
   currentScene?: Scenes.Scene;
   currentLedScene?: LedScene;
   doRender: () => void;
@@ -178,14 +178,14 @@ export default class SimulationViewport extends React.Component<Props, State> {
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
       currentScene: nextProps.scene,
-      registeredRouterLedStrip: nextProps.routerLedStrip
+      registeredVisualizationRunner: nextProps.visualizationRunner
     };
 
     if (
-      prevState.registeredRouterLedStrip !== undefined &&
-      nextProps.routerLedStrip !== prevState.registeredRouterLedStrip
+      prevState.registeredVisualizationRunner !== undefined &&
+      nextProps.visualizationRunner !== prevState.registeredVisualizationRunner
     ) {
-      throw new Error("changing routerLedStrip prop is unsupported");
+      throw new Error("changing visualizationRunner prop is unsupported");
     }
 
     if (nextProps.scene !== prevState.currentScene) {
@@ -193,12 +193,8 @@ export default class SimulationViewport extends React.Component<Props, State> {
         prevState.currentLedScene.remove();
       }
 
-      if (prevState.currentLedScene) {
-        nextProps.routerLedStrip.removeStrip(prevState.currentLedScene.ledStrip);
-      }
-
       const ledScene = new LedScene(nextProps.scene, prevState.renderScene, prevState.doRender);
-      nextProps.routerLedStrip.addStrip(ledScene.ledStrip);
+      nextProps.visualizationRunner.simulationLedStrip = ledScene.ledStrip;
       result.currentLedScene = ledScene;
 
       // point at target
@@ -238,8 +234,8 @@ export default class SimulationViewport extends React.Component<Props, State> {
     window.removeEventListener("blur", this.onWindowBlur);
     window.removeEventListener("focus", this.onWindowFocus);
 
-    if (this.state.currentLedScene) {
-      this.props.routerLedStrip.removeStrip(this.state.currentLedScene.ledStrip);
+    if (this.state.currentLedScene && this.props.visualizationRunner.simulationLedStrip === this.state.currentLedScene.ledStrip) {
+      this.props.visualizationRunner.simulationLedStrip = undefined;
     }
   }
 
