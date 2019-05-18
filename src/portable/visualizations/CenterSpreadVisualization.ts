@@ -18,7 +18,7 @@ function randomHue() {
     return Math.floor(Math.random() * 360);
 }
 
-export default class CenterSpreadVisualization extends PianoVisualization.default {
+export default class CenterSpreadVisualization extends PianoVisualization.SingleRowPianoVisualization {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private time = 0;

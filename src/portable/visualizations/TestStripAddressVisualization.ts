@@ -1,5 +1,5 @@
 import * as Colors from "../base/Colors";
-import PianoVisualization from "../base/PianoVisualization";
+import * as PianoVisualization from "../base/PianoVisualization";
 
 const MINOR_SEGMENT_LENGTH = 64;  // fadecandy channel
 const MAJOR_SEGMENT_LENGTH = 512;  // fadecandy unit
@@ -16,12 +16,12 @@ const PULSE_SPEED_LEDS_PER_SECOND = 16;
 
 const SEGMENT_HUE_INCREMENT = 210;
 
-export default class TestStripAddressVisualization extends PianoVisualization {
+export default class TestStripAddressVisualization extends PianoVisualization.default {
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
 
   constructor(numLeds: number[]) {
-    super(numLeds[0]);
+    super(numLeds);
   }
 
   public render(elapsedMillis: number): void {
@@ -31,23 +31,23 @@ export default class TestStripAddressVisualization extends PianoVisualization {
     this.timeCounter = (this.timeCounter + elapsedMillis) % LED_ZERO_BLINK_TIME;
     const flashBrightness = 2 * Math.abs(0.5 - this.timeCounter / LED_ZERO_BLINK_TIME);
 
-    for (let i = 0; i < this.leds.length; ++i) {
-      this.leds.set(i, this.colorForPixel(i, flashBrightness, pulseLocation));
-    }
+    this.ledRows.forEach((row, rowIdx) => {
+      for (let i = 0; i < row.length; ++i) {
+        row.set(i, this.colorForPixel(rowIdx, i, flashBrightness, pulseLocation));
+      }
+    });
   }
 
-  private colorForPixel(n: number, flashBrightness: number, pulseLocation: number): Colors.Color {
-    if (n % MAJOR_SEGMENT_LENGTH === 0) {
-      let color = MAJOR_SEGMENT_START_COLOR;
-      if (n === 0) {
-        color = Colors.multiply(color, flashBrightness);
-      }
-      return color;
+  private colorForPixel(rowIdx: number, n: number, flashBrightness: number, pulseLocation: number): Colors.Color {
+    if (n % MAJOR_SEGMENT_LENGTH <= rowIdx) {
+      return Colors.multiply(MAJOR_SEGMENT_START_COLOR, flashBrightness);
+    } else if (n % MAJOR_SEGMENT_LENGTH <= rowIdx) {
+      return MAJOR_SEGMENT_START_COLOR;
     } else {
       const segmentNumber = Math.floor(n / MINOR_SEGMENT_LENGTH);
       const hue = (segmentNumber * SEGMENT_HUE_INCREMENT) % 360;
       let brightness;
-      if (n % MINOR_SEGMENT_LENGTH === 0) {
+      if (n % MINOR_SEGMENT_LENGTH <= rowIdx) {
         brightness = MINOR_SEGMENT_START_BRIGHTNESS;
       } else if ((n - pulseLocation) % PULSE_SEPARATION_LEDS === 0) {
         brightness = PULSE_BRIGHTNESS;

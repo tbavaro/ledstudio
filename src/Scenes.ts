@@ -9,6 +9,7 @@ import * as SimulationUtils from "./simulation/SimulationUtils";
 
 import ColorRow from "./portable/base/ColorRow";
 import * as Colors from "./portable/base/Colors";
+import FixedArray from "./portable/base/FixedArray";
 import PianoVisualization from "./portable/base/PianoVisualization";
 
 const FLOOR_SIZE_DEFAULT = 10;
@@ -56,28 +57,34 @@ interface SceneDef {
 }
 
 export abstract class LedMapper {
-  protected readonly visColorRow: ColorRow;
-  protected readonly outputColorRows: ColorRow[];
+  protected readonly visColorRows: FixedArray<ColorRow>;
+  protected readonly outputColorRows: FixedArray<ColorRow>;
 
   constructor(vis: PianoVisualization, targetLedNums: number[]) {
-    this.visColorRow = vis.leds;
-    this.outputColorRows = targetLedNums.map(n => new ColorRow(n));
+    this.visColorRows = vis.ledRows;
+    this.outputColorRows = FixedArray.from(targetLedNums.map(n => new ColorRow(n)));
   }
 
-  public abstract mapLeds(): ColorRow[];
+  public abstract mapLeds(): FixedArray<ColorRow>;
 }
 
 class DefaultLedMapper extends LedMapper {
-  public mapLeds(): ColorRow[] {
-    this.outputColorRows.forEach(outputColorRow => {
-      const numLeds = Math.min(this.visColorRow.length, outputColorRow.length);
-      for (let i = 0; i < numLeds; ++i) {
-        outputColorRow.set(i, this.visColorRow.get(i));
+  public mapLeds() {
+    let outputRowIdx = 0;
+    while (outputRowIdx < this.outputColorRows.length) {
+      const numRows = Math.min(this.outputColorRows.length - outputRowIdx, this.visColorRows.length);
+      for (let visRowIdx = 0; visRowIdx < numRows; ++visRowIdx) {
+        const visRow = this.visColorRows.get(visRowIdx);
+        const outputRow = this.outputColorRows.get(outputRowIdx++);
+        const numLeds = Math.min(visRow.length, outputRow.length);
+        for (let i = 0; i < numLeds; ++i) {
+          outputRow.set(i, visRow.get(i));
+        }
+        for (let i = numLeds; i < outputRow.length; ++i) {
+          outputRow.set(i, Colors.BLACK);
+        }
       }
-      for (let i = numLeds; i < outputColorRow.length; ++i) {
-        outputColorRow.set(i, Colors.BLACK);
-      }
-    });
+    }
     return this.outputColorRows;
   }
 }

@@ -1,7 +1,7 @@
 import * as Colors from "../base/Colors";
-import PianoVisualization, { State } from "../base/PianoVisualization";
+import * as PianoVisualization from "../base/PianoVisualization";
 
-export default class TestRainbowVisualization extends PianoVisualization {
+export default class TestRainbowVisualization extends PianoVisualization.SingleRowPianoVisualization {
   private offset = 0;
   private width = 88; // pixels per 360 degrees
   private speed = 120 / 1000;  // degrees per millis
@@ -10,7 +10,7 @@ export default class TestRainbowVisualization extends PianoVisualization {
     super(numLeds[0]);
   }
 
-  public render(elapsedMillis: number, state: State): void {
+  public render(elapsedMillis: number, state: PianoVisualization.State): void {
     this.offset = (this.offset + this.speed * elapsedMillis) % 360.0;
 
     const step = 360 / this.width;

@@ -31,7 +31,7 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
   });
 }
 
-export default class GlowWaveVisualization extends PianoVisualization.default {
+export default class GlowWaveVisualization extends PianoVisualization.SingleRowPianoVisualization {
   private readonly pressedKeyColors = new Map<number, Colors.Color>();
 
   constructor() {

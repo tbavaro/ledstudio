@@ -4,7 +4,7 @@ import * as PianoVisualization from "../base/PianoVisualization";
 const COLOR_PRESSED = Colors.WHITE;
 const COLOR_RELEASED = Colors.BLACK;
 
-export default class TestKeyVisualization extends PianoVisualization.default {
+export default class TestKeyVisualization extends PianoVisualization.SingleRowPianoVisualization {
   constructor() {
     super(88);
   }

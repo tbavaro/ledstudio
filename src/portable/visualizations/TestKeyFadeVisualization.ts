@@ -20,7 +20,7 @@ function colorForValue(v: number) {
   return PALETTE[x];
 }
 
-export default class TestKeyFadeVisualization extends PianoVisualization.default {
+export default class TestKeyFadeVisualization extends PianoVisualization.SingleRowPianoVisualization {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
 
