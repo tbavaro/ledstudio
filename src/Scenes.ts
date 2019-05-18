@@ -332,8 +332,8 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
     const scale = 2.5;
 
     const middleCenter = new Vector2(0, 0.3).multiplyScalar(scale);
-    const leftLegTop = new Vector2(-0.25, 0).multiplyScalar(scale);
-    const leftLegBottom = new Vector2(-0.25, 0.3).multiplyScalar(scale);
+    const leftLegTop = new Vector2(-0.25, 0.3).multiplyScalar(scale);
+    const leftLegBottom = new Vector2(-0.25, 0).multiplyScalar(scale);
     const leftWingTip = new Vector2(-0.65, 0.45).multiplyScalar(scale);
 
     const ribs = 6;
@@ -344,28 +344,31 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
       spacing: leftLegTop.clone().sub(leftLegBottom).length() / (ribs - 1)
     });
 
-    const leftSidePoints: Vector2[] = [];
     let spanLengths: number[] = [];
-    legPoints.forEach(legPoint => {
+    const leftSidePoints = legPoints.map((legPoint, row) => {
+      const points: Vector2[] = [];
       spanLengths.push(middleCenter.clone().sub(legPoint).length());
-      pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
-        start: middleCenter,
-        end: legPoint,
-        spacing: ledSpacing,
-        skipFirst: true
+      pushAll(points, SimulationUtils.pointsFromTo({
+        start: legPoint,
+        end: middleCenter,
+        spacing: ledSpacing
       }));
       spanLengths.push(leftWingTip.clone().sub(legPoint).length());
-      pushAll(leftSidePoints, SimulationUtils.pointsFromTo({
+      pushAll(points, SimulationUtils.pointsFromTo({
         start: legPoint,
-        end: leftWingTip,
+        end: leftWingTip.clone().add(new Vector2(0, -0.01 * row)),
         spacing: ledSpacing,
         skipFirst: true
       }));
+      return points;
     });
 
-    // mirror left and right side
-    const rightSidePoints = leftSidePoints.map(p => new Vector2(-1 * p.x, p.y));
-    const points = [...leftSidePoints, ...rightSidePoints];
+    // mirror left and right side and sort left-to-right
+    const allPoints = leftSidePoints.map(row => {
+      const points = [...row, ...row.map(p => new Vector2(-1 * p.x, p.y))];
+      points.sort((a, b) => a.x - b.x);
+      return points;
+    });
     spanLengths = [...spanLengths, ...spanLengths];
 
     const maxSpanLength = spanLengths.reduce((a, b) => Math.max(a, b), 0);
@@ -374,14 +377,14 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
     // console.log("wing stats", `# leds: ${points.length}`, "spanLengths", spanLengths, `total span length: ${totalSpanLength}`);
 
     return {
-      positions: [
+      positions: allPoints.map(points => (
         SimulationUtils.map2dTo3d({
           points: points,
           bottomLeft: new Vector3(0, 0.3, 0.75),
           rightDirection: new Vector3(1, 0, 0),
           upDirection: new Vector3(0, 1, 0)
         })
-      ],
+      )),
       displayValues: {
         maxSpan: roundPlaces(maxSpanLength, 2),
         totalSpan: roundPlaces(totalSpanLength, 2)
