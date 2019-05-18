@@ -6,6 +6,7 @@ import { SendableLedStrip } from "./portable/SendableLedStrip";
 import { MovingAverageHelper } from "./portable/Utils";
 
 import MidiEvent from "./MidiEvent";
+import { LedMapper, Scene } from "./Scenes";
 
 export default class PianoVisualizationRunner {
   private readonly stateHelper: PianoHelpers.PianoVisualizationStateHelper;
@@ -14,11 +15,13 @@ export default class PianoVisualizationRunner {
   private lastRenderTime: number = 0;
   public hardwardLedStrip?: SendableLedStrip;
   public simulationLedStrip?: SendableLedStrip;
+  private readonly ledMapper: LedMapper;
 
-  constructor(visualization: PianoVisualization) {
+  constructor(visualization: PianoVisualization, scene: Scene) {
     this.visualization = visualization;
     this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
     this.timingHelper = new MovingAverageHelper(20);
+    this.ledMapper = scene.createLedMapper(visualization);
   }
 
   public renderFrame() {
@@ -56,10 +59,10 @@ export default class PianoVisualizationRunner {
   }
 
   private sendToStrips() {
-    const colorRow = this.visualization.leds;
+    const colors = this.ledMapper.mapLeds();
     [this.simulationLedStrip, this.hardwardLedStrip].forEach(strip => {
       if (strip !== undefined) {
-        colorRow.forEach((color, i) => strip.setColor(i, color));
+        colors.forEach((color, i) => strip.setColor(i, color));
         strip.send();
       }
     });

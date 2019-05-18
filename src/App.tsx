@@ -64,7 +64,7 @@ const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
 function visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
   const vis = PianoVisualizations.create(name, scene.ledPositions.length);
-  return new PianoVisualizationRunner(vis);
+  return new PianoVisualizationRunner(vis, scene);
 }
 
 class App extends React.Component<{}, State> {
@@ -292,6 +292,24 @@ class App extends React.Component<{}, State> {
     });
   }
 
+  private updateVisualizationAndScene(
+    visualizationName: PianoVisualizations.Name,
+    scene: Scenes.Scene,
+    doNotSetState?: boolean
+  ) {
+    const runner = visualizationRunnerForName(visualizationName, scene);
+    runner.hardwardLedStrip = this.fadeCandyLedStrip;
+    const values = {
+      visualizationRunner: runner,
+      visualizationName: visualizationName,
+      scene: scene
+    };
+    if (!doNotSetState) {
+      this.setState(values);
+    }
+    return values;
+  }
+
   private actionManager: AllActions = {
     playMusic: this.handlePlayMusic,
     stopMusic: this.handleStopMusic,
@@ -300,19 +318,13 @@ class App extends React.Component<{}, State> {
     setSelectedMidiFilename: this.loadMidiFile,
     setSelectedSceneName: (name: string) => {
       if (name !== this.state.scene.name) {
-        this.setState({
-          scene: Scenes.getScene(name)
-        });
+        const scene = Scenes.getScene(name);
+        this.updateVisualizationAndScene(this.state.visualizationName, scene);
       }
     },
     setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
       if (this.state.visualizationName !== newValue) {
-        const runner = visualizationRunnerForName(newValue, this.state.scene);
-        runner.hardwardLedStrip = this.fadeCandyLedStrip;
-        this.setState({
-          visualizationRunner: runner,
-          visualizationName: newValue
-        });
+        this.updateVisualizationAndScene(newValue, this.state.scene);
       }
     }
   };
@@ -395,11 +407,12 @@ class App extends React.Component<{}, State> {
 
   public state = ((): State => {
     const scene = Scenes.getDefaultScene();
-    const runner = visualizationRunnerForName(PianoVisualizations.defaultName, scene);
-    runner.hardwardLedStrip = this.fadeCandyLedStrip;
     return {
-      visualizationName: PianoVisualizations.defaultName,
-      visualizationRunner: runner,
+      ...this.updateVisualizationAndScene(
+        PianoVisualizations.defaultName,
+        scene,
+        /*doNotSetState=*/true
+      ),
       midiState: {
         status: "initializing"
       },
@@ -408,8 +421,7 @@ class App extends React.Component<{}, State> {
       midiFilename: "<<not assigned>>",
       midiData: null,
       midiInputs: [],
-      midiOutputs: [],
-      scene: scene
+      midiOutputs: []
     };
   })();
 }

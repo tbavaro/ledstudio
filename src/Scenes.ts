@@ -7,6 +7,10 @@ import { pushAll, roundPlaces } from "./portable/Utils";
 
 import * as SimulationUtils from "./simulation/SimulationUtils";
 
+import ColorRow from "./portable/base/ColorRow";
+import * as Colors from "./portable/base/Colors";
+import PianoVisualization from "./portable/base/PianoVisualization";
+
 const FLOOR_SIZE_DEFAULT = 10;
 const FLOOR_COLOR = 0x070707;
 
@@ -48,6 +52,32 @@ interface SceneDef {
   model: ModelDef;
   extraObjects?: ExtraObjectFunc[];
   leds: LedsDef;
+  createLedMapper?: (vis: PianoVisualization, targetLedNum: number) => LedMapper;
+}
+
+export abstract class LedMapper {
+  protected readonly visColorRow: ColorRow;
+  protected readonly outputColorRow: ColorRow;
+
+  constructor(vis: PianoVisualization, targetLedNum: number) {
+    this.visColorRow = vis.leds;
+    this.outputColorRow = new ColorRow(targetLedNum);
+  }
+
+  public abstract mapLeds(): ColorRow;
+}
+
+class DefaultLedMapper extends LedMapper {
+  public mapLeds(): ColorRow {
+    const numLeds = Math.min(this.visColorRow.length, this.outputColorRow.length);
+    for (let i = 0; i < numLeds; ++i) {
+      this.outputColorRow.set(i, this.visColorRow.get(i));
+    }
+    for (let i = numLeds; i < this.outputColorRow.length; ++i) {
+      this.outputColorRow.set(i, Colors.BLACK);
+    }
+    return this.outputColorRow;
+  }
 }
 
 // creates a box with the bottom centered at (0,0,0)
@@ -186,6 +216,15 @@ export class Scene {
       this.cachedDisplayMessage = Object.entries(this.initDisplayValuesIfNeeded()).map((entry) => `${entry[0]}=${entry[1]}`).join(" / ");
     }
     return this.cachedDisplayMessage;
+  }
+
+  public createLedMapper(vis: PianoVisualization) {
+    const targetLedNum = this.ledPositions.length;
+    if (this.def.createLedMapper) {
+      return this.def.createLedMapper(vis, targetLedNum);
+    } else {
+      return new DefaultLedMapper(vis, targetLedNum);
+    }
   }
 }
 
@@ -377,7 +416,8 @@ registerScenes([
         startPoint: new Three.Vector3(-0.6, .71, -0.173),
         endPoint: new Three.Vector3(0.6, .71, -0.173)
       }
-    ])
+    ]),
+    createLedMapper: (vis: PianoVisualization, numLeds: number) => new DefaultLedMapper(vis, numLeds)
   },
   createWingsSceneDef("keyboard:wings30", LedSpacings.NEOPIXEL_30),
   createWingsSceneDef("keyboard:wings60", LedSpacings.NEOPIXEL_60)
