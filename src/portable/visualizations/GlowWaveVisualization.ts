@@ -33,13 +33,9 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
 
 export default class GlowWaveVisualization extends PianoVisualization.default {
   private readonly pressedKeyColors = new Map<number, Colors.Color>();
-  private readonly singleRowLeds: ColorRow;
 
-  constructor(numLeds: number) {
-    super(numLeds);
-
-    // do everything derezed
-    this.singleRowLeds = new ColorRow(88);
+  constructor() {
+    super(88);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
@@ -65,14 +61,14 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
 
     // overshoot so edges get glow even if the wave center is out of bounds
     const min = -1 * WAVE_SPACING;
-    const max = this.singleRowLeds.length + WAVE_SPACING;
+    const max = this.leds.length + WAVE_SPACING;
 
-    const colors = new ColorRow(this.singleRowLeds.length);
+    const colors = new ColorRow(this.leds.length);
     this.pressedKeyColors.forEach((color, n) => {
       doSymmetric(n, WAVE_SPACING, min, max, (waveCenter: number, waveNum: number) => {
         const waveColor = Colors.multiply(color, Math.pow(1 - WAVE_DROPOFF, waveNum));
         doSymmetric(waveCenter, 1, min, max, (pos: number, step: number) => {
-          if (pos >= 0 && pos < this.singleRowLeds.length) {
+          if (pos >= 0 && pos < colors.length) {
             const ledColor = Colors.multiply(waveColor, Math.pow(1 - LED_DROPOFF, step));
             colors.add(pos, ledColor);
           }
@@ -80,6 +76,6 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
       });
     });
 
-    BurrowSceneHelpers.copySingleRow(colors, this.leds, DEREZ);
+    BurrowSceneHelpers.copyWithDerez(colors, this.leds, DEREZ);
   }
 }

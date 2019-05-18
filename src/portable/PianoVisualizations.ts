@@ -1,17 +1,17 @@
 import PianoVisualization from "./base/PianoVisualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
-import GlowWaveisualization from "./visualizations/GlowWaveVisualization";
+import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 
 const visFuncs = {
-  "glowWave": (numLeds: number) => new GlowWaveisualization(numLeds),
-  "centerSpread": (numLeds: number) => new CenterSpreadVisualization(numLeds),
-  "testKey": (numLeds: number) => new TestKeyVisualization(numLeds),
-  "testKeyFade": (numLeds: number) => new TestKeyFadeVisualization(numLeds),
+  "glowWave": () => new GlowWaveVisualization(),
+  "centerSpread": () => new CenterSpreadVisualization(),
+  "testKey": () => new TestKeyVisualization(),
+  "testKeyFade": () => new TestKeyFadeVisualization(),
   "testRainbow": (numLeds: number) => new TestRainbowVisualization(numLeds),
   "testStripAddress": (numLeds: number) => new TestStripAddressVisualization(numLeds)
 };

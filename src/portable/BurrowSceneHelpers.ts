@@ -40,7 +40,7 @@ export function createBurrowSingleRowLedStrip(ledStrip: LedStrip, dropoffFactor?
   return new MultipleLedStrip(frontLedStrips);
 }
 
-export function copySingleRow(from: ColorRow, to: ColorRow, derezAmount?: number) {
+export function copySingleRow(from: ColorRow, to: ColorRow) {
   if (to.length % from.length !== 0) {
     throw new Error(`expected 'to' to be a multiple of ${from.length}`);
   }
@@ -51,14 +51,25 @@ export function copySingleRow(from: ColorRow, to: ColorRow, derezAmount?: number
     const reverse = (row % 2 === 1);
     const dim = (row % 3 !== 1);
     for (let i = 0; i < from.length; ++i) {
-      if (derezAmount === undefined || Math.random() > derezAmount) {
-        let color = from.get(reverse ? (from.length - 1 - i) : i);
-        if (dim) {
-          color = Colors.multiply(color, 0.4);
-        }
-        to.set(offset + i, color);
+      let color = from.get(reverse ? (from.length - 1 - i) : i);
+      if (dim) {
+        color = Colors.multiply(color, 0.4);
       }
+      to.set(offset + i, color);
     }
   }
 }
+
+export function copyWithDerez(from: ColorRow, to: ColorRow, derezAmount: number) {
+  if (to.length !== from.length) {
+    throw new Error("expected 'to' to be a the same length as 'from'");
+  }
+
+  for (let i = 0; i < from.length; ++i) {
+    if (Math.random() > derezAmount) {
+      to.set(i, from.get(i));
+    }
+  }
+}
+
 

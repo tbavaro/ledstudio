@@ -1,8 +1,5 @@
-import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
-
-import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
 
 const TAIL_LENGTH_CONST = 0.02;
 
@@ -26,12 +23,10 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
     private sparkles = new Array<SparkleInfo>();
     private time = 0;
     private keyToHue = new Array<number>();
-    private readonly singleRowLeds: ColorRow;
 
-    constructor(numLeds: number) {
-        super(numLeds);
-        this.singleRowLeds = new ColorRow(88);
-        for(let i = 0; i < 88; ++i) {
+    constructor() {
+        super(88);
+        for(let i = 0; i < this.leds.length; ++i) {
             this.keyToHue[i] = randomHue();
         }
     }
@@ -51,37 +46,36 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
             this.info.push({time: this.time, velocity: Math.min(1, sumVelocity), randomHue: randomHue()});
         }
 
-        const colors = this.singleRowLeds;
-        colors.fill(Colors.BLACK);
+        this.leds.fill(Colors.BLACK);
 
         // main reaction to key press by placing random colors spreading from the center
         for (const kt of this.info) {
             const elapsed = this.time - kt.time;
-            const idx = Math.round((elapsed / 1000.0) * (colors.length / 2));
+            const idx = Math.round((elapsed / 1000.0) * (this.leds.length / 2));
 
-            const hi = idx + colors.length / 2;
+            const hi = idx + this.leds.length / 2;
             let brightness = 1;
-            for (let i = hi; i >= colors.length / 2 && brightness > 0; --i) {
+            for (let i = hi; i >= this.leds.length / 2 && brightness > 0; --i) {
                 const c = Colors.hsv(kt.randomHue, 1, brightness);
                 brightness -= TAIL_LENGTH_CONST / kt.velocity;
-                if (i < colors.length) {
-                    colors.add(i, c);
+                if (i < this.leds.length) {
+                    this.leds.add(i, c);
                 }
             }
 
-            const lo = colors.length / 2 - idx;
+            const lo = this.leds.length / 2 - idx;
             brightness = 1;
-            for (let i = lo; i <= colors.length / 2 && brightness > 0; ++i) {
+            for (let i = lo; i <= this.leds.length / 2 && brightness > 0; ++i) {
                 const c = Colors.hsv(kt.randomHue, 1, brightness);
                 brightness -= TAIL_LENGTH_CONST/ kt.velocity;
-                colors.add(i, c);
+                this.leds.add(i, c);
             }
         }
 
         // add dem sparkles dat we luv
         this.sparkles = this.sparkles.filter(si => si.value > 0);
-        for (let i = 0; i < colors.length; ++i) {
-            const rgb = Colors.split(colors.get(i));
+        for (let i = 0; i < this.leds.length; ++i) {
+            const rgb = Colors.split(this.leds.get(i));
             const v = Math.max(rgb[0], rgb[1], rgb[2]);
             if (v > 0 && Math.random() < 0.02 && this.sparkles.findIndex(si => si.led === i) < 0) {
                 this.sparkles.push({value: v, led: i});
@@ -89,11 +83,8 @@ export default class CenterSpreadVisualization extends PianoVisualization.defaul
         }
         for (const si of this.sparkles) {
             const sparkleColor = Colors.hsv(randomHue(), Math.random()*0.25, si.value);
-            colors.add(si.led, sparkleColor);
+            this.leds.add(si.led, sparkleColor);
             si.value -= 0.03;
         }
-
-        // write colors
-        BurrowSceneHelpers.copySingleRow(colors, this.leds);
     }
 }

@@ -1,8 +1,6 @@
-import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
-import * as BurrowSceneHelpers from "../BurrowSceneHelpers";
 import * as Utils from "../Utils";
 
 const COLOR_PRESSED = Colors.WHITE;
@@ -25,12 +23,10 @@ function colorForValue(v: number) {
 export default class TestKeyFadeVisualization extends PianoVisualization.default {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
-  private readonly singleRowLeds: ColorRow;
 
-  constructor(numLeds: number) {
-    super(numLeds);
-    this.singleRowLeds = new ColorRow(88);
-    this.values = new Array(this.singleRowLeds.length).fill(0);
+  constructor() {
+    super(88);
+    this.values = new Array(this.leds.length).fill(0);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
@@ -46,8 +42,6 @@ export default class TestKeyFadeVisualization extends PianoVisualization.default
     });
 
     // set colors
-    this.values.forEach((v, i) => this.singleRowLeds.set(i, colorForValue(v)));
-
-    BurrowSceneHelpers.copySingleRow(this.singleRowLeds, this.leds);
+    this.values.forEach((v, i) => this.leds.set(i, colorForValue(v)));
   }
 }
