@@ -383,4 +383,4 @@ registerScenes([
   createWingsSceneDef("keyboard:wings60", LedSpacings.NEOPIXEL_60)
 ]);
 
-defaultScene = getScene("keyboard:wings30");
+defaultScene = getScene("keyboard:3stripes");

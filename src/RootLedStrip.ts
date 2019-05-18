@@ -2,12 +2,10 @@ import ColorRow from "./portable/base/ColorRow";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 
 export default class RootLeds {
-  public readonly size: number;
   private strips: SendableLedStrip[];
   private colorRow?: ColorRow;
 
-  constructor(size: number) {
-    this.size = size;
+  constructor() {
     this.strips = [];
   }
 
@@ -28,9 +26,6 @@ export default class RootLeds {
 
   public addStrip(strip: SendableLedStrip) {
     if (!this.strips.includes(strip)) {
-      if (strip.size > this.size) {
-        throw new Error("adding bigger LedStrip into smaller RouterLedStrip");
-      }
       this.strips.push(strip);
     }
   }

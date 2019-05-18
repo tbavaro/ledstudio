@@ -64,13 +64,13 @@ type AllActions = RightSidebar.Actions;
 const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
 function initRouterLedStrip(fadeCandyLedStrip: FadecandyLedStrip) {
-  const routerLedStrip = new RootLeds(/* 88 * 3 */880 * 4);
+  const routerLedStrip = new RootLeds();
   routerLedStrip.addStrip(fadeCandyLedStrip);
   return routerLedStrip;
 }
 
 function visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
-  const vis = PianoVisualizations.create(name, /* scene.ledPositions.length */880 * 4); // xcxc
+  const vis = PianoVisualizations.create(name, scene.ledPositions.length);
   return new PianoVisualizationRunner(vis);
 }
 
