@@ -8,11 +8,14 @@ import { bracket, pushAll, roundPlaces } from "./portable/Utils";
 import * as SimulationUtils from "./simulation/SimulationUtils";
 
 import ColorRow from "./portable/base/ColorRow";
+import  * as Colors from "./portable/base/Colors";
 import FixedArray from "./portable/base/FixedArray";
 import PianoVisualization from "./portable/base/PianoVisualization";
 
 const FLOOR_SIZE_DEFAULT = 10;
 const FLOOR_COLOR = 0x070707;
+
+const UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 
 const LedSpacings = {
   NEOPIXEL_30: (1 / 30),
@@ -94,22 +97,26 @@ class DefaultLedMapper extends LedMapper {
       default:
         throw new Error(`unsupported anchor type: '${anchor}'`);
     }
+
+    console.log("offsets", this.visRowOffsets, this.targetRowOffsets);
   }
 
   public mapLeds() {
     let outputRowIdx = 0;
     while (outputRowIdx < this.outputColorRows.length) {
       const numRows = Math.min(this.outputColorRows.length - outputRowIdx, this.visColorRows.length);
-      const outputRowOffset = this.targetRowOffsets[outputRowIdx];
       for (let visRowIdx = 0; visRowIdx < numRows; ++visRowIdx) {
         const visRow = this.visColorRows.get(visRowIdx);
         const visRowOffset = this.visRowOffsets[visRowIdx];
-        const offset = outputRowOffset - visRowOffset;
+        const outputRowOffset = this.targetRowOffsets[outputRowIdx];
         const outputRow = this.outputColorRows.get(outputRowIdx++);
+
+        const offset = outputRowOffset - visRowOffset;
 
         const minI = bracket(0, outputRow.length - 1, offset);
         const maxI = bracket(0, outputRow.length - 1, visRow.length - 1 + offset);
 
+        outputRow.fill(UNMAPPED_LED_COLOR);
         for (let i = minI; i <= maxI; ++i) {
           outputRow.set(i, visRow.get(i - offset));
         }
