@@ -32,16 +32,18 @@ export function floatToString(n: number, precision: number): string {
   return `${intPart}.${fracPart}`;
 }
 
+export function bracket(min: number, max: number, v: number) {
+  if (v < min) {
+    return min;
+  } else if (v > max) {
+    return max;
+  } else {
+    return v;
+  }
+}
+
 export function createBracketFunc(min: number, max: number): (v: number) => number {
-  return (v: number) => {
-    if (v < min) {
-      return min;
-    } else if (v > max) {
-      return max;
-    } else {
-      return v;
-    }
-  };
+  return (v: number) => bracket(min, max, v);
 }
 
 export const bracket01 = createBracketFunc(0, 1);

@@ -3,12 +3,11 @@ import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-import { pushAll, roundPlaces } from "./portable/Utils";
+import { bracket, pushAll, roundPlaces } from "./portable/Utils";
 
 import * as SimulationUtils from "./simulation/SimulationUtils";
 
 import ColorRow from "./portable/base/ColorRow";
-import * as Colors from "./portable/base/Colors";
 import FixedArray from "./portable/base/FixedArray";
 import PianoVisualization from "./portable/base/PianoVisualization";
 
@@ -68,21 +67,55 @@ export abstract class LedMapper {
   public abstract mapLeds(): FixedArray<ColorRow>;
 }
 
+type LedMapperAnchor = "beginning" | "middle";
+
 class DefaultLedMapper extends LedMapper {
+  private readonly visRowOffsets: number[];
+  private readonly targetRowOffsets: number[];
+
+  constructor(vis: PianoVisualization, targetLedNums: number[], anchor?: LedMapperAnchor) {
+    super(vis, targetLedNums);
+
+    if (anchor === undefined) {
+      anchor = "beginning";
+    }
+
+    switch (anchor) {
+      case "beginning":
+        this.visRowOffsets = new Array(vis.ledRows.length).fill(0);
+        this.targetRowOffsets = new Array(targetLedNums.length).fill(0);
+        break;
+
+      case "middle":
+        this.visRowOffsets = vis.ledRows.map(r => Math.floor(r.length / 2));
+        this.targetRowOffsets = targetLedNums.map(n => Math.floor(n / 2));
+        break;
+
+      default:
+        throw new Error(`unsupported anchor type: '${anchor}'`);
+    }
+  }
+
   public mapLeds() {
     let outputRowIdx = 0;
     while (outputRowIdx < this.outputColorRows.length) {
       const numRows = Math.min(this.outputColorRows.length - outputRowIdx, this.visColorRows.length);
+      const outputRowOffset = this.targetRowOffsets[outputRowIdx];
       for (let visRowIdx = 0; visRowIdx < numRows; ++visRowIdx) {
         const visRow = this.visColorRows.get(visRowIdx);
+        const visRowOffset = this.visRowOffsets[visRowIdx];
+        const offset = outputRowOffset - visRowOffset;
         const outputRow = this.outputColorRows.get(outputRowIdx++);
-        const numLeds = Math.min(visRow.length, outputRow.length);
-        for (let i = 0; i < numLeds; ++i) {
-          outputRow.set(i, visRow.get(i));
+
+        const minI = bracket(0, outputRow.length - 1, offset);
+        const maxI = bracket(0, outputRow.length - 1, visRow.length - 1 + offset);
+
+        for (let i = minI; i <= maxI; ++i) {
+          outputRow.set(i, visRow.get(i - offset));
         }
-        for (let i = numLeds; i < outputRow.length; ++i) {
-          outputRow.set(i, Colors.BLACK);
-        }
+        // for (let i = numLeds; i < outputRow.length; ++i) {
+        //   outputRow.set(i, Colors.BLACK);
+        // }
       }
     }
     return this.outputColorRows;
@@ -127,7 +160,7 @@ export class Scene {
   public get ledPositions(): Vector3[][] {
     if (this.lazyLoadedLedPositions === undefined) {
       this.lazyLoadedLedPositions = this.def.leds.calculatePositions();
-      this.setDisplayValue("#leds", this.lazyLoadedLedPositions.length);
+      this.setDisplayValue("#leds", this.lazyLoadedLedPositions.reduce((accum, row) => accum + row.length, 0));
     }
     return this.lazyLoadedLedPositions;
   }
@@ -400,7 +433,8 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
       target: new Vector3(0, 0.7, 0)
     },
     leds: { calculatePositions: () => calculate().positions },
-    initialDisplayValues: () => calculate().displayValues
+    initialDisplayValues: () => calculate().displayValues,
+    createLedMapper: (vis: PianoVisualization, targetLedNums: number[]) => new DefaultLedMapper(vis, targetLedNums, "middle")
   };
 }
 
