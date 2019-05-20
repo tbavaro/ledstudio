@@ -23,10 +23,14 @@ function initializeScene() {
 
   let light = new Three.DirectionalLight(0xaaaaaa);
   light.position.set(-100, 100, 100);
+  light.castShadow = false;
+  light.receiveShadow = false;
   renderScene.add(light);
 
   light = new Three.DirectionalLight(0x444444);
   light.position.set(100, 100, -100);
+  light.castShadow = false;
+  light.receiveShadow = false;
   renderScene.add(light);
 
   return renderScene;
@@ -36,19 +40,20 @@ class LedHelper {
   private static readonly LED_RADIUS = 0.006;
   private static readonly RADIUS_MULTIPLIERS = [1, 1.5];
   private static readonly COLOR_MULTIPLIERS = [1, 0.8];
+  private static readonly GLOW_POSITION_OFFSET = new Vector3(0, 0, -0.0001);
 
   private static readonly GEOMETRIES = LedHelper.RADIUS_MULTIPLIERS.map(m => (
-    new Three.PlaneGeometry(LedHelper.LED_RADIUS * m, LedHelper.LED_RADIUS * m)
+    new Three.PlaneBufferGeometry(LedHelper.LED_RADIUS * m, LedHelper.LED_RADIUS * m)
   ));
 
   private static readonly MATERIAL = new Three.MeshBasicMaterial({
-    transparent: true,
     side: Three.DoubleSide
   });
   private static readonly ADDITIVE_MATERIAL = new Three.MeshBasicMaterial({
     blending: Three.AdditiveBlending,
     transparent: true,
-    side: Three.DoubleSide
+    side: Three.DoubleSide,
+    depthWrite: false
   });
 
   private colors: Three.Color[] = [];
@@ -56,7 +61,7 @@ class LedHelper {
   constructor(renderScene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
     const meshes: Three.Object3D[] = [];
     LedHelper.GEOMETRIES.forEach((geometry, i) => {
-      geometry = geometry.clone();
+      // geometry = geometry.clone();
       const isGlowMesh = (i > 0);
       const material = (isGlowMesh ? LedHelper.ADDITIVE_MATERIAL : LedHelper.MATERIAL).clone();
       this.colors.push(material.color);
@@ -66,8 +71,10 @@ class LedHelper {
       // }
       mesh.position.copy(position);
       if (isGlowMesh) {
-        mesh.position.add(new Vector3(0, 0, -0.0001));
+        mesh.position.add(LedHelper.GLOW_POSITION_OFFSET);
       }
+      mesh.castShadow = false;
+      mesh.receiveShadow = false;
       renderScene.add(mesh);
       meshes.push(mesh);
     });
@@ -209,7 +216,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
     if (super.componentDidMount) {
       super.componentDidMount();
     }
-    this.renderer.autoClear = true;
 
     this.ref.appendChild(this.renderer.domElement);
     this.state.controls.domElement = this.ref;
@@ -235,6 +241,10 @@ export default class SimulationViewport extends React.Component<Props, State> {
 
     if (this.state.currentLedScene && this.props.visualizationRunner.simulationLedStrip === this.state.currentLedScene.ledStrip) {
       this.props.visualizationRunner.simulationLedStrip = undefined;
+    }
+
+    if (this.state.currentLedScene) {
+      this.state.currentLedScene.remove();
     }
   }
 

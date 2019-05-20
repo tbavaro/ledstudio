@@ -4,6 +4,9 @@ import * as PianoVisualization from "../base/PianoVisualization";
 
 import * as Utils from "../Utils";
 
+const NATIVE_WIDTH = 88;
+const ROW_FADE_FACTOR = 0.6;
+
 const WAVE_SPACING = 18;
 const WAVE_DROPOFF = 0.7;
 const LED_DROPOFF = 0.2;
@@ -30,11 +33,14 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
   });
 }
 
-export default class GlowWaveVisualization extends PianoVisualization.SingleRowPianoVisualization {
+export default class GlowWaveVisualization extends PianoVisualization.default {
   private readonly pressedKeyColors = new Map<number, Colors.Color>();
+  private readonly fadeFactors: number[];
 
-  constructor() {
-    super(88);
+  constructor(numLeds: number[]) {
+    super(numLeds.map(_ => NATIVE_WIDTH));
+    const middleRow = Math.floor(numLeds.length / 2);
+    this.fadeFactors = numLeds.map((_, i) => Math.pow((1 - ROW_FADE_FACTOR), Math.abs(i - middleRow)));
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
@@ -60,9 +66,9 @@ export default class GlowWaveVisualization extends PianoVisualization.SingleRowP
 
     // overshoot so edges get glow even if the wave center is out of bounds
     const min = -1 * WAVE_SPACING;
-    const max = this.leds.length + WAVE_SPACING;
+    const max = NATIVE_WIDTH + WAVE_SPACING;
 
-    const colors = new ColorRow(this.leds.length);
+    const colors = new ColorRow(NATIVE_WIDTH);
     this.pressedKeyColors.forEach((color, n) => {
       doSymmetric(n, WAVE_SPACING, min, max, (waveCenter: number, waveNum: number) => {
         const waveColor = Colors.multiply(color, Math.pow(1 - WAVE_DROPOFF, waveNum));
@@ -75,6 +81,8 @@ export default class GlowWaveVisualization extends PianoVisualization.SingleRowP
       });
     });
 
-    this.leds.copyWithDerez(colors, DEREZ);
+    this.ledRows.forEach((row, i) => {
+      row.copy(colors, { derezAmount: DEREZ, multiplyBy: this.fadeFactors[i] });
+    });
   }
 }

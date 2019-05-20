@@ -8,7 +8,7 @@ import TestRainbowVisualization from "./visualizations/TestRainbowVisualization"
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 
 const visFuncs = {
-  "glowWave": () => new GlowWaveVisualization(),
+  "glowWave": (numLeds: number[]) => new GlowWaveVisualization(numLeds),
   "centerSpread": () => new CenterSpreadVisualization(),
   "testKey": () => new TestKeyVisualization(),
   "testKeyFade": () => new TestKeyFadeVisualization(),
