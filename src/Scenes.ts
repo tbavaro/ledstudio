@@ -17,17 +17,26 @@ const FLOOR_COLOR = 0x010101;
 
 const UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 
+const INCH = 1 / 100 * 2.54;
+const FOOT = INCH * 12;
+
 const LedSpacings = {
   NEOPIXEL_30: (1 / 30),
   NEOPIXEL_60: (1 / 60)
 };
 
+// const EXTRA_OBJECT_MATERIAL_DEFAULT = () => {
+//   return new Three.MeshBasicMaterial({
+//     color: 0x004400,
+//     transparent: true,
+//     opacity: 0.7,
+//     side: Three.DoubleSide
+//   });
+// };
+
 const EXTRA_OBJECT_MATERIAL_DEFAULT = () => {
   return new Three.MeshBasicMaterial({
-    color: 0x004400,
-    transparent: true,
-    opacity: 0.7,
-    side: Three.DoubleSide
+    color: 0x020202
   });
 };
 
@@ -351,6 +360,86 @@ function doLazy<T>(func: () => T): () => T {
   };
 }
 
+// table (https://www.target.com/p/6-folding-banquet-table-off-white-plastic-dev-group/-/A-14324329)
+function banquetTable(attrs: {
+  translateBy: Vector3,
+  rotateY?: number
+}) {
+  const tableWidth = 6 * FOOT;
+  const tableDepth = 30 * INCH;
+  const tableThickness = 2 * INCH;
+  const legHeight = 27.25 * INCH;
+  const legInset = 6 * INCH;
+
+  const object = new Three.Object3D();
+  object.add(boxHelper({
+    width: tableWidth,
+    height: tableThickness,
+    depth: tableDepth,
+    translateBy: new Vector3(0, legHeight, 0)
+  })());
+
+  const leg = boxHelper({
+    width: 1 * INCH,
+    height: legHeight,
+    depth: 1 * INCH
+  })();
+  [[-1, -1], [-1, 1], [1, 1], [1, -1]].forEach(([x, y]) => {
+    const thisLeg = leg.clone();
+    thisLeg.position.copy(
+      new Vector3(
+        x * (tableWidth * 0.5 - legInset),
+        0,
+        y * (tableDepth * 0.5 - legInset)
+      )
+    );
+    object.add(thisLeg);
+  });
+
+  if (attrs.rotateY) {
+    object.rotateY(attrs.rotateY);
+  }
+
+  object.position.add(attrs.translateBy);
+
+  return object;
+}
+
+// center is middle of front row of tables
+function djTables(attrs: {
+  translateBy: Vector3
+}) {
+  const scene = new Three.Object3D();
+
+  scene.add(banquetTable({
+    translateBy: new Vector3(-3.05 * FOOT, 0, 1.5)
+  }));
+
+  scene.add(banquetTable({
+    translateBy: new Vector3(3.05 * FOOT, 0, 1.5)
+  }));
+
+  scene.add(banquetTable({
+    translateBy: new Vector3(-3.05 * FOOT, 6 * INCH, 2.2)
+  }));
+
+  scene.add(banquetTable({
+    translateBy: new Vector3(3.05 * FOOT, 6 * INCH, 2.2)
+  }));
+
+  scene.add(banquetTable({
+    rotateY: Math.PI / 2,
+    translateBy: new Vector3(7.45 * FOOT, 6 * INCH, 2.75)
+  }));
+
+  scene.add(banquetTable({
+    rotateY: Math.PI / 2,
+    translateBy: new Vector3(-7.45 * FOOT, 3 * INCH, 2.75)
+  }));
+
+  return scene;
+}
+
 const KEYBOARD_VENUE = {
   model: {
     url: "./keyboard.gltf",
@@ -364,6 +453,7 @@ const KEYBOARD_VENUE = {
     //   depth: 0.376,
     //   translateBy: new Vector3(0, 0.63, 0)
     // })
+    () => djTables({ translateBy: new Vector3(0, 0, 1.5) })
   ]
 };
 
