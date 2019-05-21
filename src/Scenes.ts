@@ -13,7 +13,7 @@ import FixedArray from "./portable/base/FixedArray";
 import PianoVisualization from "./portable/base/PianoVisualization";
 
 const FLOOR_SIZE_DEFAULT = 10;
-const FLOOR_COLOR = 0x070707;
+const FLOOR_COLOR = 0x010101;
 
 const UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 

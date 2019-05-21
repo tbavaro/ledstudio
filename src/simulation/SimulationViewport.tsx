@@ -19,15 +19,15 @@ function initializeScene() {
   const renderScene = new Three.Scene();
   // renderScene.background = new Three.Color(.1, .1, .1);
 
-  renderScene.add(new Three.AmbientLight(0x333333));
+  // renderScene.add(new Three.AmbientLight(0x333333));
 
-  let light = new Three.DirectionalLight(0xaaaaaa);
+  let light = new Three.DirectionalLight(0x111111);
   light.position.set(-100, 100, 100);
   light.castShadow = false;
   light.receiveShadow = false;
   renderScene.add(light);
 
-  light = new Three.DirectionalLight(0x444444);
+  light = new Three.DirectionalLight(0x010101);
   light.position.set(100, 100, -100);
   light.castShadow = false;
   light.receiveShadow = false;
@@ -37,9 +37,9 @@ function initializeScene() {
 }
 
 class LedHelper {
-  private static readonly LED_RADIUS = 0.006;
-  private static readonly RADIUS_MULTIPLIERS = [1, 1.5];
-  private static readonly COLOR_MULTIPLIERS = [1, 0.8];
+  private static readonly LED_RADIUS = 0.008;
+  private static readonly RADIUS_MULTIPLIERS = [1];
+  private static readonly COLOR_MULTIPLIERS = [1];
   private static readonly GLOW_POSITION_OFFSET = new Vector3(0, 0, -0.0001);
 
   private static readonly GEOMETRIES = LedHelper.RADIUS_MULTIPLIERS.map(m => (
@@ -180,7 +180,7 @@ type State = {
 };
 
 export default class SimulationViewport extends React.Component<Props, State> {
-  private renderer = new Three.WebGLRenderer({ antialias: false });
+  private renderer = new Three.WebGLRenderer({ antialias: false, preserveDrawingBuffer: false });
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
@@ -216,6 +216,9 @@ export default class SimulationViewport extends React.Component<Props, State> {
     if (super.componentDidMount) {
       super.componentDidMount();
     }
+
+    this.renderer.gammaOutput = true;
+    this.renderer.gammaFactor = 2.2;
 
     this.ref.appendChild(this.renderer.domElement);
     this.state.controls.domElement = this.ref;
