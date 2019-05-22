@@ -13,7 +13,10 @@ import FixedArray from "./portable/base/FixedArray";
 import PianoVisualization from "./portable/base/PianoVisualization";
 
 const FLOOR_SIZE_DEFAULT = 10;
-const FLOOR_COLOR = 0x010101;
+const FLOOR_MATERIAL = new Three.MeshLambertMaterial({
+  color: 0x090909
+});
+
 
 const UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 
@@ -35,8 +38,8 @@ const LedSpacings = {
 // };
 
 const EXTRA_OBJECT_MATERIAL_DEFAULT = () => {
-  return new Three.MeshBasicMaterial({
-    color: 0x020202
+  return new Three.MeshLambertMaterial({
+    color: 0x111111
   });
 };
 
@@ -153,7 +156,8 @@ export function boxHelper(attrs: {
     }
 
     const material = EXTRA_OBJECT_MATERIAL_DEFAULT();
-    return new Three.Mesh(geometry, material);
+    const mesh = new Three.Mesh(geometry, material);
+    return mesh;
   };
 }
 
@@ -221,10 +225,7 @@ export class Scene {
     if (this.def.model.floorSizeOverride !== 0) {
       const floorSize = this.def.model.floorSizeOverride || FLOOR_SIZE_DEFAULT;
       const floorGeometry = new Three.PlaneGeometry(floorSize, floorSize).rotateX(-1 * Math.PI / 2);
-      const floorMaterial = new Three.MeshBasicMaterial({
-        color: FLOOR_COLOR
-      });
-      const floor = new Three.Mesh(floorGeometry, floorMaterial);
+      const floor = new Three.Mesh(floorGeometry, FLOOR_MATERIAL);
 
       // lower it ever-so-slightly to avoid collision with any semi-transparent things on the floor
       floor.translateY(-0.001);
@@ -363,6 +364,7 @@ function doLazy<T>(func: () => T): () => T {
 // table (https://www.target.com/p/6-folding-banquet-table-off-white-plastic-dev-group/-/A-14324329)
 function banquetTable(attrs: {
   translateBy: Vector3,
+  riserHeight?: number,
   rotateY?: number
 }) {
   const tableWidth = 6 * FOOT;
@@ -379,25 +381,43 @@ function banquetTable(attrs: {
     translateBy: new Vector3(0, legHeight, 0)
   })());
 
+  const { riserHeight } = attrs;
+
   const leg = boxHelper({
     width: 1 * INCH,
     height: legHeight,
     depth: 1 * INCH
   })();
-  [[-1, -1], [-1, 1], [1, 1], [1, -1]].forEach(([x, y]) => {
+  [[-1, -1], [-1, 1], [1, 1], [1, -1]].forEach(([x, z]) => {
     const thisLeg = leg.clone();
+    const legX = x * (tableWidth * 0.5 - legInset);
+    const legZ = z * (tableDepth * 0.5 - legInset);
     thisLeg.position.copy(
       new Vector3(
-        x * (tableWidth * 0.5 - legInset),
+        legX,
         0,
-        y * (tableDepth * 0.5 - legInset)
+        legZ
       )
     );
     object.add(thisLeg);
+
+    if (riserHeight) {
+      const riser = boxHelper({
+        width: 6 * INCH,
+        depth: 6 * INCH,
+        height: riserHeight,
+        translateBy: new Vector3(legX, -1 * riserHeight, legZ)
+      })();
+      object.add(riser);
+    }
   });
 
   if (attrs.rotateY) {
     object.rotateY(attrs.rotateY);
+  }
+
+  if (riserHeight) {
+    object.children.forEach(c => c.translateY(riserHeight));
   }
 
   object.position.add(attrs.translateBy);
@@ -420,21 +440,25 @@ function djTables(attrs: {
   }));
 
   scene.add(banquetTable({
-    translateBy: new Vector3(-3.05 * FOOT, 6 * INCH, 2.2)
+    riserHeight: 6 * INCH,
+    translateBy: new Vector3(-3.05 * FOOT, 0, 2.2)
   }));
 
   scene.add(banquetTable({
-    translateBy: new Vector3(3.05 * FOOT, 6 * INCH, 2.2)
+    riserHeight: 6 * INCH,
+    translateBy: new Vector3(3.05 * FOOT, 0, 2.2)
   }));
 
   scene.add(banquetTable({
     rotateY: Math.PI / 2,
-    translateBy: new Vector3(7.45 * FOOT, 6 * INCH, 2.75)
+    riserHeight: 6 * INCH,
+    translateBy: new Vector3(7.45 * FOOT, 0, 2.75)
   }));
 
   scene.add(banquetTable({
     rotateY: Math.PI / 2,
-    translateBy: new Vector3(-7.45 * FOOT, 3 * INCH, 2.75)
+    riserHeight: 3 * INCH,
+    translateBy: new Vector3(-7.45 * FOOT, 0, 2.75)
   }));
 
   return scene;

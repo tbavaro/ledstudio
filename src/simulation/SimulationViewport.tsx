@@ -27,7 +27,7 @@ function initializeScene() {
   light.receiveShadow = false;
   renderScene.add(light);
 
-  light = new Three.DirectionalLight(0x010101);
+  light = new Three.DirectionalLight(0x030303);
   light.position.set(100, 100, -100);
   light.castShadow = false;
   light.receiveShadow = false;
