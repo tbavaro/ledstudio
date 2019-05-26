@@ -1,5 +1,5 @@
-import PianoEvent from "./portable/base/PianoEvent";
-import * as PianoHelpers from "./portable/PianoHelpers";
+import PianoEvent from "../portable/base/PianoEvent";
+import * as PianoHelpers from "../portable/PianoHelpers";
 
 // tslint:disable no-bitwise
 

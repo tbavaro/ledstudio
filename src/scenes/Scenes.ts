@@ -3,14 +3,14 @@ import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-import { bracket, pushAll, roundPlaces } from "./portable/Utils";
+import { bracket, pushAll, roundPlaces } from "../portable/Utils";
 
-import * as SimulationUtils from "./simulation/SimulationUtils";
+import * as SimulationUtils from "../simulation/SimulationUtils";
 
-import ColorRow from "./portable/base/ColorRow";
-import  * as Colors from "./portable/base/Colors";
-import FixedArray from "./portable/base/FixedArray";
-import PianoVisualization from "./portable/base/PianoVisualization";
+import ColorRow from "../portable/base/ColorRow";
+import  * as Colors from "../portable/base/Colors";
+import FixedArray from "../portable/base/FixedArray";
+import PianoVisualization from "../portable/base/PianoVisualization";
 
 import * as SceneUtils from "./SceneUtils";
 

@@ -2,8 +2,8 @@ import * as React from "react";
 
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 
-import { MidiEventEmitter } from "./MidiEventListener";
-import MidiEventsView from "./MidiEventsView";
+import { MidiEventEmitter } from "./piano/MidiEventListener";
+import MidiEventsView from "./piano/MidiEventsView";
 
 import "./RightSidebar.css";
 

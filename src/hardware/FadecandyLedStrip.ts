@@ -1,7 +1,7 @@
-import * as Colors from "./portable/base/Colors";
-import LedStrip from "./portable/base/LedStrip";
+import * as Colors from "../portable/base/Colors";
+import LedStrip from "../portable/base/LedStrip";
 
-import { ensureValidRange, MovingAverageHelper } from "./portable/Utils";
+import { ensureValidRange, MovingAverageHelper } from "../portable/Utils";
 
 import FadecandyClient from "./FadecandyClient";
 

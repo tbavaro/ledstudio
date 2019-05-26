@@ -7,7 +7,7 @@ import * as Colors from "../portable/base/Colors";
 import { SendableLedStrip } from "../portable/SendableLedStrip";
 
 import PianoVisualizationRunner from "../PianoVisualizationRunner";
-import * as Scenes from "../Scenes";
+import * as Scenes from "../scenes/Scenes";
 
 import "./SimulationViewport.css";
 

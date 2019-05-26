@@ -1,18 +1,20 @@
 import MIDIFile from "midifile";
 import * as React from "react";
 
-import FadecandyClient from "./FadecandyClient";
-import FadecandyLedStrip from "./FadecandyLedStrip";
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
 
-import * as Scenes from "./Scenes";
+import FadecandyClient from "./hardware/FadecandyClient";
+import FadecandyLedStrip from "./hardware/FadecandyLedStrip";
+
+import * as Scenes from "./scenes/Scenes";
 import SimulationViewport from "./simulation/SimulationViewport";
 
-import MidiEvent from "./MidiEvent";
-import MidiEventListener, { QueuedMidiEventEmitter } from "./MidiEventListener";
-import MIDIPlayer from "./MIDIPlayer";
+import MidiEvent from "./piano/MidiEvent";
+import MidiEventListener, { QueuedMidiEventEmitter } from "./piano/MidiEventListener";
+import MIDIPlayer from "./piano/MIDIPlayer";
+
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";

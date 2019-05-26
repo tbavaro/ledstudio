@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import MidiEvent from "./MidiEvent";
-import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
+import MidiEvent from "./piano/MidiEvent";
+import MidiEventListener, { MidiEventEmitter } from "./piano/MidiEventListener";
 
 import "./PianoView.css";
 
