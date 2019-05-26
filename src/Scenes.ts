@@ -12,11 +12,12 @@ import  * as Colors from "./portable/base/Colors";
 import FixedArray from "./portable/base/FixedArray";
 import PianoVisualization from "./portable/base/PianoVisualization";
 
+import * as SceneUtils from "./SceneUtils";
+
 const FLOOR_SIZE_DEFAULT = 10;
 const FLOOR_MATERIAL = new Three.MeshLambertMaterial({
   color: 0x090909
 });
-
 
 const UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 
@@ -30,9 +31,9 @@ const LedSpacings = {
 
 const EXTRA_OBJECT_MATERIAL_GREEN = () => {
   return new Three.MeshBasicMaterial({
-    color: 0x004400,
+    color: 0x001100,
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.2,
     side: Three.DoubleSide
   });
 };
@@ -437,71 +438,111 @@ function djTables(attrs: {
   const scene = new Three.Object3D();
 
   scene.add(banquetTable({
-    translateBy: new Vector3(-3.05 * FOOT, 0, 1.5)
+    translateBy: new Vector3(-3.05 * FOOT, 0, 0)
   }));
 
   scene.add(banquetTable({
-    translateBy: new Vector3(3.05 * FOOT, 0, 1.5)
-  }));
-
-  scene.add(banquetTable({
-    riserHeight: 6 * INCH,
-    translateBy: new Vector3(-3.05 * FOOT, 0, 2.2)
+    translateBy: new Vector3(3.05 * FOOT, 0, 0)
   }));
 
   scene.add(banquetTable({
     riserHeight: 6 * INCH,
-    translateBy: new Vector3(3.05 * FOOT, 0, 2.2)
+    translateBy: new Vector3(-3.05 * FOOT, 0, 0.7)
+  }));
+
+  scene.add(banquetTable({
+    riserHeight: 6 * INCH,
+    translateBy: new Vector3(3.05 * FOOT, 0, 0.7)
   }));
 
   scene.add(banquetTable({
     rotateY: Math.PI / 2,
     riserHeight: 6 * INCH,
-    translateBy: new Vector3(7.45 * FOOT, 0, 2.75)
+    translateBy: new Vector3(7.45 * FOOT, 0, 1.25)
   }));
 
   scene.add(banquetTable({
     rotateY: Math.PI / 2,
     riserHeight: 3 * INCH,
-    translateBy: new Vector3(-7.45 * FOOT, 0, 2.75)
+    translateBy: new Vector3(-7.45 * FOOT, 0, 1.25)
   }));
+
+  scene.position.add(attrs.translateBy);
 
   return scene;
 }
 
-const KEYBOARD_VENUE = {
-  model: {
-    url: "./keyboard.gltf",
-    scale: new Vector3(0.1, 0.1, 0.12),
-    translateBy: new Vector3(0, 0, 2.85)
-  },
-  extraObjects: [
-    // piano size
-    // boxHelper({
-    //   width: 1.336,
-    //   height: 0.145,
-    //   depth: 0.376,
-    //   translateBy: new Vector3(0, 0.63, 0)
-    // })
-    () => djTables({ translateBy: new Vector3(0, 0, 1.5) }),
-    boxHelper({
-      width: 24 * 0.0252,
-      height: 57 * 0.0252,
-      depth: 10 * 0.0252,
-      translateBy: new Vector3(0, 0, 3.35),
-      material: EXTRA_OBJECT_MATERIAL_GREEN()
-    })
-  ]
-};
+function createKeyboardVenue(attrs: {
+  keyboardInFront: boolean
+}) {
+  const tablesTranslateZ = (attrs.keyboardInFront ? 1.5 : -1);
+  const keyboardTranslateZ = tablesTranslateZ + (attrs.keyboardInFront ? -1.5 : 1.35);
+  const shoulderHeight = 57 * INCH;
+
+  return {
+    model: {
+      url: "./keyboard.gltf",
+      scale: new Vector3(0.1, 0.1, 0.12),
+      translateBy: new Vector3(0, 0, keyboardTranslateZ)
+    },
+    extraObjects: [
+      // piano size
+      // boxHelper({
+      //   width: 1.336,
+      //   height: 0.145,
+      //   depth: 0.376,
+      //   translateBy: new Vector3(0, 0.63, 0)
+      // })
+      () => djTables({ translateBy: new Vector3(0, 0, tablesTranslateZ) }),
+      boxHelper({
+        width: 20 * INCH,
+        height: shoulderHeight,
+        depth: 10 * INCH,
+        translateBy: new Vector3(0, 0, keyboardTranslateZ + 0.5),
+        material: EXTRA_OBJECT_MATERIAL_GREEN()
+      }),
+      boxHelper({
+        width: 10 * INCH,
+        height: 12 * INCH,
+        depth: 10 * INCH,
+        translateBy: new Vector3(0, shoulderHeight + 1 * INCH, keyboardTranslateZ + 0.5),
+        material: EXTRA_OBJECT_MATERIAL_GREEN()
+      })
+    ]
+  };
+}
 
 function createWingsSceneDef(name: string, ledSpacing: number) {
   const calculate = doLazy(() => {
-    const scale = 2.5;
+    const innerTopLength = 30 * INCH;
+    const innerBottomLength = 36 * INCH;
+    const spineLength = 24 * INCH;
+    const outerTopLength = 60 * INCH;
+    const outerBottomLength = 72 * INCH;
 
-    const middleCenter = new Vector2(0, 0.3).multiplyScalar(scale);
-    const leftLegTop = new Vector2(-0.25, 0.3).multiplyScalar(scale);
-    const leftLegBottom = new Vector2(-0.25, 0).multiplyScalar(scale);
-    const leftWingTip = new Vector2(-0.65, 0.45).multiplyScalar(scale);
+    const centerPointHeight = 57 * INCH; // colombi's shoulders
+
+    const innerTriangle = SceneUtils.triangleFromLengths({
+      verticalLength: spineLength,
+      topSideLength: innerTopLength,
+      bottomSideLength: innerBottomLength
+    });
+    const innerTriangleWidth = SceneUtils.width2D(innerTriangle);
+    const triangleTranslation = new Vector2(-1 * innerTriangleWidth, 0);
+    innerTriangle.forEach(p => p.add(triangleTranslation));
+
+    const outerTriangle = SceneUtils.triangleFromLengths({
+      verticalLength: spineLength,
+      topSideLength: outerTopLength,
+      bottomSideLength: outerBottomLength,
+      flipX: true
+    });
+    outerTriangle.forEach(p => p.add(triangleTranslation));
+
+    const middleCenter = innerTriangle[2];
+    const leftLegTop = innerTriangle[1];
+    const leftLegBottom = innerTriangle[0];
+    const leftWingTip = outerTriangle[2];
 
     const ribs = 7;
 
@@ -523,7 +564,7 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
       spanLengths.push(leftWingTip.clone().sub(legPoint).length());
       pushAll(points, SimulationUtils.pointsFromTo({
         start: legPoint,
-        end: leftWingTip.clone().add(new Vector2(0, -0.01 * row)),
+        end: leftWingTip, // .clone().add(new Vector2(0, -0.01 * row)),
         spacing: ledSpacing,
         skipFirst: true
       }));
@@ -547,7 +588,7 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
       positions: allPoints.map(points => (
         SimulationUtils.map2dTo3d({
           points: points,
-          bottomLeft: new Vector3(0, 0.65, 3.75),
+          bottomLeft: new Vector3(0, centerPointHeight - innerTriangle[2].y, 1.25),
           rightDirection: new Vector3(1, 0, 0),
           upDirection: new Vector3(0, 1, 0)
         })
@@ -560,11 +601,11 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
   });
 
   return {
-    ...KEYBOARD_VENUE,
+    ...createKeyboardVenue({ keyboardInFront: false }),
     name,
     camera: {
-      startPosition: new Vector3(0, 1.6, -2.2),
-      target: new Vector3(0, 0.7, 0)
+      startPosition: new Vector3(0, 1.4, -2.5),
+      target: new Vector3(0, 1.2, 0)
     },
     leds: { calculatePositions: () => calculate().positions },
     initialDisplayValues: () => calculate().displayValues,
@@ -574,7 +615,7 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
 
 registerScenes([
   {
-    ...KEYBOARD_VENUE,
+    ...createKeyboardVenue({ keyboardInFront: true }),
     name: "keyboard:3stripes",
     camera: {
       startPosition: new Vector3(0, 1.1, -1.5),
@@ -603,4 +644,4 @@ registerScenes([
   createWingsSceneDef("keyboard:wings60", LedSpacings.NEOPIXEL_60)
 ]);
 
-defaultScene = getScene("keyboard:wings30");
+defaultScene = getScene("keyboard:3stripes");

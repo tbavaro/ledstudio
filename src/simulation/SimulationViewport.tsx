@@ -170,7 +170,7 @@ interface Props {
 }
 
 type State = {
-  readonly renderScene: Three.Scene;
+  renderScene: Three.Scene;
   readonly camera: Three.PerspectiveCamera;
   readonly controls: OrbitControls;
   registeredVisualizationRunner?: PianoVisualizationRunner;
@@ -194,7 +194,12 @@ export default class SimulationViewport extends React.Component<Props, State> {
         prevState.currentLedScene.remove();
       }
 
-      result.currentLedScene = new LedScene(nextProps.scene, prevState.renderScene, prevState.doRender);
+      const renderScene = initializeScene();
+      result.renderScene = renderScene;
+
+      nextProps.scene.loadModel().then(model => renderScene.add(model));
+
+      result.currentLedScene = new LedScene(nextProps.scene, renderScene, prevState.doRender);
 
       // point at target
       prevState.camera.position.copy(nextProps.scene.cameraStartPosition);
@@ -229,8 +234,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
     window.addEventListener("resize", this.updateSizes);
     window.addEventListener("blur", this.onWindowBlur);
     window.addEventListener("focus", this.onWindowFocus);
-
-    this.props.scene.loadModel().then(model => this.state.renderScene.add(model));
   }
 
   public componentWillUnmount() {
