@@ -6,10 +6,12 @@ import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization"
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
+import WingFlapVisualization from "./visualizations/WingFlapVisualization";
 
 const visFuncs = {
   "glowWave": (numLeds: number[]) => new GlowWaveVisualization(numLeds),
   "centerSpread": () => new CenterSpreadVisualization(),
+  "wingFlap": (numLeds: number[]) => new WingFlapVisualization(numLeds),
   "testKey": () => new TestKeyVisualization(),
   "testKeyFade": () => new TestKeyFadeVisualization(),
   "testRainbow": (numLeds: number[]) => new TestRainbowVisualization(numLeds),

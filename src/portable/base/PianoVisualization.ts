@@ -31,3 +31,25 @@ export abstract class SingleRowPianoVisualization extends PianoVisualization {
     this.leds = this.ledRows.get(0);
   }
 }
+
+export abstract class DerezPianoVisualization extends PianoVisualization {
+  protected readonly pureLedRows: FixedArray<ColorRow>;
+  private readonly derez: number;
+
+  constructor(numLeds: number[], derez: number) {
+    super(numLeds);
+    this.pureLedRows = new FixedArray(numLeds.length, i => new ColorRow(numLeds[i]));
+    this.derez = derez;
+  }
+
+  protected abstract renderPure(elapsedMillis: number, state: State): void;
+
+  public render(elapsedMillis: number, state: State): void {
+    this.renderPure(elapsedMillis, state);
+
+    this.pureLedRows.forEach((pureLeds, row) => {
+      const leds = this.ledRows.get(row);
+      leds.copy(pureLeds, { derezAmount: this.derez });
+    });
+  }
+}

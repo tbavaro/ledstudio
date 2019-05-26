@@ -180,7 +180,7 @@ type State = {
 };
 
 export default class SimulationViewport extends React.Component<Props, State> {
-  private renderer = new Three.WebGLRenderer({ antialias: false, preserveDrawingBuffer: false });
+  private renderer = new Three.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false });
 
   public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
     const result: Partial<State> = {
