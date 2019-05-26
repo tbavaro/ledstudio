@@ -18,7 +18,7 @@ const visFuncs = {
 
 export type Name = keyof typeof visFuncs;
 
-export const defaultName: Name = "glowWave";
+export const defaultName: Name = "testStripAddress";
 
 export const names: ReadonlyArray<Name> = Object.keys(visFuncs) as Name[];
 export function create(name: Name, numLeds: number[]): PianoVisualization {

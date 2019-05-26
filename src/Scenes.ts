@@ -28,14 +28,14 @@ const LedSpacings = {
   NEOPIXEL_60: (1 / 60)
 };
 
-// const EXTRA_OBJECT_MATERIAL_DEFAULT = () => {
-//   return new Three.MeshBasicMaterial({
-//     color: 0x004400,
-//     transparent: true,
-//     opacity: 0.7,
-//     side: Three.DoubleSide
-//   });
-// };
+const EXTRA_OBJECT_MATERIAL_GREEN = () => {
+  return new Three.MeshBasicMaterial({
+    color: 0x004400,
+    transparent: true,
+    opacity: 0.7,
+    side: Three.DoubleSide
+  });
+};
 
 const EXTRA_OBJECT_MATERIAL_DEFAULT = () => {
   return new Three.MeshLambertMaterial({
@@ -48,6 +48,7 @@ type ExtraObjectFunc = () => Three.Object3D;
 interface ModelDef {
   url: string;
   scale?: Vector3;
+  translateBy?: Vector3;
   floorSizeOverride?: number;
 }
 
@@ -146,7 +147,8 @@ export function boxHelper(attrs: {
   width: number,
   height: number,
   depth: number,
-  translateBy?: Vector3
+  translateBy?: Vector3,
+  material?: Three.Material,
 }): ExtraObjectFunc {
   return () => {
     const geometry = new Three.BoxGeometry(attrs.width, attrs.height, attrs.depth);
@@ -155,7 +157,7 @@ export function boxHelper(attrs: {
       geometry.translate(attrs.translateBy.x, attrs.translateBy.y, attrs.translateBy.z);
     }
 
-    const material = EXTRA_OBJECT_MATERIAL_DEFAULT();
+    const material = attrs.material || EXTRA_OBJECT_MATERIAL_DEFAULT();
     const mesh = new Three.Mesh(geometry, material);
     return mesh;
   };
@@ -204,6 +206,9 @@ export class Scene {
             model.translateX(-center.x);
             model.translateY(-bottomY);
             model.translateZ(-center.z);
+            if (this.def.model.translateBy) {
+              model.position.add(this.def.model.translateBy);
+            }
             callback(null, this.addExtraObjects(model));
           },
           /*onProgress=*/undefined,
@@ -467,7 +472,8 @@ function djTables(attrs: {
 const KEYBOARD_VENUE = {
   model: {
     url: "./keyboard.gltf",
-    scale: new Vector3(0.1, 0.1, 0.12)
+    scale: new Vector3(0.1, 0.1, 0.12),
+    translateBy: new Vector3(0, 0, 2.85)
   },
   extraObjects: [
     // piano size
@@ -477,7 +483,14 @@ const KEYBOARD_VENUE = {
     //   depth: 0.376,
     //   translateBy: new Vector3(0, 0.63, 0)
     // })
-    () => djTables({ translateBy: new Vector3(0, 0, 1.5) })
+    () => djTables({ translateBy: new Vector3(0, 0, 1.5) }),
+    boxHelper({
+      width: 24 * 0.0252,
+      height: 57 * 0.0252,
+      depth: 10 * 0.0252,
+      translateBy: new Vector3(0, 0, 3.35),
+      material: EXTRA_OBJECT_MATERIAL_GREEN()
+    })
   ]
 };
 
@@ -490,7 +503,7 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
     const leftLegBottom = new Vector2(-0.25, 0).multiplyScalar(scale);
     const leftWingTip = new Vector2(-0.65, 0.45).multiplyScalar(scale);
 
-    const ribs = 6;
+    const ribs = 7;
 
     const legPoints = SimulationUtils.pointsFromTo({
       start: leftLegTop,
@@ -534,7 +547,7 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
       positions: allPoints.map(points => (
         SimulationUtils.map2dTo3d({
           points: points,
-          bottomLeft: new Vector3(0, 0.3, 0.75),
+          bottomLeft: new Vector3(0, 0.65, 3.75),
           rightDirection: new Vector3(1, 0, 0),
           upDirection: new Vector3(0, 1, 0)
         })
@@ -590,4 +603,4 @@ registerScenes([
   createWingsSceneDef("keyboard:wings60", LedSpacings.NEOPIXEL_60)
 ]);
 
-defaultScene = getScene("keyboard:3stripes");
+defaultScene = getScene("keyboard:wings30");
