@@ -2,6 +2,8 @@ import * as React from "react";
 
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 
+import * as AnalogAudio from "./analogAudio/AnalogAudio";
+
 import { MidiEventEmitter } from "./piano/MidiEventListener";
 import MidiEventsView from "./piano/MidiEventsView";
 
@@ -31,6 +33,7 @@ interface Props {
   midiOutputs: WebMidi.MIDIOutput[];
   selectedMidiOutput: WebMidi.MIDIOutput | null;
   midiEventEmitter: MidiEventEmitter;
+  analogInputs: AnalogAudio.InputDeviceInfo[];
 }
 
 function findById<T extends { readonly id: string }>(entries: T[], id: string): T | undefined {
@@ -42,11 +45,13 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     return (
       <div className="RightSidebar">
         <div className="RightSidebar-optionsGroup">
-        {this.renderSceneSelector()}
-        {this.renderVisualizationSelector()}
+          {this.renderSceneSelector()}
+          {this.renderVisualizationSelector()}
           <p/>
-          {this.renderInputDevices()}
-          {this.renderOutputDevices()}
+          {this.renderAnalogInputDevices()}
+          <p/>
+          {this.renderMidiInputDevices()}
+          {this.renderMidiOutputDevices()}
           <p/>
         </div>
         <MidiEventsView
@@ -94,6 +99,30 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
+  private renderAnalogInputDevices() {
+    const { analogInputs } = this.props;
+    return (
+      <div className="RightSidebar-analogInputDevices">
+        <span>Analog audio in: </span>
+        <select
+          value=""
+          // onChange={this.handleSetMidiInput}
+        >
+          <option value="" children={"<none>"}/>
+          {
+            analogInputs.map(input => (
+              <option
+                key={input.id}
+                value={input.id}
+                children={input.name}
+              />
+            ))
+          }
+        </select>
+      </div>
+    );
+  }
+
   private renderMidiFileSelector() {
     return (
       <div className="RightSidebar-midiFiles">
@@ -113,12 +142,12 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderInputDevices() {
+  private renderMidiInputDevices() {
     const { selectedMidiInput } = this.props;
     const showInAppInputUI = (selectedMidiInput === null);
     return (
       <div className="RightSidebar-inputDevices">
-        <span>Input device: </span>
+        <span>MIDI in: </span>
         <select
           value={selectedMidiInput === null ? "" : selectedMidiInput.id}
           onChange={this.handleSetMidiInput}
@@ -148,11 +177,11 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderOutputDevices() {
+  private renderMidiOutputDevices() {
     const { selectedMidiOutput } = this.props;
     return (
       <div className="RightSidebar-outputDevices">
-        <span>Output device: </span>
+        <span>MIDI out: </span>
         <select
           value={selectedMidiOutput === null ? "" : selectedMidiOutput.id}
           onChange={this.handleSetMidiOutput}

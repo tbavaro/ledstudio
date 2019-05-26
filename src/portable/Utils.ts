@@ -63,6 +63,15 @@ export function pushAll<T>(arr: T[], items: T[]) {
   items.forEach(item => arr.push(item));
 }
 
+export function removeFirst<T>(arr: T[], item: T) {
+  for (let i = 0; i < arr.length; ++i) {
+    if (arr[i] === item) {
+      arr.splice(i, 1);
+      return;
+    }
+  }
+}
+
 export class MovingAverageHelper {
   private readonly values: number[];
   private numValues: number = 0;

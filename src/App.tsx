@@ -15,6 +15,8 @@ import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./piano/MidiEventListener";
 import MIDIPlayer from "./piano/MIDIPlayer";
 
+import * as AnalogAudio from "./analogAudio/AnalogAudio";
+
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
@@ -58,6 +60,7 @@ interface State {
   midiData: ArrayBuffer | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
+  analogInputs: AnalogAudio.InputDeviceInfo[];
 }
 
 type AllActions = RightSidebar.Actions;
@@ -73,12 +76,14 @@ class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly fadeCandyLedStrip = new FadecandyLedStrip(new FadecandyClient());
+  public readonly analogAudio = new AnalogAudio.default();
 
   public componentWillMount() {
     if (super.componentWillMount) {
       super.componentWillMount();
     }
 
+    this.analogAudio.addEventListener("deviceListChanged", this.onAnalogAudioDeviceListChanged);
     this.midiPlayer.onSend = this.onSendMidiEvent;
 
     if (navigator.requestMIDIAccess) {
@@ -143,6 +148,8 @@ class App extends React.Component<{}, State> {
       midiState.webMidi.removeEventListener("statechange", this.updateMidiDevices);
     }
     this.midiEventEmitter.removeListener(this.myMidiListener);
+
+    this.analogAudio.removeEventListener("deviceListChanged", this.onAnalogAudioDeviceListChanged);
   }
 
   public render() {
@@ -197,6 +204,7 @@ class App extends React.Component<{}, State> {
             midiOutputs={this.state.midiOutputs}
             selectedMidiOutput={this.state.midiOutput}
             midiEventEmitter={this.midiEventEmitter}
+            analogInputs={this.state.analogInputs}
           />
         );
 
@@ -407,6 +415,12 @@ class App extends React.Component<{}, State> {
     this.renderTimingHelper.addValue(renderMillis);
   }
 
+  private onAnalogAudioDeviceListChanged = () => {
+    this.setState({
+      analogInputs: this.analogAudio.inputDevices
+    });
+  }
+
   public state = ((): State => {
     const scene = Scenes.getDefaultScene();
     return {
@@ -423,7 +437,8 @@ class App extends React.Component<{}, State> {
       midiFilename: "<<not assigned>>",
       midiData: null,
       midiInputs: [],
-      midiOutputs: []
+      midiOutputs: [],
+      analogInputs: []
     };
   })();
 }
