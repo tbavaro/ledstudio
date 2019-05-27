@@ -168,6 +168,9 @@ class App extends React.Component<{}, State> {
             }
             <TimingStatsView getTimings={this.getTimings} message2={this.getMessage2}/>
           </div>
+          <div className="App-analogAudioViewContainer">
+            <AnalogAudioView ref={this.setAnalogAudioViewRef}/>
+          </div>
           <div className="App-pianoContainer">
             <PianoView
               midiEventEmitter={this.midiEventEmitter}
@@ -177,7 +180,6 @@ class App extends React.Component<{}, State> {
         <div className="App-sidebarContainer">
           {this.renderSidebarContents()}
         </div>
-        <AnalogAudioView ref={this.setAnalogAudioViewRef}/>
       </div>
     );
   }

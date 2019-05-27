@@ -18,7 +18,9 @@ export default class AnalogAudio {
   private readonly frequencyDataBuffer: Uint8Array;
 
   constructor() {
-    navigator.mediaDevices.enumerateDevices().then(this.setDevices);
+    if (navigator.mediaDevices !== undefined) {
+      navigator.mediaDevices.enumerateDevices().then(this.setDevices);
+    }
     this.frequencyDataBuffer = new Uint8Array(NUM_FREQUENCY_BINS);
   }
 

@@ -21,6 +21,11 @@
   flex: 1;
 }
 
+.App-analogAudioViewContainer {
+  position: relative;
+  height: 64px;
+}
+
 .App-pianoContainer {
   position: relative;
 }

@@ -105,7 +105,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     const { analogInputs } = this.props;
 
     if (analogInputs === undefined) {
-      return "initializing analog audio";
+      return "(initializing analog audio...)";
     }
 
     return (
