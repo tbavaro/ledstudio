@@ -29,7 +29,7 @@ export default class AnalogAudio {
   }
 
   public get defaultDeviceId(): string | null {
-    const defaultDevice = this.inputDevicesInternal.find(d => d.name.startsWith("Loopback"));
+    const defaultDevice = this.inputDevicesInternal.find(d => d.name === "Soundflower (2ch)");
     if (defaultDevice === undefined) {
       return null;
     } else {
