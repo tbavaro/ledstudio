@@ -30,8 +30,10 @@ export default class PianoVisualizationRunner {
       this.lastRenderTime = startTime - 1000 / 60;
     }
 
-    // render into the LED strip
+    // collect state
     const visState = this.stateHelper.endFrame();
+
+    // render into the LED strip
     const elapsedMillis = startTime - this.lastRenderTime;
     this.visualization.render(elapsedMillis, visState);
     this.stateHelper.startFrame();

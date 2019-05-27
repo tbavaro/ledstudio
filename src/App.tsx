@@ -16,6 +16,7 @@ import MidiEventListener, { QueuedMidiEventEmitter } from "./piano/MidiEventList
 import MIDIPlayer from "./piano/MIDIPlayer";
 
 import * as AnalogAudio from "./analogAudio/AnalogAudio";
+import AnalogAudioView from "./analogAudio/AnalogAudioView";
 
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
@@ -68,16 +69,12 @@ type AllActions = RightSidebar.Actions;
 
 const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
-function visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
-  const vis = PianoVisualizations.create(name, scene.ledPositions.map(row => row.length));
-  return new PianoVisualizationRunner(vis, scene);
-}
-
 class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly fadeCandyLedStrip = new FadecandyLedStrip(new FadecandyClient());
   public readonly analogAudio = new AnalogAudio.default();
+  private analogAudioViewRef: AnalogAudioView | undefined = undefined;
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -180,6 +177,7 @@ class App extends React.Component<{}, State> {
         <div className="App-sidebarContainer">
           {this.renderSidebarContents()}
         </div>
+        <AnalogAudioView ref={this.setAnalogAudioViewRef}/>
       </div>
     );
   }
@@ -304,13 +302,19 @@ class App extends React.Component<{}, State> {
     });
   }
 
+  private visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
+    const vis = PianoVisualizations.create(name, scene.ledPositions.map(row => row.length));
+    const runner = new PianoVisualizationRunner(vis, scene);
+    runner.hardwardLedStrip = this.fadeCandyLedStrip;
+    return runner;
+  }
+
   private updateVisualizationAndScene(
     visualizationName: PianoVisualizations.Name,
     scene: Scenes.Scene,
     doNotSetState?: boolean
   ) {
-    const runner = visualizationRunnerForName(visualizationName, scene);
-    runner.hardwardLedStrip = this.fadeCandyLedStrip;
+    const runner = this.visualizationRunnerForName(visualizationName, scene);
     const values = {
       visualizationRunner: runner,
       visualizationName: visualizationName,
@@ -396,6 +400,11 @@ class App extends React.Component<{}, State> {
   }
 
   private animate = () => {
+    const frequencyData = this.analogAudio.getFrequencyData();
+    if (this.analogAudioViewRef) {
+      this.analogAudioViewRef.displayData(frequencyData);
+    }
+
     if (this.animating) {
       this.scheduleNextAnimationFrame();
       this.state.visualizationRunner.renderFrame();
@@ -431,6 +440,8 @@ class App extends React.Component<{}, State> {
       this.actionManager.setAnalogInputId(this.analogAudio.defaultDeviceId);
     }
   }
+
+  private setAnalogAudioViewRef = (newRef: AnalogAudioView) => this.analogAudioViewRef = newRef;
 
   public state = ((): State => {
     const scene = Scenes.getDefaultScene();
