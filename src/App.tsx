@@ -341,6 +341,7 @@ class App extends React.Component<{}, State> {
     },
     setAnalogInputId: (newValue: string | null) => {
       this.setState({ selectedAnalogInputId: newValue });
+      this.analogAudio.setCurrentDeviceId(newValue);
     }
   };
 
@@ -424,8 +425,11 @@ class App extends React.Component<{}, State> {
     const isInitialization = (this.state.analogInputs === undefined);
     this.setState({
       analogInputs: this.analogAudio.inputDevices,
-      selectedAnalogInputId: (isInitialization ? this.analogAudio.defaultDeviceId : this.state.selectedAnalogInputId)
     });
+
+    if (isInitialization) {
+      this.actionManager.setAnalogInputId(this.analogAudio.defaultDeviceId);
+    }
   }
 
   public state = ((): State => {
