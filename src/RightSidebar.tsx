@@ -17,6 +17,7 @@ export interface Actions {
   setMidiOutput: (newValue: WebMidi.MIDIOutput | null) => void;
   setSelectedSceneName: (newValue: string) => void;
   setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => void;
+  setAnalogInputId: (newValue: string | null) => void;
 }
 
 interface Props {
@@ -33,7 +34,8 @@ interface Props {
   midiOutputs: WebMidi.MIDIOutput[];
   selectedMidiOutput: WebMidi.MIDIOutput | null;
   midiEventEmitter: MidiEventEmitter;
-  analogInputs: AnalogAudio.InputDeviceInfo[];
+  analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
+  selectedAnalogInputId: string | null;
 }
 
 function findById<T extends { readonly id: string }>(entries: T[], id: string): T | undefined {
@@ -101,12 +103,17 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
 
   private renderAnalogInputDevices() {
     const { analogInputs } = this.props;
+
+    if (analogInputs === undefined) {
+      return "initializing analog audio";
+    }
+
     return (
       <div className="RightSidebar-analogInputDevices">
         <span>Analog audio in: </span>
         <select
-          value=""
-          // onChange={this.handleSetMidiInput}
+          value={this.props.selectedAnalogInputId || ""}
+          onChange={this.handleSetAnalogInputId}
         >
           <option value="" children={"<none>"}/>
           {
@@ -219,6 +226,11 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
   private handleSetMidiOutput = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
     this.props.actions.setMidiOutput(findById(this.props.midiOutputs, id) || null);
+  }
+
+  private handleSetAnalogInputId = (event: React.ChangeEvent<any>) => {
+    const id = event.target.value as string;
+    this.props.actions.setAnalogInputId((id === "") ? null : id);
   }
 
   private handleSetMidiFilename = (event: React.ChangeEvent<any>) => {

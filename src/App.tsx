@@ -60,7 +60,8 @@ interface State {
   midiData: ArrayBuffer | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
-  analogInputs: AnalogAudio.InputDeviceInfo[];
+  analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
+  selectedAnalogInputId: string | null;
 }
 
 type AllActions = RightSidebar.Actions;
@@ -83,7 +84,7 @@ class App extends React.Component<{}, State> {
       super.componentWillMount();
     }
 
-    this.analogAudio.addEventListener("deviceListChanged", this.onAnalogAudioDeviceListChanged);
+    this.analogAudio.addEventListener("deviceListChanged", this.updateAnalogDevices);
     this.midiPlayer.onSend = this.onSendMidiEvent;
 
     if (navigator.requestMIDIAccess) {
@@ -149,7 +150,7 @@ class App extends React.Component<{}, State> {
     }
     this.midiEventEmitter.removeListener(this.myMidiListener);
 
-    this.analogAudio.removeEventListener("deviceListChanged", this.onAnalogAudioDeviceListChanged);
+    this.analogAudio.removeEventListener("deviceListChanged", this.updateAnalogDevices);
   }
 
   public render() {
@@ -205,6 +206,7 @@ class App extends React.Component<{}, State> {
             selectedMidiOutput={this.state.midiOutput}
             midiEventEmitter={this.midiEventEmitter}
             analogInputs={this.state.analogInputs}
+            selectedAnalogInputId={this.state.selectedAnalogInputId}
           />
         );
 
@@ -336,6 +338,9 @@ class App extends React.Component<{}, State> {
       if (this.state.visualizationName !== newValue) {
         this.updateVisualizationAndScene(newValue, this.state.scene);
       }
+    },
+    setAnalogInputId: (newValue: string | null) => {
+      this.setState({ selectedAnalogInputId: newValue });
     }
   };
 
@@ -415,9 +420,11 @@ class App extends React.Component<{}, State> {
     this.renderTimingHelper.addValue(renderMillis);
   }
 
-  private onAnalogAudioDeviceListChanged = () => {
+  private updateAnalogDevices = () => {
+    const isInitialization = (this.state.analogInputs === undefined);
     this.setState({
-      analogInputs: this.analogAudio.inputDevices
+      analogInputs: this.analogAudio.inputDevices,
+      selectedAnalogInputId: (isInitialization ? this.analogAudio.defaultDeviceId : this.state.selectedAnalogInputId)
     });
   }
 
@@ -438,7 +445,8 @@ class App extends React.Component<{}, State> {
       midiData: null,
       midiInputs: [],
       midiOutputs: [],
-      analogInputs: []
+      analogInputs: undefined,
+      selectedAnalogInputId: null
     };
   })();
 }

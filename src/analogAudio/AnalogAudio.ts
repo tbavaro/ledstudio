@@ -19,6 +19,15 @@ export default class AnalogAudio {
     return this.inputDevicesInternal;
   }
 
+  public get defaultDeviceId(): string | null {
+    const defaultDevice = this.inputDevicesInternal.find(d => d.name.startsWith("Loopback"));
+    if (defaultDevice === undefined) {
+      return null;
+    } else {
+      return defaultDevice.id;
+    }
+  }
+
   private setDevices = async (devices: MediaDeviceInfo[]) => {
     this.inputDevicesInternal = devices.filter(d => d.kind === "audioinput").map(d => ({
       id: d.deviceId,
@@ -26,12 +35,12 @@ export default class AnalogAudio {
     }));
     this.deviceListChangedListeners.forEach(listener => listener.call(this));
 
-    const defaultDevice = this.inputDevicesInternal.find(d => d.name.startsWith("Loopback"));
-    if (defaultDevice === undefined) {
-      throw new Error("no default input device");
+    const defaultDeviceId = this.defaultDeviceId;
+    if (defaultDeviceId === null) {
+      throw new Error("no default device");
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: defaultDevice.id } });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: defaultDeviceId } });
     const audioContext = new AudioContext();
     const audioSource = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
@@ -71,7 +80,6 @@ export default class AnalogAudio {
           values[idx] = v;
         }
       });
-
 
       // shift everything left 1px
       const imageData = ctx.getImageData(1, 0, canvas.width - 1, canvas.height);
