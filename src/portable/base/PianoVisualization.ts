@@ -10,6 +10,9 @@ export interface State {
 
   // sorted indexes of keys changed since last frame
   changedKeys: ReadonlyArray<number>;
+
+  // TODO probably give a better interface here
+  analogFrequencyData: Uint8Array;
 }
 
 export default abstract class PianoVisualization {

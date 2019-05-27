@@ -2,6 +2,7 @@ import PianoVisualization from "./base/PianoVisualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
+import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
@@ -12,6 +13,7 @@ const visFuncs = {
   "glowWave": (numLeds: number[]) => new GlowWaveVisualization(numLeds),
   "centerSpread": () => new CenterSpreadVisualization(),
   "wingFlap": (numLeds: number[]) => new WingFlapVisualization(numLeds),
+  "testAnalogPulse": (numLeds: number[]) => new TestAnalogPulseVisualization(numLeds),
   "testKey": () => new TestKeyVisualization(),
   "testKeyFade": () => new TestKeyFadeVisualization(),
   "testRainbow": (numLeds: number[]) => new TestRainbowVisualization(numLeds),

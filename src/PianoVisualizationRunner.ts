@@ -24,14 +24,14 @@ export default class PianoVisualizationRunner {
     this.ledMapper = scene.createLedMapper(visualization);
   }
 
-  public renderFrame() {
+  public renderFrame(analogFrequencyData: Uint8Array) {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
     }
 
     // collect state
-    const visState = this.stateHelper.endFrame();
+    const visState = this.stateHelper.endFrame(analogFrequencyData);
 
     // render into the LED strip
     const elapsedMillis = startTime - this.lastRenderTime;

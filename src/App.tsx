@@ -409,7 +409,7 @@ class App extends React.Component<{}, State> {
 
     if (this.animating) {
       this.scheduleNextAnimationFrame();
-      this.state.visualizationRunner.renderFrame();
+      this.state.visualizationRunner.renderFrame(frequencyData);
       ++this.framesRenderedSinceLastTimingsCall;
     }
   }
