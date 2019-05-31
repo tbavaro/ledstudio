@@ -33,8 +33,13 @@ function doSymmetric(n: number, stepSize: number, min: number, max: number, func
   });
 }
 
+interface FadingColor {
+  initialColor: Colors.Color;
+  brightness: number;
+}
+
 export default class GlowWaveVisualization extends PianoVisualization.default {
-  private readonly pressedKeyColors = new Map<number, Colors.Color>();
+  private readonly pressedKeyColors = new Map<number, FadingColor>();
   private readonly fadeFactors: number[];
 
   constructor(numLeds: number[]) {
@@ -45,13 +50,11 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
     // decay the unpressed keys
-    this.pressedKeyColors.forEach((c, n) => {
+    this.pressedKeyColors.forEach((fc, n) => {
       if (!state.keys[n]) {
-        c = Colors.multiply(c, 1 - (FADE_DROPOFF * elapsedMillis / 1000));
-        if (c === Colors.BLACK) {
+        fc.brightness *= 1 - (FADE_DROPOFF * elapsedMillis / 1000);
+        if (fc.brightness < 0.01) {
           this.pressedKeyColors.delete(n);
-        } else {
-          this.pressedKeyColors.set(n, c);
         }
       }
     });
@@ -60,7 +63,7 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
     state.changedKeys.forEach(n => {
       if (state.keys[n]) {
         const initialValue = Utils.bracket01(state.keyVelocities[n] / MAX_BRIGHTNESS_VELOCITY);
-        this.pressedKeyColors.set(n, Colors.hsv(n * 10, 1, initialValue));
+        this.pressedKeyColors.set(n, { initialColor: Colors.hsv(n * 10, 1, 1), brightness: initialValue });
       }
     });
 
@@ -69,13 +72,17 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
     const max = NATIVE_WIDTH + WAVE_SPACING;
 
     const colors = new ColorRow(NATIVE_WIDTH);
-    this.pressedKeyColors.forEach((color, n) => {
+    this.pressedKeyColors.forEach((fc, n) => {
+
       doSymmetric(n, WAVE_SPACING, min, max, (waveCenter: number, waveNum: number) => {
-        const waveColor = Colors.multiply(color, Math.pow(1 - WAVE_DROPOFF, waveNum));
+        const waveBrightness = fc.brightness * Math.pow(1 - WAVE_DROPOFF, waveNum);
         doSymmetric(waveCenter, 1, min, max, (pos: number, step: number) => {
           if (pos >= 0 && pos < colors.length) {
-            const ledColor = Colors.multiply(waveColor, Math.pow(1 - LED_DROPOFF, step));
-            colors.add(pos, ledColor);
+            const brightness = waveBrightness * Math.pow(1 - LED_DROPOFF, step);
+            if (brightness > 0.01) {
+              const ledColor = Colors.multiply(fc.initialColor, brightness);
+              colors.add(pos, ledColor);
+            }
           }
         });
       });

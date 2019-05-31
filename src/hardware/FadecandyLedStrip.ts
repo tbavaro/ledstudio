@@ -68,6 +68,9 @@ class FadecandyLedSingleStrip implements LedStrip {
   }
 
   public send() {
+    for (let i = 1; i < this.size; i += 2) {
+      // this.setColor(i, Colors.BLACK);
+    }
     this.client.sendData(this.buffer);
   }
 

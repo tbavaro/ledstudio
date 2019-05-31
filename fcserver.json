@@ -1,0 +1,19 @@
+{
+    "listen": ["127.0.0.1", 7890],
+    "verbose": true,
+
+    "color": {
+        "gamma": 1.0,
+        "whitepoint": [1.0, 1.0, 1.0],
+        "linearSlope": 1.0,
+        "linearCutoff": 0.0020
+    },
+
+    "devices": [
+        {
+            "type": "fadecandy",
+            "map": [[ 0, 0, 0, 512 ]],
+            "interpolate": false
+        }
+    ]
+}
