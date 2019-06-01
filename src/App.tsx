@@ -11,6 +11,7 @@ import FadecandyLedStrip from "./hardware/FadecandyLedStrip";
 import * as Scenes from "./scenes/Scenes";
 
 import SimulationViewport from "./simulator/SimulationViewport";
+import * as SimulatorStickySettings from "./simulator/SimulatorStickySettings";
 
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./piano/MidiEventListener";
@@ -343,6 +344,7 @@ class App extends React.Component<{}, State> {
     setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
       if (this.state.visualizationName !== newValue) {
         this.updateVisualizationAndScene(newValue, this.state.scene);
+        SimulatorStickySettings.set("visualizationName", newValue);
       }
     },
     setAnalogInputId: (newValue: string | null) => {
@@ -447,11 +449,19 @@ class App extends React.Component<{}, State> {
   private analogAudioViewRef: AnalogAudioView | undefined = undefined;
   private setAnalogAudioViewRef = (newRef: AnalogAudioView) => this.analogAudioViewRef = newRef;
 
+  private initialVisualizationName(): PianoVisualizations.Name {
+    let name = SimulatorStickySettings.get("visualizationName");
+    if (name === undefined || !PianoVisualizations.isValidName(name)) {
+      name = PianoVisualizations.defaultName;
+    }
+    return name;
+  }
+
   public state = ((): State => {
     const scene = Scenes.getDefaultScene();
     return {
       ...this.updateVisualizationAndScene(
-        PianoVisualizations.defaultName,
+        this.initialVisualizationName(),
         scene,
         /*doNotSetState=*/true
       ),

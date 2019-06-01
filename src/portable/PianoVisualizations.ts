@@ -33,3 +33,7 @@ export function create(name: Name, numLeds: number[]): PianoVisualization {
   }
   return visFuncs[name](numLeds);
 }
+
+export function isValidName(name: Name): boolean {
+  return name in visFuncs;
+}
