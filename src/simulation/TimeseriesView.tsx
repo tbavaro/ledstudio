@@ -51,7 +51,7 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
       const baseColor = heatmap.baseColor;
       heatmap.values.forEach((v, i) => {
         ctx.fillStyle = Colors.cssColor(Colors.multiply(baseColor, v));
-        ctx.fillRect(canvas.width - 1, i * dy, 1, dy);
+        ctx.fillRect(canvas.width - 1, (heatmap.values.length - 1 - i) * dy, 1, dy);
       });
     }
 
@@ -59,7 +59,7 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
       const p = points[i];
       if (p.value !== null) {
         ctx.fillStyle = Colors.cssColor(p.color);
-        ctx.fillRect(canvas.width - 1, p.value * canvas.height, 1, POINT_VALUE_HEIGHT);
+        ctx.fillRect(canvas.width - 1, (1 - p.value) * (canvas.height - POINT_VALUE_HEIGHT), 1, POINT_VALUE_HEIGHT);
       }
     }
   }
