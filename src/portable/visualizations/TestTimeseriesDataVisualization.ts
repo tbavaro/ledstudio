@@ -14,8 +14,16 @@ export default class TestTimeseriesDataVisualization extends PianoVisualization.
     context.setFrameTimeseriesPoints([
       {
         color: Colors.WHITE,
-        value: Math.sin(this.phase)
-      }
+        value: (Math.sin(this.phase) + 1) / 2
+      },
+      {
+        color: Colors.GREEN,
+        value: (Math.cos(this.phase * 5) + 1) / 2
+      },
+      {
+        color: Colors.BLUE,
+        value: ((this.phase * 10) % (Math.PI * 2) < Math.PI) ? 0.5 : null
+      },
     ]);
   }
 }

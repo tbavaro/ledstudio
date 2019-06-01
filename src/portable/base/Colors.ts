@@ -148,3 +148,5 @@ export function createPaletteFadeLinear(fromColor: Color, toColor: Color, size: 
 export const BLACK = rgb(0, 0, 0);
 export const WHITE = rgb(1, 1, 1);
 export const RED = rgb(1, 0, 0);
+export const GREEN = rgb(0, 1, 0);
+export const BLUE = rgb(0, 0, 1);
