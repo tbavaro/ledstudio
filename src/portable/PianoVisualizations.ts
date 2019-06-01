@@ -7,6 +7,7 @@ import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization"
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
+import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
 import WingFlapVisualization from "./visualizations/WingFlapVisualization";
 
 const visFuncs = {
@@ -17,7 +18,8 @@ const visFuncs = {
   "testKey": () => new TestKeyVisualization(),
   "testKeyFade": () => new TestKeyFadeVisualization(),
   "testRainbow": (numLeds: number[]) => new TestRainbowVisualization(numLeds),
-  "testStripAddress": (numLeds: number[]) => new TestStripAddressVisualization(numLeds)
+  "testStripAddress": (numLeds: number[]) => new TestStripAddressVisualization(numLeds),
+  "testTimeseriesDataVisualization": () => new TestTimeseriesDataVisualization()
 };
 
 export type Name = keyof typeof visFuncs;

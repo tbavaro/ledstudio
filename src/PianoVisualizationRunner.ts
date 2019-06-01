@@ -1,5 +1,6 @@
 import PianoEvent from "./portable/base/PianoEvent";
-import PianoVisualization from "./portable/base/PianoVisualization";
+import PianoVisualization, { Context } from "./portable/base/PianoVisualization";
+import * as TimeseriesData from "./portable/base/TimeseriesData";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
@@ -24,7 +25,7 @@ export default class PianoVisualizationRunner {
     this.ledMapper = scene.createLedMapper(visualization);
   }
 
-  public renderFrame(analogFrequencyData: Uint8Array) {
+  public renderFrame(analogFrequencyData: Uint8Array): TimeseriesData.PointDef[] {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
@@ -32,10 +33,20 @@ export default class PianoVisualizationRunner {
 
     // collect state
     const visState = this.stateHelper.endFrame(analogFrequencyData);
+    let frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
+    const context: Context = {
+      setFrameTimeseriesPoints: (points: TimeseriesData.PointDef[]) => {
+        if (frameTimeseriesPoints === undefined) {
+          frameTimeseriesPoints = points;
+        } else {
+          throw new Error("frame timeseries points set multiple times");
+        }
+      }
+    };
 
     // render into the LED strip
     const elapsedMillis = startTime - this.lastRenderTime;
-    this.visualization.render(elapsedMillis, visState);
+    this.visualization.render(elapsedMillis, visState, context);
     this.stateHelper.startFrame();
     this.lastRenderTime = startTime;
 
@@ -45,6 +56,8 @@ export default class PianoVisualizationRunner {
 
     // send
     this.sendToStrips();
+
+    return frameTimeseriesPoints || [];
   }
 
   // TODO don't actually pass raw midi events in here, obv

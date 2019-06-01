@@ -7,7 +7,7 @@ export default class TestAnalogPulseVisualization extends PianoVisualization.def
     super(numLeds);
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State): void {
+  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
     const frequencyData = state.analogFrequencyData;
     let total = 0;
     frequencyData.forEach(v => total += v);
@@ -26,5 +26,12 @@ export default class TestAnalogPulseVisualization extends PianoVisualization.def
         row.set(i, Colors.WHITE);
       }
     });
+
+    context.setFrameTimeseriesPoints([
+      {
+        color: Colors.WHITE,
+        value: pulseValue
+      }
+    ]);
   }
 }

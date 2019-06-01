@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import * as Colors from "../portable/base/Colors";
+import * as TimeseriesData from "../portable/base/TimeseriesData";
 
 import "./TimeseriesView.css";
 
@@ -8,20 +9,7 @@ interface Props {
   height: number;
 }
 
-export interface PointDef {
-  color: Colors.Color;
-  value: number | null;
-}
-
-export interface HeatmapDef {
-  baseColor: Colors.Color;
-  values: number[];
-}
-
-export interface Data {
-  points?: PointDef[];
-  heatmap?: HeatmapDef;
-}
+const POINT_VALUE_HEIGHT = 2;
 
 export default class TimeseriesView extends React.PureComponent<Props, {}> {
   private canvas: HTMLCanvasElement | undefined = undefined;
@@ -47,7 +35,7 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
     this.canvasContext = ctx;
   }
 
-  public displayData(data: Data) {
+  public displayData(points: TimeseriesData.PointDef[], heatmap?: TimeseriesData.HeatmapDef) {
     const canvas = this.canvas;
     const ctx = this.canvasContext;
     if (canvas === undefined || ctx === undefined) {
@@ -58,20 +46,21 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
     const imageData = ctx.getImageData(1, 0, canvas.width - 1, canvas.height);
     ctx.putImageData(imageData, 0, 0);
 
-    if (data.heatmap !== undefined) {
-      const dy = canvas.height / data.heatmap.values.length;
-      const baseColor = data.heatmap.baseColor;
-      data.heatmap.values.forEach((v, i) => {
+    if (heatmap !== undefined) {
+      const dy = canvas.height / heatmap.values.length;
+      const baseColor = heatmap.baseColor;
+      heatmap.values.forEach((v, i) => {
         ctx.fillStyle = Colors.cssColor(Colors.multiply(baseColor, v));
         ctx.fillRect(canvas.width - 1, i * dy, 1, dy);
       });
     }
 
-    (data.points || []).map(p => {
+    for (let i = points.length - 1; i >= 0; --i) {
+      const p = points[i];
       if (p.value !== null) {
         ctx.fillStyle = Colors.cssColor(p.color);
-        ctx.fillRect(canvas.width - 1, p.value * canvas.height, 1, 5);
+        ctx.fillRect(canvas.width - 1, p.value * canvas.height, 1, POINT_VALUE_HEIGHT);
       }
-    });
+    }
   }
 }

@@ -9,6 +9,7 @@ import FadecandyClient from "./hardware/FadecandyClient";
 import FadecandyLedStrip from "./hardware/FadecandyLedStrip";
 
 import * as Scenes from "./scenes/Scenes";
+
 import SimulationViewport from "./simulation/SimulationViewport";
 
 import MidiEvent from "./piano/MidiEvent";
@@ -74,7 +75,6 @@ class App extends React.Component<{}, State> {
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly fadeCandyLedStrip = new FadecandyLedStrip(new FadecandyClient());
   public readonly analogAudio = new AnalogAudio.default();
-  private analogAudioViewRef: AnalogAudioView | undefined = undefined;
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -402,15 +402,16 @@ class App extends React.Component<{}, State> {
   }
 
   private animate = () => {
-    const frequencyData = this.analogAudio.getFrequencyData();
-    if (this.analogAudioViewRef) {
-      this.analogAudioViewRef.displayFrequencyData(frequencyData);
-    }
-
     if (this.animating) {
       this.scheduleNextAnimationFrame();
-      this.state.visualizationRunner.renderFrame(frequencyData);
+
+      const frequencyData = this.analogAudio.getFrequencyData();
+      const frameTimeseriesData = this.state.visualizationRunner.renderFrame(frequencyData);
       ++this.framesRenderedSinceLastTimingsCall;
+
+      if (this.analogAudioViewRef) {
+        this.analogAudioViewRef.displayFrequencyData(frequencyData, frameTimeseriesData);
+      }
     }
   }
 
@@ -443,6 +444,7 @@ class App extends React.Component<{}, State> {
     }
   }
 
+  private analogAudioViewRef: AnalogAudioView | undefined = undefined;
   private setAnalogAudioViewRef = (newRef: AnalogAudioView) => this.analogAudioViewRef = newRef;
 
   public state = ((): State => {

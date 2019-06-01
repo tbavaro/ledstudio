@@ -2,6 +2,8 @@ import * as Colors from "../portable/base/Colors";
 
 import * as React from "react";
 
+import * as TimeseriesData from "../portable/base/TimeseriesData";
+
 import TimeseriesView from "../simulation/TimeseriesView";
 
 const HEIGHT = 64;
@@ -21,7 +23,7 @@ export default class AnalogAudioView extends React.PureComponent<{}, {}> {
 
   private setRef = (newRef: TimeseriesView) => this.ref = newRef;
 
-  public displayFrequencyData(frequencyData: Uint8Array) {
+  public displayFrequencyData(frequencyData: Uint8Array, points?: TimeseriesData.PointDef[]) {
     const values = this.valuesBuffer;
     if (frequencyData.length % values.length !== 0) {
       throw new Error("frequency data isn't an even mutiple of HEIGHT");
@@ -35,22 +37,14 @@ export default class AnalogAudioView extends React.PureComponent<{}, {}> {
       values[idx] += (v / binBatchSize / 255);
     });
 
-    let total = 0;
-    values.forEach(v => total += v);
-    total = total / values.length;
+    // let total = 0;
+    // values.forEach(v => total += v);
+    // total = total / values.length;
 
     if (this.ref) {
-      this.ref.displayData({
-        points: [
-          {
-            color: Colors.WHITE,
-            value: total
-          }
-        ],
-        heatmap: {
-          baseColor: Colors.RED,
-          values: values
-        }
+      this.ref.displayData(points || [], {
+        baseColor: Colors.RED,
+        values: values
       });
     }
   }

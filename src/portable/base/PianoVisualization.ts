@@ -1,5 +1,6 @@
 import ColorRow from "./ColorRow";
 import FixedArray from "./FixedArray";
+import * as TimeseriesData from "./TimeseriesData";
 
 export interface State {
   // 88 booleans; true = pressed, false = released
@@ -15,6 +16,10 @@ export interface State {
   analogFrequencyData: Uint8Array;
 }
 
+export interface Context {
+  setFrameTimeseriesPoints: (data: TimeseriesData.PointDef[]) => void;
+}
+
 export default abstract class PianoVisualization {
   public readonly ledRows: FixedArray<ColorRow>;
 
@@ -22,7 +27,7 @@ export default abstract class PianoVisualization {
     this.ledRows = new FixedArray(numLeds.length, i => new ColorRow(numLeds[i]));
   }
 
-  public abstract render(elapsedMillis: number, state: State): void;
+  public abstract render(elapsedMillis: number, state: State, context: Context): void;
 }
 
 export abstract class SingleRowPianoVisualization extends PianoVisualization {
