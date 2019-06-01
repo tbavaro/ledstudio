@@ -404,7 +404,7 @@ class App extends React.Component<{}, State> {
   private animate = () => {
     const frequencyData = this.analogAudio.getFrequencyData();
     if (this.analogAudioViewRef) {
-      this.analogAudioViewRef.displayData(frequencyData);
+      this.analogAudioViewRef.displayFrequencyData(frequencyData);
     }
 
     if (this.animating) {

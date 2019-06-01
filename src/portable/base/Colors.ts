@@ -15,6 +15,11 @@ export function splitRGB(color: Color): [number, number, number] {
   return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
 }
 
+export function cssColor(color: Color): string {
+  const [r, g, b] = splitRGB(color);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 // h in [0., 360.0)
 // s in [0, 1]
 // b in [0, 1]
