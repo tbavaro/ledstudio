@@ -10,7 +10,7 @@ import FadecandyLedStrip from "./hardware/FadecandyLedStrip";
 
 import * as Scenes from "./scenes/Scenes";
 
-import SimulationViewport from "./simulation/SimulationViewport";
+import SimulationViewport from "./simulator/SimulationViewport";
 
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { QueuedMidiEventEmitter } from "./piano/MidiEventListener";

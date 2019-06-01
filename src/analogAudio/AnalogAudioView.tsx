@@ -4,7 +4,7 @@ import * as React from "react";
 
 import * as TimeseriesData from "../portable/base/TimeseriesData";
 
-import TimeseriesView from "../simulation/TimeseriesView";
+import TimeseriesView from "../simulator/TimeseriesView";
 
 const HEIGHT = 64;
 

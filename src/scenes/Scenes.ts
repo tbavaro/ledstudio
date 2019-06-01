@@ -5,7 +5,7 @@ import { promisify } from "util";
 
 import { bracket, pushAll, roundPlaces } from "../portable/Utils";
 
-import * as SimulationUtils from "../simulation/SimulationUtils";
+import * as SimulationUtils from "../simulator/SimulationUtils";
 
 import ColorRow from "../portable/base/ColorRow";
 import  * as Colors from "../portable/base/Colors";
@@ -604,7 +604,7 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
     width: 4 * INCH,
     height: 65 * INCH,
     depth: 4 * INCH,
-    translateBy: new Vector3(innerTriangleWidth, 0, 1.32),
+    translateBy: new Vector3(innerTriangleWidth, 0, 1.32 ),
   }));
   kbVenue.extraObjects.push(boxHelper({
     width: 4 * INCH,
