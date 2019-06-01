@@ -31,9 +31,9 @@ const LedSpacings = {
 
 const EXTRA_OBJECT_MATERIAL_GREEN = () => {
   return new Three.MeshBasicMaterial({
-    color: 0x001100,
+    color: 0x000100,
     transparent: true,
-    opacity: 0.2,
+    // opacity: 0.2,
     side: Three.DoubleSide
   });
 };
@@ -512,22 +512,23 @@ function createKeyboardVenue(attrs: {
   };
 }
 
-function createWingsSceneDef(name: string, ledSpacing: number) {
+function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
+  const innerTopLength = 30 * INCH;
+  const innerBottomLength = 36 * INCH;
+  const spineLength = 24 * INCH;
+  const outerTopLength = 60 * INCH;
+  const outerBottomLength = 72 * INCH;
+
+  const centerPointHeight = 57 * INCH; // colombi's shoulders
+
+  const innerTriangle = SceneUtils.triangleFromLengths({
+    verticalLength: spineLength,
+    topSideLength: innerTopLength,
+    bottomSideLength: innerBottomLength
+  });
+  const innerTriangleWidth = SceneUtils.width2D(innerTriangle);
+
   const calculate = doLazy(() => {
-    const innerTopLength = 30 * INCH;
-    const innerBottomLength = 36 * INCH;
-    const spineLength = 24 * INCH;
-    const outerTopLength = 60 * INCH;
-    const outerBottomLength = 72 * INCH;
-
-    const centerPointHeight = 57 * INCH; // colombi's shoulders
-
-    const innerTriangle = SceneUtils.triangleFromLengths({
-      verticalLength: spineLength,
-      topSideLength: innerTopLength,
-      bottomSideLength: innerBottomLength
-    });
-    const innerTriangleWidth = SceneUtils.width2D(innerTriangle);
     const triangleTranslation = new Vector2(-1 * innerTriangleWidth, 0);
     innerTriangle.forEach(p => p.add(triangleTranslation));
 
@@ -543,8 +544,6 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
     const leftLegTop = innerTriangle[1];
     const leftLegBottom = innerTriangle[0];
     const leftWingTip = outerTriangle[2];
-
-    const ribs = 7;
 
     const legPoints = SimulationUtils.pointsFromTo({
       start: leftLegTop,
@@ -600,8 +599,22 @@ function createWingsSceneDef(name: string, ledSpacing: number) {
     };
   });
 
+  const kbVenue = createKeyboardVenue({ keyboardInFront: false });
+  kbVenue.extraObjects.push(boxHelper({
+    width: 4 * INCH,
+    height: 65 * INCH,
+    depth: 4 * INCH,
+    translateBy: new Vector3(innerTriangleWidth, 0, 1.32),
+  }));
+  kbVenue.extraObjects.push(boxHelper({
+    width: 4 * INCH,
+    height: 65 * INCH,
+    depth: 4 * INCH,
+    translateBy: new Vector3(-1 * innerTriangleWidth, 0, 1.32),
+  }));
+
   return {
-    ...createKeyboardVenue({ keyboardInFront: false }),
+    ...kbVenue,
     name,
     camera: {
       startPosition: new Vector3(0, 1.4, -2.5),
@@ -640,8 +653,12 @@ registerScenes([
     ]),
     createLedMapper: (vis: PianoVisualization, numLeds: number[]) => new DefaultLedMapper(vis, numLeds)
   },
-  createWingsSceneDef("keyboard:wings30", LedSpacings.NEOPIXEL_30),
-  createWingsSceneDef("keyboard:wings60", LedSpacings.NEOPIXEL_60)
+  createWingsSceneDef("burrow:wings30x2", LedSpacings.NEOPIXEL_30, 2),
+  createWingsSceneDef("burrow:wings30x3", LedSpacings.NEOPIXEL_30, 3),
+  createWingsSceneDef("burrow:wings30x4", LedSpacings.NEOPIXEL_30, 4),
+  createWingsSceneDef("burrow:wings30x5", LedSpacings.NEOPIXEL_30, 5),
+  createWingsSceneDef("burrow:wings30x7", LedSpacings.NEOPIXEL_30, 7),
+  createWingsSceneDef("burrow:wings60x7", LedSpacings.NEOPIXEL_60, 7)
 ]);
 
-defaultScene = getScene("keyboard:wings30");
+defaultScene = getScene("burrow:wings30x2");
