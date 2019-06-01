@@ -319,6 +319,10 @@ function registerScenes(defs: ReadonlyArray<SceneDef>) {
   });
 }
 
+export function isValidName(name: string) {
+  return names().includes(name);
+}
+
 export function getDefaultScene(): Scene {
   if (defaultScene === undefined) {
     if (names.length === 0) {

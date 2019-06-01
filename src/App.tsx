@@ -339,6 +339,7 @@ class App extends React.Component<{}, State> {
       if (name !== this.state.scene.name) {
         const scene = Scenes.getScene(name);
         this.updateVisualizationAndScene(this.state.visualizationName, scene);
+        SimulatorStickySettings.set("sceneName", name);
       }
     },
     setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
@@ -457,8 +458,17 @@ class App extends React.Component<{}, State> {
     return name;
   }
 
+  private initialScene(): Scenes.Scene {
+    const name = SimulatorStickySettings.get("sceneName");
+    if (name === undefined || !Scenes.isValidName(name)) {
+      return Scenes.getDefaultScene();
+    } else {
+      return Scenes.getScene(name);
+    }
+  }
+
   public state = ((): State => {
-    const scene = Scenes.getDefaultScene();
+    const scene = this.initialScene();
     return {
       ...this.updateVisualizationAndScene(
         this.initialVisualizationName(),
