@@ -351,6 +351,7 @@ class App extends React.Component<{}, State> {
     setAnalogInputId: (newValue: string | null) => {
       this.setState({ selectedAnalogInputId: newValue });
       this.analogAudio.setCurrentDeviceId(newValue);
+      SimulatorStickySettings.set("analogAudioSourceId", newValue);
     }
   };
 
@@ -443,7 +444,7 @@ class App extends React.Component<{}, State> {
     });
 
     if (isInitialization) {
-      this.actionManager.setAnalogInputId(this.analogAudio.defaultDeviceId);
+      this.actionManager.setAnalogInputId(this.initialAnalogAudioDeviceId());
     }
   }
 
@@ -451,20 +452,28 @@ class App extends React.Component<{}, State> {
   private setAnalogAudioViewRef = (newRef: AnalogAudioView) => this.analogAudioViewRef = newRef;
 
   private initialVisualizationName(): PianoVisualizations.Name {
-    let name = SimulatorStickySettings.get("visualizationName");
-    if (name === undefined || !PianoVisualizations.isValidName(name)) {
-      name = PianoVisualizations.defaultName;
-    }
-    return name;
+    return SimulatorStickySettings.get({
+      key: "visualizationName",
+      defaultValue: PianoVisualizations.defaultName,
+      validateFunc: PianoVisualizations.isValidName
+    });
   }
 
   private initialScene(): Scenes.Scene {
-    const name = SimulatorStickySettings.get("sceneName");
-    if (name === undefined || !Scenes.isValidName(name)) {
-      return Scenes.getDefaultScene();
-    } else {
-      return Scenes.getScene(name);
-    }
+    const name = SimulatorStickySettings.get({
+      key: "sceneName",
+      defaultValue: Scenes.defaultSceneName,
+      validateFunc: Scenes.isValidName
+    });
+    return Scenes.getScene(name);
+  }
+
+  private initialAnalogAudioDeviceId(): string | null {
+    return SimulatorStickySettings.get({
+      key: "analogAudioSourceId",
+      defaultValue: this.analogAudio.defaultDeviceId,
+      validateFunc: this.analogAudio.isValidId
+    });
   }
 
   public state = ((): State => {

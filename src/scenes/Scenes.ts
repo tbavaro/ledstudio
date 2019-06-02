@@ -294,7 +294,6 @@ export class Scene {
 }
 
 const registry = new Map<string, Scene>();
-let defaultScene: Scene | undefined;
 
 export function names(): ReadonlyArray<string> {
   return Array.from(registry.keys());
@@ -321,16 +320,6 @@ function registerScenes(defs: ReadonlyArray<SceneDef>) {
 
 export function isValidName(name: string) {
   return names().includes(name);
-}
-
-export function getDefaultScene(): Scene {
-  if (defaultScene === undefined) {
-    if (names.length === 0) {
-      throw new Error("no scenes");
-    }
-    defaultScene = getScene(names[0]);
-  }
-  return defaultScene;
 }
 
 function makeLedSegments(segments: Array<{
@@ -665,4 +654,7 @@ registerScenes([
   createWingsSceneDef("burrow:wings60x7", LedSpacings.NEOPIXEL_60, 7)
 ]);
 
-defaultScene = getScene("burrow:wings30x2");
+export const defaultSceneName = "burrow:wings30x2";
+if (!isValidName(defaultSceneName)) {
+  throw new Error("not a valid scene name");
+}

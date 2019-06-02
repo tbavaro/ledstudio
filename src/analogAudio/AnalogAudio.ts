@@ -28,6 +28,14 @@ export default class AnalogAudio {
     return this.inputDevicesInternal;
   }
 
+  public isValidId = (id: string | null) => {
+    if (id === null) {
+      return true;
+    } else {
+      return this.inputDevices.find(d => d.id === id) !== undefined;
+    }
+  }
+
   public get defaultDeviceId(): string | null {
     const defaultDevice = this.inputDevicesInternal.find(d => d.name === "Soundflower (2ch)");
     if (defaultDevice === undefined) {
