@@ -15,8 +15,8 @@ export function get<K extends keyof Settings>(attrs: {
   defaultValue: Settings[K],
   validateFunc: (value: Settings[K]) => boolean
 }): Settings[K] {
-  const json = (window.localStorage[LOCAL_STORAGE_PREFIX + attrs.key]) as string | undefined;
-  const value = (json === undefined ? undefined : JSON.parse(json));
+  const json = window.localStorage.getItem(LOCAL_STORAGE_PREFIX + attrs.key) as string | null;
+  const value = (json === null ? undefined : JSON.parse(json));
   if (value === undefined || !attrs.validateFunc(value)) {
     return attrs.defaultValue;
   } else {
@@ -25,5 +25,5 @@ export function get<K extends keyof Settings>(attrs: {
 }
 
 export function set<K extends keyof Settings>(key: K, value: Settings[K]): void {
-  window.localStorage[LOCAL_STORAGE_PREFIX + key] = JSON.stringify(value);
+  window.localStorage.setItem(LOCAL_STORAGE_PREFIX + key, JSON.stringify(value));
 }
