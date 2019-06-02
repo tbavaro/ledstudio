@@ -71,6 +71,38 @@ type AllActions = RightSidebar.Actions;
 
 const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
+function tryGetById<T extends { id: string}>(objs: ReadonlyArray<T>, id: string | null): T | null | undefined {
+  if (id === null) {
+    return null;
+  }
+
+  return objs.find(obj => obj.id === id);
+}
+
+function createIsValidIdFunc<T extends { id: string}>(objs: ReadonlyArray<T>) {
+  return (id: string | null) => tryGetById(objs, id) !== undefined;
+}
+
+function getById<T extends { id: string }>(objs: ReadonlyArray<T>, id: string | null): T | null {
+  const obj = tryGetById(objs, id);
+  if (obj === undefined) {
+    throw new Error(`can't find by id: ${id}`);
+  }
+  return obj;
+}
+
+function getByStickyIdKeyOrFirst<T extends { id: string }>(
+  objs: ReadonlyArray<T>,
+  key: keyof SimulatorStickySettings.Settings
+): T | null {
+  const idOrNull = SimulatorStickySettings.get({
+    key: key,
+    defaultValue: (objs.length === 0 ? null : objs[0].id),
+    validateFunc: createIsValidIdFunc(objs)
+  });
+  return getById(objs, idOrNull);
+}
+
 class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
@@ -95,11 +127,11 @@ class App extends React.Component<{}, State> {
         });
 
         const inputs = Array.from(webMidi.inputs.values());
-        const defaultInput = (inputs.length === 0 ? null : inputs[0]);
+        const defaultInput = getByStickyIdKeyOrFirst(inputs, "midiInputId");
         this.setMidiInput(defaultInput);
 
         const outputs = Array.from(webMidi.outputs.values());
-        const defaultOutput = (outputs.length === 0 ? null : outputs[0]);
+        const defaultOutput = getByStickyIdKeyOrFirst(outputs, "midiOutputId");
         this.setMidiOutput(defaultOutput);
 
         this.updateMidiDevices();
@@ -247,6 +279,7 @@ class App extends React.Component<{}, State> {
         newValue.addEventListener("midimessage", this.onMidiInputMessage);
       }
       this.setState({ midiInput: newValue });
+      SimulatorStickySettings.set("midiInputId", newValue === null ? null : newValue.id);
     }
   }
 
@@ -254,6 +287,7 @@ class App extends React.Component<{}, State> {
     if (newValue !== this.state.midiOutput) {
       this.midiPlayer.output = newValue;
       this.setState({ midiOutput: newValue });
+      SimulatorStickySettings.set("midiOutputId", newValue === null ? null : newValue.id);
     }
   }
 
