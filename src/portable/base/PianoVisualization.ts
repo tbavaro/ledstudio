@@ -50,10 +50,10 @@ export abstract class DerezPianoVisualization extends PianoVisualization {
     this.derez = derez;
   }
 
-  protected abstract renderPure(elapsedMillis: number, state: State): void;
+  protected abstract renderPure(elapsedMillis: number, state: State, context: Context): void;
 
-  public render(elapsedMillis: number, state: State): void {
-    this.renderPure(elapsedMillis, state);
+  public render(elapsedMillis: number, state: State, context: Context): void {
+    this.renderPure(elapsedMillis, state, context);
 
     this.pureLedRows.forEach((pureLeds, row) => {
       const leds = this.ledRows.get(row);

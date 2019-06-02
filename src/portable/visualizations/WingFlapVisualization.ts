@@ -22,10 +22,11 @@ export default class WingFlapVisualization extends PianoVisualization.DerezPiano
     super(numLeds, DEREZ);
   }
 
-  public renderPure(elapsedMillis: number, state: PianoVisualization.State): void {
+  public renderPure(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
     this.phase = (this.phase + elapsedMillis * SPEED) % PERIOD;
 
-    const position = Math.pow(Math.sin(this.phase), FLAPPINESS) * (this.ledRows.length - 1);
+    const positionNormalized = Math.pow(Math.sin(this.phase), FLAPPINESS);
+    const position = positionNormalized * (this.ledRows.length - 1);
 
     this.pureLedRows.forEach((leds, row) => {
       const rowV = Math.pow(1 - (Math.abs(position - row) / (this.ledRows.length)), VERTICAL_SHARPNESS);
@@ -40,5 +41,10 @@ export default class WingFlapVisualization extends PianoVisualization.DerezPiano
         leds.set(i, color);
       }
     });
+
+    context.setFrameTimeseriesPoints([{
+      color: Colors.WHITE,
+      value: 1 - positionNormalized
+    }]);
   }
 }
