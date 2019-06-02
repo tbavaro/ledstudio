@@ -3,7 +3,7 @@ import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-import { bracket, pushAll, roundPlaces } from "../portable/Utils";
+import { bracket, pushAll } from "../portable/Utils";
 
 import * as SimulationUtils from "../simulator/SimulationUtils";
 
@@ -506,11 +506,15 @@ function createKeyboardVenue(attrs: {
 }
 
 function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
-  const innerTopLength = 30 * INCH;
-  const innerBottomLength = 36 * INCH;
+  const extraLength = 1 * INCH;
+  const skipFirst = 0.75 * INCH;
+
+  const innerTopLength = 30 * INCH + extraLength;
+  const innerBottomLength = 36 * INCH + extraLength;
   const spineLength = 24 * INCH;
-  const outerTopLength = 60 * INCH;
+  const outerTopLength = 60 * INCH + extraLength;
   const outerBottomLength = 72 * INCH;
+  const shortenEachSubsequentOuterRibBy = 2 * INCH;
 
   const centerPointHeight = 57 * INCH; // colombi's shoulders
 
@@ -544,22 +548,30 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
       spacing: leftLegTop.clone().sub(leftLegBottom).length() / (ribs - 1)
     });
 
-    let spanLengths: number[] = [];
+    const ribCounts: any[] = [];
+
     const leftSidePoints = legPoints.map((legPoint, row) => {
       const points: Vector2[] = [];
-      spanLengths.push(middleCenter.clone().sub(legPoint).length());
-      pushAll(points, SimulationUtils.pointsFromTo({
+      const innerPoints = SimulationUtils.pointsFromTo({
         start: legPoint,
         end: middleCenter,
-        spacing: ledSpacing
-      }));
-      spanLengths.push(leftWingTip.clone().sub(legPoint).length());
-      pushAll(points, SimulationUtils.pointsFromTo({
+        spacing: ledSpacing,
+        skipFirst: skipFirst,
+        shortenBy: 0.75 * INCH
+      });
+      pushAll(points, innerPoints);
+      const outerPoints = SimulationUtils.pointsFromTo({
         start: legPoint,
         end: leftWingTip, // .clone().add(new Vector2(0, -0.01 * row)),
         spacing: ledSpacing,
-        skipFirst: true
-      }));
+        skipFirst: skipFirst,
+        shortenBy: row * shortenEachSubsequentOuterRibBy
+      });
+      pushAll(points, outerPoints);
+      ribCounts.push({
+        i: innerPoints.length,
+        o: outerPoints.length
+      });
       return points;
     });
 
@@ -569,12 +581,6 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
       points.sort((a, b) => a.x - b.x);
       return points;
     });
-    spanLengths = [...spanLengths, ...spanLengths];
-
-    const maxSpanLength = spanLengths.reduce((a, b) => Math.max(a, b), 0);
-    const totalSpanLength = spanLengths.reduce((a, b) => a + b, 0);
-    // spanLengths.sort();
-    // console.log("wing stats", `# leds: ${points.length}`, "spanLengths", spanLengths, `total span length: ${totalSpanLength}`);
 
     return {
       positions: allPoints.map(points => (
@@ -586,8 +592,7 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
         })
       )),
       displayValues: {
-        maxSpan: roundPlaces(maxSpanLength, 2),
-        totalSpan: roundPlaces(totalSpanLength, 2)
+        ribCounts: JSON.stringify(ribCounts)
       }
     };
   });

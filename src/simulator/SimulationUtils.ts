@@ -50,19 +50,15 @@ export function pointsFromTo<V extends Vector>(attrs: {
   start: V,
   end: V,
   spacing: number,
-  skipFirst?: boolean
+  skipFirst?: number,
+  shortenBy?: number
 }): V[] {
   const delta = attrs.end.clone().sub(attrs.start);
-  const distance = delta.length();
-  const step = delta.normalize().multiplyScalar(attrs.spacing);
+  const distance = Math.max(0, delta.length() - (attrs.shortenBy || 0) - (attrs.skipFirst || 0));
+  const step = delta.clone().normalize().multiplyScalar(attrs.spacing);
 
-  const start = attrs.start.clone();
-  let numPoints = 1 + Math.floor(distance / attrs.spacing);
-  if (attrs.skipFirst) {
-    start.add(step);
-    numPoints -= 1;
-  }
-
+  const start = attrs.start.clone().add(delta.clone().normalize().multiplyScalar(attrs.skipFirst || 0));
+  const numPoints = 1 + Math.floor(distance / attrs.spacing);
   return nPointsInDirection({
     firstPoint: start,
     step,
