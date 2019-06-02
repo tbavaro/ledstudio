@@ -8,6 +8,7 @@ export interface Settings {
   analogAudioSourceId: string | null;
   midiInputId: string | null;
   midiOutputId: string | null;
+  midiFilename: string;
 }
 
 export function get<K extends keyof Settings>(attrs: {

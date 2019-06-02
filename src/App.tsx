@@ -155,7 +155,11 @@ class App extends React.Component<{}, State> {
       });
     }
 
-    this.loadMidiFile(MIDI_FILES[0]);
+    this.loadMidiFile(SimulatorStickySettings.get({
+      key: "midiFilename",
+      defaultValue: MIDI_FILES[0],
+      validateFunc: v => MIDI_FILES.includes(v)
+    }));
     this.midiEventEmitter.addListener(this.myMidiListener);
   }
 
@@ -306,6 +310,7 @@ class App extends React.Component<{}, State> {
         midiData: null,
         midiFilename: filename
       });
+      SimulatorStickySettings.set("midiFilename", filename);
 
       const req = new XMLHttpRequest();
       req.open("GET", MIDI_FILE_PATH_PREFIX + filename, true);
