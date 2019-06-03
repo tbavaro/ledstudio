@@ -16,9 +16,13 @@ export abstract class LedMapper {
   public abstract mapLeds(): FixedArray<ColorRow>;
 }
 
+export interface LedInfo {
+  position: Three.Vector3;
+}
+
 export interface Scene {
   readonly name: string;
-  readonly ledPositions: Three.Vector3[][];
+  readonly leds: LedInfo[][];
   readonly cameraStartPosition: Three.Vector3;
   readonly cameraTarget: Three.Vector3;
   readonly displayMessage: string;

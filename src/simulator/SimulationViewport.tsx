@@ -151,8 +151,8 @@ class LedScene {
 
   constructor(scene: Scene, renderScene: Three.Scene, doRender: () => void) {
     this.scene = scene;
-    scene.ledPositions.forEach(row => row.forEach(point => {
-      this.ledHelpers.push(new LedHelper(renderScene, point));
+    scene.leds.forEach(row => row.forEach(led => {
+      this.ledHelpers.push(new LedHelper(renderScene, led.position));
     }));
 
     this.ledStrip = new LedSceneStrip(this.ledHelpers, doRender);

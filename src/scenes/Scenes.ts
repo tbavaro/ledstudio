@@ -58,7 +58,7 @@ interface CameraDef {
 }
 
 interface LedsDef {
-  calculatePositions: () => Vector3[][];
+  calculate: () => Scene.LedInfo[][];
 }
 
 interface SceneDef {
@@ -153,26 +153,26 @@ export function boxHelper(attrs: {
 
 export class SceneImpl implements Scene.default {
   private readonly def: SceneDef;
-  private lazyLoadedLedPositions?: Vector3[][];
+  private lazyLoadedLeds?: Scene.LedInfo[][];
   private lazyModelPromise?: Promise<Three.Object3D>;
   private displayValues: { [k: string]: string | number } | undefined;
   private cachedDisplayMessage: string | undefined;
 
   constructor(def: SceneDef) {
     this.def = def;
-    this.lazyLoadedLedPositions = undefined;
+    this.lazyLoadedLeds = undefined;
   }
 
   public get name() {
     return this.def.name;
   }
 
-  public get ledPositions(): Vector3[][] {
-    if (this.lazyLoadedLedPositions === undefined) {
-      this.lazyLoadedLedPositions = this.def.leds.calculatePositions();
-      this.setDisplayValue("#leds", this.lazyLoadedLedPositions.reduce((accum, row) => accum + row.length, 0));
+  public get leds(): Scene.LedInfo[][] {
+    if (this.lazyLoadedLeds === undefined) {
+      this.lazyLoadedLeds = this.def.leds.calculate();
+      this.setDisplayValue("#leds", this.lazyLoadedLeds.reduce((accum, row) => accum + row.length, 0));
     }
-    return this.lazyLoadedLedPositions;
+    return this.lazyLoadedLeds;
   }
 
   public async loadModel(): Promise<Three.Object3D> {
@@ -271,7 +271,7 @@ export class SceneImpl implements Scene.default {
   }
 
   public createLedMapper(vis: PianoVisualization) {
-    const targetLedNums = this.ledPositions.map(row => row.length);
+    const targetLedNums = this.leds.map(row => row.length);
     if (this.def.createLedMapper) {
       return this.def.createLedMapper(vis, targetLedNums);
     } else {
@@ -315,9 +315,9 @@ function makeLedSegments(segments: Array<{
   endPoint: Three.Vector3;
 }>): LedsDef {
   return {
-    calculatePositions: () => {
+    calculate: () => {
       return segments.map(segment => {
-        const positions: Three.Vector3[] = [];
+        const positions: Scene.LedInfo[] = [];
         const numLeds = segment.numLeds;
         const step = segment.endPoint.clone();
         step.sub(segment.startPoint);
@@ -326,7 +326,10 @@ function makeLedSegments(segments: Array<{
           const position = step.clone();
           position.multiplyScalar(i);
           position.add(segment.startPoint);
-          positions.push(position);
+          const led: Scene.LedInfo = {
+            position: position
+          };
+          positions.push(led);
         }
         return positions;
       });
@@ -570,13 +573,13 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
     });
 
     return {
-      positions: allPoints.map(points => (
+      leds: allPoints.map(points => (
         SimulationUtils.map2dTo3d({
           points: points,
           bottomLeft: new Vector3(0, centerPointHeight - innerTriangle[2].y, 1.25),
           rightDirection: new Vector3(1, 0, 0),
           upDirection: new Vector3(0, 1, 0)
-        })
+        }).map(p => ({ position: p }))
       )),
       displayValues: {
         ribCounts: JSON.stringify(ribCounts)
@@ -605,7 +608,7 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
       startPosition: new Vector3(0, 1.4, -2.5),
       target: new Vector3(0, 1.2, 0)
     },
-    leds: { calculatePositions: () => calculate().positions },
+    leds: { calculate: () => calculate().leds },
     initialDisplayValues: () => calculate().displayValues,
     createLedMapper: (vis: PianoVisualization, targetLedNums: number[]) => new DefaultLedMapper(vis, targetLedNums, "middle")
   };
