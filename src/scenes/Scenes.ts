@@ -553,7 +553,8 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
       return points3d.map((p, idx) => ({ position: p, hardwareChannel: channel, hardwareIndex: idx }));
     };
 
-    let nextChannel = 1;
+    const firstChannel = 1;
+    let nextChannel = firstChannel;
 
     const leftSideLeds = legPoints.map((legPoint, row) => {
       const innerLeds = makeChannelLeds(nextChannel++, SimulationUtils.pointsFromTo({
@@ -580,7 +581,7 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
       return [...innerLeds, ...outerLeds];
     });
 
-    const rightSideChannelOffset = nextChannel;
+    const rightSideChannelOffset = nextChannel - firstChannel;
 
     // mirror left and right side and sort left-to-right
     const allLeds = leftSideLeds.map(row => {

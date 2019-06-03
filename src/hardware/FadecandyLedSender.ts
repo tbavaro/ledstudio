@@ -30,6 +30,7 @@ export default class FadecandyLedSender {
     }));
 
     this.channelToBufferMap = new Map();
+    const channelToLedCountMap = new Map<number, number>();
     channelToIndicesMap.forEach((indices: number[], channel: number) => {
       // validate
       indices.sort((a, b) => a - b);
@@ -43,6 +44,7 @@ export default class FadecandyLedSender {
 
       // initialize buffer
       const numLeds = indices.length;
+      channelToLedCountMap.set(channel, numLeds);
       const buffer = new Buffer(HEADER_LENGTH + 3 * numLeds).fill(0);
       buffer.writeUInt8(channel, 0); // channel
       buffer.writeUInt8(0, 1); // command
@@ -50,6 +52,9 @@ export default class FadecandyLedSender {
 
       this.channelToBufferMap.set(channel, buffer);
     });
+
+    const orderedLedCounts = Array.from(channelToLedCountMap.entries()).sort((a, b) => a[0] - b[0]);
+    console.log(`initialized FadecandyLedSender with counts: ${JSON.stringify(orderedLedCounts)}`);
   }
 
   public send(colorRows: FixedArray<ColorRow>) {
