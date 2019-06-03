@@ -18,6 +18,8 @@ export abstract class LedMapper {
 
 export interface LedInfo {
   position: Three.Vector3;
+  hardwareChannel: number;
+  hardwareIndex: number;
 }
 
 export interface Scene {

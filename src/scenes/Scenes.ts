@@ -3,7 +3,7 @@ import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-import { bracket, pushAll } from "../portable/Utils";
+import { bracket } from "../portable/Utils";
 
 import * as SimulationUtils from "../simulator/SimulationUtils";
 
@@ -313,6 +313,7 @@ function makeLedSegments(segments: Array<{
   numLeds: number;
   startPoint: Three.Vector3;
   endPoint: Three.Vector3;
+  hardwareChannel: number;
 }>): LedsDef {
   return {
     calculate: () => {
@@ -327,7 +328,9 @@ function makeLedSegments(segments: Array<{
           position.multiplyScalar(i);
           position.add(segment.startPoint);
           const led: Scene.LedInfo = {
-            position: position
+            position: position,
+            hardwareChannel: segment.hardwareChannel,
+            hardwareIndex: i
           };
           positions.push(led);
         }
@@ -540,47 +543,58 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
 
     const ribCounts: any[] = [];
 
-    const leftSidePoints = legPoints.map((legPoint, row) => {
-      const points: Vector2[] = [];
-      const innerPoints = SimulationUtils.pointsFromTo({
+    const makeChannelLeds = (channel: number, points2d: Vector2[]): Scene.LedInfo[] => {
+      const points3d = SimulationUtils.map2dTo3d({
+        points: points2d,
+        bottomLeft: new Vector3(0, centerPointHeight - innerTriangle[2].y, 1.25),
+        rightDirection: new Vector3(1, 0, 0),
+        upDirection: new Vector3(0, 1, 0)
+      });
+      return points3d.map((p, idx) => ({ position: p, hardwareChannel: channel, hardwareIndex: idx }));
+    };
+
+    let nextChannel = 0;
+
+    const leftSideLeds = legPoints.map((legPoint, row) => {
+      const innerLeds = makeChannelLeds(nextChannel++, SimulationUtils.pointsFromTo({
         start: legPoint,
         end: middleCenter,
         spacing: ledSpacing,
         skipFirst: skipFirst,
         shortenBy: 0.75 * INCH
-      });
-      pushAll(points, innerPoints);
-      const outerPoints = SimulationUtils.pointsFromTo({
+      }));
+
+      const outerLeds = makeChannelLeds(nextChannel++, SimulationUtils.pointsFromTo({
         start: legPoint,
         end: leftWingTip, // .clone().add(new Vector2(0, -0.01 * row)),
         spacing: ledSpacing,
         skipFirst: skipFirst,
         shortenBy: row * shortenEachSubsequentOuterRibBy
-      });
-      pushAll(points, outerPoints);
+      }));
+
       ribCounts.push({
-        i: innerPoints.length,
-        o: outerPoints.length
+        i: innerLeds.length,
+        o: outerLeds.length
       });
-      return points;
+
+      return [...innerLeds, ...outerLeds];
     });
 
+    const rightSideChannelOffset = nextChannel;
+
     // mirror left and right side and sort left-to-right
-    const allPoints = leftSidePoints.map(row => {
-      const points = [...row, ...row.map(p => new Vector2(-1 * p.x, p.y))];
-      points.sort((a, b) => a.x - b.x);
-      return points;
+    const allLeds = leftSideLeds.map(row => {
+      const leds = [...row, ...row.map(led => ({
+        position: new Vector3(-1 * led.position.x, led.position.y, led.position.z),
+        hardwareChannel: led.hardwareChannel + rightSideChannelOffset,
+        hardwareIndex: led.hardwareIndex
+      }))];
+      leds.sort((a, b) => a.position.x - b.position.x);
+      return leds;
     });
 
     return {
-      leds: allPoints.map(points => (
-        SimulationUtils.map2dTo3d({
-          points: points,
-          bottomLeft: new Vector3(0, centerPointHeight - innerTriangle[2].y, 1.25),
-          rightDirection: new Vector3(1, 0, 0),
-          upDirection: new Vector3(0, 1, 0)
-        }).map(p => ({ position: p }))
-      )),
+      leds: allLeds,
       displayValues: {
         ribCounts: JSON.stringify(ribCounts)
       }
@@ -601,7 +615,7 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
     translateBy: new Vector3(-1 * innerTriangleWidth, 0, 1.32),
   }));
 
-  return {
+  const sceneDef: SceneDef = {
     ...kbVenue,
     name,
     camera: {
@@ -612,6 +626,8 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
     initialDisplayValues: () => calculate().displayValues,
     createLedMapper: (vis: PianoVisualization, targetLedNums: number[]) => new DefaultLedMapper(vis, targetLedNums, "middle")
   };
+
+  return sceneDef;
 }
 
 registerScenes([
@@ -626,17 +642,20 @@ registerScenes([
       {
         numLeds: 88,
         startPoint: new Three.Vector3(-0.6, 0.74, -0.163),
-        endPoint: new Three.Vector3(0.6, 0.74, -0.163)
+        endPoint: new Three.Vector3(0.6, 0.74, -0.163),
+        hardwareChannel: 0
       },
       {
         numLeds: 88,
         startPoint: new Three.Vector3(-0.6, 0.725, -0.168),
-        endPoint: new Three.Vector3(0.6, 0.725, -0.168)
+        endPoint: new Three.Vector3(0.6, 0.725, -0.168),
+        hardwareChannel: 1
       },
       {
         numLeds: 88,
         startPoint: new Three.Vector3(-0.6, .71, -0.173),
-        endPoint: new Three.Vector3(0.6, .71, -0.173)
+        endPoint: new Three.Vector3(0.6, .71, -0.173),
+        hardwareChannel: 2
       }
     ]),
     createLedMapper: (vis: PianoVisualization, numLeds: number[]) => new DefaultLedMapper(vis, numLeds)
