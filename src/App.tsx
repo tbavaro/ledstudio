@@ -6,7 +6,7 @@ import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
 
 import FadecandyClient from "./hardware/FadecandyClient";
-import FadecandyLedStrip from "./hardware/FadecandyLedStrip";
+import FadecandyLedSender from "./hardware/FadecandyLedSender";
 
 import Scene from "./scenes/Scene";
 import * as Scenes from "./scenes/Scenes";
@@ -107,7 +107,7 @@ function getByStickyIdKeyOrFirst<T extends { id: string }>(
 class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
-  private readonly fadeCandyLedStrip = new FadecandyLedStrip(new FadecandyClient());
+  private readonly fadecandyClient = new FadecandyClient();
   public readonly analogAudio = new AnalogAudio.default();
 
   public componentWillMount() {
@@ -348,7 +348,7 @@ class App extends React.Component<{}, State> {
   private visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scene) {
     const vis = PianoVisualizations.create(name, scene.leds);
     const runner = new PianoVisualizationRunner(vis, scene);
-    runner.hardwardLedStrip = this.fadeCandyLedStrip;
+    runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
     return runner;
   }
 
@@ -460,9 +460,10 @@ class App extends React.Component<{}, State> {
   }
 
   private getTimings = () => {
+    const fadecandyLedSender = this.state.visualizationRunner.hardwareLedSender;
     const result = {
       visualizationMillis: this.state.visualizationRunner.averageRenderTime,
-      fadeCandyMillis: this.fadeCandyLedStrip.averageSendTime,
+      fadeCandyMillis: (fadecandyLedSender === undefined ? 0 : fadecandyLedSender.averageSendTime),
       renderMillis: (ENABLE_SIMULATION ? this.renderTimingHelper.movingAverage : 0),
       framesRenderedSinceLastCall: this.framesRenderedSinceLastTimingsCall
     };

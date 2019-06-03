@@ -139,6 +139,8 @@ class LedSceneStrip implements SendableLedStrip {
     this.onSend();
   }
 
+  public readonly averageSendTime = 0;
+
   private static convertColor(color: Colors.Color): Three.Color {
     return new Three.Color(color);
   }

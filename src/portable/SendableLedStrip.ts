@@ -5,4 +5,5 @@ import LedStrip from "./base/LedStrip";
 // visualizations should not need to call this themselves.
 export interface SendableLedStrip extends LedStrip {
   send(): void;
+  readonly averageSendTime: number;
 }
