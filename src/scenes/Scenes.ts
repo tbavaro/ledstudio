@@ -553,7 +553,7 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
       return points3d.map((p, idx) => ({ position: p, hardwareChannel: channel, hardwareIndex: idx }));
     };
 
-    let nextChannel = 0;
+    let nextChannel = 1;
 
     const leftSideLeds = legPoints.map((legPoint, row) => {
       const innerLeds = makeChannelLeds(nextChannel++, SimulationUtils.pointsFromTo({
@@ -643,19 +643,19 @@ registerScenes([
         numLeds: 88,
         startPoint: new Three.Vector3(-0.6, 0.74, -0.163),
         endPoint: new Three.Vector3(0.6, 0.74, -0.163),
-        hardwareChannel: 0
+        hardwareChannel: 1
       },
       {
         numLeds: 88,
         startPoint: new Three.Vector3(-0.6, 0.725, -0.168),
         endPoint: new Three.Vector3(0.6, 0.725, -0.168),
-        hardwareChannel: 1
+        hardwareChannel: 2
       },
       {
         numLeds: 88,
         startPoint: new Three.Vector3(-0.6, .71, -0.173),
         endPoint: new Three.Vector3(0.6, .71, -0.173),
-        hardwareChannel: 2
+        hardwareChannel: 3
       }
     ]),
     createLedMapper: (vis: PianoVisualization, numLeds: number[]) => new DefaultLedMapper(vis, numLeds)
