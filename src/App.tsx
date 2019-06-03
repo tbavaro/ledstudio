@@ -346,7 +346,7 @@ class App extends React.Component<{}, State> {
   }
 
   private visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scene) {
-    const vis = PianoVisualizations.create(name, scene.leds.map(row => row.length));
+    const vis = PianoVisualizations.create(name, scene.leds);
     const runner = new PianoVisualizationRunner(vis, scene);
     runner.hardwardLedStrip = this.fadeCandyLedStrip;
     return runner;

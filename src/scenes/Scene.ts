@@ -2,6 +2,7 @@ import * as Three from "three";
 
 import ColorRow from "../portable/base/ColorRow";
 import FixedArray from "../portable/base/FixedArray";
+import PortableLedInfo from "../portable/base/LedInfo";
 import PianoVisualization from "../portable/base/PianoVisualization";
 
 export abstract class LedMapper {
@@ -16,7 +17,7 @@ export abstract class LedMapper {
   public abstract mapLeds(): FixedArray<ColorRow>;
 }
 
-export interface LedInfo {
+export interface LedInfo extends PortableLedInfo {
   position: Three.Vector3;
   hardwareChannel: number;
   hardwareIndex: number;

@@ -1,4 +1,5 @@
 import * as Colors from "../base/Colors";
+import LedInfo from "../base/LedInfo";
 import * as PianoVisualization from "../base/PianoVisualization";
 
 const MINOR_SEGMENT_LENGTH = 64;  // fadecandy channel
@@ -20,8 +21,8 @@ export default class TestStripAddressVisualization extends PianoVisualization.de
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
 
-  constructor(numLeds: number[]) {
-    super(numLeds);
+  constructor(ledInfos: LedInfo[][]) {
+    super(ledInfos.map(row => row.length));
   }
 
   public render(elapsedMillis: number): void {

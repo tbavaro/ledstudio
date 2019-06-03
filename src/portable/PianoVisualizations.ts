@@ -1,3 +1,4 @@
+import LedInfo from "./base/LedInfo";
 import PianoVisualization from "./base/PianoVisualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
@@ -10,15 +11,19 @@ import TestStripAddressVisualization from "./visualizations/TestStripAddressVisu
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
 import WingFlapVisualization from "./visualizations/WingFlapVisualization";
 
+function countsOnly(ledInfos: LedInfo[][]): number[] {
+  return ledInfos.map(row => row.length);
+}
+
 const visFuncs = {
-  "glowWave": (numLeds: number[]) => new GlowWaveVisualization(numLeds),
+  "glowWave": (ledInfos: LedInfo[][]) => new GlowWaveVisualization(countsOnly(ledInfos)),
   "centerSpread": () => new CenterSpreadVisualization(),
-  "wingFlap": (numLeds: number[]) => new WingFlapVisualization(numLeds),
-  "testAnalogPulse": (numLeds: number[]) => new TestAnalogPulseVisualization(numLeds),
+  "wingFlap": (ledInfos: LedInfo[][]) => new WingFlapVisualization(countsOnly(ledInfos)),
+  "testAnalogPulse": (ledInfos: LedInfo[][]) => new TestAnalogPulseVisualization(countsOnly(ledInfos)),
   "testKey": () => new TestKeyVisualization(),
   "testKeyFade": () => new TestKeyFadeVisualization(),
-  "testRainbow": (numLeds: number[]) => new TestRainbowVisualization(numLeds),
-  "testStripAddress": (numLeds: number[]) => new TestStripAddressVisualization(numLeds),
+  "testRainbow": (ledInfos: LedInfo[][]) => new TestRainbowVisualization(countsOnly(ledInfos)),
+  "testStripAddress": (ledInfos: LedInfo[][]) => new TestStripAddressVisualization(ledInfos),
   "testTimeseriesDataVisualization": () => new TestTimeseriesDataVisualization()
 };
 
@@ -27,11 +32,11 @@ export type Name = keyof typeof visFuncs;
 export const defaultName: Name = "testStripAddress";
 
 export const names: ReadonlyArray<Name> = Object.keys(visFuncs) as Name[];
-export function create(name: Name, numLeds: number[]): PianoVisualization {
+export function create(name: Name, ledInfos: LedInfo[][]): PianoVisualization {
   if (!(name in visFuncs)) {
     throw new Error("unrecognized name");
   }
-  return visFuncs[name](numLeds);
+  return visFuncs[name](ledInfos);
 }
 
 export function isValidName(name: Name): boolean {
