@@ -7,11 +7,10 @@ import { bracket, pushAll } from "../portable/Utils";
 
 import * as SimulationUtils from "../simulator/SimulationUtils";
 
-import ColorRow from "../portable/base/ColorRow";
 import  * as Colors from "../portable/base/Colors";
-import FixedArray from "../portable/base/FixedArray";
 import PianoVisualization from "../portable/base/PianoVisualization";
 
+import * as Scene from "./Scene";
 import * as SceneUtils from "./SceneUtils";
 
 const FLOOR_SIZE_DEFAULT = 10;
@@ -69,24 +68,12 @@ interface SceneDef {
   model: ModelDef;
   extraObjects?: ExtraObjectFunc[];
   leds: LedsDef;
-  createLedMapper?: (vis: PianoVisualization, targetLedNums: number[]) => LedMapper;
-}
-
-export abstract class LedMapper {
-  protected readonly visColorRows: FixedArray<ColorRow>;
-  protected readonly outputColorRows: FixedArray<ColorRow>;
-
-  constructor(vis: PianoVisualization, targetLedNums: number[]) {
-    this.visColorRows = vis.ledRows;
-    this.outputColorRows = FixedArray.from(targetLedNums.map(n => new ColorRow(n)));
-  }
-
-  public abstract mapLeds(): FixedArray<ColorRow>;
+  createLedMapper?: (vis: PianoVisualization, targetLedNums: number[]) => Scene.LedMapper;
 }
 
 type LedMapperAnchor = "beginning" | "middle";
 
-class DefaultLedMapper extends LedMapper {
+class DefaultLedMapper extends Scene.LedMapper {
   private readonly visRowOffsets: number[];
   private readonly targetRowOffsets: number[];
 
@@ -164,7 +151,7 @@ export function boxHelper(attrs: {
   };
 }
 
-export class Scene {
+export class SceneImpl implements Scene.default {
   private readonly def: SceneDef;
   private lazyLoadedLedPositions?: Vector3[][];
   private lazyModelPromise?: Promise<Three.Object3D>;
@@ -293,13 +280,13 @@ export class Scene {
   }
 }
 
-const registry = new Map<string, Scene>();
+const registry = new Map<string, Scene.default>();
 
 export function names(): ReadonlyArray<string> {
   return Array.from(registry.keys());
 }
 
-export function getScene(name: string): Scene {
+export function getScene(name: string): Scene.default {
   const result = registry.get(name);
   if (result === undefined) {
     throw new Error(`no scene with name: ${name}`);
@@ -309,7 +296,7 @@ export function getScene(name: string): Scene {
 
 function registerScenes(defs: ReadonlyArray<SceneDef>) {
   defs.forEach(def => {
-    const scene = new Scene(def);
+    const scene = new SceneImpl(def);
     const name = scene.name;
     if (registry.has(name)) {
       throw new Error(`scene already registered with name: ${name}`);

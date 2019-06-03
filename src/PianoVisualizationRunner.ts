@@ -7,7 +7,7 @@ import { SendableLedStrip } from "./portable/SendableLedStrip";
 import { MovingAverageHelper } from "./portable/Utils";
 
 import MidiEvent from "./piano/MidiEvent";
-import { LedMapper, Scene } from "./scenes/Scenes";
+import { LedMapper, Scene } from "./scenes/Scene";
 
 export default class PianoVisualizationRunner {
   private readonly stateHelper: PianoHelpers.PianoVisualizationStateHelper;

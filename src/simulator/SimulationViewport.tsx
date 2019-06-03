@@ -7,7 +7,7 @@ import * as Colors from "../portable/base/Colors";
 import { SendableLedStrip } from "../portable/SendableLedStrip";
 
 import PianoVisualizationRunner from "../PianoVisualizationRunner";
-import * as Scenes from "../scenes/Scenes";
+import Scene from "../scenes/Scene";
 
 import "./SimulationViewport.css";
 
@@ -145,11 +145,11 @@ class LedSceneStrip implements SendableLedStrip {
 }
 
 class LedScene {
-  public readonly scene: Scenes.Scene;
+  public readonly scene: Scene;
   public readonly ledStrip: SendableLedStrip;
   private ledHelpers: LedHelper[] = [];
 
-  constructor(scene: Scenes.Scene, renderScene: Three.Scene, doRender: () => void) {
+  constructor(scene: Scene, renderScene: Three.Scene, doRender: () => void) {
     this.scene = scene;
     scene.ledPositions.forEach(row => row.forEach(point => {
       this.ledHelpers.push(new LedHelper(renderScene, point));
@@ -164,7 +164,7 @@ class LedScene {
 }
 
 interface Props {
-  scene: Scenes.Scene;
+  scene: Scene;
   visualizationRunner: PianoVisualizationRunner;
   frameDidRender: (renderMillis: number) => void;
 }
@@ -174,7 +174,7 @@ type State = {
   readonly camera: Three.PerspectiveCamera;
   readonly controls: OrbitControls;
   registeredVisualizationRunner?: PianoVisualizationRunner;
-  currentScene?: Scenes.Scene;
+  currentScene?: Scene;
   currentLedScene?: LedScene;
   doRender: () => void;
 };

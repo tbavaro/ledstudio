@@ -8,6 +8,7 @@ import { MovingAverageHelper } from "./portable/Utils";
 import FadecandyClient from "./hardware/FadecandyClient";
 import FadecandyLedStrip from "./hardware/FadecandyLedStrip";
 
+import Scene from "./scenes/Scene";
 import * as Scenes from "./scenes/Scenes";
 
 import SimulationViewport from "./simulator/SimulationViewport";
@@ -53,7 +54,7 @@ const TARGET_FPS = 60;
 const TARGET_FRAME_MILLIS = 1000 / TARGET_FPS;
 
 interface State {
-  scene: Scenes.Scene;
+  scene: Scene;
   visualizationName: PianoVisualizations.Name;
   visualizationRunner: PianoVisualizationRunner;
   midiState: Readonly<MidiState>;
@@ -344,7 +345,7 @@ class App extends React.Component<{}, State> {
     });
   }
 
-  private visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scenes.Scene) {
+  private visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scene) {
     const vis = PianoVisualizations.create(name, scene.ledPositions.map(row => row.length));
     const runner = new PianoVisualizationRunner(vis, scene);
     runner.hardwardLedStrip = this.fadeCandyLedStrip;
@@ -353,7 +354,7 @@ class App extends React.Component<{}, State> {
 
   private updateVisualizationAndScene(
     visualizationName: PianoVisualizations.Name,
-    scene: Scenes.Scene,
+    scene: Scene,
     doNotSetState?: boolean
   ) {
     const runner = this.visualizationRunnerForName(visualizationName, scene);
@@ -498,7 +499,7 @@ class App extends React.Component<{}, State> {
     });
   }
 
-  private initialScene(): Scenes.Scene {
+  private initialScene(): Scene {
     const name = SimulatorStickySettings.get({
       key: "sceneName",
       defaultValue: Scenes.defaultSceneName,
