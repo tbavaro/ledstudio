@@ -3,12 +3,7 @@ import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { promisify } from "util";
 
-import { bracket } from "../portable/Utils";
-
 import * as SimulationUtils from "../simulator/SimulationUtils";
-
-import  * as Colors from "../portable/base/Colors";
-import PianoVisualization from "../portable/base/PianoVisualization";
 
 import * as Scene from "./Scene";
 import * as SceneUtils from "./SceneUtils";
@@ -17,8 +12,6 @@ const FLOOR_SIZE_DEFAULT = 10;
 const FLOOR_MATERIAL = new Three.MeshLambertMaterial({
   color: 0x090909
 });
-
-const UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 
 const INCH = 1 / 100 * 2.54;
 const FOOT = INCH * 12;
@@ -68,66 +61,6 @@ interface SceneDef {
   model: ModelDef;
   extraObjects?: ExtraObjectFunc[];
   leds: LedsDef;
-  createLedMapper?: (vis: PianoVisualization, targetLedNums: number[]) => Scene.LedMapper;
-}
-
-type LedMapperAnchor = "beginning" | "middle";
-
-class DefaultLedMapper extends Scene.LedMapper {
-  private readonly visRowOffsets: number[];
-  private readonly targetRowOffsets: number[];
-
-  constructor(vis: PianoVisualization, targetLedNums: number[], anchor?: LedMapperAnchor) {
-    super(vis, targetLedNums);
-
-    if (anchor === undefined) {
-      anchor = "beginning";
-    }
-
-    switch (anchor) {
-      case "beginning":
-        this.visRowOffsets = new Array(vis.ledRows.length).fill(0);
-        this.targetRowOffsets = new Array(targetLedNums.length).fill(0);
-        break;
-
-      case "middle":
-        this.visRowOffsets = vis.ledRows.map(r => Math.floor(r.length / 2));
-        this.targetRowOffsets = targetLedNums.map(n => Math.floor(n / 2));
-        break;
-
-      default:
-        throw new Error(`unsupported anchor type: '${anchor}'`);
-    }
-
-    console.log("offsets", this.visRowOffsets, this.targetRowOffsets);
-  }
-
-  public mapLeds() {
-    let outputRowIdx = 0;
-    while (outputRowIdx < this.outputColorRows.length) {
-      const numRows = Math.min(this.outputColorRows.length - outputRowIdx, this.visColorRows.length);
-      for (let visRowIdx = 0; visRowIdx < numRows; ++visRowIdx) {
-        const visRow = this.visColorRows.get(visRowIdx);
-        const visRowOffset = this.visRowOffsets[visRowIdx];
-        const outputRowOffset = this.targetRowOffsets[outputRowIdx];
-        const outputRow = this.outputColorRows.get(outputRowIdx++);
-
-        const offset = outputRowOffset - visRowOffset;
-
-        const minI = bracket(0, outputRow.length - 1, offset);
-        const maxI = bracket(0, outputRow.length - 1, visRow.length - 1 + offset);
-
-        outputRow.fill(UNMAPPED_LED_COLOR);
-        for (let i = minI; i <= maxI; ++i) {
-          outputRow.set(i, visRow.get(i - offset));
-        }
-        // for (let i = numLeds; i < outputRow.length; ++i) {
-        //   outputRow.set(i, Colors.BLACK);
-        // }
-      }
-    }
-    return this.outputColorRows;
-  }
 }
 
 // creates a box with the bottom centered at (0,0,0)
@@ -268,15 +201,6 @@ export class SceneImpl implements Scene.default {
       this.cachedDisplayMessage = Object.entries(this.initDisplayValuesIfNeeded()).map((entry) => `${entry[0]}=${entry[1]}`).join(" / ");
     }
     return this.cachedDisplayMessage;
-  }
-
-  public createLedMapper(vis: PianoVisualization) {
-    const targetLedNums = this.leds.map(row => row.length);
-    if (this.def.createLedMapper) {
-      return this.def.createLedMapper(vis, targetLedNums);
-    } else {
-      return new DefaultLedMapper(vis, targetLedNums);
-    }
   }
 }
 
@@ -624,8 +548,7 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
       target: new Vector3(0, 1.2, 0)
     },
     leds: { calculate: () => calculate().leds },
-    initialDisplayValues: () => calculate().displayValues,
-    createLedMapper: (vis: PianoVisualization, targetLedNums: number[]) => new DefaultLedMapper(vis, targetLedNums, "middle")
+    initialDisplayValues: () => calculate().displayValues
   };
 
   return sceneDef;
@@ -658,8 +581,7 @@ registerScenes([
         endPoint: new Three.Vector3(0.6, .71, -0.173),
         hardwareChannel: 3
       }
-    ]),
-    createLedMapper: (vis: PianoVisualization, numLeds: number[]) => new DefaultLedMapper(vis, numLeds)
+    ])
   },
   createWingsSceneDef("burrow:wings30x2", LedSpacings.NEOPIXEL_30, 2),
   createWingsSceneDef("burrow:wings30x3", LedSpacings.NEOPIXEL_30, 3),

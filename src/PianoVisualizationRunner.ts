@@ -9,7 +9,7 @@ import { MovingAverageHelper } from "./portable/Utils";
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
 
 import MidiEvent from "./piano/MidiEvent";
-import { LedMapper, Scene } from "./scenes/Scene";
+import Scene from "./scenes/Scene";
 
 export default class PianoVisualizationRunner {
   private readonly stateHelper: PianoHelpers.PianoVisualizationStateHelper;
@@ -18,13 +18,11 @@ export default class PianoVisualizationRunner {
   private lastRenderTime: number = 0;
   public hardwareLedSender?: FadecandyLedSender;
   public simulationLedStrip?: SendableLedStrip;
-  private readonly ledMapper: LedMapper;
 
   constructor(visualization: PianoVisualization, scene: Scene) {
     this.visualization = visualization;
     this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
     this.timingHelper = new MovingAverageHelper(20);
-    this.ledMapper = scene.createLedMapper(visualization);
   }
 
   public renderFrame(analogFrequencyData: Uint8Array): TimeseriesData.PointDef[] {
@@ -78,9 +76,8 @@ export default class PianoVisualizationRunner {
   private sendToStrips() {
     if (this.simulationLedStrip !== undefined) {
       const strip = this.simulationLedStrip;
-      const colors = this.ledMapper.mapLeds();
       let i = 0;
-      colors.forEach(row => {
+      this.visualization.ledRows.forEach(row => {
         row.forEach(color => {
           strip.setColor(i++, color);
         });
