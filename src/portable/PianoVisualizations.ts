@@ -1,4 +1,5 @@
-import LedInfo from "./base/LedInfo";
+import Scene from "../scenes/Scene";
+
 import PianoVisualization from "./base/PianoVisualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
@@ -11,20 +12,16 @@ import TestStripAddressVisualization from "./visualizations/TestStripAddressVisu
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
 import WingFlapVisualization from "./visualizations/WingFlapVisualization";
 
-function countsOnly(ledInfos: LedInfo[][]): number[] {
-  return ledInfos.map(row => row.length);
-}
-
 const visFuncs = {
-  "glowWave": (ledInfos: LedInfo[][]) => new GlowWaveVisualization(countsOnly(ledInfos)),
-  "centerSpread": () => new CenterSpreadVisualization(),
-  "wingFlap": (ledInfos: LedInfo[][]) => new WingFlapVisualization(countsOnly(ledInfos)),
-  "testAnalogPulse": (ledInfos: LedInfo[][]) => new TestAnalogPulseVisualization(countsOnly(ledInfos)),
-  "testKey": () => new TestKeyVisualization(),
-  "testKeyFade": () => new TestKeyFadeVisualization(),
-  "testRainbow": (ledInfos: LedInfo[][]) => new TestRainbowVisualization(countsOnly(ledInfos)),
-  "testStripAddress": (ledInfos: LedInfo[][]) => new TestStripAddressVisualization(ledInfos),
-  "testTimeseriesDataVisualization": () => new TestTimeseriesDataVisualization()
+  "glowWave": GlowWaveVisualization,
+  "centerSpread": CenterSpreadVisualization,
+  "wingFlap": WingFlapVisualization,
+  "testAnalogPulse": TestAnalogPulseVisualization,
+  "testKey": TestKeyVisualization,
+  "testKeyFade": TestKeyFadeVisualization,
+  "testRainbow": TestRainbowVisualization,
+  "testStripAddress": TestStripAddressVisualization,
+  "testTimeseriesDataVisualization": TestTimeseriesDataVisualization
 };
 
 export type Name = keyof typeof visFuncs;
@@ -32,11 +29,11 @@ export type Name = keyof typeof visFuncs;
 export const defaultName: Name = "testStripAddress";
 
 export const names: ReadonlyArray<Name> = Object.keys(visFuncs) as Name[];
-export function create(name: Name, ledInfos: LedInfo[][]): PianoVisualization {
+export function create(name: Name, scene: Scene): PianoVisualization {
   if (!(name in visFuncs)) {
     throw new Error("unrecognized name");
   }
-  return visFuncs[name](ledInfos);
+  return new visFuncs[name](scene);
 }
 
 export function isValidName(name: Name): boolean {

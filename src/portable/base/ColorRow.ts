@@ -18,7 +18,7 @@ export default class ColorRow extends FixedArray<Colors.Color> {
     this.set(i, Colors.add(this.get(i), color));
   }
 
-  public copy(source: ColorRow, options?: {
+  public copyFancy(source: ColorRow, options?: {
     derezAmount?: number;
     multiplyBy?: number
   }) {

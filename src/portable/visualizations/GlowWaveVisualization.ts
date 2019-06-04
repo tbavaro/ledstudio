@@ -1,3 +1,5 @@
+import Scene from "../../scenes/Scene";
+
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
@@ -41,11 +43,13 @@ interface FadingColor {
 export default class GlowWaveVisualization extends PianoVisualization.default {
   private readonly pressedKeyColors = new Map<number, FadingColor>();
   private readonly fadeFactors: number[];
+  private readonly nativeRows: ColorRow[];
 
-  constructor(numLeds: number[]) {
-    super(numLeds.map(_ => NATIVE_WIDTH));
-    const middleRow = Math.floor(numLeds.length / 2);
-    this.fadeFactors = numLeds.map((_, i) => Math.pow((1 - ROW_FADE_FACTOR), Math.abs(i - middleRow)));
+  constructor(scene: Scene) {
+    super(scene);
+    const middleRow = Math.floor(scene.leds.length / 2);
+    this.fadeFactors = scene.leds.map((_, i) => Math.pow((1 - ROW_FADE_FACTOR), Math.abs(i - middleRow)));
+    this.nativeRows = scene.leds.map(_ => new ColorRow(NATIVE_WIDTH));
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
@@ -88,8 +92,11 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
       });
     });
 
-    this.ledRows.forEach((row, i) => {
-      row.copy(colors, { derezAmount: DEREZ, multiplyBy: this.fadeFactors[i] });
+    this.nativeRows.forEach((row, i) => {
+      row.copyFancy(colors, { derezAmount: DEREZ, multiplyBy: this.fadeFactors[i] });
+
+      const outputRow = this.ledRows.get(i);
+      row.copy(outputRow, Math.floor((outputRow.length - row.length) / 2));
     });
   }
 }

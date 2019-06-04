@@ -1,3 +1,5 @@
+import Scene from "../../scenes/Scene";
+
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
@@ -15,20 +17,20 @@ const PERIOD = Math.PI * 2 / SPEED;
 // TODO improve flap motion
 // TODO see if we can smooth it out by not perfectly following ribs
 
-export default class WingFlapVisualization extends PianoVisualization.DerezPianoVisualization {
+class PureWingFlapVisualization extends PianoVisualization.default {
   private phase = 0;
 
-  constructor(numLeds: number[]) {
-    super(numLeds, DEREZ);
+  constructor(scene: Scene) {
+    super(scene);
   }
 
-  public renderPure(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
+  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
     this.phase = (this.phase + elapsedMillis * SPEED) % PERIOD;
 
     const positionNormalized = Math.pow(Math.sin(this.phase), FLAPPINESS);
     const position = positionNormalized * (this.ledRows.length - 1);
 
-    this.pureLedRows.forEach((leds, row) => {
+    this.ledRows.forEach((leds, row) => {
       const rowV = Math.pow(1 - (Math.abs(position - row) / (this.ledRows.length)), VERTICAL_SHARPNESS);
       const rowColor = Colors.hsv(0, 0, rowV);
       for (let i = 0; i < leds.length; ++i) {
@@ -46,5 +48,11 @@ export default class WingFlapVisualization extends PianoVisualization.DerezPiano
       color: Colors.WHITE,
       value: 1 - positionNormalized
     }]);
+  }
+}
+
+export default class WingFlapVisualization extends PianoVisualization.DerezPianoVisualization {
+  constructor(scene: Scene) {
+    super(new PureWingFlapVisualization(scene), DEREZ);
   }
 }

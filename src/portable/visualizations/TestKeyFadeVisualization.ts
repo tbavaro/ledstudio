@@ -1,3 +1,5 @@
+import Scene from "../../scenes/Scene";
+
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
@@ -24,12 +26,12 @@ export default class TestKeyFadeVisualization extends PianoVisualization.SingleR
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
 
-  constructor() {
-    super(88);
+  constructor(scene: Scene) {
+    super(scene, 88);
     this.values = new Array(this.leds.length).fill(0);
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State): void {
+  public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
     // decay
     const decayAmount = elapsedMillis * this.decayRate;
     Utils.updateValues(this.values, (oldValue: number) => Math.max(0, oldValue - decayAmount));

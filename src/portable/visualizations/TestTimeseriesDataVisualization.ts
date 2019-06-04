@@ -1,11 +1,13 @@
+import Scene from "../../scenes/Scene";
+
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
 export default class TestTimeseriesDataVisualization extends PianoVisualization.default {
   private phase = 0;
 
-  constructor() {
-    super([0]);
+  constructor(scene: Scene) {
+    super(scene);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {

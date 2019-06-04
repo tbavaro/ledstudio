@@ -60,6 +60,34 @@ export default class FixedArray<T> {
     return this.items.toString();
   }
 
+  public copy(target: FixedArray<T>, targetStart?: number, sourceStart?: number, sourceEnd?: number) {
+    let adjTargetStart = targetStart || 0;
+    if (adjTargetStart >= target.length) {
+      return;
+    }
+
+    let adjSourceStart = sourceStart || 0;
+    if (adjSourceStart < 0) {
+      throw new Error("sourceStart is < 0");
+    }
+
+    const adjSourceEnd = Math.min(this.length, sourceEnd || this.length);
+
+    if (adjTargetStart < 0) {
+      adjSourceStart += -1 * adjTargetStart;
+      adjTargetStart = 0;
+    }
+
+    const n = Math.min(adjSourceEnd - adjSourceStart, target.length - adjTargetStart);
+    for (let i = 0; i < n; ++i) {
+      target.set(adjTargetStart + i, this.get(adjSourceStart + i));
+    }
+  }
+
+  public toArray(): T[] {
+    return [...this.items];
+  }
+
   // don't allow direct indexing
   [n: number]: { __invalid: never };
 }

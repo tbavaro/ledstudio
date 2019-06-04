@@ -1,5 +1,6 @@
+import Scene from "../../scenes/Scene";
+
 import * as Colors from "../base/Colors";
-import LedInfo from "../base/LedInfo";
 import * as PianoVisualization from "../base/PianoVisualization";
 
 const CHANNEL_START_COLOR = Colors.WHITE;
@@ -16,15 +17,13 @@ const SHOW_CHANNEL_NUMBER_AFTER_N_LEDS = 2;
 export default class TestStripAddressVisualization extends PianoVisualization.default {
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
-  private readonly ledInfos: LedInfo[][];
   private readonly channelHueIncrement: number;
 
-  constructor(ledInfos: LedInfo[][]) {
-    super(ledInfos.map(row => row.length));
-    this.ledInfos = ledInfos;
+  constructor(scene: Scene) {
+    super(scene);
 
     let maxChannel = 0;
-    ledInfos.forEach(row => row.forEach(led => {
+    this.scene.leds.forEach(row => row.forEach(led => {
       if (led.hardwareChannel > maxChannel) {
         maxChannel = led.hardwareChannel;
       }

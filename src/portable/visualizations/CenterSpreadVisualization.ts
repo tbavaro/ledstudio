@@ -1,3 +1,5 @@
+import Scene from "../../scenes/Scene";
+
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
@@ -24,14 +26,14 @@ export default class CenterSpreadVisualization extends PianoVisualization.Single
     private time = 0;
     private keyToHue = new Array<number>();
 
-    constructor() {
-        super(88);
+    constructor(scene: Scene) {
+        super(scene, 88);
         for(let i = 0; i < this.leds.length; ++i) {
             this.keyToHue[i] = randomHue();
         }
     }
 
-    public render(elapsedMillis: number, state: PianoVisualization.State): void {
+    public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
         this.time += elapsedMillis;
 
         this.info = this.info.filter(kt => kt.time - this.time < 1000);
