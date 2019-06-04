@@ -12,6 +12,11 @@
     "devices": [
         {
             "type": "fadecandy",
+            "serial": "NJQZUSRTRTHCWUPH",
+            "map": [[ 1, 0, 0, 512 ]]
+        },
+        {
+            "type": "fadecandy",
             "serial": "RPAQAKTRFTKCSYXN",
             "map": [[ 1, 0, 0, 512 ]]
         },
