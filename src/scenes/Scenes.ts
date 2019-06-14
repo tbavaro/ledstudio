@@ -558,9 +558,10 @@ function createRealWingsSceneDef(name: string) {
   const ledSpacing = LedSpacings.NEOPIXEL_30;
 
   // measurements
+  const middleSpacing = 1.5 * INCH;
   const interTriangleSpacing = 1.75 * INCH;
   const startSpacing = 7.5 * INCH;
-  const smallDeltaX = 31 * INCH;
+  const smallDeltaX = 29 * INCH;
   const smallDeltaY = 19.5 * INCH;
   const largeDeltaX = 57 * INCH;
   const largeDeltaY = 48.25 * INCH;
@@ -573,7 +574,7 @@ function createRealWingsSceneDef(name: string) {
       toward: Vector2,
       numLeds: number
     }) => {
-      const end = attrs.toward.clone().sub(attrs.start).normalize().multiplyScalar(ledSpacing * (attrs.numLeds + 0.1)).add(attrs.start);
+      const end = attrs.toward.clone().sub(attrs.start).normalize().multiplyScalar(ledSpacing * ((attrs.numLeds - 1) + 0.1)).add(attrs.start);
       return SimulationUtils.pointsFromTo({
         start: attrs.start,
         end: end,
@@ -604,7 +605,7 @@ function createRealWingsSceneDef(name: string) {
         toward: new Vector2(smallDeltaX, smallDeltaY),
         numLeds: 26
       })
-    ].map(translateBy(new Vector2(-1 * smallDeltaX)));
+    ].map(translateBy(new Vector2(-1 * (smallDeltaX + middleSpacing * 0.5))));
 
     const largeLeftRibs = [
       makeRib({
@@ -627,7 +628,7 @@ function createRealWingsSceneDef(name: string) {
         toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
         numLeds: 53
       })
-    ].map(translateBy(new Vector2(-1 * (smallDeltaX + interTriangleSpacing))));
+    ].map(translateBy(new Vector2(-1 * (smallDeltaX + interTriangleSpacing + middleSpacing * 0.5))));
 
     const interleave = <T>(a: T[], b: T[]): T[] => {
       if (a.length !== b.length) {
@@ -654,6 +655,8 @@ function createRealWingsSceneDef(name: string) {
 
   const calculate = doLazy(() => {
     const positions2d = calculateLedPositions2d();
+    const ribLengths = positions2d.map(r => r.length);
+
     const positions3d = positions2d.map(points2d => SimulationUtils.map2dTo3d({
       points: points2d,
       bottomLeft: new Vector3(0, bottomHeight, 1.25),
@@ -680,7 +683,7 @@ function createRealWingsSceneDef(name: string) {
 
     return {
       leds: ledInfos,
-      displayValues: {}
+      displayValues: { l: JSON.stringify(ribLengths) }
     };
   });
 
