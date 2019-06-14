@@ -9,7 +9,7 @@ export default class TestRainbowVisualization extends PianoVisualization.SingleR
   private speed = 120 / 1000;  // degrees per millis
 
   constructor(scene: Scene) {
-    super(scene, scene.leds[0].length);
+    super(scene, Math.max.apply(Math, scene.leds.map(arr => arr.length)));
   }
 
   public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
