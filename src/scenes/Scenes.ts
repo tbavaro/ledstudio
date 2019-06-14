@@ -558,7 +558,7 @@ function createRealWingsSceneDef(name: string) {
   const ledSpacing = LedSpacings.NEOPIXEL_30;
 
   // measurements
-  const interTriangleSpacing = 2.25 * INCH;
+  const interTriangleSpacing = 1.75 * INCH;
   const startSpacing = 7.5 * INCH;
   const smallDeltaX = 31 * INCH;
   const smallDeltaY = 19.5 * INCH;
