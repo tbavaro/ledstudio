@@ -10,11 +10,13 @@ import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
+import VoronoiMapperVisualization from "./visualizations/VoronoiMapperVisualization";
 import WingFlapVisualization from "./visualizations/WingFlapVisualization";
 
 const visFuncs = {
   "glowWave": GlowWaveVisualization,
   "centerSpread": CenterSpreadVisualization,
+  "voronoiMapper": VoronoiMapperVisualization,
   "wingFlap": WingFlapVisualization,
   "testAnalogPulse": TestAnalogPulseVisualization,
   "testKey": TestKeyVisualization,

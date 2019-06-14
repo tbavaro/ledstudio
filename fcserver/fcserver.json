@@ -13,7 +13,7 @@
         {
             "type": "fadecandy",
             "serial": "NJQZUSRTRTHCWUPH",
-            "map": [[ 1, 0, 0, 512 ]]
+            "map": [[ 8, 0, 0, 512 ]]
         },
         {
             "type": "fadecandy",
