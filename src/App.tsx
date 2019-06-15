@@ -21,6 +21,7 @@ import MIDIPlayer from "./piano/MIDIPlayer";
 import * as AnalogAudio from "./analogAudio/AnalogAudio";
 import AnalogAudioView from "./analogAudio/AnalogAudioView";
 
+import ControlsView from "./ControlsView";
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
@@ -213,8 +214,11 @@ class App extends React.Component<{}, State> {
           <div className="App-analogAudioViewContainer">
             <AnalogAudioView ref={this.setAnalogAudioViewRef}/>
           </div>
-          <div className="App-pianoContainer">
+          <div className="App-controllerStateContainer">
             <PianoView
+              midiEventEmitter={this.midiEventEmitter}
+            />
+            <ControlsView
               midiEventEmitter={this.midiEventEmitter}
             />
           </div>

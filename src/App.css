@@ -26,8 +26,14 @@
   height: 64px;
 }
 
-.App-pianoContainer {
+.App-controllerStateContainer {
   position: relative;
+  display: flex;
+  flex-direction: row;
+  height: 75px;
+  background-color: #333333;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .App-sidebarContainer {
