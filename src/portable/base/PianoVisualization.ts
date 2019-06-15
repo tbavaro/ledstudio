@@ -5,17 +5,11 @@ import * as Colors from "./Colors";
 import ControllerState from "./ControllerState";
 import FixedArray from "./FixedArray";
 import LedInfo from "./LedInfo";
+import PianoState from "./PianoState";
 import * as TimeseriesData from "./TimeseriesData";
 
 export interface State {
-  // 88 booleans; true = pressed, false = released
-  keys: boolean[];
-
-  // velocity (0-1) of most recent key event (press OR release)
-  keyVelocities: number[];
-
-  // sorted indexes of keys changed since last frame
-  changedKeys: ReadonlyArray<number>;
+  pianoState: PianoState;
 
   // TODO probably give a better interface here
   analogFrequencyData: Uint8Array;

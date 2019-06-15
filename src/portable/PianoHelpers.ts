@@ -1,5 +1,6 @@
 import ControllerState from "./base/ControllerState";
 import PianoEvent, { Key } from "./base/PianoEvent";
+import PianoState from "./base/PianoState";
 import * as PianoVisualization from "./base/PianoVisualization";
 import * as Utils from "./Utils";
 
@@ -81,20 +82,18 @@ export class PianoVisualizationStateHelper {
 
   private static freshState(): AccessibleState {
     return {
-      keys: new Array<boolean>(NUM_KEYS).fill(false),
-      keyVelocities: new Array<number>(NUM_KEYS).fill(0),
-      changedKeys: [],
+      pianoState: new PianoState(),
       analogFrequencyData: DUMMY_ANALOG_FREQUENCY_DATA,
       controllerState: null
     };
   }
 
   public startFrame() {
-    this.state.changedKeys = [];
+    this.state.pianoState.changedKeys = [];
   }
 
   public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState | null): PianoVisualization.State {
-    this.state.changedKeys.sort();
+    this.state.pianoState.changedKeys.sort();
     this.state.analogFrequencyData = analogFrequencyData;
     this.state.controllerState = controllerState;
     return this.state;
@@ -114,11 +113,12 @@ export class PianoVisualizationStateHelper {
   }
 
   private applyPressOrReleaseEvent(isPress: boolean, key: Key, velocity: number) {
-    if (this.state.keys[key] !== isPress) {
-      this.state.keys[key] = isPress;
-      this.state.keyVelocities[key] = velocity;
-      if (!this.state.changedKeys.includes(key)) {
-        this.state.changedKeys.push(key);
+    const { pianoState } = this.state;
+    if (pianoState.keys[key] !== isPress) {
+      pianoState.keys[key] = isPress;
+      pianoState.keyVelocities[key] = velocity;
+      if (!pianoState.changedKeys.includes(key)) {
+        pianoState.changedKeys.push(key);
       }
     }
   }

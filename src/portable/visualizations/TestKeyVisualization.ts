@@ -12,8 +12,10 @@ export default class TestKeyVisualization extends PianoVisualization.SingleRowPi
   }
 
   public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
-    state.changedKeys.forEach(n => {
-      const isPressed = state.keys[n];
+    const { pianoState } = state;
+
+    pianoState.changedKeys.forEach(n => {
+      const isPressed = pianoState.keys[n];
       this.leds.set(n, isPressed ? COLOR_PRESSED : COLOR_RELEASED);
     });
   }

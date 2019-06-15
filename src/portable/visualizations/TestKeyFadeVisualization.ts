@@ -32,13 +32,15 @@ export default class TestKeyFadeVisualization extends PianoVisualization.SingleR
   }
 
   public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
+    const { pianoState } = state;
+
     // decay
     const decayAmount = elapsedMillis * this.decayRate;
     Utils.updateValues(this.values, (oldValue: number) => Math.max(0, oldValue - decayAmount));
 
     // turn on newly-pressed keys
-    state.changedKeys.forEach(n => {
-      if (state.keys[n]) {
+    pianoState.changedKeys.forEach(n => {
+      if (pianoState.keys[n]) {
         this.values[n] = 1;
       }
     });

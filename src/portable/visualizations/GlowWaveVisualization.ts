@@ -53,9 +53,11 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State): void {
+    const { pianoState } = state;
+
     // decay the unpressed keys
     this.pressedKeyColors.forEach((fc, n) => {
-      if (!state.keys[n]) {
+      if (!pianoState.keys[n]) {
         fc.brightness *= 1 - (FADE_DROPOFF * elapsedMillis / 1000);
         if (fc.brightness < 0.01) {
           this.pressedKeyColors.delete(n);
@@ -64,9 +66,9 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
     });
 
     // assign colors to newly pressed keys
-    state.changedKeys.forEach(n => {
-      if (state.keys[n]) {
-        const initialValue = Utils.bracket01(state.keyVelocities[n] / MAX_BRIGHTNESS_VELOCITY);
+    pianoState.changedKeys.forEach(n => {
+      if (pianoState.keys[n]) {
+        const initialValue = Utils.bracket01(pianoState.keyVelocities[n] / MAX_BRIGHTNESS_VELOCITY);
         this.pressedKeyColors.set(n, { initialColor: Colors.hsv(n * 10, 1, 1), brightness: initialValue });
       }
     });
