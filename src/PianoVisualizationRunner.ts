@@ -1,3 +1,4 @@
+import ControllerState from "./portable/base/ControllerState";
 import PianoEvent from "./portable/base/PianoEvent";
 import PianoVisualization, { Context } from "./portable/base/PianoVisualization";
 import * as TimeseriesData from "./portable/base/TimeseriesData";
@@ -25,14 +26,14 @@ export default class PianoVisualizationRunner {
     this.timingHelper = new MovingAverageHelper(20);
   }
 
-  public renderFrame(analogFrequencyData: Uint8Array): TimeseriesData.PointDef[] {
+  public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState | null): TimeseriesData.PointDef[] {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
     }
 
     // collect state
-    const visState = this.stateHelper.endFrame(analogFrequencyData);
+    const visState = this.stateHelper.endFrame(analogFrequencyData, controllerState);
     let frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
     const context: Context = {
       setFrameTimeseriesPoints: (points: TimeseriesData.PointDef[]) => {

@@ -16,13 +16,6 @@ export default class ControllerState {
     this.dialValues = arrayOf8Values(0);
   }
 
-  public reset() {
-    for (let i = 0; i < 8; ++i) {
-      this.buttonStates[i] = false;
-      this.dialValues[i] = 0;
-    }
-  }
-
   public handleEvent(event: MidiEvent) {
     if (event.data.length !== 3) {
       return;

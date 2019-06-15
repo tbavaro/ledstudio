@@ -2,6 +2,7 @@ import Scene from "../../scenes/Scene";
 
 import ColorRow from "./ColorRow";
 import * as Colors from "./Colors";
+import ControllerState from "./ControllerState";
 import FixedArray from "./FixedArray";
 import LedInfo from "./LedInfo";
 import * as TimeseriesData from "./TimeseriesData";
@@ -18,6 +19,8 @@ export interface State {
 
   // TODO probably give a better interface here
   analogFrequencyData: Uint8Array;
+
+  controllerState: ControllerState | null;
 }
 
 export interface Context {
