@@ -59,6 +59,7 @@ interface State {
   visualizationRunner: PianoVisualizationRunner;
   midiState: Readonly<MidiState>;
   midiInput: WebMidi.MIDIInput | null;
+  midiControllerInput: WebMidi.MIDIInput | null;
   midiOutput: WebMidi.MIDIOutput | null;
   midiFilename: string;
   midiData: ArrayBuffer | null;
@@ -130,6 +131,8 @@ class App extends React.Component<{}, State> {
         const inputs = Array.from(webMidi.inputs.values());
         const defaultInput = getByStickyIdKeyOrFirst(inputs, "midiInputId");
         this.setMidiInput(defaultInput);
+        const defaultControllerInput = getByStickyIdKeyOrFirst(inputs, "midiControllerInputId");
+        this.setMidiControllerInput(defaultControllerInput);
 
         const outputs = Array.from(webMidi.outputs.values());
         const defaultOutput = getByStickyIdKeyOrFirst(outputs, "midiOutputId");
@@ -240,6 +243,7 @@ class App extends React.Component<{}, State> {
             selectedMidiFilename={this.state.midiFilename}
             midiInputs={this.state.midiInputs}
             selectedMidiInput={this.state.midiInput}
+            selectedMidiControllerInput={this.state.midiControllerInput}
             midiOutputs={this.state.midiOutputs}
             selectedMidiOutput={this.state.midiOutput}
             midiEventEmitter={this.midiEventEmitter}
@@ -288,6 +292,13 @@ class App extends React.Component<{}, State> {
     }
   }
 
+  private setMidiControllerInput = (newValue: WebMidi.MIDIInput | null) => {
+    if (newValue !== this.state.midiControllerInput) {
+      this.setState({ midiControllerInput: newValue });
+      SimulatorStickySettings.set("midiControllerInputId", newValue === null ? null : newValue.id);
+    }
+  }
+
   private setMidiOutput = (newValue: WebMidi.MIDIOutput | null) => {
     if (newValue !== this.state.midiOutput) {
       this.midiPlayer.output = newValue;
@@ -326,7 +337,7 @@ class App extends React.Component<{}, State> {
   }
 
   private updateMidiDevices = () => {
-    const { midiInput, midiOutput, midiState } = this.state;
+    const { midiInput, midiOutput, midiState, midiControllerInput } = this.state;
     if (midiState.status !== "loaded") {
       return;
     }
@@ -334,6 +345,9 @@ class App extends React.Component<{}, State> {
     const { webMidi } = midiState;
     if (midiInput !== null) {
       this.setMidiInput(webMidi.inputs.get(midiInput.id) || null);
+    }
+    if (midiControllerInput !== null) {
+      this.setMidiControllerInput(webMidi.inputs.get(midiControllerInput.id) || null);
     }
     if (midiOutput !== null) {
       this.setMidiOutput(webMidi.outputs.get(midiOutput.id) || null);
@@ -373,6 +387,7 @@ class App extends React.Component<{}, State> {
     playMusic: this.handlePlayMusic,
     stopMusic: this.handleStopMusic,
     setMidiInput: this.setMidiInput,
+    setMidiControllerInput: this.setMidiControllerInput,
     setMidiOutput: this.setMidiOutput,
     setSelectedMidiFilename: this.loadMidiFile,
     setSelectedSceneName: (name: string) => {
@@ -529,6 +544,7 @@ class App extends React.Component<{}, State> {
         status: "initializing"
       },
       midiInput: null,
+      midiControllerInput: null,
       midiOutput: null,
       midiFilename: "<<not assigned>>",
       midiData: null,
