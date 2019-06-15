@@ -1,3 +1,4 @@
+import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
 import PianoEvent from "./portable/base/PianoEvent";
 import PianoVisualization, { Context } from "./portable/base/PianoVisualization";
@@ -56,7 +57,8 @@ export default class PianoVisualizationRunner {
     this.timingHelper.addValue(visTimeMillis);
 
     // send
-    this.sendToStrips();
+    const multiplier = controllerState === null ? 1 : controllerState.dialValues[7];
+    this.sendToStrips(multiplier);
 
     return frameTimeseriesPoints || [];
   }
@@ -74,12 +76,15 @@ export default class PianoVisualizationRunner {
     return this.timingHelper.movingAverage;
   }
 
-  private sendToStrips() {
+  private sendToStrips(multiplier: number) {
     if (this.simulationLedStrip !== undefined) {
       const strip = this.simulationLedStrip;
       let i = 0;
       this.visualization.ledRows.forEach(row => {
         row.forEach(color => {
+          if (multiplier !== -1) {
+            color = Colors.multiply(color, multiplier);
+          }
           strip.setColor(i++, color);
         });
       });

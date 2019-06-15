@@ -14,6 +14,9 @@ export default class ControllerState {
   constructor() {
     this.buttonStates = arrayOf8Values(false);
     this.dialValues = arrayOf8Values(0);
+
+    // default the last dial to 1 since it's used as global brightness
+    this.dialValues[7] = 1;
   }
 
   public handleEvent(event: MidiEvent) {
