@@ -5,6 +5,7 @@ import PianoVisualization from "./base/PianoVisualization";
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
+import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
@@ -17,6 +18,7 @@ const visFuncs = {
   "centerSpread": CenterSpreadVisualization,
   "wingFlap": WingFlapVisualization,
   "testAnalogPulse": TestAnalogPulseVisualization,
+  "testControllerDial": TestControllerDialVisualization,
   "testKey": TestKeyVisualization,
   "testKeyFade": TestKeyFadeVisualization,
   "testRainbow": TestRainbowVisualization,
