@@ -25,6 +25,10 @@
   padding-left: 2px;
 }
 
+.ControlsView-button.pressed {
+  background-color: red;
+}
+
 .ControlsView-dial {
   flex: 1;
   border: 1px solid #666;

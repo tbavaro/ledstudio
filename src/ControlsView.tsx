@@ -1,27 +1,15 @@
 import * as React from "react";
 
-import MidiEvent from "./piano/MidiEvent";
-import MidiEventListener, { MidiEventEmitter } from "./piano/MidiEventListener";
+import ControllerState from "./portable/base/ControllerState";
 
 import "./ControlsView.css";
 
 interface Props {
-  midiEventEmitter: MidiEventEmitter;
+  controllerState: ControllerState;
 }
 
-export default class ControlsView extends React.PureComponent<Props, {}> implements MidiEventListener {
-  private registeredMidiEventEmitter: MidiEventEmitter | null = null;
-
-  public componentWillUnmount() {
-    if (super.componentWillUnmount) {
-      super.componentWillUnmount();
-    }
-    this.unregisterMidiEventEmitter();
-  }
-
+export default class ControlsView extends React.Component<Props, {}> {
   public render() {
-    this.refreshMidiEventEmitter();
-
     return (
       <div className="ControlsView">
         <div className="ControlsView-controls">
@@ -33,9 +21,8 @@ export default class ControlsView extends React.PureComponent<Props, {}> impleme
   }
 
   private renderButtons() {
-    const values = [ true, false, false, true, true, true, false, false ];
     return this.render4by2({
-      values,
+      values: this.props.controllerState.buttonStates,
       renderFunc: (value, i) => (
         <div key={`button${i}`} className={`ControlsView-button ${value ? "pressed" : ""}`}>{i + 1}</div>
       ),
@@ -44,9 +31,8 @@ export default class ControlsView extends React.PureComponent<Props, {}> impleme
   }
 
   private renderDials() {
-    const values = [ 0.5, 0, 0.2, 0.8, 1.0, 0.7, 0.4, 0 ];
     return this.render4by2({
-      values,
+      values: this.props.controllerState.dialValues,
       renderFunc: (value, i) => (
         <div key={`button${i}`} className="ControlsView-dial">
           <span
@@ -91,40 +77,5 @@ export default class ControlsView extends React.PureComponent<Props, {}> impleme
         }
       </div>
     );
-  }
-
-  public onMidiEvent(event: MidiEvent) {
-    const pianoEvent = event.pianoEvent;
-    if (pianoEvent !== null) {
-      switch (pianoEvent.type) {
-        case "keyPressed":
-          // this.setKeyPressed(pianoEvent.key, /*isPressed=*/true);
-          break;
-
-        case "keyReleased":
-          // this.setKeyPressed(pianoEvent.key, /*isPressed=*/false);
-          break;
-
-        default:
-          break;
-      }
-    }
-  }
-
-  private refreshMidiEventEmitter() {
-    if (this.props.midiEventEmitter === this.registeredMidiEventEmitter) {
-      return;
-    }
-
-    this.unregisterMidiEventEmitter();
-    this.props.midiEventEmitter.addListener(this);
-    this.registeredMidiEventEmitter = this.props.midiEventEmitter;
-  }
-
-  private unregisterMidiEventEmitter() {
-    if (this.registeredMidiEventEmitter !== null) {
-      this.registeredMidiEventEmitter.removeListener(this);
-      this.registeredMidiEventEmitter = null;
-    }
   }
 }

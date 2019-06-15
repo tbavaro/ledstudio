@@ -1,6 +1,8 @@
 import MIDIFile from "midifile";
 import * as React from "react";
 
+import ControllerState from "./portable/base/ControllerState";
+
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
@@ -111,6 +113,7 @@ class App extends React.Component<{}, State> {
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly midiControllerEventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
+  private readonly controllerState = new ControllerState();
   public readonly analogAudio = new AnalogAudio.default();
 
   public componentWillMount() {
@@ -194,6 +197,8 @@ class App extends React.Component<{}, State> {
   }
 
   public render() {
+    const hasController = this.state.midiControllerInput !== null;
+
     return (
       <div className="App">
         <div className="App-viewportGroup">
@@ -218,9 +223,16 @@ class App extends React.Component<{}, State> {
             <PianoView
               midiEventEmitter={this.midiEventEmitter}
             />
-            <ControlsView
-              midiEventEmitter={this.midiEventEmitter}
-            />
+            {
+              hasController
+                ? (
+                    <ControlsView
+                      controllerState={this.controllerState}
+                      ref={this.setControlsViewRef}
+                    />
+                  )
+                : null
+            }
           </div>
         </div>
         <div className="App-sidebarContainer">
@@ -307,6 +319,8 @@ class App extends React.Component<{}, State> {
         newValue.addEventListener("midimessage", this.onMidiControllerInputMessage);
       }
       this.setState({ midiControllerInput: newValue });
+      this.controllerState.reset();
+      this.updateControlsView();
       SimulatorStickySettings.set("midiControllerInputId", newValue === null ? null : newValue.id);
     }
   }
@@ -438,6 +452,8 @@ class App extends React.Component<{}, State> {
   private onMidiControllerInputMessage = (message: WebMidi.MIDIMessageEvent) => {
     const event = new MidiEvent(message.data);
     this.midiControllerEventEmitter.fire(event);
+    this.controllerState.handleEvent(event);
+    this.updateControlsView();
   }
 
   private resetAllKeys = () => {
@@ -523,6 +539,14 @@ class App extends React.Component<{}, State> {
 
   private analogAudioViewRef: AnalogAudioView | undefined = undefined;
   private setAnalogAudioViewRef = (newRef: AnalogAudioView) => this.analogAudioViewRef = newRef;
+
+  private controlsViewRef: ControlsView | null = null;
+  private setControlsViewRef = (newRef: ControlsView | null) => this.controlsViewRef = newRef;
+  private updateControlsView = () => {
+    if (this.controlsViewRef !== null) {
+      this.controlsViewRef.forceUpdate();
+    }
+  }
 
   private initialVisualizationName(): PianoVisualizations.Name {
     return SimulatorStickySettings.get({

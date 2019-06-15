@@ -58,6 +58,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           {this.renderMidiOutputDevices()}
           <p/>
           {this.renderMidiControllerDevices()}
+          <p/>
         </div>
         <MidiEventsView
           className="RightSidebar-midiEventsView"
