@@ -15,7 +15,7 @@ import SimulationViewport from "./simulator/SimulationViewport";
 import * as SimulatorStickySettings from "./simulator/SimulatorStickySettings";
 
 import MidiEvent from "./piano/MidiEvent";
-import MidiEventListener, { QueuedMidiEventEmitter } from "./piano/MidiEventListener";
+import MidiEventListener, { MidiEventEmitter, QueuedMidiEventEmitter } from "./piano/MidiEventListener";
 import MIDIPlayer from "./piano/MIDIPlayer";
 
 import * as AnalogAudio from "./analogAudio/AnalogAudio";
@@ -108,6 +108,7 @@ function getByStickyIdKeyOrFirst<T extends { id: string }>(
 class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
+  private readonly midiControllerEventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
   public readonly analogAudio = new AnalogAudio.default();
 
@@ -246,7 +247,7 @@ class App extends React.Component<{}, State> {
             selectedMidiControllerInput={this.state.midiControllerInput}
             midiOutputs={this.state.midiOutputs}
             selectedMidiOutput={this.state.midiOutput}
-            midiEventEmitter={this.midiEventEmitter}
+            midiEventEmitters={[this.midiEventEmitter, this.midiControllerEventEmitter]}
             analogInputs={this.state.analogInputs}
             selectedAnalogInputId={this.state.selectedAnalogInputId}
           />
@@ -294,6 +295,13 @@ class App extends React.Component<{}, State> {
 
   private setMidiControllerInput = (newValue: WebMidi.MIDIInput | null) => {
     if (newValue !== this.state.midiControllerInput) {
+      if (this.state.midiControllerInput) {
+        this.state.midiControllerInput.removeEventListener("midimessage", this.onMidiControllerInputMessage);
+        this.resetAllKeys();
+      }
+      if (newValue) {
+        newValue.addEventListener("midimessage", this.onMidiControllerInputMessage);
+      }
       this.setState({ midiControllerInput: newValue });
       SimulatorStickySettings.set("midiControllerInputId", newValue === null ? null : newValue.id);
     }
@@ -421,6 +429,11 @@ class App extends React.Component<{}, State> {
     ) {
       this.state.midiOutput.send(message.data);
     }
+  }
+
+  private onMidiControllerInputMessage = (message: WebMidi.MIDIMessageEvent) => {
+    const event = new MidiEvent(message.data);
+    this.midiControllerEventEmitter.fire(event);
   }
 
   private resetAllKeys = () => {

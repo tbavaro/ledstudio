@@ -4,3 +4,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.emitter1 {
+  background-color: #442222 !important;
+}

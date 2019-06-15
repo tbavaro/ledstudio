@@ -35,7 +35,7 @@ interface Props {
   selectedMidiControllerInput: WebMidi.MIDIInput | null;
   midiOutputs: WebMidi.MIDIOutput[];
   selectedMidiOutput: WebMidi.MIDIOutput | null;
-  midiEventEmitter: MidiEventEmitter;
+  midiEventEmitters: MidiEventEmitter[];
   analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
   selectedAnalogInputId: string | null;
 }
@@ -62,7 +62,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
         <MidiEventsView
           className="RightSidebar-midiEventsView"
           entryClassName="RightSidebar-midiEventEntry"
-          midiEventEmitter={this.props.midiEventEmitter}
+          midiEventEmitters={this.props.midiEventEmitters}
         />
       </div>
     );
