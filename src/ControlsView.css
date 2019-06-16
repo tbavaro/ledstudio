@@ -41,6 +41,14 @@
   cursor: pointer;
 }
 
+.ControlsView-dial.dragging {
+  background-color: #400;
+}
+
+.ControlsView-dial.dragging .ControlsView-dialLabel {
+  background-color: #400;
+}
+
 .ControlsView-dialLabel {
   position: absolute;
   top: 50%;

@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import ControllerState from "./portable/base/ControllerState";
+import { bracket01 } from "./portable/Utils";
 
 import "./ControlsView.css";
 
@@ -15,12 +16,18 @@ interface MyButtonProps {
 }
 
 class MyButton extends React.PureComponent<MyButtonProps, {}> {
+  public componentWillUnmount() {
+    if (super.componentWillUnmount) {
+      super.componentWillUnmount();
+    }
+    this.removeListeners();
+  }
+
   public render() {
     return (
       <div
         className={`ControlsView-button ${this.props.value ? "pressed" : ""}`}
         onMouseDown={this.onMouseDown}
-        onMouseUp={this.onMouseUp}
       >
         {this.props.index + 1}
       </div>
@@ -29,10 +36,84 @@ class MyButton extends React.PureComponent<MyButtonProps, {}> {
 
   private onMouseDown = () => {
     this.props.setButtonValue(this.props.index, true);
+    document.addEventListener("mouseup", this.onMouseUp);
   }
 
   private onMouseUp = () => {
     this.props.setButtonValue(this.props.index, false);
+    this.removeListeners();
+  }
+
+  private removeListeners = () => {
+    document.removeEventListener("mouseup", this.onMouseUp);
+  }
+}
+
+interface MyDialProps {
+  index: number;
+  value: number;
+  setDialValue: (index: number, value: number) => void;
+}
+
+interface MyDialState {
+  isDragging: boolean;
+}
+
+class MyDial extends React.PureComponent<MyDialProps, MyDialState> {
+  public state: MyDialState = { isDragging: false };
+
+  private startDragValue = 0;
+  private startDragX = 0;
+
+  public componentWillUnmount() {
+    if (super.componentWillUnmount) {
+      super.componentWillUnmount();
+    }
+    this.removeListeners();
+  }
+
+  public render() {
+    return (
+      <div
+      className={[
+        "ControlsView-dial",
+        this.state.isDragging ? "dragging" : ""
+      ].join(" ")}
+    onMouseDown={this.onMouseDown}
+      >
+        <span
+          className="ControlsView-dialIndicator"
+          style={{
+            transform: `translateX(-50%) rotate(${-135 + 270 * this.props.value}deg)`
+          }}
+        />
+        <span className="ControlsView-dialLabel">
+          {this.props.index + 1}
+        </span>
+    </div>
+    );
+  }
+
+  private onMouseDown = (event: React.MouseEvent<any>) => {
+    this.startDragValue = this.props.value;
+    this.startDragX = event.pageX;
+    this.setState({ isDragging: true });
+    document.addEventListener("mousemove", this.onMouseMove as any);
+    document.addEventListener("mouseup", this.onMouseUp);
+  }
+
+  private onMouseUp = () => {
+    this.setState({ isDragging: false });
+    this.removeListeners();
+  }
+
+  private onMouseMove = (event: React.MouseEvent<any>) => {
+    this.props.setDialValue(this.props.index, bracket01(this.startDragValue + (event.pageX - this.startDragX) / 100));
+  }
+
+  private removeListeners = () => {
+    document.removeEventListener("mousemove", this.onMouseMove as any);
+    document.removeEventListener("mouseup", this.onMouseUp);
   }
 }
 
@@ -62,17 +143,7 @@ export default class ControlsView extends React.Component<Props, {}> {
     return this.render4by2({
       values: this.props.controllerState.dialValues,
       renderFunc: (value, i) => (
-        <div key={`button${i}`} className="ControlsView-dial">
-          <span
-            className="ControlsView-dialIndicator"
-            style={{
-              transform: `translateX(-50%) rotate(${-135 + 270 * value}deg)`
-            }}
-          />
-          <span className="ControlsView-dialLabel">
-            {i + 1}
-          </span>
-        </div>
+        <MyDial key={`dial${i}`} index={i} value={value} setDialValue={this.setDialValue}/>
       ),
     });
   }
@@ -120,6 +191,11 @@ export default class ControlsView extends React.Component<Props, {}> {
 
   private setButtonValue = (index: number, value: boolean) => {
     this.props.controllerState.buttonStates[index] = value;
+    this.forceUpdate();
+  }
+
+  private setDialValue = (index: number, value: number) => {
+    this.props.controllerState.dialValues[index] = value;
     this.forceUpdate();
   }
 }
