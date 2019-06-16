@@ -48,8 +48,8 @@ export default class FixedArray<T> {
     this.items.fill(value);
   }
 
-  public map<V>(func: (value: T) => V): V[] {
-    return this.items.map(func);
+  public map<V>(func: (value: T) => V): FixedArray<V> {
+    return FixedArray.from(this.items.map(func));
   }
 
   public forEach(func: (value: T, i: number) => void) {

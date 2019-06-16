@@ -546,7 +546,7 @@ class App extends React.Component<{}, State> {
   private setControlsViewRef = (newRef: ControlsView | null) => this.controlsViewRef = newRef;
   private updateControlsView = () => {
     if (this.controlsViewRef !== null) {
-      this.controlsViewRef.forceUpdate();
+      this.controlsViewRef.onStateChange();
     }
   }
 

@@ -1,4 +1,3 @@
-import ColorRow from "../portable/base/ColorRow";
 import * as Colors from "../portable/base/Colors";
 import FixedArray from "../portable/base/FixedArray";
 import LedInfo from "../portable/base/LedInfo";
@@ -57,7 +56,7 @@ export default class FadecandyLedSender {
     console.log(`initialized FadecandyLedSender with counts: ${JSON.stringify(orderedLedCounts)}`);
   }
 
-  public send(colorRows: FixedArray<ColorRow>) {
+  public send(colorRows: FixedArray<FixedArray<Colors.Color>>) {
     this.timingHelper.addTiming(() => {
       if (colorRows.length !== this.leds.length) {
         throw new Error("colorRows length doesn't match led row count");

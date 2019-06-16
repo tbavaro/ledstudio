@@ -1,5 +1,6 @@
 import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
+import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
 import PianoVisualization, { Context } from "./portable/base/PianoVisualization";
 import * as TimeseriesData from "./portable/base/TimeseriesData";
@@ -20,11 +21,13 @@ export default class PianoVisualizationRunner {
   private lastRenderTime: number = 0;
   public hardwareLedSender?: FadecandyLedSender;
   public simulationLedStrip?: SendableLedStrip;
+  private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
 
   constructor(visualization: PianoVisualization, scene: Scene) {
     this.visualization = visualization;
     this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
     this.timingHelper = new MovingAverageHelper(20);
+    this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
   }
 
   public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState | null): TimeseriesData.PointDef[] {
@@ -77,14 +80,18 @@ export default class PianoVisualizationRunner {
   }
 
   private sendToStrips(multiplier: number) {
+    this.visualization.ledRows.forEach((row, rowIdx) => {
+      const outputRow = this.adjustedLedRows.get(rowIdx);
+      row.forEach((color, i) => {
+        outputRow.set(i, Colors.multiply(color, multiplier));
+      });
+    });
+
     if (this.simulationLedStrip !== undefined) {
       const strip = this.simulationLedStrip;
       let i = 0;
-      this.visualization.ledRows.forEach(row => {
+      this.adjustedLedRows.forEach(row => {
         row.forEach(color => {
-          if (multiplier !== -1) {
-            color = Colors.multiply(color, multiplier);
-          }
           strip.setColor(i++, color);
         });
       });
@@ -92,7 +99,7 @@ export default class PianoVisualizationRunner {
     }
 
     if (this.hardwareLedSender !== undefined) {
-      this.hardwareLedSender.send(this.visualization.ledRows);
+      this.hardwareLedSender.send(this.adjustedLedRows);
     }
   }
 }

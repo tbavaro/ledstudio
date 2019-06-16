@@ -40,6 +40,11 @@ export default class MidiEventsView extends React.Component<Props, {}> implement
       throw new Error("couldn't find emitter");
     }
 
+    // stop showing events for controller
+    if (emitterIndex > 0) {
+      return;
+    }
+
     const newElement = document.createElement("div");
     newElement.className = [
       "MidiEventsView-entry",

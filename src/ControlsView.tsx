@@ -78,4 +78,15 @@ export default class ControlsView extends React.Component<Props, {}> {
       </div>
     );
   }
+
+  private stateChangeTimeout: NodeJS.Timeout | null = null;
+
+  public onStateChange() {
+    if (this.stateChangeTimeout === null) {
+      this.stateChangeTimeout = setTimeout(() => {
+        this.stateChangeTimeout = null;
+        this.forceUpdate();
+      }, 1000 / 60);
+    }
+  }
 }
