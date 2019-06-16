@@ -14,7 +14,7 @@ export interface State {
   // TODO probably give a better interface here
   analogFrequencyData: Uint8Array;
 
-  controllerState: ControllerState | null;
+  controllerState: ControllerState;
 }
 
 export interface Context {

@@ -9,10 +9,6 @@ export default class TestControllerDialVisualization extends PianoVisualization.
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
-    if (state.controllerState === null) {
-      return;
-    }
-
     const dialValues = state.controllerState.dialValues;
 
     const rValue = dialValues[0];

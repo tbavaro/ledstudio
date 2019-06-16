@@ -84,7 +84,7 @@ export class PianoVisualizationStateHelper {
     return {
       pianoState: new PianoState(),
       analogFrequencyData: DUMMY_ANALOG_FREQUENCY_DATA,
-      controllerState: null
+      controllerState: new ControllerState()
     };
   }
 
@@ -92,7 +92,7 @@ export class PianoVisualizationStateHelper {
     this.state.pianoState.changedKeys = [];
   }
 
-  public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState | null): PianoVisualization.State {
+  public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): PianoVisualization.State {
     this.state.pianoState.changedKeys.sort();
     this.state.analogFrequencyData = analogFrequencyData;
     this.state.controllerState = controllerState;

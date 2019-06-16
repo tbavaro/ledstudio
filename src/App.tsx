@@ -70,7 +70,7 @@ interface State {
   midiOutputs: WebMidi.MIDIOutput[];
   analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
   selectedAnalogInputId: string | null;
-  controllerState: ControllerState | null;
+  controllerState: ControllerState;
 }
 
 type AllActions = RightSidebar.Actions;
@@ -318,7 +318,7 @@ class App extends React.Component<{}, State> {
       }
       this.setState({
         midiControllerInput: newValue,
-        controllerState: (newValue === null ? null : new ControllerState())
+        controllerState: new ControllerState()
       });
       this.updateControlsView();
       SimulatorStickySettings.set("midiControllerInputId", newValue === null ? null : newValue.id);
@@ -595,7 +595,7 @@ class App extends React.Component<{}, State> {
       midiOutputs: [],
       analogInputs: undefined,
       selectedAnalogInputId: null,
-      controllerState: null
+      controllerState: new ControllerState()
     };
   })();
 }

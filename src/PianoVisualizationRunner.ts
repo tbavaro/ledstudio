@@ -30,7 +30,7 @@ export default class PianoVisualizationRunner {
     this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
   }
 
-  public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState | null): TimeseriesData.PointDef[] {
+  public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): TimeseriesData.PointDef[] {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
