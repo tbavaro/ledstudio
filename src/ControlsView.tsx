@@ -8,6 +8,34 @@ interface Props {
   controllerState: ControllerState;
 }
 
+interface MyButtonProps {
+  index: number;
+  value: boolean;
+  setButtonValue: (index: number, value: boolean) => void;
+}
+
+class MyButton extends React.PureComponent<MyButtonProps, {}> {
+  public render() {
+    return (
+      <div
+        className={`ControlsView-button ${this.props.value ? "pressed" : ""}`}
+        onMouseDown={this.onMouseDown}
+        onMouseUp={this.onMouseUp}
+      >
+        {this.props.index + 1}
+      </div>
+    );
+  }
+
+  private onMouseDown = () => {
+    this.props.setButtonValue(this.props.index, true);
+  }
+
+  private onMouseUp = () => {
+    this.props.setButtonValue(this.props.index, false);
+  }
+}
+
 export default class ControlsView extends React.Component<Props, {}> {
   public render() {
     return (
@@ -24,7 +52,7 @@ export default class ControlsView extends React.Component<Props, {}> {
     return this.render4by2({
       values: this.props.controllerState.buttonStates,
       renderFunc: (value, i) => (
-        <div key={`button${i}`} className={`ControlsView-button ${value ? "pressed" : ""}`}>{i + 1}</div>
+        <MyButton key={`button${i}`} index={i} value={value} setButtonValue={this.setButtonValue}/>
       ),
       flipped: true
     });
@@ -88,5 +116,10 @@ export default class ControlsView extends React.Component<Props, {}> {
         this.forceUpdate();
       }, 1000 / 60);
     }
+  }
+
+  private setButtonValue = (index: number, value: boolean) => {
+    this.props.controllerState.buttonStates[index] = value;
+    this.forceUpdate();
   }
 }

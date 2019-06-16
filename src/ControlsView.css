@@ -23,6 +23,7 @@
   margin: 1px;
   padding-top: 1px;
   padding-left: 2px;
+  cursor: pointer;
 }
 
 .ControlsView-button.pressed {
@@ -37,6 +38,7 @@
   margin: 1px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .ControlsView-dialLabel {
