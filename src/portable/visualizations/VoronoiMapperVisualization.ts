@@ -36,13 +36,138 @@ function flatten<T>(arrays: T[][]): T[] {
   return output;
 }
 
+let existingCanvas: HTMLCanvasElement | null = null;
+function createCanvas(width: number, height: number): HTMLCanvasElement {
+  if (existingCanvas !== null) {
+    const parent = existingCanvas.parentElement;
+    if (parent !== null) {
+      parent.removeChild(existingCanvas);
+    }
+    existingCanvas = null;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.style.position = "absolute";
+  canvas.style.top = "5px";
+  canvas.style.left = "5px";
+  canvas.style.boxSizing = "border-box";
+  canvas.style.border = "5px dashed green";
+  canvas.style.backgroundColor = "white";
+  canvas.width = width;
+  canvas.height = height;
+  document.body.appendChild(canvas);
+
+  existingCanvas = canvas;
+  return canvas;
+}
+
+function getExtents(points: Vector2[]) {
+  if (points.length === 0) {
+    throw new Error("need at least one point");
+  }
+
+  let minX = points[0].x;
+  let maxX = points[0].x;
+  let minY = points[0].y;
+  let maxY = points[0].y;
+
+  points.forEach(p => {
+    if (p.x < minX) {
+      minX = p.x;
+    }
+    if (p.x > maxX) {
+      maxX = p.x;
+    }
+    if (p.y < minY) {
+      minY = p.y;
+    }
+    if (p.y > maxY) {
+      maxY = p.y;
+    }
+  });
+
+  return {
+    minX,
+    maxX,
+    minY,
+    maxY
+  };
+}
+
+function closestIndex(ps: Vector2[], p: Vector2): number {
+  if (ps.length === 0) {
+    throw new Error("need at least one point");
+  }
+
+  let bestIndex = 0;
+  let bestDistance = p.distanceTo(ps[0]);
+  ps.forEach((p2, i) => {
+    const myDistance = p.distanceTo(p2);
+    if (myDistance < bestDistance) {
+      bestDistance = myDistance;
+      bestIndex = i;
+    }
+  });
+
+  return bestIndex;
+}
+
 export default class VoronoiMapperVisualization extends PianoVisualization.default {
   private phase = 0;
 
   constructor(scene: Scene.default) {
     super(scene);
     const allLeds = flatten(scene.leds);
-    mapTo2D(allLeds.map(led => led.position));
+    const leds2d = mapTo2D(allLeds.map(led => led.position));
+    const pointColors = leds2d.map(_ => Colors.hsv(Math.random() * 360, 0.7, Math.random() * 0.5 + 0.5));
+    const extents = getExtents(leds2d);
+    const width = extents.maxX - extents.minX;
+    const height = extents.maxY - extents.minY;
+    const maxDimension = 900;
+    let canvasWidth: number;
+    let canvasHeight: number;
+    if (width > height) {
+      canvasWidth = maxDimension;
+      canvasHeight = Math.ceil(maxDimension / width * height);
+    } else {
+      canvasHeight = maxDimension;
+      canvasWidth = Math.ceil(maxDimension / height * width);
+    }
+    const canvas = createCanvas(canvasWidth, canvasHeight);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("can't use canvas");
+    }
+
+    const worldPointToCanvasPoint = (wp: Vector2) => {
+      const x = (wp.x - extents.minX) / width * (canvasWidth - 1);
+      const y = (1 - (wp.y - extents.minY) / height) * (canvasHeight - 1);
+      return new Vector2(x, y);
+    };
+
+    const canvasPointToWorldPoint = (cp: Vector2) => {
+      const x = (cp.x / (canvasWidth - 1)) * width + extents.minX;
+      const y = (1 - cp.y / (canvasHeight - 1)) * height + extents.minY;
+      return new Vector2(x, y);
+    };
+
+    const drawPoint = (p: Vector2, color: Colors.Color) => {
+      const cp = worldPointToCanvasPoint(p);
+      ctx.fillStyle = Colors.cssColor(color);
+      ctx.fillRect(cp.x, cp.y, 1, 1);
+    };
+
+    for (let x = 0; x < canvasWidth; ++x) {
+      for (let y = 0; y < canvasHeight; ++y) {
+        const cp = new Vector2(x, y);
+        const wp = canvasPointToWorldPoint(cp);
+        const index = closestIndex(leds2d, wp);
+        const color = pointColors[index];
+        drawPoint(wp, color);
+      }
+    }
+
+    leds2d.forEach(p => drawPoint(p, Colors.BLACK));
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
