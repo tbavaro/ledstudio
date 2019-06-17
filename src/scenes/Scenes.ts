@@ -554,6 +554,169 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
   return sceneDef;
 }
 
+function createRealWingsSceneDef(name: string) {
+  const ledSpacing = LedSpacings.NEOPIXEL_30;
+
+  // measurements
+  const middleSpacing = 1.5 * INCH;
+  const interTriangleSpacing = 1.75 * INCH;
+  const startSpacing = 7.5 * INCH;
+  const smallDeltaX = 29 * INCH;
+  const smallDeltaY = 19.5 * INCH;
+  const largeDeltaX = 57 * INCH;
+  const largeDeltaY = 48.25 * INCH;
+  const bottomHeight = 35 * INCH;
+
+  const calculateLedPositions2d = () => {
+
+    const makeRib = (attrs: {
+      start: Vector2,
+      toward: Vector2,
+      numLeds: number
+    }) => {
+      const end = attrs.toward.clone().sub(attrs.start).normalize().multiplyScalar(ledSpacing * ((attrs.numLeds - 1) + 0.1)).add(attrs.start);
+      return SimulationUtils.pointsFromTo({
+        start: attrs.start,
+        end: end,
+        spacing: ledSpacing
+      });
+    };
+
+    const translateBy = (delta: Vector2) => (vs: Vector2[]) => vs.map(v => v.clone().add(delta));
+
+    const smallLeftRibs = [
+      makeRib({
+        start: new Vector2(0, 3 * startSpacing),
+        toward: new Vector2(smallDeltaX, smallDeltaY),
+        numLeds: 23
+      }),
+      makeRib({
+        start: new Vector2(0, 2 * startSpacing),
+        toward: new Vector2(smallDeltaX, smallDeltaY),
+        numLeds: 20
+      }),
+      makeRib({
+        start: new Vector2(0, 1 * startSpacing),
+        toward: new Vector2(smallDeltaX, smallDeltaY),
+        numLeds: 22
+      }),
+      makeRib({
+        start: new Vector2(0, 0 * startSpacing),
+        toward: new Vector2(smallDeltaX, smallDeltaY),
+        numLeds: 26
+      })
+    ].map(translateBy(new Vector2(-1 * (smallDeltaX + middleSpacing * 0.5))));
+
+    const largeLeftRibs = [
+      makeRib({
+        start: new Vector2(0, 3 * startSpacing),
+        toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
+        numLeds: 46
+      }),
+      makeRib({
+        start: new Vector2(0, 2 * startSpacing),
+        toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
+        numLeds: 44
+      }),
+      makeRib({
+        start: new Vector2(0, 1 * startSpacing),
+        toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
+        numLeds: 44
+      }),
+      makeRib({
+        start: new Vector2(0, 0 * startSpacing),
+        toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
+        numLeds: 53
+      })
+    ].map(translateBy(new Vector2(-1 * (smallDeltaX + interTriangleSpacing + middleSpacing * 0.5))));
+
+    const interleave = <T>(a: T[], b: T[]): T[] => {
+      if (a.length !== b.length) {
+        throw new Error("must be same length");
+      }
+
+      const output: T[] = [];
+
+      a.forEach((ai, i) => {
+        output.push(ai);
+        output.push(b[i]);
+      });
+
+      return output;
+    };
+
+    const allLeftRibs = interleave(smallLeftRibs, largeLeftRibs);
+
+    const flipX = (v: Vector2) => new Vector2(-1 * v.x, v.y);
+    const allRightRibs = allLeftRibs.map(rib => rib.map(flipX));
+
+    return [...allLeftRibs, ...allRightRibs];
+  };
+
+  const calculate = doLazy(() => {
+    const positions2d = calculateLedPositions2d();
+    const ribLengths = positions2d.map(r => r.length);
+
+    const positions3d = positions2d.map(points2d => SimulationUtils.map2dTo3d({
+      points: points2d,
+      bottomLeft: new Vector3(0, bottomHeight, 1.25),
+      rightDirection: new Vector3(1, 0, 0),
+      upDirection: new Vector3(0, 1, 0)
+    }));
+
+    const ledInfos: Scene.LedInfo[][] = [[], [], [], []];
+    positions3d.map((ribPositions, ribIndex) => {
+      const rowNum = Math.floor((ribIndex % 8) / 2);
+      const rowLedInfos = ledInfos[rowNum];
+      ribPositions.forEach((p, ledIndex) => {
+        rowLedInfos.push({
+          position: p,
+          hardwareChannel: ribIndex + 1,
+          hardwareIndex: ledIndex
+        });
+      });
+    });
+
+    ledInfos.forEach(rowLedInfos => {
+      rowLedInfos.sort((a, b) => (a.position.x - b.position.x));
+    });
+
+    return {
+      leds: ledInfos,
+      displayValues: { l: JSON.stringify(ribLengths) }
+    };
+  });
+
+  const postPositionX = smallDeltaX + 0.5 * interTriangleSpacing;
+
+  const kbVenue = createKeyboardVenue({ keyboardInFront: false });
+  kbVenue.extraObjects.push(boxHelper({
+    width: 4 * INCH,
+    height: 65 * INCH,
+    depth: 4 * INCH,
+    translateBy: new Vector3(postPositionX, 0, 1.32 ),
+  }));
+  kbVenue.extraObjects.push(boxHelper({
+    width: 4 * INCH,
+    height: 65 * INCH,
+    depth: 4 * INCH,
+    translateBy: new Vector3(-1 * postPositionX, 0, 1.32),
+  }));
+
+  const sceneDef: SceneDef = {
+    ...kbVenue,
+    name,
+    camera: {
+      startPosition: new Vector3(0, 1.4, -2.5),
+      target: new Vector3(0, 1.2, 0)
+    },
+    leds: { calculate: () => calculate().leds },
+    initialDisplayValues: () => calculate().displayValues
+  };
+
+  return sceneDef;
+}
+
 registerScenes([
   {
     ...createKeyboardVenue({ keyboardInFront: true }),
@@ -586,6 +749,7 @@ registerScenes([
   createWingsSceneDef("burrow:wings30x2", LedSpacings.NEOPIXEL_30, 2),
   createWingsSceneDef("burrow:wings30x3", LedSpacings.NEOPIXEL_30, 3),
   createWingsSceneDef("burrow:wings30x4", LedSpacings.NEOPIXEL_30, 4),
+  createRealWingsSceneDef("burrow:wings30x4-real"),
   createWingsSceneDef("burrow:wings30x5", LedSpacings.NEOPIXEL_30, 5),
   createWingsSceneDef("burrow:wings30x7", LedSpacings.NEOPIXEL_30, 7),
   createWingsSceneDef("burrow:wings60x7", LedSpacings.NEOPIXEL_60, 7)

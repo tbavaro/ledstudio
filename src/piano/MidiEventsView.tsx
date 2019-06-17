@@ -10,33 +10,47 @@ const MAX_EVENTS = 100;
 interface Props {
   className?: string;
   entryClassName?: string;
-  midiEventEmitter: MidiEventEmitter;
+  midiEventEmitters: MidiEventEmitter[];
 }
 
 export default class MidiEventsView extends React.Component<Props, {}> implements MidiEventListener {
-  private registeredMidiEventEmitter: MidiEventEmitter | null = null;
+  private registeredMidiEventEmitters: MidiEventEmitter[] = [];
 
   public componentWillUnmount() {
     if (super.componentWillUnmount) {
       super.componentWillUnmount();
     }
-    this.unregisterMidiEventEmitter();
+    this.unregisterMidiEventEmitters();
   }
 
   public render() {
-    this.refreshMidiEventEmitter();
+    this.refreshMidiEventEmitters();
     return (
       <div className={"MidiEventsView " + (this.props.className || "")} ref={this.setRef}/>
     );
   }
 
-  public onMidiEvent(event: MidiEvent) {
+  public onMidiEvent(event: MidiEvent, emitter: MidiEventEmitter) {
     if (event.suppressDisplay) {
       return;
     }
 
+    const emitterIndex = this.props.midiEventEmitters.findIndex(e => e === emitter);
+    if (emitterIndex === -1) {
+      throw new Error("couldn't find emitter");
+    }
+
+    // stop showing events for controller
+    if (emitterIndex > 0) {
+      return;
+    }
+
     const newElement = document.createElement("div");
-    newElement.className = "MidiEventsView-entry " + (this.props.entryClassName || "");
+    newElement.className = [
+      "MidiEventsView-entry",
+      (this.props.entryClassName || ""),
+      `emitter${emitterIndex}`
+    ].join(" ");
     newElement.innerText = event.toString();
 
     const parent = this.ref;
@@ -60,20 +74,18 @@ export default class MidiEventsView extends React.Component<Props, {}> implement
     this.unsafeRef = newRef;
   }
 
-  private refreshMidiEventEmitter() {
-    if (this.props.midiEventEmitter === this.registeredMidiEventEmitter) {
+  private refreshMidiEventEmitters() {
+    if (this.props.midiEventEmitters === this.registeredMidiEventEmitters) {
       return;
     }
 
-    this.unregisterMidiEventEmitter();
-    this.props.midiEventEmitter.addListener(this);
-    this.registeredMidiEventEmitter = this.props.midiEventEmitter;
+    this.unregisterMidiEventEmitters();
+    this.props.midiEventEmitters.forEach(e => e.addListener(this));
+    this.registeredMidiEventEmitters = this.props.midiEventEmitters;
   }
 
-  private unregisterMidiEventEmitter() {
-    if (this.registeredMidiEventEmitter !== null) {
-      this.registeredMidiEventEmitter.removeListener(this);
-      this.registeredMidiEventEmitter = null;
-    }
+  private unregisterMidiEventEmitters() {
+    this.registeredMidiEventEmitters.forEach(e => e.removeListener(this));
+    this.registeredMidiEventEmitters = [];
   }
 }

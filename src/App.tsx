@@ -1,6 +1,8 @@
 import MIDIFile from "midifile";
 import * as React from "react";
 
+import ControllerState from "./portable/base/ControllerState";
+
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
@@ -15,12 +17,13 @@ import SimulationViewport from "./simulator/SimulationViewport";
 import * as SimulatorStickySettings from "./simulator/SimulatorStickySettings";
 
 import MidiEvent from "./piano/MidiEvent";
-import MidiEventListener, { QueuedMidiEventEmitter } from "./piano/MidiEventListener";
+import MidiEventListener, { MidiEventEmitter, QueuedMidiEventEmitter } from "./piano/MidiEventListener";
 import MIDIPlayer from "./piano/MIDIPlayer";
 
 import * as AnalogAudio from "./analogAudio/AnalogAudio";
 import AnalogAudioView from "./analogAudio/AnalogAudioView";
 
+import ControlsView from "./ControlsView";
 import PianoView from "./PianoView";
 import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
@@ -59,6 +62,7 @@ interface State {
   visualizationRunner: PianoVisualizationRunner;
   midiState: Readonly<MidiState>;
   midiInput: WebMidi.MIDIInput | null;
+  midiControllerInput: WebMidi.MIDIInput | null;
   midiOutput: WebMidi.MIDIOutput | null;
   midiFilename: string;
   midiData: ArrayBuffer | null;
@@ -66,6 +70,7 @@ interface State {
   midiOutputs: WebMidi.MIDIOutput[];
   analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
   selectedAnalogInputId: string | null;
+  controllerState: ControllerState;
 }
 
 type AllActions = RightSidebar.Actions;
@@ -107,6 +112,7 @@ function getByStickyIdKeyOrFirst<T extends { id: string }>(
 class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
+  private readonly midiControllerEventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
   public readonly analogAudio = new AnalogAudio.default();
 
@@ -130,6 +136,8 @@ class App extends React.Component<{}, State> {
         const inputs = Array.from(webMidi.inputs.values());
         const defaultInput = getByStickyIdKeyOrFirst(inputs, "midiInputId");
         this.setMidiInput(defaultInput);
+        const defaultControllerInput = getByStickyIdKeyOrFirst(inputs, "midiControllerInputId");
+        this.setMidiControllerInput(defaultControllerInput);
 
         const outputs = Array.from(webMidi.outputs.values());
         const defaultOutput = getByStickyIdKeyOrFirst(outputs, "midiOutputId");
@@ -209,10 +217,20 @@ class App extends React.Component<{}, State> {
           <div className="App-analogAudioViewContainer">
             <AnalogAudioView ref={this.setAnalogAudioViewRef}/>
           </div>
-          <div className="App-pianoContainer">
+          <div className="App-controllerStateContainer">
             <PianoView
               midiEventEmitter={this.midiEventEmitter}
             />
+            {
+              this.state.controllerState === null
+                ? null
+                : (
+                    <ControlsView
+                      controllerState={this.state.controllerState}
+                      ref={this.setControlsViewRef}
+                    />
+                  )
+            }
           </div>
         </div>
         <div className="App-sidebarContainer">
@@ -240,9 +258,10 @@ class App extends React.Component<{}, State> {
             selectedMidiFilename={this.state.midiFilename}
             midiInputs={this.state.midiInputs}
             selectedMidiInput={this.state.midiInput}
+            selectedMidiControllerInput={this.state.midiControllerInput}
             midiOutputs={this.state.midiOutputs}
             selectedMidiOutput={this.state.midiOutput}
-            midiEventEmitter={this.midiEventEmitter}
+            midiEventEmitters={[this.midiEventEmitter, this.midiControllerEventEmitter]}
             analogInputs={this.state.analogInputs}
             selectedAnalogInputId={this.state.selectedAnalogInputId}
           />
@@ -288,6 +307,24 @@ class App extends React.Component<{}, State> {
     }
   }
 
+  private setMidiControllerInput = (newValue: WebMidi.MIDIInput | null) => {
+    if (newValue !== this.state.midiControllerInput) {
+      if (this.state.midiControllerInput) {
+        this.state.midiControllerInput.removeEventListener("midimessage", this.onMidiControllerInputMessage);
+        this.resetAllKeys();
+      }
+      if (newValue) {
+        newValue.addEventListener("midimessage", this.onMidiControllerInputMessage);
+      }
+      this.setState({
+        midiControllerInput: newValue,
+        controllerState: new ControllerState()
+      });
+      this.updateControlsView();
+      SimulatorStickySettings.set("midiControllerInputId", newValue === null ? null : newValue.id);
+    }
+  }
+
   private setMidiOutput = (newValue: WebMidi.MIDIOutput | null) => {
     if (newValue !== this.state.midiOutput) {
       this.midiPlayer.output = newValue;
@@ -326,7 +363,7 @@ class App extends React.Component<{}, State> {
   }
 
   private updateMidiDevices = () => {
-    const { midiInput, midiOutput, midiState } = this.state;
+    const { midiInput, midiOutput, midiState, midiControllerInput } = this.state;
     if (midiState.status !== "loaded") {
       return;
     }
@@ -334,6 +371,9 @@ class App extends React.Component<{}, State> {
     const { webMidi } = midiState;
     if (midiInput !== null) {
       this.setMidiInput(webMidi.inputs.get(midiInput.id) || null);
+    }
+    if (midiControllerInput !== null) {
+      this.setMidiControllerInput(webMidi.inputs.get(midiControllerInput.id) || null);
     }
     if (midiOutput !== null) {
       this.setMidiOutput(webMidi.outputs.get(midiOutput.id) || null);
@@ -373,6 +413,7 @@ class App extends React.Component<{}, State> {
     playMusic: this.handlePlayMusic,
     stopMusic: this.handleStopMusic,
     setMidiInput: this.setMidiInput,
+    setMidiControllerInput: this.setMidiControllerInput,
     setMidiOutput: this.setMidiOutput,
     setSelectedMidiFilename: this.loadMidiFile,
     setSelectedSceneName: (name: string) => {
@@ -406,6 +447,15 @@ class App extends React.Component<{}, State> {
     ) {
       this.state.midiOutput.send(message.data);
     }
+  }
+
+  private onMidiControllerInputMessage = (message: WebMidi.MIDIMessageEvent) => {
+    const event = new MidiEvent(message.data);
+    this.midiControllerEventEmitter.fire(event);
+    if (this.state.controllerState !== null) {
+      this.state.controllerState.handleEvent(event);
+    }
+    this.updateControlsView();
   }
 
   private resetAllKeys = () => {
@@ -450,7 +500,7 @@ class App extends React.Component<{}, State> {
       this.scheduleNextAnimationFrame();
 
       const frequencyData = this.analogAudio.getFrequencyData();
-      const frameTimeseriesData = this.state.visualizationRunner.renderFrame(frequencyData);
+      const frameTimeseriesData = this.state.visualizationRunner.renderFrame(frequencyData, this.state.controllerState);
       ++this.framesRenderedSinceLastTimingsCall;
 
       if (this.analogAudioViewRef) {
@@ -492,6 +542,14 @@ class App extends React.Component<{}, State> {
   private analogAudioViewRef: AnalogAudioView | undefined = undefined;
   private setAnalogAudioViewRef = (newRef: AnalogAudioView) => this.analogAudioViewRef = newRef;
 
+  private controlsViewRef: ControlsView | null = null;
+  private setControlsViewRef = (newRef: ControlsView | null) => this.controlsViewRef = newRef;
+  private updateControlsView = () => {
+    if (this.controlsViewRef !== null) {
+      this.controlsViewRef.onStateChange();
+    }
+  }
+
   private initialVisualizationName(): PianoVisualizations.Name {
     return SimulatorStickySettings.get({
       key: "visualizationName",
@@ -529,13 +587,15 @@ class App extends React.Component<{}, State> {
         status: "initializing"
       },
       midiInput: null,
+      midiControllerInput: null,
       midiOutput: null,
       midiFilename: "<<not assigned>>",
       midiData: null,
       midiInputs: [],
       midiOutputs: [],
       analogInputs: undefined,
-      selectedAnalogInputId: null
+      selectedAnalogInputId: null,
+      controllerState: new ControllerState()
     };
   })();
 }

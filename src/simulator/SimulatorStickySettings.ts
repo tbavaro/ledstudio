@@ -7,6 +7,7 @@ export interface Settings {
   visualizationName: PianoVisualizations.Name;
   analogAudioSourceId: string | null;
   midiInputId: string | null;
+  midiControllerInputId: string | null;
   midiOutputId: string | null;
   midiFilename: string;
 }

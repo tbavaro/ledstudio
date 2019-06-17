@@ -37,7 +37,7 @@ function initializeScene() {
 }
 
 class LedHelper {
-  private static readonly LED_RADIUS = 0.008;
+  private static readonly LED_RADIUS = 0.014;
   private static readonly RADIUS_MULTIPLIERS = [1];
   private static readonly COLOR_MULTIPLIERS = [1];
   private static readonly GLOW_POSITION_OFFSET = new Vector3(0, 0, -0.0001);

@@ -1,3 +1,6 @@
+import * as Colors from "./portable/base/Colors";
+import ControllerState from "./portable/base/ControllerState";
+import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
 import PianoVisualization, { Context } from "./portable/base/PianoVisualization";
 import * as TimeseriesData from "./portable/base/TimeseriesData";
@@ -18,21 +21,23 @@ export default class PianoVisualizationRunner {
   private lastRenderTime: number = 0;
   public hardwareLedSender?: FadecandyLedSender;
   public simulationLedStrip?: SendableLedStrip;
+  private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
 
   constructor(visualization: PianoVisualization, scene: Scene) {
     this.visualization = visualization;
     this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
     this.timingHelper = new MovingAverageHelper(20);
+    this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
   }
 
-  public renderFrame(analogFrequencyData: Uint8Array): TimeseriesData.PointDef[] {
+  public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): TimeseriesData.PointDef[] {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
     }
 
     // collect state
-    const visState = this.stateHelper.endFrame(analogFrequencyData);
+    const visState = this.stateHelper.endFrame(analogFrequencyData, controllerState);
     let frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
     const context: Context = {
       setFrameTimeseriesPoints: (points: TimeseriesData.PointDef[]) => {
@@ -55,7 +60,8 @@ export default class PianoVisualizationRunner {
     this.timingHelper.addValue(visTimeMillis);
 
     // send
-    this.sendToStrips();
+    const multiplier = controllerState === null ? 1 : controllerState.dialValues[7];
+    this.sendToStrips(multiplier);
 
     return frameTimeseriesPoints || [];
   }
@@ -73,11 +79,18 @@ export default class PianoVisualizationRunner {
     return this.timingHelper.movingAverage;
   }
 
-  private sendToStrips() {
+  private sendToStrips(multiplier: number) {
+    this.visualization.ledRows.forEach((row, rowIdx) => {
+      const outputRow = this.adjustedLedRows.get(rowIdx);
+      row.forEach((color, i) => {
+        outputRow.set(i, Colors.multiply(color, multiplier));
+      });
+    });
+
     if (this.simulationLedStrip !== undefined) {
       const strip = this.simulationLedStrip;
       let i = 0;
-      this.visualization.ledRows.forEach(row => {
+      this.adjustedLedRows.forEach(row => {
         row.forEach(color => {
           strip.setColor(i++, color);
         });
@@ -86,7 +99,7 @@ export default class PianoVisualizationRunner {
     }
 
     if (this.hardwareLedSender !== undefined) {
-      this.hardwareLedSender.send(this.visualization.ledRows);
+      this.hardwareLedSender.send(this.adjustedLedRows);
     }
   }
 }

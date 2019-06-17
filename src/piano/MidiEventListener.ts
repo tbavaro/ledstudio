@@ -1,7 +1,7 @@
 import MidiEvent from "./MidiEvent";
 
 export default interface MidiEventListener {
-  onMidiEvent: (event: MidiEvent) => void;
+  onMidiEvent: (event: MidiEvent, emitter: MidiEventEmitter) => void;
 }
 
 export class MidiEventEmitter {
@@ -18,7 +18,7 @@ export class MidiEventEmitter {
   }
 
   public fire(event: MidiEvent) {
-    this.listeners.forEach(listener => listener.onMidiEvent(event));
+    this.listeners.forEach(listener => listener.onMidiEvent(event, this));
   }
 }
 

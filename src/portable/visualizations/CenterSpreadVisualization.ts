@@ -34,14 +34,16 @@ export default class CenterSpreadVisualization extends PianoVisualization.Single
     }
 
     public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
+        const { pianoState } = state;
+
         this.time += elapsedMillis;
 
         this.info = this.info.filter(kt => kt.time - this.time < 1000);
 
         let sumVelocity = 0;
-        for (const key of state.changedKeys) {
-            if (state.keys[key]) {
-                sumVelocity += state.keyVelocities[key];
+        for (const key of pianoState.changedKeys) {
+            if (pianoState.keys[key]) {
+                sumVelocity += pianoState.keyVelocities[key];
             }
         }
         if (sumVelocity > 0) {
