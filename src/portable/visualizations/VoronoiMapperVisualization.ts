@@ -10,6 +10,7 @@ const VERTICAL_SHARPNESS = 7;
 const FLAPPINESS = 2;
 const TIP_DISTANCE = 0.65; // 0 to 1
 const TIP_FADE = 4;
+const MAX_DISTANCE = 0.1;
 
 // derived
 const PERIOD = Math.PI * 2 / SPEED;
@@ -52,7 +53,7 @@ function createCanvas(width: number, height: number): HTMLCanvasElement {
   canvas.style.left = "5px";
   canvas.style.boxSizing = "border-box";
   canvas.style.border = "5px dashed green";
-  canvas.style.backgroundColor = "white";
+  canvas.style.backgroundColor = "black";
   canvas.width = width;
   canvas.height = height;
   document.body.appendChild(canvas);
@@ -94,9 +95,9 @@ function getExtents(points: Vector2[]) {
   };
 }
 
-function closestIndex(ps: Vector2[], p: Vector2): number {
+function closestIndex(ps: Vector2[], p: Vector2, maxDistance?: number): number | null {
   if (ps.length === 0) {
-    throw new Error("need at least one point");
+    return null;
   }
 
   let bestIndex = 0;
@@ -109,7 +110,11 @@ function closestIndex(ps: Vector2[], p: Vector2): number {
     }
   });
 
-  return bestIndex;
+  if (maxDistance === undefined || bestDistance <= maxDistance) {
+    return bestIndex;
+  } else {
+    return null;
+  }
 }
 
 export default class VoronoiMapperVisualization extends PianoVisualization.default {
@@ -121,8 +126,8 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
     const leds2d = mapTo2D(allLeds.map(led => led.position));
     const pointColors = leds2d.map(_ => Colors.hsv(Math.random() * 360, 0.7, Math.random() * 0.5 + 0.5));
     const extents = getExtents(leds2d);
-    const width = extents.maxX - extents.minX;
-    const height = extents.maxY - extents.minY;
+    const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
+    const height = MAX_DISTANCE * 2 + (extents.maxY - extents.minY);
     const maxDimension = 900;
     let canvasWidth: number;
     let canvasHeight: number;
@@ -140,14 +145,14 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
     }
 
     const worldPointToCanvasPoint = (wp: Vector2) => {
-      const x = (wp.x - extents.minX) / width * (canvasWidth - 1);
-      const y = (1 - (wp.y - extents.minY) / height) * (canvasHeight - 1);
+      const x = (wp.x - extents.minX + MAX_DISTANCE) / width * (canvasWidth - 1);
+      const y = (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
       return new Vector2(x, y);
     };
 
     const canvasPointToWorldPoint = (cp: Vector2) => {
-      const x = (cp.x / (canvasWidth - 1)) * width + extents.minX;
-      const y = (1 - cp.y / (canvasHeight - 1)) * height + extents.minY;
+      const x = (cp.x / (canvasWidth - 1)) * width + extents.minX - MAX_DISTANCE;
+      const y = (1 - cp.y / (canvasHeight - 1)) * height + extents.minY - MAX_DISTANCE;
       return new Vector2(x, y);
     };
 
@@ -161,9 +166,11 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
       for (let y = 0; y < canvasHeight; ++y) {
         const cp = new Vector2(x, y);
         const wp = canvasPointToWorldPoint(cp);
-        const index = closestIndex(leds2d, wp);
-        const color = pointColors[index];
-        drawPoint(wp, color);
+        const index = closestIndex(leds2d, wp, MAX_DISTANCE);
+        if (index !== null) {
+          const color = pointColors[index];
+          drawPoint(wp, color);
+        }
       }
     }
 
