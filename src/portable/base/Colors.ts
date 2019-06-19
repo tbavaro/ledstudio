@@ -5,7 +5,7 @@ export type Color = number;
 const MAX_VALUE = 0xff;
 
 // 0-MAX_VALUE for each
-function rgbUnchecked(r: number, g: number, b: number): Color {
+export function rgbUnchecked(r: number, g: number, b: number): Color {
   // tslint:disable-next-line: no-bitwise
   return (r << 16) | (g << 8) | b;
 }

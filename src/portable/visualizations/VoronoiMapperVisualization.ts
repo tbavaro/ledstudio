@@ -2,6 +2,7 @@ import { Vector2, Vector3 } from "three";
 
 import * as Scene from "../../scenes/Scene";
 
+import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
@@ -117,6 +118,114 @@ function closestIndex(ps: Vector2[], p: Vector2, maxDistance?: number): number |
   }
 }
 
+class VoronoiHelper {
+  private readonly pixelsForPoint: number[][];  // point index -> pixel indices (y*w+x, like imgData)
+  private readonly maxCount: number;
+  private readonly height: number;
+  private readonly width: number;
+  private readonly colors: ColorRow;
+  private readonly valuesR: number[];
+  private readonly valuesG: number[];
+  private readonly valuesB: number[];
+
+  constructor(attrs: {
+    points: Vector2[],  // pixel coordinates
+    width: number,  // pixels
+    height: number,  // pixels
+    maxDistance: number  // pixels
+  }) {
+    this.pixelsForPoint = attrs.points.map(_ => []);
+    const counts = attrs.points.map(_ => 0);
+    const p = new Vector2(0, 0);
+    let i = 0;
+    while (p.y < attrs.height) {
+      p.x = 0;
+      while (p.x < attrs.width) {
+        const index = closestIndex(attrs.points, p, attrs.maxDistance);
+        if (index !== null) {
+          this.pixelsForPoint[index].push(i);
+          ++counts[index];
+        }
+        ++i;
+        ++p.x;
+      }
+      ++p.y;
+    }
+    this.maxCount = Math.max.apply(Math, counts);
+    this.colors = new ColorRow(attrs.points.length);
+    this.valuesR = new Array(attrs.points.length).fill(0);
+    this.valuesG = new Array(attrs.points.length).fill(0);
+    this.valuesB = new Array(attrs.points.length).fill(0);
+    this.width = attrs.width;
+    this.height = attrs.height;
+  }
+
+  public colorsFromCanvas(canvas: HTMLCanvasElement): ColorRow {
+    if (canvas.height !== this.height || canvas.width !== this.width) {
+      throw new Error("canvas isn't the right size");
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("can't get canvas context");
+    }
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    this.valuesR.fill(0);
+    this.valuesG.fill(0);
+    this.valuesB.fill(0);
+    this.pixelsForPoint.forEach((pixelIndexes, pointIndex) => {
+      let rTotal = 0;
+      let gTotal = 0;
+      let bTotal = 0;
+      pixelIndexes.forEach(pixelIndex => {
+        rTotal += imgData.data[pixelIndex * 4];
+        gTotal += imgData.data[pixelIndex * 4 + 1];
+        bTotal += imgData.data[pixelIndex * 4 + 2];
+      });
+      const color = Colors.rgbUnchecked(
+        Math.round(rTotal / this.maxCount),
+        Math.round(gTotal / this.maxCount),
+        Math.round(bTotal / this.maxCount)
+      );
+      this.colors.set(pointIndex, color);
+    });
+
+    return this.colors;
+  }
+
+  public drawColorsOnCanvas(canvas: HTMLCanvasElement, colors: ColorRow) {
+    if (canvas.height !== this.height || canvas.width !== this.width) {
+      throw new Error("canvas isn't the right size");
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("can't get canvas context");
+    }
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    this.pixelsForPoint.forEach((pixelIndexes, pointIndex) => {
+      ctx.fillStyle = Colors.cssColor(colors.get(pointIndex));
+      pixelIndexes.forEach(pixelIndex => {
+        const x = pixelIndex % this.width;
+        const y = Math.floor(pixelIndex / this.width);
+        ctx.fillRect(x, y, 1, 1);
+      });
+    });
+  }
+
+  public drawDebugMapOnCanvas(canvas: HTMLCanvasElement) {
+    const colors = new ColorRow(this.pixelsForPoint.length);
+    for (let i = 0; i < this.pixelsForPoint.length; ++i) {
+      colors.set(i, Colors.hsv(Math.random() * 360, 0.7, Math.random() * 0.5 + 0.5));
+    }
+    this.drawColorsOnCanvas(canvas, colors);
+  }
+}
+
 export default class VoronoiMapperVisualization extends PianoVisualization.default {
   private phase = 0;
 
@@ -124,7 +233,6 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
     super(scene);
     const allLeds = flatten(scene.leds);
     const leds2d = mapTo2D(allLeds.map(led => led.position));
-    const pointColors = leds2d.map(_ => Colors.hsv(Math.random() * 360, 0.7, Math.random() * 0.5 + 0.5));
     const extents = getExtents(leds2d);
     const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
     const height = MAX_DISTANCE * 2 + (extents.maxY - extents.minY);
@@ -144,37 +252,23 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
       throw new Error("can't use canvas");
     }
 
-    const worldPointToCanvasPoint = (wp: Vector2) => {
+    // leds mapped to pixel locations
+    const points2d = leds2d.map(wp => {
       const x = (wp.x - extents.minX + MAX_DISTANCE) / width * (canvasWidth - 1);
       const y = (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
       return new Vector2(x, y);
-    };
+    });
 
-    const canvasPointToWorldPoint = (cp: Vector2) => {
-      const x = (cp.x / (canvasWidth - 1)) * width + extents.minX - MAX_DISTANCE;
-      const y = (1 - cp.y / (canvasHeight - 1)) * height + extents.minY - MAX_DISTANCE;
-      return new Vector2(x, y);
-    };
+    const maxDistancePixels = MAX_DISTANCE * (canvasWidth / width);
 
-    const drawPoint = (p: Vector2, color: Colors.Color) => {
-      const cp = worldPointToCanvasPoint(p);
-      ctx.fillStyle = Colors.cssColor(color);
-      ctx.fillRect(cp.x, cp.y, 1, 1);
-    };
+    const helper = new VoronoiHelper({
+      points: points2d,
+      width: canvasWidth,
+      height: canvasHeight,
+      maxDistance: maxDistancePixels
+    });
 
-    for (let x = 0; x < canvasWidth; ++x) {
-      for (let y = 0; y < canvasHeight; ++y) {
-        const cp = new Vector2(x, y);
-        const wp = canvasPointToWorldPoint(cp);
-        const index = closestIndex(leds2d, wp, MAX_DISTANCE);
-        if (index !== null) {
-          const color = pointColors[index];
-          drawPoint(wp, color);
-        }
-      }
-    }
-
-    leds2d.forEach(p => drawPoint(p, Colors.BLACK));
+    helper.drawDebugMapOnCanvas(canvas);
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
