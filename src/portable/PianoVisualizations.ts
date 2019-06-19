@@ -6,6 +6,8 @@ import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualizatio
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
 import PatternFlagVisualization from "./visualizations/PatternFlagVisualization";
 import PatternOwlEyesVisualization from "./visualizations/PatternOwlEyesVisualization";
+import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
+import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
@@ -13,14 +15,14 @@ import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
-import WingFlapVisualization from "./visualizations/WingFlapVisualization";
 
 const visFuncs = {
   "glowWave": GlowWaveVisualization,
   "centerSpread": CenterSpreadVisualization,
-  "wingFlap": WingFlapVisualization,
   "pattern:flag": PatternFlagVisualization,
   "pattern:owlEyes": PatternOwlEyesVisualization,
+  "pattern:wingFlap": PatternWingFlapVisualization,
+  "pattern:zaps": PatternZapsVisualization,
   "testAnalogPulse": TestAnalogPulseVisualization,
   "testControllerDial": TestControllerDialVisualization,
   "testKey": TestKeyVisualization,

@@ -51,7 +51,7 @@ class PureWingFlapVisualization extends PianoVisualization.default {
   }
 }
 
-export default class WingFlapVisualization extends PianoVisualization.DerezPianoVisualization {
+export default class PatternWingFlapVisualization extends PianoVisualization.DerezPianoVisualization {
   constructor(scene: Scene) {
     super(new PureWingFlapVisualization(scene), DEREZ);
   }
