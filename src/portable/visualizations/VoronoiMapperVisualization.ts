@@ -6,15 +6,7 @@ import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as PianoVisualization from "../base/PianoVisualization";
 
-const SPEED = 3 / 1000;
-const VERTICAL_SHARPNESS = 7;
-const FLAPPINESS = 2;
-const TIP_DISTANCE = 0.65; // 0 to 1
-const TIP_FADE = 4;
-const MAX_DISTANCE = 0.1;
-
-// derived
-const PERIOD = Math.PI * 2 / SPEED;
+const MAX_DISTANCE = 0.05;
 
 // TODO this could be made to work with any co-planar points, but right now it requires all Z
 // positions to be the same
@@ -57,7 +49,7 @@ function createCanvas(width: number, height: number): HTMLCanvasElement {
   canvas.style.backgroundColor = "black";
   canvas.width = width;
   canvas.height = height;
-  document.body.appendChild(canvas);
+  // document.body.appendChild(canvas);
 
   existingCanvas = canvas;
   return canvas;
@@ -207,14 +199,19 @@ class VoronoiHelper {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    const imgData = new ImageData(canvas.width, canvas.height);
+
     this.pixelsForPoint.forEach((pixelIndexes, pointIndex) => {
-      ctx.fillStyle = Colors.cssColor(colors.get(pointIndex));
+      const [r, g, b] = Colors.splitRGB(colors.get(pointIndex));
       pixelIndexes.forEach(pixelIndex => {
-        const x = pixelIndex % this.width;
-        const y = Math.floor(pixelIndex / this.width);
-        ctx.fillRect(x, y, 1, 1);
+        imgData.data[pixelIndex * 4] = r;
+        imgData.data[pixelIndex * 4 + 1] = g;
+        imgData.data[pixelIndex * 4 + 2] = b;
+        imgData.data[pixelIndex * 4 + 3] = 255; // alpha
       });
     });
+
+    ctx.putImageData(imgData, 0, 0);
   }
 
   public drawDebugMapOnCanvas(canvas: HTMLCanvasElement) {
@@ -227,7 +224,9 @@ class VoronoiHelper {
 }
 
 export default class VoronoiMapperVisualization extends PianoVisualization.default {
-  private phase = 0;
+  private colors: ColorRow | null = null;
+  private helper: VoronoiHelper;
+  private canvas: HTMLCanvasElement;
 
   constructor(scene: Scene.default) {
     super(scene);
@@ -236,7 +235,7 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
     const extents = getExtents(leds2d);
     const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
     const height = MAX_DISTANCE * 2 + (extents.maxY - extents.minY);
-    const maxDimension = 900;
+    const maxDimension = 300;
     let canvasWidth: number;
     let canvasHeight: number;
     if (width > height) {
@@ -254,7 +253,7 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
 
     // leds mapped to pixel locations
     const points2d = leds2d.map(wp => {
-      const x = (wp.x - extents.minX + MAX_DISTANCE) / width * (canvasWidth - 1);
+      const x = (1 - (wp.x - extents.minX + MAX_DISTANCE) / width) * (canvasWidth - 1);
       const y = (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
       return new Vector2(x, y);
     });
@@ -269,31 +268,35 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
     });
 
     helper.drawDebugMapOnCanvas(canvas);
+
+    const imgElement = document.createElement("img");
+    imgElement.style.position = "absolute";
+    imgElement.style.bottom = "0px";
+    imgElement.onload = () => {
+      ctx.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height, 0, 0, canvasWidth, canvasHeight);
+      // this.colors = helper.colorsFromCanvas(canvas);
+      // helper.drawColorsOnCanvas(canvas, this.colors);
+    };
+    imgElement.src = "./owleyes.jpg";
+    // document.body.appendChild(imgElement);
+
+    this.helper = helper;
+    this.canvas = canvas;
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
-    this.phase = (this.phase + elapsedMillis * SPEED) % PERIOD;
+    this.colors = this.helper.colorsFromCanvas(this.canvas);
 
-    const positionNormalized = Math.pow(Math.sin(this.phase), FLAPPINESS);
-    const position = positionNormalized * (this.ledRows.length - 1);
+    const colors = this.colors;
+    if (colors === null) {
+      return;
+    }
 
-    this.ledRows.forEach((leds, row) => {
-      const rowV = Math.pow(1 - (Math.abs(position - row) / (this.ledRows.length)), VERTICAL_SHARPNESS);
-      const rowColor = Colors.hsv(0, 0, rowV);
+    let index = 0;
+    this.ledRows.forEach(leds => {
       for (let i = 0; i < leds.length; ++i) {
-        // -1 on left, 0 in middle, 1 on right
-        const x = (i - (leds.length - 1) / 2) / ((leds.length - 1) / 2);
-
-        // 1 at the tips, 0 where tips "start"
-        const tippiness = Math.max(0, Math.abs(x) - TIP_DISTANCE) / (1 - TIP_DISTANCE);
-        const color = Colors.multiply(rowColor, Math.pow(1 - tippiness, TIP_FADE));
-        leds.set(i, color);
+        leds.set(i, colors.get(index++));
       }
     });
-
-    context.setFrameTimeseriesPoints([{
-      color: Colors.WHITE,
-      value: 1 - positionNormalized
-    }]);
   }
 }
