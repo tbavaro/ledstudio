@@ -1,10 +1,10 @@
 import { Vector2, Vector3 } from "three";
 
-import * as Scene from "../../scenes/Scene";
+import * as Scene from "../../../scenes/Scene";
 
-import ColorRow from "../base/ColorRow";
-import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import ColorRow from "../../base/ColorRow";
+import * as Colors from "../../base/Colors";
+import * as PianoVisualization from "../../base/PianoVisualization";
 
 const MAX_DISTANCE = 0.05;
 
@@ -223,75 +223,85 @@ class VoronoiHelper {
   }
 }
 
-export default class VoronoiMapperVisualization extends PianoVisualization.default {
-  private colors: ColorRow | null = null;
+interface InitializationValues {
+  scene: Scene.default;
+  helper: VoronoiHelper;
+  canvas: HTMLCanvasElement;
+  canvasContext: CanvasRenderingContext2D;
+}
+
+let cachedInitializationValues: InitializationValues | undefined;
+
+function initializeFor(scene: Scene.default): InitializationValues {
+  if (cachedInitializationValues && cachedInitializationValues.scene === scene) {
+    return cachedInitializationValues;
+  }
+
+  const allLeds = flatten(scene.leds);
+  const leds2d = mapTo2D(allLeds.map(led => led.position));
+  const extents = getExtents(leds2d);
+  const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
+  const height = MAX_DISTANCE * 2 + (extents.maxY - extents.minY);
+  const maxDimension = 300;
+  let canvasWidth: number;
+  let canvasHeight: number;
+  if (width > height) {
+    canvasWidth = maxDimension;
+    canvasHeight = Math.ceil(maxDimension / width * height);
+  } else {
+    canvasHeight = maxDimension;
+    canvasWidth = Math.ceil(maxDimension / height * width);
+  }
+  const canvas = createCanvas(canvasWidth, canvasHeight);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error("can't use canvas");
+  }
+
+  // leds mapped to pixel locations
+  const points2d = leds2d.map(wp => {
+    const x = (1 - (wp.x - extents.minX + MAX_DISTANCE) / width) * (canvasWidth - 1);
+    const y = (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
+    return new Vector2(x, y);
+  });
+
+  const maxDistancePixels = MAX_DISTANCE * (canvasWidth / width);
+
+  const helper = new VoronoiHelper({
+    points: points2d,
+    width: canvasWidth,
+    height: canvasHeight,
+    maxDistance: maxDistancePixels
+  });
+
+  // helper.drawDebugMapOnCanvas(canvas);
+
+  cachedInitializationValues = {
+    scene,
+    helper,
+    canvas,
+    canvasContext: ctx
+  };
+
+  return cachedInitializationValues;
+}
+
+export default abstract class AbstractVoronoiMapperVisualization extends PianoVisualization.default {
   private helper: VoronoiHelper;
-  private canvas: HTMLCanvasElement;
+  protected canvas: HTMLCanvasElement;
+  protected canvasContext: CanvasRenderingContext2D;
 
   constructor(scene: Scene.default) {
     super(scene);
-    const allLeds = flatten(scene.leds);
-    const leds2d = mapTo2D(allLeds.map(led => led.position));
-    const extents = getExtents(leds2d);
-    const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
-    const height = MAX_DISTANCE * 2 + (extents.maxY - extents.minY);
-    const maxDimension = 300;
-    let canvasWidth: number;
-    let canvasHeight: number;
-    if (width > height) {
-      canvasWidth = maxDimension;
-      canvasHeight = Math.ceil(maxDimension / width * height);
-    } else {
-      canvasHeight = maxDimension;
-      canvasWidth = Math.ceil(maxDimension / height * width);
-    }
-    const canvas = createCanvas(canvasWidth, canvasHeight);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      throw new Error("can't use canvas");
-    }
-
-    // leds mapped to pixel locations
-    const points2d = leds2d.map(wp => {
-      const x = (1 - (wp.x - extents.minX + MAX_DISTANCE) / width) * (canvasWidth - 1);
-      const y = (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
-      return new Vector2(x, y);
-    });
-
-    const maxDistancePixels = MAX_DISTANCE * (canvasWidth / width);
-
-    const helper = new VoronoiHelper({
-      points: points2d,
-      width: canvasWidth,
-      height: canvasHeight,
-      maxDistance: maxDistancePixels
-    });
-
-    helper.drawDebugMapOnCanvas(canvas);
-
-    const imgElement = document.createElement("img");
-    imgElement.style.position = "absolute";
-    imgElement.style.bottom = "0px";
-    imgElement.onload = () => {
-      ctx.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height, 0, 0, canvasWidth, canvasHeight);
-      // this.colors = helper.colorsFromCanvas(canvas);
-      // helper.drawColorsOnCanvas(canvas, this.colors);
-    };
-    imgElement.src = "./owleyes.jpg";
-    // document.body.appendChild(imgElement);
-
-    this.helper = helper;
-    this.canvas = canvas;
+    const values = initializeFor(scene);
+    this.helper = values.helper;
+    this.canvas = values.canvas;
+    this.canvasContext = values.canvasContext;
   }
 
   public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
-    this.colors = this.helper.colorsFromCanvas(this.canvas);
-
-    const colors = this.colors;
-    if (colors === null) {
-      return;
-    }
-
+    this.renderToCanvas(elapsedMillis, state, context);
+    const colors = this.helper.colorsFromCanvas(this.canvas);
     let index = 0;
     this.ledRows.forEach(leds => {
       for (let i = 0; i < leds.length; ++i) {
@@ -299,4 +309,6 @@ export default class VoronoiMapperVisualization extends PianoVisualization.defau
       }
     });
   }
+
+  protected abstract renderToCanvas(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void;
 }
