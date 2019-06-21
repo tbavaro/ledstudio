@@ -6,6 +6,7 @@ import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualizatio
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
 import PatternFlagVisualization from "./visualizations/PatternFlagVisualization";
 import PatternOwlEyesVisualization from "./visualizations/PatternOwlEyesVisualization";
+import PatternSparklesVisualization from "./visualizations/PatternSparklesVisualization";
 import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
@@ -21,6 +22,7 @@ const visFuncs = {
   "centerSpread": CenterSpreadVisualization,
   "pattern:flag": PatternFlagVisualization,
   "pattern:owlEyes": PatternOwlEyesVisualization,
+  "pattern:sparkles": PatternSparklesVisualization,
   "pattern:wingFlap": PatternWingFlapVisualization,
   "pattern:zaps": PatternZapsVisualization,
   "testAnalogPulse": TestAnalogPulseVisualization,
