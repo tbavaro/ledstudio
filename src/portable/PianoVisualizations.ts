@@ -7,6 +7,7 @@ import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
 import PatternFlagVisualization from "./visualizations/PatternFlagVisualization";
 import PatternMarqueeVisualization from "./visualizations/PatternMarqueeVisualization";
 import PatternOwlEyesVisualization from "./visualizations/PatternOwlEyesVisualization";
+import PatternRainVisualization from "./visualizations/PatternRainVisualization";
 import PatternSparklesVisualization from "./visualizations/PatternSparklesVisualization";
 import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
@@ -24,6 +25,7 @@ const visFuncs = {
   "pattern:flag": PatternFlagVisualization,
   "pattern:marquee": PatternMarqueeVisualization,
   "pattern:owlEyes": PatternOwlEyesVisualization,
+  "pattern:rain": PatternRainVisualization,
   "pattern:sparkles": PatternSparklesVisualization,
   "pattern:wingFlap": PatternWingFlapVisualization,
   "pattern:zaps": PatternZapsVisualization,
