@@ -1,12 +1,12 @@
 import Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 const MILLIS_BETWEEN_ZAPS = 300;
 const DECAY_RATE = 0.005; // per ms
 
-export default class PatternZapsVisualization extends PianoVisualization.default {
+export default class PatternZapsVisualization extends Visualization.default {
   private phase: number = 0;
   private ribChannels: number[][];  // addressing is row -> column -> channel
   private channelValues: Map<number, Colors.Color>;
@@ -55,7 +55,7 @@ export default class PatternZapsVisualization extends PianoVisualization.default
     }
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
     // decay
     const decayAmount = elapsedMillis * DECAY_RATE;
     this.channelValues.forEach((value, channel) => {

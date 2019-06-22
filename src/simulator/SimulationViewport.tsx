@@ -6,8 +6,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as Colors from "../portable/base/Colors";
 import { SendableLedStrip } from "../portable/SendableLedStrip";
 
-import PianoVisualizationRunner from "../PianoVisualizationRunner";
 import Scene from "../scenes/Scene";
+import VisualizationRunner from "../VisualizationRunner";
 
 import "./SimulationViewport.css";
 
@@ -167,7 +167,7 @@ class LedScene {
 
 interface Props {
   scene: Scene;
-  visualizationRunner: PianoVisualizationRunner;
+  visualizationRunner: VisualizationRunner;
   frameDidRender: (renderMillis: number) => void;
 }
 
@@ -175,7 +175,7 @@ type State = {
   renderScene: Three.Scene;
   readonly camera: Three.PerspectiveCamera;
   readonly controls: OrbitControls;
-  registeredVisualizationRunner?: PianoVisualizationRunner;
+  registeredVisualizationRunner?: VisualizationRunner;
   currentScene?: Scene;
   currentLedScene?: LedScene;
   doRender: () => void;

@@ -4,7 +4,7 @@ import * as Scene from "../../../scenes/Scene";
 
 import ColorRow from "../../base/ColorRow";
 import * as Colors from "../../base/Colors";
-import * as PianoVisualization from "../../base/PianoVisualization";
+import * as Visualization from "../../base/Visualization";
 
 const MAX_DISTANCE = 0.05;
 
@@ -286,7 +286,7 @@ function initializeFor(scene: Scene.default): InitializationValues {
   return cachedInitializationValues;
 }
 
-export default abstract class AbstractVoronoiMapperVisualization extends PianoVisualization.default {
+export default abstract class AbstractVoronoiMapperVisualization extends Visualization.default {
   private helper: VoronoiHelper;
   protected canvas: HTMLCanvasElement;
   protected canvasContext: CanvasRenderingContext2D;
@@ -299,7 +299,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends PianoVi
     this.canvasContext = values.canvasContext;
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
     this.renderToCanvas(elapsedMillis, state, context);
     const colors = this.helper.colorsFromCanvas(this.canvas);
     let index = 0;
@@ -310,5 +310,5 @@ export default abstract class AbstractVoronoiMapperVisualization extends PianoVi
     });
   }
 
-  protected abstract renderToCanvas(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void;
+  protected abstract renderToCanvas(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void;
 }

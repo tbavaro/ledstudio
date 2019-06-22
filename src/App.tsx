@@ -4,8 +4,8 @@ import * as React from "react";
 import ControllerState from "./portable/base/ControllerState";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
-import * as PianoVisualizations from "./portable/PianoVisualizations";
 import { MovingAverageHelper } from "./portable/Utils";
+import * as Visualizations from "./portable/Visualizations";
 
 import FadecandyClient from "./hardware/FadecandyClient";
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
@@ -25,8 +25,8 @@ import AnalogAudioView from "./analogAudio/AnalogAudioView";
 
 import ControlsView from "./ControlsView";
 import PianoView from "./PianoView";
-import PianoVisualizationRunner from "./PianoVisualizationRunner";
 import * as RightSidebar from "./RightSidebar";
+import VisualizationRunner from "./VisualizationRunner";
 
 import "./App.css";
 import TimingStatsView from "./TimingStatsView";
@@ -58,8 +58,8 @@ const TARGET_FRAME_MILLIS = 1000 / TARGET_FPS;
 
 interface State {
   scene: Scene;
-  visualizationName: PianoVisualizations.Name;
-  visualizationRunner: PianoVisualizationRunner;
+  visualizationName: Visualizations.Name;
+  visualizationRunner: VisualizationRunner;
   midiState: Readonly<MidiState>;
   midiInput: WebMidi.MIDIInput | null;
   midiControllerInput: WebMidi.MIDIInput | null;
@@ -251,7 +251,7 @@ class App extends React.Component<{}, State> {
             actions={this.actionManager}
             sceneNames={Scenes.names()}
             selectedSceneName={this.state.scene.name}
-            visualizationNames={PianoVisualizations.names}
+            visualizationNames={Visualizations.names}
             selectedVisualizationName={this.state.visualizationName}
             midiFilenames={MIDI_FILES}
             isMidiFileLoaded={this.state.midiData !== null}
@@ -385,15 +385,15 @@ class App extends React.Component<{}, State> {
     });
   }
 
-  private visualizationRunnerForName(name: PianoVisualizations.Name, scene: Scene) {
-    const vis = PianoVisualizations.create(name, scene);
-    const runner = new PianoVisualizationRunner(vis, scene);
+  private visualizationRunnerForName(name: Visualizations.Name, scene: Scene) {
+    const vis = Visualizations.create(name, scene);
+    const runner = new VisualizationRunner(vis, scene);
     runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
     return runner;
   }
 
   private updateVisualizationAndScene(
-    visualizationName: PianoVisualizations.Name,
+    visualizationName: Visualizations.Name,
     scene: Scene,
     doNotSetState?: boolean
   ) {
@@ -423,7 +423,7 @@ class App extends React.Component<{}, State> {
         SimulatorStickySettings.set("sceneName", name);
       }
     },
-    setSelectedVisualizationName: (newValue: PianoVisualizations.Name) => {
+    setSelectedVisualizationName: (newValue: Visualizations.Name) => {
       if (this.state.visualizationName !== newValue) {
         this.updateVisualizationAndScene(newValue, this.state.scene);
         SimulatorStickySettings.set("visualizationName", newValue);
@@ -550,11 +550,11 @@ class App extends React.Component<{}, State> {
     }
   }
 
-  private initialVisualizationName(): PianoVisualizations.Name {
+  private initialVisualizationName(): Visualizations.Name {
     return SimulatorStickySettings.get({
       key: "visualizationName",
-      defaultValue: PianoVisualizations.defaultName,
-      validateFunc: PianoVisualizations.isValidName
+      defaultValue: Visualizations.defaultName,
+      validateFunc: Visualizations.isValidName
     });
   }
 

@@ -1,7 +1,7 @@
 import ControllerState from "./base/ControllerState";
 import PianoEvent, { Key } from "./base/PianoEvent";
 import PianoState from "./base/PianoState";
-import * as PianoVisualization from "./base/PianoVisualization";
+import * as Visualization from "./base/Visualization";
 import * as Utils from "./Utils";
 
 const MIDI_KEY_OFFSET = -21;
@@ -64,20 +64,20 @@ export function describePianoEvent(event: PianoEvent): string {
 const NUM_KEYS = 88;
 
 type AccessibleState = {
-  -readonly [k in keyof PianoVisualization.State]: PianoVisualization.State[k] extends ReadonlyArray<infer T> ? T[] : PianoVisualization.State[k]
+  -readonly [k in keyof Visualization.State]: Visualization.State[k] extends ReadonlyArray<infer T> ? T[] : Visualization.State[k]
 };
 
 const DUMMY_ANALOG_FREQUENCY_DATA = new Uint8Array(1024).fill(0);
 
-export class PianoVisualizationStateHelper {
+export class VisualizationStateHelper {
   private state: AccessibleState;
 
   constructor() {
-    this.state = PianoVisualizationStateHelper.freshState();
+    this.state = VisualizationStateHelper.freshState();
   }
 
   public reset() {
-    this.state = PianoVisualizationStateHelper.freshState();
+    this.state = VisualizationStateHelper.freshState();
   }
 
   private static freshState(): AccessibleState {
@@ -92,7 +92,7 @@ export class PianoVisualizationStateHelper {
     this.state.pianoState.changedKeys = [];
   }
 
-  public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): PianoVisualization.State {
+  public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): Visualization.State {
     this.state.pianoState.changedKeys.sort();
     this.state.analogFrequencyData = analogFrequencyData;
     this.state.controllerState = controllerState;

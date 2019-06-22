@@ -1,7 +1,7 @@
 import * as Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 const SPARKLES_PER_SECOND = 15;
 const SPARKLE_HALF_LIFE_SECONDS = 0.1;
@@ -58,7 +58,7 @@ class DropHelper {
   }
 }
 
-export default class PatternRainVisualization extends PianoVisualization.default {
+export default class PatternRainVisualization extends Visualization.default {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private numSparklesRemainder = 0;
@@ -69,7 +69,7 @@ export default class PatternRainVisualization extends PianoVisualization.default
     this.sparkles = new Set();
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
     // drops
     const deadSparkles: Sparkle[] = [];
     this.sparkles.forEach(sparkle => {

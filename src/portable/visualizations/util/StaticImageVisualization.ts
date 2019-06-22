@@ -1,6 +1,6 @@
 import Scene from "../../../scenes/Scene";
 
-import * as PianoVisualization from "../../base/PianoVisualization";
+import * as Visualization from "../../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./AbstractVoronoiMapperVisualization";
 
@@ -14,7 +14,7 @@ export default class StaticImageVisualization extends AbstractVoronoiMapperVisua
     imgElement.src = imageUrl;
   }
 
-  protected renderToCanvas(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context) {
+  protected renderToCanvas(elapsedMillis: number, state: Visualization.State, context: Visualization.Context) {
     // no-op
   }
 }

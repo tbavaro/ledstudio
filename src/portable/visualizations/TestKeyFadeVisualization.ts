@@ -1,7 +1,7 @@
 import Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 import * as Utils from "../Utils";
 
@@ -22,7 +22,7 @@ function colorForValue(v: number) {
   return PALETTE[x];
 }
 
-export default class TestKeyFadeVisualization extends PianoVisualization.SingleRowPianoVisualization {
+export default class TestKeyFadeVisualization extends Visualization.SingleRowVisualization {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
 
@@ -31,7 +31,7 @@ export default class TestKeyFadeVisualization extends PianoVisualization.SingleR
     this.values = new Array(this.leds.length).fill(0);
   }
 
-  public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
+  public renderSingleRow(elapsedMillis: number, state: Visualization.State): void {
     const { pianoState } = state;
 
     // decay

@@ -1,7 +1,7 @@
 import Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 const CHANNEL_START_COLOR = Colors.WHITE;
 const NORMAL_BRIGHTNESS = 0.5;
@@ -14,7 +14,7 @@ const PULSE_SPEED_LEDS_PER_SECOND = 16;
 
 const SHOW_CHANNEL_NUMBER_AFTER_N_LEDS = 2;
 
-export default class TestStripAddressVisualization extends PianoVisualization.default {
+export default class TestStripAddressVisualization extends Visualization.default {
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
   private readonly channelHueIncrement: number;

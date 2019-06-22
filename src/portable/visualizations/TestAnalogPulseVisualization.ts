@@ -1,15 +1,15 @@
 import Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 import { bracket } from "../Utils";
 
-export default class TestAnalogPulseVisualization extends PianoVisualization.default {
+export default class TestAnalogPulseVisualization extends Visualization.default {
   constructor(scene: Scene) {
     super(scene);
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
     const frequencyData = state.analogFrequencyData;
     let total = 0;
     frequencyData.forEach(v => total += v);

@@ -1,10 +1,10 @@
-import * as PianoVisualizations from "../portable/PianoVisualizations";
+import * as Visualizations from "../portable/Visualizations";
 
 const LOCAL_STORAGE_PREFIX = "simulatorSettings:";
 
 export interface Settings {
   sceneName: string;
-  visualizationName: PianoVisualizations.Name;
+  visualizationName: Visualizations.Name;
   analogAudioSourceId: string | null;
   midiInputId: string | null;
   midiControllerInputId: string | null;

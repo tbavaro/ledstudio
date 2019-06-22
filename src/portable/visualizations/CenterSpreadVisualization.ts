@@ -1,7 +1,7 @@
 import Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 const TAIL_LENGTH_CONST = 0.02;
 
@@ -20,20 +20,20 @@ function randomHue() {
     return Math.floor(Math.random() * 360);
 }
 
-export default class CenterSpreadVisualization extends PianoVisualization.SingleRowPianoVisualization {
+export default class CenterSpreadVisualization extends Visualization.SingleRowVisualization {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private time = 0;
     private keyToHue = new Array<number>();
 
     constructor(scene: Scene) {
-        super(scene, 88);
+        super(scene, Math.max.apply(Math, scene.leds.map(row => row.length)));
         for(let i = 0; i < this.leds.length; ++i) {
             this.keyToHue[i] = randomHue();
         }
     }
 
-    public renderSingleRow(elapsedMillis: number, state: PianoVisualization.State): void {
+    public renderSingleRow(elapsedMillis: number, state: Visualization.State): void {
         const { pianoState } = state;
 
         this.time += elapsedMillis;

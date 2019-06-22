@@ -1,12 +1,12 @@
 import Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 const SPARKLES_PER_SECOND = 300;
 const SPARKLE_HALF_LIFE_SECONDS = 0.2;
 
-export default class PatternSparklesVisualization extends PianoVisualization.default {
+export default class PatternSparklesVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private numLedsRemainder = 0;
 
@@ -17,7 +17,7 @@ export default class PatternSparklesVisualization extends PianoVisualization.def
     scene.leds.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
     const multiplier = Math.pow(0.5, elapsedMillis / 1000 / SPARKLE_HALF_LIFE_SECONDS);
     this.ledRows.forEach(row => row.forEach((color, i) => row.set(i, Colors.multiply(color, multiplier))));
 

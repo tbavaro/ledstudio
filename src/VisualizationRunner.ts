@@ -2,8 +2,8 @@ import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
 import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
-import PianoVisualization, { Context } from "./portable/base/PianoVisualization";
 import * as TimeseriesData from "./portable/base/TimeseriesData";
+import Visualization, { Context } from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
@@ -14,18 +14,18 @@ import FadecandyLedSender from "./hardware/FadecandyLedSender";
 import MidiEvent from "./piano/MidiEvent";
 import Scene from "./scenes/Scene";
 
-export default class PianoVisualizationRunner {
-  private readonly stateHelper: PianoHelpers.PianoVisualizationStateHelper;
-  public readonly visualization: PianoVisualization;
+export default class VisualizationRunner {
+  private readonly stateHelper: PianoHelpers.VisualizationStateHelper;
+  public readonly visualization: Visualization;
   private readonly timingHelper: MovingAverageHelper;
   private lastRenderTime: number = 0;
   public hardwareLedSender?: FadecandyLedSender;
   public simulationLedStrip?: SendableLedStrip;
   private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
 
-  constructor(visualization: PianoVisualization, scene: Scene) {
+  constructor(visualization: Visualization, scene: Scene) {
     this.visualization = visualization;
-    this.stateHelper = new PianoHelpers.PianoVisualizationStateHelper();
+    this.stateHelper = new PianoHelpers.VisualizationStateHelper();
     this.timingHelper = new MovingAverageHelper(20);
     this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
   }

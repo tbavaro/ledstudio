@@ -2,7 +2,7 @@ import Scene from "../../scenes/Scene";
 
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 import * as Utils from "../Utils";
 
@@ -40,7 +40,7 @@ interface FadingColor {
   brightness: number;
 }
 
-export default class GlowWaveVisualization extends PianoVisualization.default {
+export default class GlowWaveVisualization extends Visualization.default {
   private readonly pressedKeyColors = new Map<number, FadingColor>();
   private readonly fadeFactors: number[];
   private readonly nativeRows: ColorRow[];
@@ -52,7 +52,7 @@ export default class GlowWaveVisualization extends PianoVisualization.default {
     this.nativeRows = scene.leds.map(_ => new ColorRow(NATIVE_WIDTH));
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State): void {
+  public render(elapsedMillis: number, state: Visualization.State): void {
     const { pianoState } = state;
 
     // decay the unpressed keys

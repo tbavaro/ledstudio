@@ -1,12 +1,12 @@
 import Scene from "../../scenes/Scene";
 
 import * as Colors from "../base/Colors";
-import * as PianoVisualization from "../base/PianoVisualization";
+import * as Visualization from "../base/Visualization";
 
 const LED_SEPARATION = 3;
 const SPEED = 10; // LEDs per second
 
-export default class PatternSparklesVisualization extends PianoVisualization.default {
+export default class PatternSparklesVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private phase = 0;
 
@@ -20,7 +20,7 @@ export default class PatternSparklesVisualization extends PianoVisualization.def
     scene.leds[bottomRow].forEach((_, i) => this.ledAddresses.push([bottomRow, bottomRowCount - i - 1]));
   }
 
-  public render(elapsedMillis: number, state: PianoVisualization.State, context: PianoVisualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
     this.phase = (this.phase + SPEED * elapsedMillis / 1000) % LED_SEPARATION;
     const offset = Math.round(this.phase);
     this.ledAddresses.forEach((ledAddress, i) => {

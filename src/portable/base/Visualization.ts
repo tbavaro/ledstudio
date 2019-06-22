@@ -21,7 +21,7 @@ export interface Context {
   setFrameTimeseriesPoints: (data: TimeseriesData.PointDef[]) => void;
 }
 
-export default abstract class PianoVisualization {
+export default abstract class Visualization {
   public readonly scene: Scene;
   public readonly ledInfos: LedInfo[][];
   public readonly ledRows: FixedArray<ColorRow>;
@@ -35,7 +35,7 @@ export default abstract class PianoVisualization {
   public abstract render(elapsedMillis: number, state: State, context: Context): void;
 }
 
-export abstract class SingleRowPianoVisualization extends PianoVisualization {
+export abstract class SingleRowVisualization extends Visualization {
   private static UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 
   protected readonly length: number;
@@ -53,7 +53,7 @@ export abstract class SingleRowPianoVisualization extends PianoVisualization {
     this.renderSingleRow(elapsedMillis, state, context);
 
     this.ledRows.forEach(ledRow => {
-      ledRow.fill(SingleRowPianoVisualization.UNMAPPED_LED_COLOR);
+      ledRow.fill(SingleRowVisualization.UNMAPPED_LED_COLOR);
 
       const start = Math.floor((ledRow.length - this.length) / 2);
       this.leds.copy(ledRow, start);
@@ -61,11 +61,11 @@ export abstract class SingleRowPianoVisualization extends PianoVisualization {
   }
 }
 
-export class DerezPianoVisualization extends PianoVisualization {
-  private readonly delegate: PianoVisualization;
+export class DerezVisualization extends Visualization {
+  private readonly delegate: Visualization;
   private readonly derez: number;
 
-  constructor(delegate: PianoVisualization, derez: number) {
+  constructor(delegate: Visualization, derez: number) {
     super(delegate.scene);
     this.delegate = delegate;
     this.derez = derez;
