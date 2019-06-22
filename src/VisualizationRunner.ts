@@ -11,38 +11,62 @@ import { MovingAverageHelper } from "./portable/Utils";
 
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
 
-import MidiEvent from "./piano/MidiEvent";
 import Scene from "./scenes/Scene";
 
+class MyFrameContext implements Visualization.FrameContext {
+  public elapsedMillis: number;
+  public pianoState: PianoHelpers.VisualizationStateHelper;
+  public analogFrequencyData: Uint8Array;
+  public controllerState: ControllerState;
+  public frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
+
+  constructor() {
+    const UNSET = "<unset>" as any;
+    this.elapsedMillis = UNSET;
+    this.pianoState = new PianoHelpers.VisualizationStateHelper();
+    this.analogFrequencyData = UNSET;
+    this.controllerState = UNSET;
+  }
+
+  public setFrameTimeseriesPoints(points: TimeseriesData.PointDef[]) {
+    if (this.frameTimeseriesPoints === undefined) {
+      this.frameTimeseriesPoints = points;
+    } else {
+      throw new Error("frame timeseries points set multiple times");
+    }
+  }
+
+  public startFrame() {
+    this.pianoState.startFrame();
+  }
+
+  public endFrame(elapsedMillis: number, analogFrequencyData: Uint8Array, controllerState: ControllerState) {
+    this.elapsedMillis = elapsedMillis;
+    this.analogFrequencyData = analogFrequencyData;
+    this.controllerState = controllerState;
+    this.pianoState.endFrame();
+    this.frameTimeseriesPoints = undefined;
+  }
+
+  public applyPianoEvent(event: PianoEvent) {
+    this.pianoState.applyEvent(event);
+  }
+}
+
 export default class VisualizationRunner {
-  private readonly stateHelper: PianoHelpers.VisualizationStateHelper;
   public readonly visualization: Visualization.default;
   private readonly timingHelper: MovingAverageHelper;
   private lastRenderTime: number = 0;
   public hardwareLedSender?: FadecandyLedSender;
   public simulationLedStrip?: SendableLedStrip;
   private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
-  private readonly frameContext: Visualization.FrameContext;
-  private frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
+  private readonly frameContext: MyFrameContext;
 
   constructor(visualization: Visualization.default, scene: Scene) {
     this.visualization = visualization;
-    this.stateHelper = new PianoHelpers.VisualizationStateHelper();
     this.timingHelper = new MovingAverageHelper(20);
     this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
-    this.frameContext = {
-      elapsedMillis: 0,
-      pianoState: this.stateHelper,
-      analogFrequencyData: new Uint8Array(),
-      controllerState: new ControllerState(),
-      setFrameTimeseriesPoints: (points: TimeseriesData.PointDef[]) => {
-        if (this.frameTimeseriesPoints === undefined) {
-          this.frameTimeseriesPoints = points;
-        } else {
-          throw new Error("frame timeseries points set multiple times");
-        }
-      }
-    };
+    this.frameContext = new MyFrameContext();
   }
 
   public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): TimeseriesData.PointDef[] {
@@ -52,16 +76,17 @@ export default class VisualizationRunner {
     }
 
     // collect state
-    const elapsedMillis = startTime - this.lastRenderTime;
-    this.frameContext.elapsedMillis = elapsedMillis;
-    this.frameContext.analogFrequencyData = analogFrequencyData;
-    this.frameContext.controllerState = controllerState;
-    this.frameTimeseriesPoints = undefined;
-    this.stateHelper.endFrame();
+    this.frameContext.endFrame(
+      startTime - this.lastRenderTime,
+      analogFrequencyData,
+      controllerState
+    );
 
     // render into the LED strip
     this.visualization.render(this.frameContext);
-    this.stateHelper.startFrame();
+    const frameTimeseriesPoints = this.frameContext.frameTimeseriesPoints || [];
+
+    this.frameContext.startFrame();
     this.lastRenderTime = startTime;
 
     // timing
@@ -72,17 +97,12 @@ export default class VisualizationRunner {
     const multiplier = controllerState === null ? 1 : controllerState.dialValues[7];
     this.sendToStrips(multiplier);
 
-    return this.frameTimeseriesPoints || [];
+    return frameTimeseriesPoints;
   }
 
-  // TODO don't actually pass raw midi events in here, obv
-  public onMidiEvent = (event: MidiEvent) => {
-    if (event.pianoEvent !== null) {
-      this.onPianoEvent(event.pianoEvent);
-    }
+  public onPianoEvent(event: PianoEvent) {
+    this.frameContext.applyPianoEvent(event);
   }
-
-  public onPianoEvent = (event: PianoEvent) => this.stateHelper.applyEvent(event);
 
   public get averageRenderTime() {
     return this.timingHelper.movingAverage;

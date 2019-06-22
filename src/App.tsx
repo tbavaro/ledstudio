@@ -466,7 +466,12 @@ class App extends React.Component<{}, State> {
   }
 
   private myMidiListener: MidiEventListener = {
-    onMidiEvent: (event: MidiEvent) => this.state.visualizationRunner.onMidiEvent(event)
+    onMidiEvent: (event: MidiEvent) => {
+      const pianoEvent = event.pianoEvent;
+      if (pianoEvent !== null) {
+        this.state.visualizationRunner.onPianoEvent(pianoEvent);
+      }
+    }
   };
 
   private animating = false;
