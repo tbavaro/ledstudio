@@ -3,7 +3,7 @@ import ControllerState from "./portable/base/ControllerState";
 import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
 import * as TimeseriesData from "./portable/base/TimeseriesData";
-import Visualization, { Context } from "./portable/base/Visualization";
+import Visualization, { FrameContext } from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
@@ -39,7 +39,7 @@ export default class VisualizationRunner {
     // collect state
     const visState = this.stateHelper.endFrame(analogFrequencyData, controllerState);
     let frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
-    const context: Context = {
+    const context: FrameContext = {
       setFrameTimeseriesPoints: (points: TimeseriesData.PointDef[]) => {
         if (frameTimeseriesPoints === undefined) {
           frameTimeseriesPoints = points;

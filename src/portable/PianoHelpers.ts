@@ -64,7 +64,7 @@ export function describePianoEvent(event: PianoEvent): string {
 const NUM_KEYS = 88;
 
 type AccessibleState = {
-  -readonly [k in keyof Visualization.State]: Visualization.State[k] extends ReadonlyArray<infer T> ? T[] : Visualization.State[k]
+  -readonly [k in keyof Visualization.FrameState]: Visualization.FrameState[k] extends ReadonlyArray<infer T> ? T[] : Visualization.FrameState[k]
 };
 
 const DUMMY_ANALOG_FREQUENCY_DATA = new Uint8Array(1024).fill(0);
@@ -92,7 +92,7 @@ export class VisualizationStateHelper {
     this.state.pianoState.changedKeys = [];
   }
 
-  public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): Visualization.State {
+  public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): Visualization.FrameState {
     this.state.pianoState.changedKeys.sort();
     this.state.analogFrequencyData = analogFrequencyData;
     this.state.controllerState = controllerState;

@@ -1,5 +1,3 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
@@ -26,14 +24,14 @@ export default class CenterSpreadVisualization extends Visualization.SingleRowVi
     private time = 0;
     private keyToHue = new Array<number>();
 
-    constructor(scene: Scene) {
-        super(scene, Math.max.apply(Math, scene.leds.map(row => row.length)));
+    constructor(config: Visualization.Config) {
+        super(config, Math.max.apply(Math, config.scene.leds.map(row => row.length)));
         for(let i = 0; i < this.leds.length; ++i) {
             this.keyToHue[i] = randomHue();
         }
     }
 
-    public renderSingleRow(elapsedMillis: number, state: Visualization.State): void {
+    public renderSingleRow(elapsedMillis: number, state: Visualization.FrameState): void {
         const { pianoState } = state;
 
         this.time += elapsedMillis;

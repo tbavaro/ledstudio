@@ -1,9 +1,9 @@
-import Scene from "../../scenes/Scene";
+import * as Visualization from "../base/Visualization";
 
 import StaticImageVisualization from "./util/StaticImageVisualization";
 
 export default class PatternOwlEyesVisualization extends StaticImageVisualization {
-  constructor(scene: Scene) {
-    super(scene, "./owleyes.jpg");
+  constructor(config: Visualization.Config) {
+    super(config, "./owleyes.jpg");
   }
 }

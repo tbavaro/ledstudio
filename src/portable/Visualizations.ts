@@ -8,6 +8,7 @@ import PatternFlagVisualization from "./visualizations/PatternFlagVisualization"
 import PatternMarqueeVisualization from "./visualizations/PatternMarqueeVisualization";
 import PatternOwlEyesVisualization from "./visualizations/PatternOwlEyesVisualization";
 import PatternRain2Visualization from "./visualizations/PatternRain2Visualization";
+import PatternRainbowVisualization from "./visualizations/PatternRainbowVisualization";
 import PatternRainVisualization from "./visualizations/PatternRainVisualization";
 import PatternSparklesVisualization from "./visualizations/PatternSparklesVisualization";
 import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
@@ -16,7 +17,6 @@ import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisual
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
-import TestRainbowVisualization from "./visualizations/TestRainbowVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
 
@@ -28,6 +28,7 @@ const visFuncs = {
   "pattern:owlEyes": PatternOwlEyesVisualization,
   "pattern:rain": PatternRainVisualization,
   "pattern:rain2": PatternRain2Visualization,
+  "pattern:rainbow": PatternRainbowVisualization,
   "pattern:sparkles": PatternSparklesVisualization,
   "pattern:wingFlap": PatternWingFlapVisualization,
   "pattern:zaps": PatternZapsVisualization,
@@ -35,7 +36,6 @@ const visFuncs = {
   "testControllerDial": TestControllerDialVisualization,
   "testKey": TestKeyVisualization,
   "testKeyFade": TestKeyFadeVisualization,
-  "testRainbow": TestRainbowVisualization,
   "testStripAddress": TestStripAddressVisualization,
   "testTimeseriesDataVisualization": TestTimeseriesDataVisualization
 };
@@ -49,7 +49,7 @@ export function create(name: Name, scene: Scene): Visualization {
   if (!(name in visFuncs)) {
     throw new Error("unrecognized name");
   }
-  return new visFuncs[name](scene);
+  return new visFuncs[name]({ scene: scene });
 }
 
 export function isValidName(name: Name): boolean {

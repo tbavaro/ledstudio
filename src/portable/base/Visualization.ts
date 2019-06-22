@@ -8,7 +8,11 @@ import LedInfo from "./LedInfo";
 import PianoState from "./PianoState";
 import * as TimeseriesData from "./TimeseriesData";
 
-export interface State {
+export interface Config {
+  readonly scene: Scene;
+}
+
+export interface FrameState {
   pianoState: PianoState;
 
   // TODO probably give a better interface here
@@ -17,22 +21,22 @@ export interface State {
   controllerState: ControllerState;
 }
 
-export interface Context {
+export interface FrameContext {
   setFrameTimeseriesPoints: (data: TimeseriesData.PointDef[]) => void;
 }
 
 export default abstract class Visualization {
-  public readonly scene: Scene;
+  public readonly config: Config;
   public readonly ledInfos: LedInfo[][];
   public readonly ledRows: FixedArray<ColorRow>;
 
-  constructor(scene: Scene) {
-    this.scene = scene;
-    this.ledInfos = scene.leds;
+  constructor(config: Config) {
+    this.config = config;
+    this.ledInfos = config.scene.leds;
     this.ledRows = new FixedArray(this.ledInfos.length, i => new ColorRow(this.ledInfos[i].length));
   }
 
-  public abstract render(elapsedMillis: number, state: State, context: Context): void;
+  public abstract render(elapsedMillis: number, state: FrameState, context: FrameContext): void;
 }
 
 export abstract class SingleRowVisualization extends Visualization {
@@ -41,15 +45,15 @@ export abstract class SingleRowVisualization extends Visualization {
   protected readonly length: number;
   protected readonly leds: ColorRow;
 
-  constructor(scene: Scene, length: number) {
-    super(scene);
+  constructor(config: Config, length: number) {
+    super(config);
     this.length = length;
     this.leds = new ColorRow(length);
   }
 
-  protected abstract renderSingleRow(elapsedMillis: number, state: State, context: Context): void;
+  protected abstract renderSingleRow(elapsedMillis: number, state: FrameState, context: FrameContext): void;
 
-  public render(elapsedMillis: number, state: State, context: Context): void {
+  public render(elapsedMillis: number, state: FrameState, context: FrameContext): void {
     this.renderSingleRow(elapsedMillis, state, context);
 
     this.ledRows.forEach(ledRow => {
@@ -66,12 +70,12 @@ export class DerezVisualization extends Visualization {
   private readonly derez: number;
 
   constructor(delegate: Visualization, derez: number) {
-    super(delegate.scene);
+    super(delegate.config);
     this.delegate = delegate;
     this.derez = derez;
   }
 
-  public render(elapsedMillis: number, state: State, context: Context): void {
+  public render(elapsedMillis: number, state: FrameState, context: FrameContext): void {
     this.delegate.render(elapsedMillis, state, context);
 
     this.delegate.ledRows.forEach((pureLeds, row) => {

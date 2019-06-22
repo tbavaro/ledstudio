@@ -1,14 +1,8 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
 export default class TestControllerDialVisualization extends Visualization.default {
-  constructor(scene: Scene) {
-    super(scene);
-  }
-
-  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
     const dialValues = state.controllerState.dialValues;
 
     const rValue = dialValues[0];

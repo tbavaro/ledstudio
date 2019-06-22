@@ -1,16 +1,10 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
 export default class TestTimeseriesDataVisualization extends Visualization.default {
   private phase = 0;
 
-  constructor(scene: Scene) {
-    super(scene);
-  }
-
-  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
     this.phase = (this.phase + elapsedMillis / 1000) % (Math.PI * 2);
 
     context.setFrameTimeseriesPoints([

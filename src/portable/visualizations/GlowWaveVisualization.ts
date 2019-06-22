@@ -1,5 +1,3 @@
-import Scene from "../../scenes/Scene";
-
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
@@ -45,14 +43,15 @@ export default class GlowWaveVisualization extends Visualization.default {
   private readonly fadeFactors: number[];
   private readonly nativeRows: ColorRow[];
 
-  constructor(scene: Scene) {
-    super(scene);
+  constructor(config: Visualization.Config) {
+    super(config);
+    const scene = config.scene;
     const middleRow = Math.floor(scene.leds.length / 2);
     this.fadeFactors = scene.leds.map((_, i) => Math.pow((1 - ROW_FADE_FACTOR), Math.abs(i - middleRow)));
     this.nativeRows = scene.leds.map(_ => new ColorRow(NATIVE_WIDTH));
   }
 
-  public render(elapsedMillis: number, state: Visualization.State): void {
+  public render(elapsedMillis: number, state: Visualization.FrameState): void {
     const { pianoState } = state;
 
     // decay the unpressed keys

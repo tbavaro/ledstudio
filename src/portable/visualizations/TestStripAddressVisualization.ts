@@ -1,5 +1,3 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
@@ -19,11 +17,11 @@ export default class TestStripAddressVisualization extends Visualization.default
   private pulseLocationFloat: number = 0;
   private readonly channelHueIncrement: number;
 
-  constructor(scene: Scene) {
-    super(scene);
+  constructor(config: Visualization.Config) {
+    super(config);
 
     let maxChannel = 0;
-    this.scene.leds.forEach(row => row.forEach(led => {
+    config.scene.leds.forEach(row => row.forEach(led => {
       if (led.hardwareChannel > maxChannel) {
         maxChannel = led.hardwareChannel;
       }

@@ -1,5 +1,3 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
@@ -7,11 +5,11 @@ const COLOR_PRESSED = Colors.WHITE;
 const COLOR_RELEASED = Colors.BLACK;
 
 export default class TestKeyVisualization extends Visualization.SingleRowVisualization {
-  constructor(scene: Scene) {
-    super(scene, 88);
+  constructor(config: Visualization.Config) {
+    super(config, 88);
   }
 
-  public renderSingleRow(elapsedMillis: number, state: Visualization.State): void {
+  public renderSingleRow(elapsedMillis: number, state: Visualization.FrameState): void {
     const { pianoState } = state;
 
     pianoState.changedKeys.forEach(n => {

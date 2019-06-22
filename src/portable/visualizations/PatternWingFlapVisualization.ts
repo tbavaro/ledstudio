@@ -1,5 +1,3 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
@@ -20,11 +18,7 @@ const PERIOD = Math.PI * 2 / SPEED;
 class PureWingFlapVisualization extends Visualization.default {
   private phase = 0;
 
-  constructor(scene: Scene) {
-    super(scene);
-  }
-
-  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
     this.phase = (this.phase + elapsedMillis * SPEED) % PERIOD;
 
     const positionNormalized = Math.pow(Math.sin(this.phase), FLAPPINESS);
@@ -52,7 +46,7 @@ class PureWingFlapVisualization extends Visualization.default {
 }
 
 export default class PatternWingFlapVisualization extends Visualization.DerezVisualization {
-  constructor(scene: Scene) {
-    super(new PureWingFlapVisualization(scene), DEREZ);
+  constructor(config: Visualization.Config) {
+    super(new PureWingFlapVisualization(config), DEREZ);
   }
 }

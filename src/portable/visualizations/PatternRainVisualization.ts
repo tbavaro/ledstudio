@@ -63,13 +63,13 @@ export default class PatternRainVisualization extends Visualization.default {
   private readonly sparkles: Set<Sparkle>;
   private numSparklesRemainder = 0;
 
-  constructor(scene: Scene.default) {
-    super(scene);
-    this.dropHelper = new DropHelper(scene.leds);
+  constructor(config: Visualization.Config) {
+    super(config);
+    this.dropHelper = new DropHelper(config.scene.leds);
     this.sparkles = new Set();
   }
 
-  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
     // drops
     const deadSparkles: Sparkle[] = [];
     this.sparkles.forEach(sparkle => {

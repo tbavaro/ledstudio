@@ -1,17 +1,15 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-export default class TestRainbowVisualization extends Visualization.SingleRowVisualization {
+export default class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
   private offset = 0;
   private width = 88; // pixels per 360 degrees
 
-  constructor(scene: Scene) {
-    super(scene, Math.max.apply(Math, scene.leds.map(arr => arr.length)));
+  constructor(config: Visualization.Config) {
+    super(config, Math.max.apply(Math, config.scene.leds.map(arr => arr.length)));
   }
 
-  public renderSingleRow(elapsedMillis: number, state: Visualization.State): void {
+  public renderSingleRow(elapsedMillis: number, state: Visualization.FrameState): void {
     const maxSpeed = 300 / 1000 * (state.controllerState.buttonStates[0] ? 4 : 1);
     const speed = (state.controllerState.dialValues[0] - 0.5) * -1 * maxSpeed;
     this.offset = (this.offset + speed * elapsedMillis) % 360.0;

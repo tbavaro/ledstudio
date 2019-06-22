@@ -291,15 +291,15 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
   protected canvas: HTMLCanvasElement;
   protected canvasContext: CanvasRenderingContext2D;
 
-  constructor(scene: Scene.default) {
-    super(scene);
-    const values = initializeFor(scene);
+  constructor(config: Visualization.Config) {
+    super(config);
+    const values = initializeFor(config.scene);
     this.helper = values.helper;
     this.canvas = values.canvas;
     this.canvasContext = values.canvasContext;
   }
 
-  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
     this.renderToCanvas(elapsedMillis, state, context);
     const colors = this.helper.colorsFromCanvas(this.canvas);
     let index = 0;
@@ -310,5 +310,5 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     });
   }
 
-  protected abstract renderToCanvas(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void;
+  protected abstract renderToCanvas(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void;
 }

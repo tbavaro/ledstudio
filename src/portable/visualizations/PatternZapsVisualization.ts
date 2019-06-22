@@ -1,5 +1,3 @@
-import Scene from "../../scenes/Scene";
-
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
@@ -13,9 +11,10 @@ export default class PatternZapsVisualization extends Visualization.default {
   private numRows: number;
   private numColumns: number;
 
-  constructor(scene: Scene) {
-    super(scene);
+  constructor(config: Visualization.Config) {
+    super(config);
 
+    const scene = config.scene;
     this.ribChannels = [];
     this.channelValues = new Map();
     scene.leds.forEach((rowLeds, rowIndex) => {
@@ -55,7 +54,7 @@ export default class PatternZapsVisualization extends Visualization.default {
     }
   }
 
-  public render(elapsedMillis: number, state: Visualization.State, context: Visualization.Context): void {
+  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
     // decay
     const decayAmount = elapsedMillis * DECAY_RATE;
     this.channelValues.forEach((value, channel) => {
@@ -70,7 +69,7 @@ export default class PatternZapsVisualization extends Visualization.default {
     }
 
     // render
-    this.scene.leds.forEach((rowLeds, rowIndex) => {
+    this.config.scene.leds.forEach((rowLeds, rowIndex) => {
       const ledRow = this.ledRows.get(rowIndex);
       rowLeds.forEach((ledInfo, index) => {
         ledRow.set(index, this.channelValues.get(ledInfo.hardwareChannel) || Colors.BLACK);
