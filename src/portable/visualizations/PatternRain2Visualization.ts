@@ -69,7 +69,9 @@ export default class PatternRain2Visualization extends Visualization.default {
     this.sparkles = new Set();
   }
 
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
+  public render(context: Visualization.FrameContext): void {
+    const { elapsedMillis } = context;
+
     // drops
     const deadSparkles: Sparkle[] = [];
     this.sparkles.forEach(sparkle => {

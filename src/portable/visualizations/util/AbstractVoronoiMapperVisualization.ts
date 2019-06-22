@@ -299,8 +299,8 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     this.canvasContext = values.canvasContext;
   }
 
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
-    this.renderToCanvas(elapsedMillis, state, context);
+  public render(context: Visualization.FrameContext): void {
+    this.renderToCanvas(context);
     const colors = this.helper.colorsFromCanvas(this.canvas);
     let index = 0;
     this.ledRows.forEach(leds => {
@@ -310,5 +310,5 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     });
   }
 
-  protected abstract renderToCanvas(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void;
+  protected abstract renderToCanvas(context: Visualization.FrameContext): void;
 }

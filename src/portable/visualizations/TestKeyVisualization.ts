@@ -9,8 +9,8 @@ export default class TestKeyVisualization extends Visualization.SingleRowVisuali
     super(config, 88);
   }
 
-  public renderSingleRow(elapsedMillis: number, state: Visualization.FrameState): void {
-    const { pianoState } = state;
+  public renderSingleRow(context: Visualization.FrameContext): void {
+    const { pianoState } = context;
 
     pianoState.changedKeys.forEach(n => {
       const isPressed = pianoState.keys[n];

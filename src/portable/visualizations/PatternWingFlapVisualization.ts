@@ -18,7 +18,9 @@ const PERIOD = Math.PI * 2 / SPEED;
 class PureWingFlapVisualization extends Visualization.default {
   private phase = 0;
 
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
+  public render(context: Visualization.FrameContext): void {
+    const { elapsedMillis } = context;
+
     this.phase = (this.phase + elapsedMillis * SPEED) % PERIOD;
 
     const positionNormalized = Math.pow(Math.sin(this.phase), FLAPPINESS);

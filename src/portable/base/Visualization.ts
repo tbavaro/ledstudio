@@ -12,16 +12,16 @@ export interface Config {
   readonly scene: Scene;
 }
 
-export interface FrameState {
+export interface FrameContext {
+  elapsedMillis: number;
+
   pianoState: PianoState;
 
   // TODO probably give a better interface here
   analogFrequencyData: Uint8Array;
 
   controllerState: ControllerState;
-}
 
-export interface FrameContext {
   setFrameTimeseriesPoints: (data: TimeseriesData.PointDef[]) => void;
 }
 
@@ -36,7 +36,7 @@ export default abstract class Visualization {
     this.ledRows = new FixedArray(this.ledInfos.length, i => new ColorRow(this.ledInfos[i].length));
   }
 
-  public abstract render(elapsedMillis: number, state: FrameState, context: FrameContext): void;
+  public abstract render(context: FrameContext): void;
 }
 
 export abstract class SingleRowVisualization extends Visualization {
@@ -51,10 +51,10 @@ export abstract class SingleRowVisualization extends Visualization {
     this.leds = new ColorRow(length);
   }
 
-  protected abstract renderSingleRow(elapsedMillis: number, state: FrameState, context: FrameContext): void;
+  protected abstract renderSingleRow(context: FrameContext): void;
 
-  public render(elapsedMillis: number, state: FrameState, context: FrameContext): void {
-    this.renderSingleRow(elapsedMillis, state, context);
+  public render(context: FrameContext): void {
+    this.renderSingleRow(context);
 
     this.ledRows.forEach(ledRow => {
       ledRow.fill(SingleRowVisualization.UNMAPPED_LED_COLOR);
@@ -75,8 +75,8 @@ export class DerezVisualization extends Visualization {
     this.derez = derez;
   }
 
-  public render(elapsedMillis: number, state: FrameState, context: FrameContext): void {
-    this.delegate.render(elapsedMillis, state, context);
+  public render(context: FrameContext): void {
+    this.delegate.render(context);
 
     this.delegate.ledRows.forEach((pureLeds, row) => {
       const leds = this.ledRows.get(row);

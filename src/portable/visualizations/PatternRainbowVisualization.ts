@@ -9,9 +9,11 @@ export default class PatternRainbowVisualization extends Visualization.SingleRow
     super(config, Math.max.apply(Math, config.scene.leds.map(arr => arr.length)));
   }
 
-  public renderSingleRow(elapsedMillis: number, state: Visualization.FrameState): void {
-    const maxSpeed = 300 / 1000 * (state.controllerState.buttonStates[0] ? 4 : 1);
-    const speed = (state.controllerState.dialValues[0] - 0.5) * -1 * maxSpeed;
+  public renderSingleRow(context: Visualization.FrameContext): void {
+    const { elapsedMillis, controllerState } = context;
+
+    const maxSpeed = 300 / 1000 * (controllerState.buttonStates[0] ? 4 : 1);
+    const speed = (controllerState.dialValues[0] - 0.5) * -1 * maxSpeed;
     this.offset = (this.offset + speed * elapsedMillis) % 360.0;
 
     const step = 360 / this.width;

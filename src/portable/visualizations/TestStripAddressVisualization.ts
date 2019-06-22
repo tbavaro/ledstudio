@@ -32,7 +32,9 @@ export default class TestStripAddressVisualization extends Visualization.default
     this.channelHueIncrement = 360 / numChannels;
   }
 
-  public render(elapsedMillis: number): void {
+  public render(context: Visualization.FrameContext): void {
+    const { elapsedMillis } = context;
+
     this.pulseLocationFloat = (this.pulseLocationFloat + PULSE_SPEED_LEDS_PER_SECOND * elapsedMillis / 1000) % PULSE_SEPARATION_LEDS;
     const pulseLocation = Math.floor(this.pulseLocationFloat);
 

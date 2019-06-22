@@ -29,8 +29,8 @@ export default class TestKeyFadeVisualization extends Visualization.SingleRowVis
     this.values = new Array(this.leds.length).fill(0);
   }
 
-  public renderSingleRow(elapsedMillis: number, state: Visualization.FrameState): void {
-    const { pianoState } = state;
+  public renderSingleRow(context: Visualization.FrameContext): void {
+    const { elapsedMillis, pianoState } = context;
 
     // decay
     const decayAmount = elapsedMillis * this.decayRate;

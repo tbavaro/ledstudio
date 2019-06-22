@@ -12,7 +12,7 @@ export default class StaticImageVisualization extends AbstractVoronoiMapperVisua
     imgElement.src = imageUrl;
   }
 
-  protected renderToCanvas(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext) {
+  protected renderToCanvas(context: Visualization.FrameContext) {
     // no-op
   }
 }

@@ -51,8 +51,8 @@ export default class GlowWaveVisualization extends Visualization.default {
     this.nativeRows = scene.leds.map(_ => new ColorRow(NATIVE_WIDTH));
   }
 
-  public render(elapsedMillis: number, state: Visualization.FrameState): void {
-    const { pianoState } = state;
+  public render(context: Visualization.FrameContext): void {
+    const { elapsedMillis, pianoState } = context;
 
     // decay the unpressed keys
     this.pressedKeyColors.forEach((fc, n) => {

@@ -2,8 +2,10 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
 export default class TestControllerDialVisualization extends Visualization.default {
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
-    const dialValues = state.controllerState.dialValues;
+  public render(context: Visualization.FrameContext): void {
+    const { controllerState } = context;
+
+    const dialValues = controllerState.dialValues;
 
     const rValue = dialValues[0];
     const gValue = dialValues[1];

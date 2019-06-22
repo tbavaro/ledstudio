@@ -3,13 +3,14 @@ import * as Visualization from "../base/Visualization";
 import { bracket } from "../Utils";
 
 export default class TestAnalogPulseVisualization extends Visualization.default {
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
-    const frequencyData = state.analogFrequencyData;
+  public render(context: Visualization.FrameContext): void {
+    const { analogFrequencyData } = context;
+
     let total = 0;
-    frequencyData.forEach(v => total += v);
+    analogFrequencyData.forEach(v => total += v);
 
     // between 0 and 1
-    const pulseValue = bracket(0, 1, total / frequencyData.length / 255);
+    const pulseValue = bracket(0, 1, total / analogFrequencyData.length / 255);
 
     this.ledRows.forEach(row => {
       row.fill(Colors.BLACK);

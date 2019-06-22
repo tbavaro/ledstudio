@@ -31,8 +31,8 @@ export default class CenterSpreadVisualization extends Visualization.SingleRowVi
         }
     }
 
-    public renderSingleRow(elapsedMillis: number, state: Visualization.FrameState): void {
-        const { pianoState } = state;
+    public renderSingleRow(context: Visualization.FrameContext): void {
+        const { elapsedMillis, pianoState } = context;
 
         this.time += elapsedMillis;
 

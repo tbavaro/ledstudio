@@ -18,7 +18,8 @@ export default class PatternSparklesVisualization extends Visualization.default 
     scene.leds[bottomRow].forEach((_, i) => this.ledAddresses.push([bottomRow, bottomRowCount - i - 1]));
   }
 
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
+  public render(context: Visualization.FrameContext): void {
+    const { elapsedMillis } = context;
     this.phase = (this.phase + SPEED * elapsedMillis / 1000) % LED_SEPARATION;
     const offset = Math.round(this.phase);
     this.ledAddresses.forEach((ledAddress, i) => {

@@ -54,7 +54,9 @@ export default class PatternZapsVisualization extends Visualization.default {
     }
   }
 
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
+  public render(context: Visualization.FrameContext): void {
+    const { elapsedMillis } = context;
+
     // decay
     const decayAmount = elapsedMillis * DECAY_RATE;
     this.channelValues.forEach((value, channel) => {

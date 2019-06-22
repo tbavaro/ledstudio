@@ -4,7 +4,9 @@ import * as Visualization from "../base/Visualization";
 export default class TestTimeseriesDataVisualization extends Visualization.default {
   private phase = 0;
 
-  public render(elapsedMillis: number, state: Visualization.FrameState, context: Visualization.FrameContext): void {
+  public render(context: Visualization.FrameContext): void {
+    const { elapsedMillis } = context;
+
     this.phase = (this.phase + elapsedMillis / 1000) % (Math.PI * 2);
 
     context.setFrameTimeseriesPoints([

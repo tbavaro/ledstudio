@@ -3,7 +3,7 @@ import ControllerState from "./portable/base/ControllerState";
 import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
 import * as TimeseriesData from "./portable/base/TimeseriesData";
-import Visualization, { FrameContext } from "./portable/base/Visualization";
+import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
@@ -16,18 +16,33 @@ import Scene from "./scenes/Scene";
 
 export default class VisualizationRunner {
   private readonly stateHelper: PianoHelpers.VisualizationStateHelper;
-  public readonly visualization: Visualization;
+  public readonly visualization: Visualization.default;
   private readonly timingHelper: MovingAverageHelper;
   private lastRenderTime: number = 0;
   public hardwareLedSender?: FadecandyLedSender;
   public simulationLedStrip?: SendableLedStrip;
   private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
+  private readonly frameContext: Visualization.FrameContext;
+  private frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
 
-  constructor(visualization: Visualization, scene: Scene) {
+  constructor(visualization: Visualization.default, scene: Scene) {
     this.visualization = visualization;
     this.stateHelper = new PianoHelpers.VisualizationStateHelper();
     this.timingHelper = new MovingAverageHelper(20);
     this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
+    this.frameContext = {
+      elapsedMillis: 0,
+      pianoState: this.stateHelper,
+      analogFrequencyData: new Uint8Array(),
+      controllerState: new ControllerState(),
+      setFrameTimeseriesPoints: (points: TimeseriesData.PointDef[]) => {
+        if (this.frameTimeseriesPoints === undefined) {
+          this.frameTimeseriesPoints = points;
+        } else {
+          throw new Error("frame timeseries points set multiple times");
+        }
+      }
+    };
   }
 
   public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): TimeseriesData.PointDef[] {
@@ -37,21 +52,15 @@ export default class VisualizationRunner {
     }
 
     // collect state
-    const visState = this.stateHelper.endFrame(analogFrequencyData, controllerState);
-    let frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
-    const context: FrameContext = {
-      setFrameTimeseriesPoints: (points: TimeseriesData.PointDef[]) => {
-        if (frameTimeseriesPoints === undefined) {
-          frameTimeseriesPoints = points;
-        } else {
-          throw new Error("frame timeseries points set multiple times");
-        }
-      }
-    };
+    const elapsedMillis = startTime - this.lastRenderTime;
+    this.frameContext.elapsedMillis = elapsedMillis;
+    this.frameContext.analogFrequencyData = analogFrequencyData;
+    this.frameContext.controllerState = controllerState;
+    this.frameTimeseriesPoints = undefined;
+    this.stateHelper.endFrame();
 
     // render into the LED strip
-    const elapsedMillis = startTime - this.lastRenderTime;
-    this.visualization.render(elapsedMillis, visState, context);
+    this.visualization.render(this.frameContext);
     this.stateHelper.startFrame();
     this.lastRenderTime = startTime;
 
@@ -63,7 +72,7 @@ export default class VisualizationRunner {
     const multiplier = controllerState === null ? 1 : controllerState.dialValues[7];
     this.sendToStrips(multiplier);
 
-    return frameTimeseriesPoints || [];
+    return this.frameTimeseriesPoints || [];
   }
 
   // TODO don't actually pass raw midi events in here, obv

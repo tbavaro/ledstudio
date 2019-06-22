@@ -1,7 +1,5 @@
-import ControllerState from "./base/ControllerState";
 import PianoEvent, { Key } from "./base/PianoEvent";
 import PianoState from "./base/PianoState";
-import * as Visualization from "./base/Visualization";
 import * as Utils from "./Utils";
 
 const MIDI_KEY_OFFSET = -21;
@@ -63,40 +61,13 @@ export function describePianoEvent(event: PianoEvent): string {
 
 const NUM_KEYS = 88;
 
-type AccessibleState = {
-  -readonly [k in keyof Visualization.FrameState]: Visualization.FrameState[k] extends ReadonlyArray<infer T> ? T[] : Visualization.FrameState[k]
-};
-
-const DUMMY_ANALOG_FREQUENCY_DATA = new Uint8Array(1024).fill(0);
-
-export class VisualizationStateHelper {
-  private state: AccessibleState;
-
-  constructor() {
-    this.state = VisualizationStateHelper.freshState();
-  }
-
-  public reset() {
-    this.state = VisualizationStateHelper.freshState();
-  }
-
-  private static freshState(): AccessibleState {
-    return {
-      pianoState: new PianoState(),
-      analogFrequencyData: DUMMY_ANALOG_FREQUENCY_DATA,
-      controllerState: new ControllerState()
-    };
-  }
-
+export class VisualizationStateHelper extends PianoState {
   public startFrame() {
-    this.state.pianoState.changedKeys = [];
+    this.changedKeys = [];
   }
 
-  public endFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): Visualization.FrameState {
-    this.state.pianoState.changedKeys.sort();
-    this.state.analogFrequencyData = analogFrequencyData;
-    this.state.controllerState = controllerState;
-    return this.state;
+  public endFrame() {
+    this.changedKeys.sort();
   }
 
   public applyEvent(event: PianoEvent) {
@@ -113,12 +84,11 @@ export class VisualizationStateHelper {
   }
 
   private applyPressOrReleaseEvent(isPress: boolean, key: Key, velocity: number) {
-    const { pianoState } = this.state;
-    if (pianoState.keys[key] !== isPress) {
-      pianoState.keys[key] = isPress;
-      pianoState.keyVelocities[key] = velocity;
-      if (!pianoState.changedKeys.includes(key)) {
-        pianoState.changedKeys.push(key);
+    if (this.keys[key] !== isPress) {
+      this.keys[key] = isPress;
+      this.keyVelocities[key] = velocity;
+      if (!this.changedKeys.includes(key)) {
+        this.changedKeys.push(key);
       }
     }
   }

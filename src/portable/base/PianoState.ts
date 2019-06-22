@@ -15,4 +15,10 @@ export default class PianoState {
     this.keyVelocities = new Array<number>(NUM_KEYS).fill(0),
     this.changedKeys = [];
   }
+
+  public reset() {
+    this.keys.fill(false);
+    this.keyVelocities.fill(0);
+    this.changedKeys = [];
+  }
 }
