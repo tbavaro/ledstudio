@@ -11,12 +11,9 @@ import { MovingAverageHelper } from "./portable/Utils";
 
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
 
-import Scene from "./scenes/Scene";
-
 class MyFrameContext implements Visualization.FrameContext {
   public elapsedMillis: number;
   public pianoState: PianoHelpers.VisualizationStateHelper;
-  public analogFrequencyData: Uint8Array;
   public controllerState: ControllerState;
   public frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
 
@@ -24,7 +21,6 @@ class MyFrameContext implements Visualization.FrameContext {
     const UNSET = "<unset>" as any;
     this.elapsedMillis = UNSET;
     this.pianoState = new PianoHelpers.VisualizationStateHelper();
-    this.analogFrequencyData = UNSET;
     this.controllerState = UNSET;
   }
 
@@ -40,9 +36,8 @@ class MyFrameContext implements Visualization.FrameContext {
     this.pianoState.startFrame();
   }
 
-  public endFrame(elapsedMillis: number, analogFrequencyData: Uint8Array, controllerState: ControllerState) {
+  public endFrame(elapsedMillis: number, controllerState: ControllerState) {
     this.elapsedMillis = elapsedMillis;
-    this.analogFrequencyData = analogFrequencyData;
     this.controllerState = controllerState;
     this.pianoState.endFrame();
     this.frameTimeseriesPoints = undefined;
@@ -62,14 +57,14 @@ export default class VisualizationRunner {
   private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
   private readonly frameContext: MyFrameContext;
 
-  constructor(visualization: Visualization.default, scene: Scene) {
+  constructor(visualization: Visualization.default) {
     this.visualization = visualization;
     this.timingHelper = new MovingAverageHelper(20);
     this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
     this.frameContext = new MyFrameContext();
   }
 
-  public renderFrame(analogFrequencyData: Uint8Array, controllerState: ControllerState): TimeseriesData.PointDef[] {
+  public renderFrame(controllerState: ControllerState): TimeseriesData.PointDef[] {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
@@ -78,7 +73,6 @@ export default class VisualizationRunner {
     // collect state
     this.frameContext.endFrame(
       startTime - this.lastRenderTime,
-      analogFrequencyData,
       controllerState
     );
 

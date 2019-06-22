@@ -117,10 +117,7 @@ class App extends React.Component<{}, State> {
   private readonly midiControllerEventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
   public readonly analogAudio = new AnalogAudio.default((newAudioSource: AudioNode | null) => {
-    this.setState({
-      audioSource: newAudioSource,
-      audioSourceFFT: newAudioSource === null ? null : new AnalogAudio.BasicFFT(newAudioSource)
-    });
+    this.configureVisualization(this.state.visualizationName, this.state.scene, newAudioSource);
   });
 
   public componentWillMount() {
@@ -392,23 +389,35 @@ class App extends React.Component<{}, State> {
     });
   }
 
-  private visualizationRunnerForName(name: Visualizations.Name, scene: Scene) {
-    const vis = Visualizations.create(name, scene);
-    const runner = new VisualizationRunner(vis, scene);
+  private visualizationRunnerForName(name: Visualizations.Name, scene: Scene, audioSource: AudioNode | null) {
+    const vis = Visualizations.create(name, { scene, audioSource });
+    const runner = new VisualizationRunner(vis);
     runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
     return runner;
   }
 
-  private updateVisualizationAndScene(
+  private configureVisualization(
     visualizationName: Visualizations.Name,
     scene: Scene,
+    audioSource: AudioNode | null,
     doNotSetState?: boolean
   ) {
-    const runner = this.visualizationRunnerForName(visualizationName, scene);
+    let audioSourceFFT: AnalogAudio.BasicFFT | null = null;
+    if (audioSource !== null) {
+      // disconnect everything
+      audioSource.disconnect();
+
+      // connect FFT for onscreen display
+      audioSourceFFT = new AnalogAudio.BasicFFT(audioSource);
+    }
+
+    const runner = this.visualizationRunnerForName(visualizationName, scene, audioSource);
     const values = {
       visualizationRunner: runner,
       visualizationName: visualizationName,
-      scene: scene
+      scene: scene,
+      audioSource: audioSource,
+      audioSourceFFT
     };
     if (!doNotSetState) {
       this.setState(values);
@@ -426,13 +435,13 @@ class App extends React.Component<{}, State> {
     setSelectedSceneName: (name: string) => {
       if (name !== this.state.scene.name) {
         const scene = Scenes.getScene(name);
-        this.updateVisualizationAndScene(this.state.visualizationName, scene);
+        this.configureVisualization(this.state.visualizationName, scene, this.state.audioSource);
         SimulatorStickySettings.set("sceneName", name);
       }
     },
     setSelectedVisualizationName: (newValue: Visualizations.Name) => {
       if (this.state.visualizationName !== newValue) {
-        this.updateVisualizationAndScene(newValue, this.state.scene);
+        this.configureVisualization(newValue, this.state.scene, this.state.audioSource);
         SimulatorStickySettings.set("visualizationName", newValue);
       }
     },
@@ -511,10 +520,10 @@ class App extends React.Component<{}, State> {
     if (this.animating) {
       this.scheduleNextAnimationFrame();
 
-      const frequencyData = (this.state.audioSourceFFT === null ? new Uint8Array(64) : this.state.audioSourceFFT.getFrequencyData());
-      const frameTimeseriesData = this.state.visualizationRunner.renderFrame(frequencyData, this.state.controllerState);
+      const frameTimeseriesData = this.state.visualizationRunner.renderFrame(this.state.controllerState);
       ++this.framesRenderedSinceLastTimingsCall;
 
+      const frequencyData = (this.state.audioSourceFFT === null ? new Uint8Array(64) : this.state.audioSourceFFT.getFrequencyData());
       if (this.analogAudioViewRef) {
         this.analogAudioViewRef.displayFrequencyData(frequencyData, frameTimeseriesData);
       }
@@ -590,9 +599,10 @@ class App extends React.Component<{}, State> {
   public state = ((): State => {
     const scene = this.initialScene();
     return {
-      ...this.updateVisualizationAndScene(
+      ...this.configureVisualization(
         this.initialVisualizationName(),
         scene,
+        /*audioSource=*/null,
         /*doNotSetState=*/true
       ),
       midiState: {

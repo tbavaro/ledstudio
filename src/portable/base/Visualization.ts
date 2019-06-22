@@ -10,15 +10,13 @@ import * as TimeseriesData from "./TimeseriesData";
 
 export interface Config {
   readonly scene: Scene;
+  readonly audioSource: AudioNode | null;
 }
 
 export interface FrameContext {
   elapsedMillis: number;
 
   pianoState: PianoState;
-
-  // TODO probably give a better interface here
-  analogFrequencyData: Uint8Array;
 
   controllerState: ControllerState;
 
