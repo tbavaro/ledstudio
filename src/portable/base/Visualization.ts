@@ -20,6 +20,7 @@ export interface FrameContext {
 
   controllerState: ControllerState;
 
+  setFrameHeatmapValues: (data: number[]) => void;
   setFrameTimeseriesPoints: (data: TimeseriesData.PointDef[]) => void;
 }
 

@@ -85,35 +85,3 @@ export default class AnalogAudio {
     removeFirst(this.deviceListChangedListeners, listener);
   }
 }
-
-const FFT_SIZE = 128;
-const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
-
-export class BasicFFT {
-  private analyser: AnalyserNode;
-  private readonly frequencyDataBuffer: Uint8Array;
-
-  constructor(audioSource: AudioNode) {
-    const audioContext = audioSource.context;
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = FFT_SIZE;
-    analyser.smoothingTimeConstant = 0.8;
-    audioSource.connect(analyser);
-
-    this.analyser = analyser;
-    if (analyser.frequencyBinCount !== NUM_FREQUENCY_BINS) {
-      throw new Error("incorrect number of frequency bins");
-    }
-
-    this.frequencyDataBuffer = new Uint8Array(NUM_FREQUENCY_BINS);
-  }
-
-  public getFrequencyData() {
-    if (this.analyser !== null) {
-      this.analyser.getByteFrequencyData(this.frequencyDataBuffer);
-    } else {
-      this.frequencyDataBuffer.fill(0);
-    }
-    return this.frequencyDataBuffer;
-  }
-}

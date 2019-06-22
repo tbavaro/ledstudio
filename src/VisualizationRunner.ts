@@ -15,6 +15,7 @@ class MyFrameContext implements Visualization.FrameContext {
   public elapsedMillis: number;
   public pianoState: PianoHelpers.VisualizationStateHelper;
   public controllerState: ControllerState;
+  public frameHeatmapValues: number[] | undefined;
   public frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
 
   constructor() {
@@ -22,6 +23,14 @@ class MyFrameContext implements Visualization.FrameContext {
     this.elapsedMillis = UNSET;
     this.pianoState = new PianoHelpers.VisualizationStateHelper();
     this.controllerState = UNSET;
+  }
+
+  public setFrameHeatmapValues(values: number[]) {
+    if (this.frameHeatmapValues === undefined) {
+      this.frameHeatmapValues = values;
+    } else {
+      throw new Error("frame heatmap values set multiple times");
+    }
   }
 
   public setFrameTimeseriesPoints(points: TimeseriesData.PointDef[]) {
@@ -41,6 +50,7 @@ class MyFrameContext implements Visualization.FrameContext {
     this.controllerState = controllerState;
     this.pianoState.endFrame();
     this.frameTimeseriesPoints = undefined;
+    this.frameHeatmapValues = undefined;
   }
 
   public applyPianoEvent(event: PianoEvent) {
@@ -64,7 +74,7 @@ export default class VisualizationRunner {
     this.frameContext = new MyFrameContext();
   }
 
-  public renderFrame(controllerState: ControllerState): TimeseriesData.PointDef[] {
+  public renderFrame(controllerState: ControllerState) {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
@@ -78,6 +88,7 @@ export default class VisualizationRunner {
 
     // render into the LED strip
     this.visualization.render(this.frameContext);
+    const frameHeatmapValues = this.frameContext.frameHeatmapValues || [];
     const frameTimeseriesPoints = this.frameContext.frameTimeseriesPoints || [];
 
     this.frameContext.startFrame();
@@ -91,7 +102,10 @@ export default class VisualizationRunner {
     const multiplier = controllerState === null ? 1 : controllerState.dialValues[7];
     this.sendToStrips(multiplier);
 
-    return frameTimeseriesPoints;
+    return {
+      frameHeatmapValues: frameHeatmapValues,
+      frameTimeseriesPoints: frameTimeseriesPoints
+    };
   }
 
   public onPianoEvent(event: PianoEvent) {

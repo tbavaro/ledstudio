@@ -1,20 +1,64 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-import { BasicFFT } from "../../analogAudio/AnalogAudio";
-
 import { bracket } from "../Utils";
 
+const FFT_SIZE = 128;
+const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
+const USE_LOWPASS_FILTER = false;
+
+class BasicFFTHelper {
+  private analyser: AnalyserNode;
+  private readonly frequencyDataBuffer: Uint8Array;
+
+  constructor(audioSource: AudioNode) {
+    const audioContext = audioSource.context;
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = FFT_SIZE;
+    analyser.smoothingTimeConstant = 0.8;
+
+    if (USE_LOWPASS_FILTER) {
+      // connect the source to low-pass filter, then low-pass filter to analyser
+      const filter = new BiquadFilterNode(audioContext, { type: "lowpass" });
+      audioSource.connect(filter);
+      filter.connect(analyser);
+    } else {
+      // connect the source directly to analyser
+      audioSource.connect(analyser);
+    }
+
+    this.analyser = analyser;
+    if (analyser.frequencyBinCount !== NUM_FREQUENCY_BINS) {
+      throw new Error("incorrect number of frequency bins");
+    }
+
+    this.frequencyDataBuffer = new Uint8Array(NUM_FREQUENCY_BINS);
+  }
+
+  public getFrequencyData() {
+    if (this.analyser !== null) {
+      this.analyser.getByteFrequencyData(this.frequencyDataBuffer);
+    } else {
+      this.frequencyDataBuffer.fill(0);
+    }
+    return this.frequencyDataBuffer;
+  }
+}
+
 export default class TestAnalogPulseVisualization extends Visualization.default {
-  private readonly fft: BasicFFT | null;
+  private readonly fft: BasicFFTHelper | null;
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.fft = (config.audioSource === null ? null : new BasicFFT(config.audioSource));
+    this.fft = (config.audioSource === null ? null : new BasicFFTHelper(config.audioSource));
   }
 
   public render(context: Visualization.FrameContext): void {
-    const analogFrequencyData = this.fft === null ? new Uint8Array(1) : this.fft.getFrequencyData();
+    if (this.fft === null) {
+      return;
+    }
+
+    const analogFrequencyData = this.fft.getFrequencyData();
 
     let total = 0;
     analogFrequencyData.forEach(v => total += v);
@@ -33,6 +77,8 @@ export default class TestAnalogPulseVisualization extends Visualization.default 
         row.set(i, Colors.WHITE);
       }
     });
+
+    context.setFrameHeatmapValues(Array.from(analogFrequencyData.values()).map(v => v / 255));
 
     context.setFrameTimeseriesPoints([
       {

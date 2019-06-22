@@ -72,7 +72,6 @@ interface State {
   selectedAnalogInputId: string | null;
   controllerState: ControllerState;
   audioSource: AudioNode | null;
-  audioSourceFFT: AnalogAudio.BasicFFT | null;
 }
 
 type AllActions = RightSidebar.Actions;
@@ -402,22 +401,12 @@ class App extends React.Component<{}, State> {
     audioSource: AudioNode | null,
     doNotSetState?: boolean
   ) {
-    let audioSourceFFT: AnalogAudio.BasicFFT | null = null;
-    if (audioSource !== null) {
-      // disconnect everything
-      audioSource.disconnect();
-
-      // connect FFT for onscreen display
-      audioSourceFFT = new AnalogAudio.BasicFFT(audioSource);
-    }
-
     const runner = this.visualizationRunnerForName(visualizationName, scene, audioSource);
     const values = {
       visualizationRunner: runner,
       visualizationName: visualizationName,
       scene: scene,
-      audioSource: audioSource,
-      audioSourceFFT
+      audioSource: audioSource
     };
     if (!doNotSetState) {
       this.setState(values);
@@ -520,12 +509,11 @@ class App extends React.Component<{}, State> {
     if (this.animating) {
       this.scheduleNextAnimationFrame();
 
-      const frameTimeseriesData = this.state.visualizationRunner.renderFrame(this.state.controllerState);
+      const { frameHeatmapValues, frameTimeseriesPoints } = this.state.visualizationRunner.renderFrame(this.state.controllerState);
       ++this.framesRenderedSinceLastTimingsCall;
 
-      const frequencyData = (this.state.audioSourceFFT === null ? new Uint8Array(64) : this.state.audioSourceFFT.getFrequencyData());
       if (this.analogAudioViewRef) {
-        this.analogAudioViewRef.displayFrequencyData(frequencyData, frameTimeseriesData);
+        this.analogAudioViewRef.displayFrequencyData(frameHeatmapValues, frameTimeseriesPoints);
       }
     }
   }
@@ -618,8 +606,7 @@ class App extends React.Component<{}, State> {
       analogInputs: undefined,
       selectedAnalogInputId: null,
       controllerState: new ControllerState(),
-      audioSource: null,
-      audioSourceFFT: null
+      audioSource: null
     };
   })();
 }

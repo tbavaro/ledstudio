@@ -10,7 +10,6 @@ const HEIGHT = 64;
 
 export default class AnalogAudioView extends React.PureComponent<{}, {}> {
   private ref?: TimeseriesView;
-  private valuesBuffer: number[] = new Array(HEIGHT).fill(0);
 
   public render() {
     return (
@@ -23,28 +22,11 @@ export default class AnalogAudioView extends React.PureComponent<{}, {}> {
 
   private setRef = (newRef: TimeseriesView) => this.ref = newRef;
 
-  public displayFrequencyData(frequencyData: Uint8Array, points?: TimeseriesData.PointDef[]) {
-    const values = this.valuesBuffer;
-    if (frequencyData.length % values.length !== 0) {
-      throw new Error("frequency data isn't an even mutiple of HEIGHT");
-    }
-
-    const binBatchSize = frequencyData.length / values.length;
-
-    values.fill(0);
-    frequencyData.forEach((v, i) => {
-      const idx = Math.floor(i / binBatchSize);
-      values[idx] += (v / binBatchSize / 255);
-    });
-
-    // let total = 0;
-    // values.forEach(v => total += v);
-    // total = total / values.length;
-
+  public displayFrequencyData(heatmapValues: number[], points?: TimeseriesData.PointDef[]) {
     if (this.ref) {
       this.ref.displayData(points || [], {
         baseColor: Colors.RED,
-        values: values
+        values: heatmapValues
       });
     }
   }
