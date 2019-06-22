@@ -71,6 +71,8 @@ interface State {
   analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
   selectedAnalogInputId: string | null;
   controllerState: ControllerState;
+  audioSource: AudioNode | null;
+  audioSourceFFT: AnalogAudio.BasicFFT | null;
 }
 
 type AllActions = RightSidebar.Actions;
@@ -114,7 +116,12 @@ class App extends React.Component<{}, State> {
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly midiControllerEventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
-  public readonly analogAudio = new AnalogAudio.default();
+  public readonly analogAudio = new AnalogAudio.default((newAudioSource: AudioNode | null) => {
+    this.setState({
+      audioSource: newAudioSource,
+      audioSourceFFT: newAudioSource === null ? null : new AnalogAudio.BasicFFT(newAudioSource)
+    });
+  });
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -504,7 +511,7 @@ class App extends React.Component<{}, State> {
     if (this.animating) {
       this.scheduleNextAnimationFrame();
 
-      const frequencyData = this.analogAudio.getFrequencyData();
+      const frequencyData = (this.state.audioSourceFFT === null ? new Uint8Array(64) : this.state.audioSourceFFT.getFrequencyData());
       const frameTimeseriesData = this.state.visualizationRunner.renderFrame(frequencyData, this.state.controllerState);
       ++this.framesRenderedSinceLastTimingsCall;
 
@@ -600,7 +607,9 @@ class App extends React.Component<{}, State> {
       midiOutputs: [],
       analogInputs: undefined,
       selectedAnalogInputId: null,
-      controllerState: new ControllerState()
+      controllerState: new ControllerState(),
+      audioSource: null,
+      audioSourceFFT: null
     };
   })();
 }

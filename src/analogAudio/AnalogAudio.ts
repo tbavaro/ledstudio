@@ -1,8 +1,5 @@
 import { removeFirst } from "../portable/Utils";
 
-const FFT_SIZE = 128;
-const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
-
 export interface InputDeviceInfo {
   id: string;
   name: string;
@@ -14,14 +11,15 @@ export default class AnalogAudio {
   private inputDevicesInternal: InputDeviceInfo[] = [];
   private deviceListChangedListeners: Array<(this: this) => void> = [];
   private currentDeviceId: string | null = null;
-  private analyser: AnalyserNode | null = null;
-  private readonly frequencyDataBuffer: Uint8Array;
+  private currentAudioSource: AudioNode | null = null;
+  private readonly onAudioSourceChanged: (audioSource: AudioNode | null) => void;
 
-  constructor() {
+  constructor(onAudioSourceChanged: (audioSource: AudioNode | null) => void) {
+    this.onAudioSourceChanged = onAudioSourceChanged;
+
     if (navigator.mediaDevices !== undefined) {
       navigator.mediaDevices.enumerateDevices().then(this.setDevices);
     }
-    this.frequencyDataBuffer = new Uint8Array(NUM_FREQUENCY_BINS);
   }
 
   public get inputDevices() {
@@ -48,34 +46,25 @@ export default class AnalogAudio {
   public setCurrentDeviceId(deviceId: string | null) {
     if (deviceId !== this.currentDeviceId) {
       this.currentDeviceId = deviceId;
-      this.analyser = null;
+      this.setCurrentAudioSource(null);
       if (deviceId !== null) {
         navigator.mediaDevices.getUserMedia({ audio: { deviceId: deviceId } }).then(stream => {
           // make sure this is still the stream I was trying to load
           if (deviceId === this.currentDeviceId) {
             const audioContext = new AudioContext();
             const audioSource = audioContext.createMediaStreamSource(stream);
-            const analyser = audioContext.createAnalyser();
-            analyser.fftSize = FFT_SIZE;
-            analyser.smoothingTimeConstant = 0.8;
-            audioSource.connect(analyser);
-            this.analyser = analyser;
-            if (analyser.frequencyBinCount !== NUM_FREQUENCY_BINS) {
-              throw new Error("incorrect number of frequency bins");
-            }
+            this.setCurrentAudioSource(audioSource);
           }
         });
       }
     }
   }
 
-  public getFrequencyData() {
-    if (this.analyser !== null) {
-      this.analyser.getByteFrequencyData(this.frequencyDataBuffer);
-    } else {
-      this.frequencyDataBuffer.fill(0);
+  private setCurrentAudioSource(newValue: AudioNode | null) {
+    if (newValue !== this.currentAudioSource) {
+      this.currentAudioSource = newValue;
+      this.onAudioSourceChanged(newValue);
     }
-    return this.frequencyDataBuffer;
   }
 
   private setDevices = async (devices: MediaDeviceInfo[]) => {
@@ -94,5 +83,37 @@ export default class AnalogAudio {
 
   public removeEventListener(eventType: EventType, listener: (this: this) => void) {
     removeFirst(this.deviceListChangedListeners, listener);
+  }
+}
+
+const FFT_SIZE = 128;
+const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
+
+export class BasicFFT {
+  private analyser: AnalyserNode;
+  private readonly frequencyDataBuffer: Uint8Array;
+
+  constructor(audioSource: AudioNode) {
+    const audioContext = audioSource.context;
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = FFT_SIZE;
+    analyser.smoothingTimeConstant = 0.8;
+    audioSource.connect(analyser);
+
+    this.analyser = analyser;
+    if (analyser.frequencyBinCount !== NUM_FREQUENCY_BINS) {
+      throw new Error("incorrect number of frequency bins");
+    }
+
+    this.frequencyDataBuffer = new Uint8Array(NUM_FREQUENCY_BINS);
+  }
+
+  public getFrequencyData() {
+    if (this.analyser !== null) {
+      this.analyser.getByteFrequencyData(this.frequencyDataBuffer);
+    } else {
+      this.frequencyDataBuffer.fill(0);
+    }
+    return this.frequencyDataBuffer;
   }
 }
