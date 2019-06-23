@@ -135,15 +135,11 @@ class VoronoiHelper {
     this.height = attrs.height;
   }
 
-  public colorsFromCanvas(canvas: HTMLCanvasElement): ColorRow {
+  public colorsFromCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): ColorRow {
     if (canvas.height !== this.height || canvas.width !== this.width) {
       throw new Error("canvas isn't the right size");
     }
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      throw new Error("can't get canvas context");
-    }
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     this.valuesR.fill(0);
@@ -209,8 +205,8 @@ class VoronoiHelper {
 interface InitializationValues {
   scene: Scene.default;
   helper: VoronoiHelper;
-  canvas: HTMLCanvasElement;
-  canvasContext: CanvasRenderingContext2D;
+  canvasWidth: number;
+  canvasHeight: number;
 }
 
 let cachedInitializationValues: InitializationValues | undefined;
@@ -235,11 +231,6 @@ function initializeFor(scene: Scene.default): InitializationValues {
     canvasHeight = maxDimension;
     canvasWidth = Math.ceil(maxDimension / height * width);
   }
-  const canvas = createCanvas(canvasWidth, canvasHeight);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    throw new Error("can't use canvas");
-  }
 
   // leds mapped to pixel locations
   const points2d = leds2d.map(wp => {
@@ -262,8 +253,8 @@ function initializeFor(scene: Scene.default): InitializationValues {
   cachedInitializationValues = {
     scene,
     helper,
-    canvas,
-    canvasContext: ctx
+    canvasWidth,
+    canvasHeight
   };
 
   return cachedInitializationValues;
@@ -278,14 +269,19 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     super(config);
     const values = initializeFor(config.scene);
     this.helper = values.helper;
-    this.canvas = values.canvas;
-    this.canvasContext = values.canvasContext;
+
+    this.canvas = createCanvas(values.canvasWidth, values.canvasHeight);
+    const ctx = this.canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("can't use canvas");
+    }
+    this.canvasContext = ctx;
     config.setExtraDisplay(this.canvas);
   }
 
   public render(context: Visualization.FrameContext): void {
     this.renderToCanvas(context);
-    const colors = this.helper.colorsFromCanvas(this.canvas);
+    const colors = this.helper.colorsFromCanvas(this.canvas, this.canvasContext);
     let index = 0;
     this.ledRows.forEach(leds => {
       for (let i = 0; i < leds.length; ++i) {
