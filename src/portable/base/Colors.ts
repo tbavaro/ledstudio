@@ -1,4 +1,4 @@
-import * as Utils from "../Utils";
+import * as Utils from "../../util/Utils";
 
 export type Color = number;
 

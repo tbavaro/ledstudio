@@ -2,7 +2,7 @@ import * as Colors from "../portable/base/Colors";
 import FixedArray from "../portable/base/FixedArray";
 import LedInfo from "../portable/base/LedInfo";
 
-import { MovingAverageHelper } from "../portable/Utils";
+import { MovingAverageHelper } from "../util/Utils";
 
 import FadecandyClient from "./FadecandyClient";
 

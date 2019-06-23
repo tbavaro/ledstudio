@@ -1,6 +1,7 @@
 import PianoEvent, { Key } from "./base/PianoEvent";
 import PianoState from "./base/PianoState";
-import * as Utils from "./Utils";
+
+import * as Utils from "../util/Utils";
 
 const MIDI_KEY_OFFSET = -21;
 const MIDI_MAX_VELOCITY = 127;

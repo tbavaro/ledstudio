@@ -2,7 +2,7 @@ import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-import * as Utils from "../Utils";
+import * as Utils from "../../util/Utils";
 
 const NATIVE_WIDTH = 88;
 const ROW_FADE_FACTOR = 0.6;

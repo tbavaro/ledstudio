@@ -7,7 +7,7 @@ import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
-import { MovingAverageHelper } from "./portable/Utils";
+import { MovingAverageHelper } from "./util/Utils";
 
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
 

@@ -1,6 +1,8 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+import { UnorderedRecycledSet } from "../../util/RecycledSet";
+
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
 const MIN_RADIUS = 10;
@@ -17,51 +19,30 @@ class Particle {
   public color: Colors.Color = Colors.BLACK;
 }
 
-class Recycler<T> {
-  private readonly deadObjects: T[];
-  private readonly createNewObject: () => T;
-
-  constructor(createNewObject: () => T) {
-    this.deadObjects = [];
-    this.createNewObject = createNewObject;
-  }
-
-  public getOrCreate(): T {
-    return this.deadObjects.pop() || this.createNewObject();
-  }
-
-  public recycle(object: T) {
-    this.deadObjects.push(object);
-  }
-}
-
 export default class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualization {
-  private numParticlesRemainder = 0;
+  private numParticlesToAddRemainder = 0;
   private readonly maxDistance: number;
-  private readonly particles: Set<Particle>;
-  private readonly particleSource: Recycler<Particle>;
+  private readonly particles: UnorderedRecycledSet<Particle>;
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.particleSource = new Recycler(() => new Particle());
-    this.particles = new Set();
+    this.particles = UnorderedRecycledSet.withObjectCreator(() => new Particle());
     this.maxDistance = Math.max(this.canvas.width, this.canvas.height) / 2 + MAX_RADIUS;
   }
 
   protected renderToCanvas(context: Visualization.FrameContext) {
     // add particles
-    let numParticles = this.numParticlesRemainder + PARTICLES_PER_SECOND * context.elapsedMillis / 1000;
-    while (numParticles >= 1) {
-      const particle: Particle = this.particleSource.getOrCreate();
+    let numParticlesToAdd = this.numParticlesToAddRemainder + PARTICLES_PER_SECOND * context.elapsedMillis / 1000;
+    while (numParticlesToAdd >= 1) {
+      const particle: Particle = this.particles.add();
       particle.distance = 0;
       particle.speed = Math.random() * (PARTICLE_MAX_SPEED - PARTICLE_MIN_SPEED) + PARTICLE_MIN_SPEED;
       particle.radius = Math.random() * (MAX_RADIUS - MIN_RADIUS) + MIN_RADIUS;
       particle.angleRadians = Math.random() * Math.PI * 2;
       particle.color = Colors.hsv(Math.pow(Math.random(), 2) * 60, 1, Math.random() * 0.3 + 0.7);
-      this.particles.add(particle);
-      numParticles -= 1;
+      numParticlesToAdd -= 1;
     }
-    this.numParticlesRemainder = numParticles;
+    this.numParticlesToAddRemainder = numParticlesToAdd;
 
     // clear
     const canvas = this.canvas;
@@ -74,11 +55,10 @@ export default class PatternParticleFireVisualization extends AbstractVoronoiMap
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
     ctx.globalCompositeOperation = "lighter";
-    const newDeadParticles: Particle[] = [];
-    this.particles.forEach(particle => {
+    this.particles.forEachAndFilter(particle => {
       particle.distance += context.elapsedMillis / 1000 * particle.speed;
       if (particle.distance >= this.maxDistance) {
-        newDeadParticles.push(particle);
+        return false;
       } else {
         const x = cx + Math.sin(particle.angleRadians) * particle.distance;
         const y = cy + Math.cos(particle.angleRadians) * particle.distance;
@@ -86,11 +66,8 @@ export default class PatternParticleFireVisualization extends AbstractVoronoiMap
         ctx.beginPath();
         ctx.arc(x, y, particle.radius, 0, Math.PI * 2);
         ctx.fill();
+        return true;
       }
-    });
-    newDeadParticles.forEach(p => {
-      this.particles.delete(p);
-      this.particleSource.recycle(p);
     });
   }
 }

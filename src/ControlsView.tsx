@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import ControllerState from "./portable/base/ControllerState";
-import { bracket01 } from "./portable/Utils";
+import { bracket01 } from "./util/Utils";
 
 import "./ControlsView.css";
 

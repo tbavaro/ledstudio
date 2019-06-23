@@ -72,6 +72,12 @@ export function removeFirst<T>(arr: T[], item: T) {
   }
 }
 
+export function forEachReverse<T>(arr: T[], func: (value: T, index: number) => void) {
+  for (let i = arr.length - 1; i >= 0; --i) {
+    func(arr[i], i);
+  }
+}
+
 export class MovingAverageHelper {
   private readonly values: number[];
   private numValues: number = 0;

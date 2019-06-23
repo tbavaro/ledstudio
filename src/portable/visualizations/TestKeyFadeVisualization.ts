@@ -1,7 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-import * as Utils from "../Utils";
+import * as Utils from "../../util/Utils";
 
 const COLOR_PRESSED = Colors.WHITE;
 const COLOR_RELEASED = Colors.multiply(Colors.RED, 0.25);

@@ -5,8 +5,9 @@ import ControllerState from "./portable/base/ControllerState";
 import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
-import { MovingAverageHelper } from "./portable/Utils";
 import * as Visualizations from "./portable/Visualizations";
+
+import { MovingAverageHelper } from "./util/Utils";
 
 import FadecandyClient from "./hardware/FadecandyClient";
 import FadecandyLedSender from "./hardware/FadecandyLedSender";

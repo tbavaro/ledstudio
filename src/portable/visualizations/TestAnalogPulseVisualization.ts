@@ -1,7 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-import { bracket } from "../Utils";
+import { bracket } from "../../util/Utils";
 
 const FFT_SIZE = 128;
 const NUM_FREQUENCY_BINS = FFT_SIZE / 2;

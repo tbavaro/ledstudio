@@ -1,4 +1,4 @@
-import { removeFirst } from "../portable/Utils";
+import { removeFirst } from "../util/Utils";
 
 export interface InputDeviceInfo {
   id: string;
