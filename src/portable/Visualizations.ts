@@ -2,6 +2,7 @@ import * as Visualization from "./base/Visualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
+import PatternClockVisualization from "./visualizations/PatternClockVisualization";
 import PatternFlagVisualization from "./visualizations/PatternFlagVisualization";
 import PatternMarqueeVisualization from "./visualizations/PatternMarqueeVisualization";
 import PatternOwlEyesVisualization from "./visualizations/PatternOwlEyesVisualization";
@@ -22,6 +23,7 @@ import TestVisualizerExtraDisplayVisualization from "./visualizations/TestVisual
 const visFuncs = {
   "glowWave": GlowWaveVisualization,
   "centerSpread": CenterSpreadVisualization,
+  "pattern:clock": PatternClockVisualization,
   "pattern:flag": PatternFlagVisualization,
   "pattern:marquee": PatternMarqueeVisualization,
   "pattern:owlEyes": PatternOwlEyesVisualization,
