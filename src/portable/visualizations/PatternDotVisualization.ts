@@ -9,10 +9,6 @@ const RADIUS = 40;
 export default class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
-  constructor(config: Visualization.Config) {
-    super(config);
-  }
-
   protected renderToCanvas(context: Visualization.FrameContext) {
     this.phase = (this.phase + DEGREES_PER_SECOND * context.elapsedMillis / 1000) % 360;
     const phaseRadians = this.phase / 180 * Math.PI;
