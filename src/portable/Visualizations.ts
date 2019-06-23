@@ -13,6 +13,7 @@ import PatternRainVisualization from "./visualizations/PatternRainVisualization"
 import PatternSparklesVisualization from "./visualizations/PatternSparklesVisualization";
 import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
+import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
@@ -35,6 +36,7 @@ const visFuncs = {
   "pattern:sparkles": PatternSparklesVisualization,
   "pattern:wingFlap": PatternWingFlapVisualization,
   "pattern:zaps": PatternZapsVisualization,
+  "pattern:zoom": PatternZoomVisualization,
   "testAnalogPulse": TestAnalogPulseVisualization,
   "testControllerDial": TestControllerDialVisualization,
   "testKey": TestKeyVisualization,
