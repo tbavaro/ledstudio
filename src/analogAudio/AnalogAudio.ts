@@ -11,6 +11,7 @@ export default class AnalogAudio {
   private inputDevicesInternal: InputDeviceInfo[] = [];
   private deviceListChangedListeners: Array<(this: this) => void> = [];
   private currentDeviceId: string | null = null;
+  private currentAudioContext: AudioContext | null = null;
   private currentAudioSource: AudioNode | null = null;
   private readonly onAudioSourceChanged: (audioSource: AudioNode | null) => void;
 
@@ -46,24 +47,36 @@ export default class AnalogAudio {
   public setCurrentDeviceId(deviceId: string | null) {
     if (deviceId !== this.currentDeviceId) {
       this.currentDeviceId = deviceId;
-      this.setCurrentAudioSource(null);
+      this.setCurrentAudioSource(null, null);
       if (deviceId !== null) {
         navigator.mediaDevices.getUserMedia({ audio: { deviceId: deviceId } }).then(stream => {
           // make sure this is still the stream I was trying to load
           if (deviceId === this.currentDeviceId) {
             const audioContext = new AudioContext();
             const audioSource = audioContext.createMediaStreamSource(stream);
-            this.setCurrentAudioSource(audioSource);
+            this.setCurrentAudioSource(audioContext, audioSource);
           }
         });
       }
     }
   }
 
-  private setCurrentAudioSource(newValue: AudioNode | null) {
-    if (newValue !== this.currentAudioSource) {
-      this.currentAudioSource = newValue;
-      this.onAudioSourceChanged(newValue);
+  private setCurrentAudioSource(newAudioContext: AudioContext | null, newAudioSource: AudioNode | null) {
+    if (newAudioContext !== this.currentAudioContext) {
+      if (this.currentAudioContext !== null) {
+        this.currentAudioContext.close();
+      }
+
+      this.currentAudioContext = newAudioContext;
+    }
+
+    if (newAudioSource !== this.currentAudioSource) {
+      if (this.currentAudioSource !== null) {
+        this.currentAudioSource.disconnect();
+      }
+
+      this.currentAudioSource = newAudioSource;
+      this.onAudioSourceChanged(newAudioSource);
     }
   }
 
