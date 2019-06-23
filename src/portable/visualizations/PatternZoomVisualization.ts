@@ -9,10 +9,6 @@ const RADIUS_STEP = 15;
 export default class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
-  constructor(config: Visualization.Config) {
-    super(config);
-  }
-
   private drawCircle(radius: number, color: Colors.Color) {
     const canvas = this.canvas;
     const ctx = this.canvasContext;

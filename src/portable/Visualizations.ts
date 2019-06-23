@@ -8,6 +8,7 @@ import PatternDotVisualization from "./visualizations/PatternDotVisualization";
 import PatternFlagVisualization from "./visualizations/PatternFlagVisualization";
 import PatternMarqueeVisualization from "./visualizations/PatternMarqueeVisualization";
 import PatternOwlEyesVisualization from "./visualizations/PatternOwlEyesVisualization";
+import PatternParticleFireVisualization from "./visualizations/PatternParticleFireVisualization";
 import PatternRain2Visualization from "./visualizations/PatternRain2Visualization";
 import PatternRainbowVisualization from "./visualizations/PatternRainbowVisualization";
 import PatternRainVisualization from "./visualizations/PatternRainVisualization";
@@ -32,6 +33,7 @@ const visFuncs = {
   "pattern:flag": PatternFlagVisualization,
   "pattern:marquee": PatternMarqueeVisualization,
   "pattern:owlEyes": PatternOwlEyesVisualization,
+  "pattern:particleFire": PatternParticleFireVisualization,
   "pattern:rain": PatternRainVisualization,
   "pattern:rain2": PatternRain2Visualization,
   "pattern:rainbow": PatternRainbowVisualization,
