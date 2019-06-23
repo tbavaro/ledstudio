@@ -1,3 +1,4 @@
+import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
 const CANVAS_SCALE = 0.5;
@@ -23,7 +24,12 @@ class ByteDataCanvasHelper {
     ctx.scale(CANVAS_SCALE, CANVAS_SCALE);
   }
 
-  public render() {
+  public render(overrideData?: Uint8Array) {
+    const data = overrideData || this.data;
+    if (data.length !== this.data.length) {
+      throw new Error("overrideData has a different length");
+    }
+
     const canvas = this.canvas;
     const ctx = this.canvasContext;
 
@@ -36,46 +42,116 @@ class ByteDataCanvasHelper {
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(-1, 127);
-    this.data.forEach((y, x) => {
+    data.forEach((y, x) => {
       ctx.lineTo(x, y);
     });
     ctx.stroke();
   }
 }
 
+class AnalyserHelper {
+  private readonly analyser: AnalyserNode;
+  public readonly timeDataBuffer: Uint8Array;
+
+  constructor(analyser: AnalyserNode) {
+    this.analyser = analyser;
+    this.timeDataBuffer = new Uint8Array(this.analyser.fftSize);
+  }
+
+  public getLevels() {
+    const data = this.timeDataBuffer;
+    this.analyser.getByteTimeDomainData(data);
+    let maxAmplitude = 0;
+    let sumSquares = 0;
+    data.forEach(v => {
+      const normalizedV = (v - 127) / 128;
+      const amplitude = Math.abs(normalizedV);
+      if (amplitude > maxAmplitude) {
+        maxAmplitude = amplitude;
+      }
+      sumSquares += normalizedV * normalizedV;
+    });
+    const rmsAmplitude = Math.sqrt(sumSquares / data.length);
+
+    return {
+      timeData: data,
+      max: maxAmplitude,
+      rms: rmsAmplitude
+    };
+  }
+}
+
+function createAnalyserHelpers(audioSource: AudioNode) {
+  const audioContext = audioSource.context;
+  const fftSize = 1024;
+
+  const createAnalyserHelper = (createFilter?: () => AudioNode) => {
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = fftSize;
+
+    if (createFilter) {
+      const filter = createFilter();
+      audioSource.connect(filter);
+      filter.connect(analyser);
+    } else {
+      audioSource.connect(analyser);
+    }
+
+    return new AnalyserHelper(analyser);
+  };
+
+  return {
+    direct: createAnalyserHelper(),
+    low: createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "lowpass" })),
+    high: createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "highpass" }))
+  };
+}
+
 export default class TestAudioWaveformVisualization extends Visualization.default {
-  private readonly analyser: AnalyserNode | null;
-  private readonly dataBuffer: Uint8Array;
-  private readonly canvasHelper: ByteDataCanvasHelper;
+  private readonly analyserHelpers: ReturnType<typeof createAnalyserHelpers> | null;
+  private readonly canvasHelper: ByteDataCanvasHelper | null;
 
   constructor(config: Visualization.Config) {
     super(config);
 
     const audioSource = config.audioSource;
     if (audioSource !== null) {
-      const audioContext = audioSource.context;
-      this.analyser = audioContext.createAnalyser();
-      this.analyser.fftSize = 1024;
-      audioSource.connect(this.analyser);
-      this.dataBuffer = new Uint8Array(this.analyser.fftSize);
+      this.analyserHelpers = createAnalyserHelpers(audioSource);
+      this.canvasHelper = new ByteDataCanvasHelper(this.analyserHelpers.direct.timeDataBuffer);
+      config.setExtraDisplay(this.canvasHelper.canvas);
     } else {
-      this.analyser = null;
-      this.dataBuffer = new Uint8Array(1);
+      this.analyserHelpers = null;
+      this.canvasHelper = null;
     }
-
-    this.canvasHelper = new ByteDataCanvasHelper(this.dataBuffer);
-    config.setExtraDisplay(this.canvasHelper.canvas);
   }
 
   public render(context: Visualization.FrameContext): void {
-    if (this.analyser === null) {
+    if (this.analyserHelpers === null) {
       return;
     }
 
-    const data = this.dataBuffer;
-    this.analyser.getByteTimeDomainData(data);
+    const lowLevels = this.analyserHelpers.low.getLevels();
+    const highLevels = this.analyserHelpers.high.getLevels();
 
     // render
-    this.canvasHelper.render();
+    if (this.canvasHelper !== null) {
+      const directLevels = this.analyserHelpers.direct.getLevels();
+      this.canvasHelper.render(directLevels.timeData);
+    }
+
+    context.setFrameTimeseriesPoints([
+      // {
+      //   color: Colors.WHITE,
+      //   value: directLevels.rms
+      // },
+      {
+        color: Colors.BLUE,
+        value: lowLevels.rms
+      },
+      {
+        color: Colors.RED,
+        value: highLevels.rms
+      },
+    ]);
   }
 }
