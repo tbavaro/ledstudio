@@ -30,28 +30,11 @@ function flatten<T>(arrays: T[][]): T[] {
   return output;
 }
 
-let existingCanvas: HTMLCanvasElement | null = null;
 function createCanvas(width: number, height: number): HTMLCanvasElement {
-  if (existingCanvas !== null) {
-    const parent = existingCanvas.parentElement;
-    if (parent !== null) {
-      parent.removeChild(existingCanvas);
-    }
-    existingCanvas = null;
-  }
-
   const canvas = document.createElement("canvas");
-  canvas.style.position = "absolute";
-  canvas.style.top = "5px";
-  canvas.style.left = "5px";
-  canvas.style.boxSizing = "border-box";
-  canvas.style.border = "5px dashed green";
   canvas.style.backgroundColor = "black";
   canvas.width = width;
   canvas.height = height;
-  // document.body.appendChild(canvas);
-
-  existingCanvas = canvas;
   return canvas;
 }
 
@@ -297,6 +280,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     this.helper = values.helper;
     this.canvas = values.canvas;
     this.canvasContext = values.canvasContext;
+    config.setExtraDisplay(this.canvas);
   }
 
   public render(context: Visualization.FrameContext): void {
