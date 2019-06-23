@@ -17,6 +17,7 @@ import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisual
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
+import TestAudioWaveformVisualization from "./visualizations/TestAudioWaveformVisualization";
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
@@ -42,6 +43,7 @@ const visFuncs = {
   "pattern:zaps": PatternZapsVisualization,
   "pattern:zoom": PatternZoomVisualization,
   "testAnalogPulse": TestAnalogPulseVisualization,
+  "testAudioWaveform": TestAudioWaveformVisualization,
   "testControllerDial": TestControllerDialVisualization,
   "testKey": TestKeyVisualization,
   "testKeyFade": TestKeyFadeVisualization,
