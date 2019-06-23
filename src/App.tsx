@@ -2,6 +2,7 @@ import MIDIFile from "midifile";
 import * as React from "react";
 
 import ControllerState from "./portable/base/ControllerState";
+import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { MovingAverageHelper } from "./portable/Utils";
@@ -15,6 +16,7 @@ import * as Scenes from "./scenes/Scenes";
 
 import SimulationViewport from "./simulator/SimulationViewport";
 import * as SimulatorStickySettings from "./simulator/SimulatorStickySettings";
+import VisualizerExtraDisplayContainer from "./simulator/VisualizerExtraDisplayContainer";
 
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { MidiEventEmitter, QueuedMidiEventEmitter } from "./piano/MidiEventListener";
@@ -72,6 +74,7 @@ interface State {
   selectedAnalogInputId: string | null;
   controllerState: ControllerState;
   audioSource: AudioNode | null;
+  visualizerExtraDisplay: HTMLElement | null;
 }
 
 type AllActions = RightSidebar.Actions;
@@ -214,6 +217,13 @@ class App extends React.Component<{}, State> {
                     />
                   )
                 : null
+            }
+            {
+              this.state.visualizerExtraDisplay === null
+                ? null
+                : (
+                    <VisualizerExtraDisplayContainer element={this.state.visualizerExtraDisplay} />
+                  )
             }
             <TimingStatsView getTimings={this.getTimings} message2={this.getMessage2}/>
           </div>
@@ -388,20 +398,21 @@ class App extends React.Component<{}, State> {
     });
   }
 
-  private visualizationRunnerForName(name: Visualizations.Name, scene: Scene, audioSource: AudioNode | null) {
-    const vis = Visualizations.create(name, { scene, audioSource });
-    const runner = new VisualizationRunner(vis);
-    runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
-    return runner;
-  }
-
   private configureVisualization(
     visualizationName: Visualizations.Name,
     scene: Scene,
     audioSource: AudioNode | null,
     doNotSetState?: boolean
   ) {
-    const runner = this.visualizationRunnerForName(visualizationName, scene, audioSource);
+    this.setState({ visualizerExtraDisplay: null });
+    const visualizationConfig: Visualization.Config = {
+      scene,
+      audioSource,
+      setExtraDisplay: (element: HTMLElement) => { this.setState({ visualizerExtraDisplay: element }); }
+    };
+    const vis = Visualizations.create(visualizationName, visualizationConfig);
+    const runner = new VisualizationRunner(vis);
+    runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
     const values = {
       visualizationRunner: runner,
       visualizationName: visualizationName,
@@ -606,7 +617,8 @@ class App extends React.Component<{}, State> {
       analogInputs: undefined,
       selectedAnalogInputId: null,
       controllerState: new ControllerState(),
-      audioSource: null
+      audioSource: null,
+      visualizerExtraDisplay: null
     };
   })();
 }

@@ -11,6 +11,7 @@ import * as TimeseriesData from "./TimeseriesData";
 export interface Config {
   readonly scene: Scene;
   readonly audioSource: AudioNode | null;
+  setExtraDisplay: (element: HTMLElement) => void;
 }
 
 export interface FrameContext {

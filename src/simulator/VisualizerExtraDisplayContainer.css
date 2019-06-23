@@ -1,0 +1,8 @@
+.VisualizerExtraDisplayContainer {
+  position: absolute;
+  background-color: black;
+  color: white;
+  border: 1px solid gray;
+  right: 5px;
+  bottom: 5px;
+}

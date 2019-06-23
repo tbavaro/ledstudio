@@ -17,6 +17,7 @@ import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization"
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
+import TestVisualizerExtraDisplayVisualization from "./visualizations/TestVisualizerExtraDisplayVisualization";
 
 const visFuncs = {
   "glowWave": GlowWaveVisualization,
@@ -35,7 +36,8 @@ const visFuncs = {
   "testKey": TestKeyVisualization,
   "testKeyFade": TestKeyFadeVisualization,
   "testStripAddress": TestStripAddressVisualization,
-  "testTimeseriesDataVisualization": TestTimeseriesDataVisualization
+  "testTimeseriesData": TestTimeseriesDataVisualization,
+  "testVisualizerExtraDisplay": TestVisualizerExtraDisplayVisualization
 };
 
 export type Name = keyof typeof visFuncs;
