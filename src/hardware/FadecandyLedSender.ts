@@ -51,9 +51,6 @@ export default class FadecandyLedSender {
 
       this.channelToBufferMap.set(channel, buffer);
     });
-
-    const orderedLedCounts = Array.from(channelToLedCountMap.entries()).sort((a, b) => a[0] - b[0]);
-    console.log(`initialized FadecandyLedSender with counts: ${JSON.stringify(orderedLedCounts)}`);
   }
 
   public send(colorRows: FixedArray<FixedArray<Colors.Color>>) {

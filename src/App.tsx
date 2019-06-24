@@ -427,11 +427,18 @@ class App extends React.Component<{}, State> {
     audioSource: AudioNode | null,
     doNotSetState?: boolean
   ) {
-    this.setState({ visualizerExtraDisplay: null });
+    let isInConfigure = true;
+    let newVisualizerExtraDisplay: HTMLElement | null = null;
     const visualizationConfig: Visualization.Config = {
       scene,
       audioSource,
-      setExtraDisplay: (element: HTMLElement) => { this.setState({ visualizerExtraDisplay: element }); }
+      setExtraDisplay: (element: HTMLElement) => {
+        if (isInConfigure) {
+          newVisualizerExtraDisplay = element;
+        } else {
+          this.setState({ visualizerExtraDisplay: element });
+        }
+      }
     };
     const vis = Visualizations.create(visualizationName, visualizationConfig);
     const runner = new VisualizationRunner(vis);
@@ -440,8 +447,10 @@ class App extends React.Component<{}, State> {
       visualizationRunner: runner,
       visualizationName: visualizationName,
       scene: scene,
-      audioSource: audioSource
+      audioSource: audioSource,
+      visualizerExtraDisplay: newVisualizerExtraDisplay
     };
+    isInConfigure = false;
     if (!doNotSetState) {
       this.setState(values);
     }
@@ -652,7 +661,6 @@ class App extends React.Component<{}, State> {
       selectedAnalogInputId: null,
       controllerState: new ControllerState(),
       audioSource: null,
-      visualizerExtraDisplay: null,
       simulationEnabled: this.initialSimulationEnabled()
     };
   })();
