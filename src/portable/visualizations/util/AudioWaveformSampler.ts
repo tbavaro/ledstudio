@@ -64,6 +64,7 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
   public readonly currentSamples: Float32Array;
   private readonly scriptNode: ScriptProcessorNode;
   private cachedRMSAmplitude: number = 0;
+  private cachedMaxAmplitude: number = 0;
 
   constructor(audioSource: AudioNode, numSamples: number) {
     this.currentSamples = new Float32Array(numSamples);
@@ -80,12 +81,14 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
     const channelRms: number[] = [];
     const inputBuffer = event.inputBuffer;
 
+    let myMax = 0;
     for (let i = 0; i < inputBuffer.numberOfChannels; ++i) {
       const data = inputBuffer.getChannelData(i);
       let myRms = 0;
       // tslint:disable-next-line:prefer-for-of
       for (let k = 0; k < data.length; ++k) {
         myRms += data[k] * data[k];
+        myMax = Math.max(myMax, Math.abs(data[k]));
       }
       myRms = Math.sqrt(myRms / data.length);
       channelRms.push(myRms);
@@ -94,6 +97,7 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
     let total = 0;
     channelRms.forEach(x => total += x);
     this.cachedRMSAmplitude = total / channelRms.length;
+    this.cachedMaxAmplitude = myMax;
   }
 
   public sample() {
@@ -102,7 +106,7 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
   }
 
   public get currentMaxAmplitude(): number {
-    throw new Error("not implemented");
+    return this.cachedMaxAmplitude;
   }
 
   public get currentRMSAmplitude() {

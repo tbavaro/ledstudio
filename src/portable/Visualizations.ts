@@ -17,7 +17,9 @@ import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisual
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
 import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashesVisualization";
+import TestAbletonLink from "./visualizations/TestAbletonLink";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
+import TestAudioAndAbletonLink from "./visualizations/TestAudioAndAbletonLink";
 import TestAudioWaveformVisualization from "./visualizations/TestAudioWaveformVisualization";
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
@@ -44,6 +46,8 @@ const visFuncs = {
   "pattern:wingFlap": PatternWingFlapVisualization,
   "pattern:zaps": PatternZapsVisualization,
   "pattern:zoom": PatternZoomVisualization,
+  "testAbletonLink": TestAbletonLink,
+  "testAudioAndAbletonLink": TestAudioAndAbletonLink,
   "testAnalogPulse": TestAnalogPulseVisualization,
   "testAudioWaveform": TestAudioWaveformVisualization,
   "testControllerDial": TestControllerDialVisualization,
