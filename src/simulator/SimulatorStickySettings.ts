@@ -10,16 +10,17 @@ export interface Settings {
   midiControllerInputId: string | null;
   midiOutputId: string | null;
   midiFilename: string;
+  simulationEnabled: boolean;
 }
 
 export function get<K extends keyof Settings>(attrs: {
   key: K,
   defaultValue: Settings[K],
-  validateFunc: (value: Settings[K]) => boolean
+  validateFunc?: (value: Settings[K]) => boolean
 }): Settings[K] {
   const json = window.localStorage.getItem(LOCAL_STORAGE_PREFIX + attrs.key) as string | null;
   const value = (json === null ? undefined : JSON.parse(json));
-  if (value === undefined || !attrs.validateFunc(value)) {
+  if (value === undefined || (attrs.validateFunc !== undefined && !attrs.validateFunc(value))) {
     return attrs.defaultValue;
   } else {
     return value;

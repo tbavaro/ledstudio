@@ -110,6 +110,11 @@ function getByStickyIdKeyOrFirst<T extends { id: string }>(
     defaultValue: (objs.length === 0 ? null : objs[0].id),
     validateFunc: createIsValidIdFunc(objs)
   });
+
+  if (typeof idOrNull !== "string") {
+    return null;
+  }
+
   return getById(objs, idOrNull);
 }
 
@@ -266,7 +271,9 @@ class App extends React.Component<{}, State> {
   }
 
   private handleClickSimulationToggleSwitch = () => {
-    this.setState({ simulationEnabled: !this.state.simulationEnabled });
+    const newValue = !this.state.simulationEnabled;
+    SimulatorStickySettings.set("simulationEnabled", newValue);
+    this.setState({ simulationEnabled: newValue });
   }
 
   private renderSidebarContents() {
@@ -611,6 +618,17 @@ class App extends React.Component<{}, State> {
     });
   }
 
+  private initialSimulationEnabled(): boolean {
+    if (window.location.search === "?disableSimulation") {
+      return false;
+    } else {
+      return SimulatorStickySettings.get({
+        key: "simulationEnabled",
+        defaultValue: true
+      });
+    }
+  }
+
   public state = ((): State => {
     const scene = this.initialScene();
     return {
@@ -635,7 +653,7 @@ class App extends React.Component<{}, State> {
       controllerState: new ControllerState(),
       audioSource: null,
       visualizerExtraDisplay: null,
-      simulationEnabled: (window.location.search !== "?disableSimulation")
+      simulationEnabled: this.initialSimulationEnabled()
     };
   })();
 }
