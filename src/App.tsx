@@ -76,11 +76,10 @@ interface State {
   controllerState: ControllerState;
   audioSource: AudioNode | null;
   visualizerExtraDisplay: HTMLElement | null;
+  simulationEnabled: boolean;
 }
 
 type AllActions = RightSidebar.Actions;
-
-const ENABLE_SIMULATION = (window.location.search !== "?disableSimulation");
 
 function tryGetById<T extends { id: string}>(objs: ReadonlyArray<T>, id: string | null): T | null | undefined {
   if (id === null) {
@@ -209,7 +208,7 @@ class App extends React.Component<{}, State> {
         <div className="App-viewportGroup">
           <div className="App-viewportContainer">
             {
-              ENABLE_SIMULATION
+              this.state.simulationEnabled
                 ? (
                     <SimulationViewport
                       scene={this.state.scene}
@@ -226,6 +225,7 @@ class App extends React.Component<{}, State> {
                     <VisualizerExtraDisplayContainer element={this.state.visualizerExtraDisplay} />
                   )
             }
+            {this.renderSimulationToggleSwitch()}
             <TimingStatsView getTimings={this.getTimings} message2={this.getMessage2}/>
           </div>
           <div className="App-analogAudioViewContainer">
@@ -252,6 +252,21 @@ class App extends React.Component<{}, State> {
         </div>
       </div>
     );
+  }
+
+  private renderSimulationToggleSwitch() {
+    return (
+      <div
+        className={"App-simulationToggleSwitch" + (this.state.simulationEnabled ? " enabled" : "")}
+        onClick={this.handleClickSimulationToggleSwitch}
+      >
+        { this.state.simulationEnabled ? "Disable simulation" : "Simulation is disabled — click here to enable" }
+      </div>
+    );
+  }
+
+  private handleClickSimulationToggleSwitch = () => {
+    this.setState({ simulationEnabled: !this.state.simulationEnabled });
   }
 
   private renderSidebarContents() {
@@ -535,7 +550,7 @@ class App extends React.Component<{}, State> {
     const result = {
       visualizationMillis: this.state.visualizationRunner.averageRenderTime,
       fadeCandyMillis: (fadecandyLedSender === undefined ? 0 : fadecandyLedSender.averageSendTime),
-      renderMillis: (ENABLE_SIMULATION ? this.renderTimingHelper.movingAverage : 0),
+      renderMillis: (this.state.simulationEnabled ? this.renderTimingHelper.movingAverage : 0),
       framesRenderedSinceLastCall: this.framesRenderedSinceLastTimingsCall
     };
     this.framesRenderedSinceLastTimingsCall = 0;
@@ -619,7 +634,8 @@ class App extends React.Component<{}, State> {
       selectedAnalogInputId: null,
       controllerState: new ControllerState(),
       audioSource: null,
-      visualizerExtraDisplay: null
+      visualizerExtraDisplay: null,
+      simulationEnabled: (window.location.search !== "?disableSimulation")
     };
   })();
 }

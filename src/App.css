@@ -47,3 +47,18 @@
   font-size: 0.8em;
 }
 
+.App-simulationToggleSwitch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 4px;
+  background-color: red;
+  color: yellow;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.App-simulationToggleSwitch.enabled {
+  background-color: #222;
+  color: gray;
+}
