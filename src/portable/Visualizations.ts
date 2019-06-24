@@ -16,6 +16,7 @@ import PatternSparklesVisualization from "./visualizations/PatternSparklesVisual
 import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
+import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashesVisualization";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestAudioWaveformVisualization from "./visualizations/TestAudioWaveformVisualization";
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
@@ -28,6 +29,7 @@ import TestVisualizerExtraDisplayVisualization from "./visualizations/TestVisual
 const visFuncs = {
   "glowWave": GlowWaveVisualization,
   "centerSpread": CenterSpreadVisualization,
+  "sparklesAndFlashes": SparklesAndFlashesVisualization,
   "pattern:clock": PatternClockVisualization,
   "pattern:dot": PatternDotVisualization,
   "pattern:dot2": PatternDot2Visualization,

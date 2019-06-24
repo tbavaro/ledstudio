@@ -18,6 +18,14 @@ export default class ColorRow extends FixedArray<Colors.Color> {
     this.set(i, Colors.add(this.get(i), color));
   }
 
+  public addAll(colorToAdd: Colors.Color) {
+    this.forEach((color, i) => this.set(i, Colors.add(color, colorToAdd)));
+  }
+
+  public multiplyAll(factor: number) {
+    this.forEach((color, i) => this.set(i, Colors.multiply(color, factor)));
+  }
+
   public copyFancy(source: ColorRow, options?: {
     derezAmount?: number;
     multiplyBy?: number
