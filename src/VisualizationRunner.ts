@@ -7,16 +7,18 @@ import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
-import { MovingAverageHelper } from "./util/Utils";
+import * as Visualizations from "./portable/Visualizations";
+
+import { MovingAverageHelper, removeFirst } from "./util/Utils";
 
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
+import Scene from "./scenes/Scene";
 
 class MyFrameContext implements Visualization.FrameContext {
   public elapsedMillis: number;
   public pianoState: PianoHelpers.VisualizationStateHelper;
   public controllerState: ControllerState;
   public frameHeatmapValues: number[] | undefined;
-  public frameTimeseriesPoints: TimeseriesData.PointDef[] | undefined;
 
   constructor() {
     const UNSET = "<unset>" as any;
@@ -33,14 +35,6 @@ class MyFrameContext implements Visualization.FrameContext {
     }
   }
 
-  public setFrameTimeseriesPoints(points: TimeseriesData.PointDef[]) {
-    if (this.frameTimeseriesPoints === undefined) {
-      this.frameTimeseriesPoints = points;
-    } else {
-      throw new Error("frame timeseries points set multiple times");
-    }
-  }
-
   public startFrame() {
     this.pianoState.startFrame();
   }
@@ -49,12 +43,80 @@ class MyFrameContext implements Visualization.FrameContext {
     this.elapsedMillis = elapsedMillis;
     this.controllerState = controllerState;
     this.pianoState.endFrame();
-    this.frameTimeseriesPoints = undefined;
     this.frameHeatmapValues = undefined;
   }
 
   public applyPianoEvent(event: PianoEvent) {
     this.pianoState.applyEvent(event);
+  }
+}
+
+class MyTimeSeriesValueSetter implements Visualization.TimeSeriesValueSetter {
+  public readonly data: TimeseriesData.PointDef;
+
+  constructor(color: Colors.Color) {
+    this.data = {
+      color: color,
+      value: null
+    };
+  }
+
+  public reset() {
+    this.set(null);
+  }
+
+  public set(value: number | null) {
+    this.data.value = value;
+  }
+}
+
+const DEFAULT_COLOR_ORDER = [
+  Colors.WHITE,
+  Colors.BLUE,
+  Colors.RED,
+  Colors.YELLOW,
+  Colors.GREEN,
+  Colors.ORANGE,
+  Colors.CYAN,
+  Colors.PURPLE,
+  Colors.CHARTREUSE
+];
+
+class TimeSeriesHelper {
+  private readonly remainingDefaultColors = [...DEFAULT_COLOR_ORDER].reverse();
+  public readonly data: TimeseriesData.PointDef[] = [];
+  private readonly setters: MyTimeSeriesValueSetter[] = [];
+
+  public createTimeSeries = (attrs?: {
+    color?: Colors.Color
+  }) => {
+    attrs = attrs || {};
+
+    let color: Colors.Color;
+    if (attrs.color === undefined) {
+      color = this.nextDefaultColor();
+    } else {
+      color = attrs.color;
+      removeFirst(this.remainingDefaultColors, attrs.color);
+    }
+
+    const setter = new MyTimeSeriesValueSetter(color);
+    this.data.push(setter.data);
+    this.setters.push(setter);
+
+    return setter;
+  }
+
+  private nextDefaultColor(): Colors.Color {
+    const color = this.remainingDefaultColors.pop();
+    if (color === undefined) {
+      throw new Error("all default colors were used");
+    }
+    return color;
+  }
+
+  public resetAll() {
+    this.setters.forEach(s => s.reset());
   }
 }
 
@@ -66,11 +128,25 @@ export default class VisualizationRunner {
   public simulationLedStrip?: SendableLedStrip;
   private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
   private readonly frameContext: MyFrameContext;
+  private readonly timeSeriesHelper: TimeSeriesHelper;
 
-  constructor(visualization: Visualization.default) {
-    this.visualization = visualization;
+  constructor(attrs: {
+    visualizationName: Visualizations.Name,
+    scene: Scene,
+    audioSource: AudioNode | null,
+    setVisualizerExtraDisplay: (element: HTMLElement) => void
+  }) {
+    this.timeSeriesHelper = new TimeSeriesHelper();
+    const visualizationConfig: Visualization.Config = {
+      scene: attrs.scene,
+      audioSource: attrs.audioSource,
+      setExtraDisplay: attrs.setVisualizerExtraDisplay,
+      createTimeSeries: this.timeSeriesHelper.createTimeSeries,
+      // createDialControl: (): Visualization.ControllerDialValueGetter => { throw new Error("unsupported"); }
+    };
+    this.visualization = Visualizations.create(attrs.visualizationName, visualizationConfig);
     this.timingHelper = new MovingAverageHelper(20);
-    this.adjustedLedRows = visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
+    this.adjustedLedRows = this.visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
     this.frameContext = new MyFrameContext();
   }
 
@@ -81,6 +157,7 @@ export default class VisualizationRunner {
     }
 
     // collect state
+    this.timeSeriesHelper.resetAll();
     this.frameContext.endFrame(
       startTime - this.lastRenderTime,
       controllerState
@@ -89,7 +166,6 @@ export default class VisualizationRunner {
     // render into the LED strip
     this.visualization.render(this.frameContext);
     const frameHeatmapValues = this.frameContext.frameHeatmapValues || [];
-    const frameTimeseriesPoints = this.frameContext.frameTimeseriesPoints || [];
 
     this.frameContext.startFrame();
     this.lastRenderTime = startTime;
@@ -104,7 +180,7 @@ export default class VisualizationRunner {
 
     return {
       frameHeatmapValues: frameHeatmapValues,
-      frameTimeseriesPoints: frameTimeseriesPoints
+      frameTimeseriesPoints: this.timeSeriesHelper.data
     };
   }
 

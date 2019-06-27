@@ -6,12 +6,39 @@ import ControllerState from "./ControllerState";
 import FixedArray from "./FixedArray";
 import LedInfo from "./LedInfo";
 import PianoState from "./PianoState";
-import * as TimeseriesData from "./TimeseriesData";
+
+export interface TimeSeriesValueSetter {
+  // value should be between 0 and 1
+  set: (value: number | null) => void;
+}
+
+// export interface ControllerDialValueGetter {
+//   // value will be between 0 and 1
+//   get: () => number;
+// }
 
 export interface Config {
   readonly scene: Scene;
   readonly audioSource: AudioNode | null;
   setExtraDisplay: (element: HTMLElement) => void;
+
+  createTimeSeries: (attrs?: {
+    // if `color` is not defined, will try to pick something reasonable
+    color?: Colors.Color
+  }) => TimeSeriesValueSetter;
+
+  // createDialControl: (attrs?: {
+  //   label?: string;
+
+  //   // if not specified, will use the next unused dial
+  //   // - this is 1-indexed, as that is how they are labeled on the device
+  //   // - dial #8 is reserved for global brightness; visualizations can still
+  //   //   read it and set its initial value though
+  //   dialNumber?: number;
+
+  //   // default 0
+  //   initialValue?: number;
+  // }) => ControllerDialValueGetter;
 }
 
 export interface FrameContext {
@@ -22,7 +49,6 @@ export interface FrameContext {
   controllerState: ControllerState;
 
   setFrameHeatmapValues: (data: number[]) => void;
-  setFrameTimeseriesPoints: (data: TimeseriesData.PointDef[]) => void;
 }
 
 export default abstract class Visualization {

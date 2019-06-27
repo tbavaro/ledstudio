@@ -6,10 +6,11 @@ import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
 
 
 export default class TestAudioAndAbletonLink extends Visualization.default {
-
   private link: AbletonLinkConnect;
   private readonly analyserHelpers: ReturnType<typeof createAnalyserHelpers> | null;
-
+  private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly loudnessTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly currentRMSAmplitudeTimeSeries: Visualization.TimeSeriesValueSetter;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -21,6 +22,10 @@ export default class TestAudioAndAbletonLink extends Visualization.default {
     } else {
       this.analyserHelpers = null;
     }
+
+    this.duringBeatTimeSeries = config.createTimeSeries();
+    this.loudnessTimeSeries = config.createTimeSeries({ color: Colors.RED });
+    this.currentRMSAmplitudeTimeSeries = config.createTimeSeries({ color: Colors.GREEN });
   }
 
 
@@ -38,20 +43,9 @@ export default class TestAudioAndAbletonLink extends Visualization.default {
       row.fill(duringBeat ? loudness * Colors.WHITE : Colors.BLACK);
     });
 
-    context.setFrameTimeseriesPoints([
-      {
-        color: Colors.WHITE,
-        value: duringBeat ? 1 : 0
-      },
-      {
-        color: Colors.RED,
-        value: loudness
-      },
-      {
-        color: Colors.GREEN,
-        value: this.analyserHelpers.direct.currentRMSAmplitude
-      }
-    ]);
+    this.duringBeatTimeSeries.set(duringBeat ? 1 : 0);
+    this.loudnessTimeSeries.set(loudness);
+    this.currentRMSAmplitudeTimeSeries.set(this.analyserHelpers.direct.currentRMSAmplitude);
   }
 }
 

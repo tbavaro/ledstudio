@@ -47,10 +47,12 @@ class BasicFFTHelper {
 
 export default class TestAnalogPulseVisualization extends Visualization.default {
   private readonly fft: BasicFFTHelper | null;
+  private readonly pulseValueTimeSeries: Visualization.TimeSeriesValueSetter;
 
   constructor(config: Visualization.Config) {
     super(config);
     this.fft = (config.audioSource === null ? null : new BasicFFTHelper(config.audioSource));
+    this.pulseValueTimeSeries = config.createTimeSeries();
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -79,12 +81,6 @@ export default class TestAnalogPulseVisualization extends Visualization.default 
     });
 
     context.setFrameHeatmapValues(Array.from(analogFrequencyData.values()).map(v => v / 255));
-
-    context.setFrameTimeseriesPoints([
-      {
-        color: Colors.WHITE,
-        value: pulseValue
-      }
-    ]);
+    this.pulseValueTimeSeries.set(pulseValue);
   }
 }

@@ -3,12 +3,17 @@ import * as Visualization from "../base/Visualization";
 import AbletonLinkConnect from "./util/AbletonLinkConnect";
 
 export default class TestAbletonLink extends Visualization.default {
-
-  private link: AbletonLinkConnect;
+  private readonly link: AbletonLinkConnect;
+  private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly progressToNextBeatTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly timeSinceLastBeatTimeSeries: Visualization.TimeSeriesValueSetter;
 
   constructor(config: Visualization.Config) {
     super(config);
     this.link = new AbletonLinkConnect();
+    this.duringBeatTimeSeries = config.createTimeSeries();
+    this.timeSinceLastBeatTimeSeries = config.createTimeSeries();
+    this.progressToNextBeatTimeSeries = config.createTimeSeries();
   }
 
 
@@ -20,19 +25,8 @@ export default class TestAbletonLink extends Visualization.default {
       row.fill(duringBeat ? Colors.WHITE : Colors.BLACK);
     });
 
-    context.setFrameTimeseriesPoints([
-      {
-        color: Colors.WHITE,
-        value: duringBeat ? 1 : 0
-      },
-      {
-        color: Colors.RED,
-        value: this.link.progressToNextBeat()
-      },
-      {
-        color: Colors.BLUE,
-        value: this.link.timeSinceLastBeat()
-      }
-    ]);
+    this.duringBeatTimeSeries.set(duringBeat ? 1 : 0);
+    this.progressToNextBeatTimeSeries.set(this.link.progressToNextBeat());
+    this.timeSinceLastBeatTimeSeries.set(this.link.timeSinceLastBeat());
   }
 }

@@ -17,6 +17,12 @@ const PERIOD = Math.PI * 2 / SPEED;
 
 class PureWingFlapVisualization extends Visualization.default {
   private phase = 0;
+  private readonly positionTimeSeries: Visualization.TimeSeriesValueSetter;
+
+  constructor(config: Visualization.Config) {
+    super(config);
+    this.positionTimeSeries = config.createTimeSeries();
+  }
 
   public render(context: Visualization.FrameContext): void {
     const { elapsedMillis } = context;
@@ -40,10 +46,7 @@ class PureWingFlapVisualization extends Visualization.default {
       }
     });
 
-    context.setFrameTimeseriesPoints([{
-      color: Colors.WHITE,
-      value: 1 - positionNormalized
-    }]);
+    this.positionTimeSeries.set(1 - positionNormalized);
   }
 }
 

@@ -2,7 +2,6 @@ import MIDIFile from "midifile";
 import * as React from "react";
 
 import ControllerState from "./portable/base/ControllerState";
-import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as Visualizations from "./portable/Visualizations";
@@ -429,19 +428,19 @@ class App extends React.Component<{}, State> {
   ) {
     let isInConfigure = true;
     let newVisualizerExtraDisplay: HTMLElement | null = null;
-    const visualizationConfig: Visualization.Config = {
-      scene,
-      audioSource,
-      setExtraDisplay: (element: HTMLElement) => {
-        if (isInConfigure) {
-          newVisualizerExtraDisplay = element;
-        } else {
-          this.setState({ visualizerExtraDisplay: element });
-        }
+    const setVisualizerExtraDisplay = (element: HTMLElement) => {
+      if (isInConfigure) {
+        newVisualizerExtraDisplay = element;
+      } else {
+        this.setState({ visualizerExtraDisplay: element });
       }
     };
-    const vis = Visualizations.create(visualizationName, visualizationConfig);
-    const runner = new VisualizationRunner(vis);
+    const runner = new VisualizationRunner({
+      visualizationName,
+      scene,
+      audioSource,
+      setVisualizerExtraDisplay
+    });
     runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
     const values = {
       visualizationRunner: runner,

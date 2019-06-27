@@ -92,6 +92,11 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
   private readonly analyserHelpers2: ReturnType<typeof createAnalyserHelpers> | null;
   private readonly canvasHelper: FloatDataCanvasHelper | null;
 
+  private readonly lowTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly highTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly low2TimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly high2TimeSeries: Visualization.TimeSeriesValueSetter;
+
   constructor(config: Visualization.Config) {
     super(config);
 
@@ -106,6 +111,11 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
       this.analyserHelpers2 = null;
       this.canvasHelper = null;
     }
+
+    this.lowTimeSeries = config.createTimeSeries({ color: Colors.BLUE });
+    this.highTimeSeries = config.createTimeSeries({ color: Colors.RED });
+    this.low2TimeSeries = config.createTimeSeries({ color: Colors.BLUE });
+    this.high2TimeSeries = config.createTimeSeries({ color: Colors.RED });
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -121,27 +131,9 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
       this.canvasHelper.render(this.analyserHelpers.direct.currentSamples);
     }
 
-    context.setFrameTimeseriesPoints([
-      // {
-      //   color: Colors.WHITE,
-      //   value: directLevels.rms
-      // },
-      {
-        color: Colors.BLUE,
-        value: this.analyserHelpers.low.currentRMSAmplitude
-      },
-      {
-        color: Colors.RED,
-        value: this.analyserHelpers.high.currentRMSAmplitude
-      },
-      {
-        color: Colors.BLUE,
-        value: this.analyserHelpers2.low.currentRMSAmplitude + 0.5
-      },
-      {
-        color: Colors.RED,
-        value: this.analyserHelpers2.high.currentRMSAmplitude + 0.5
-      }
-    ]);
+    this.lowTimeSeries.set(this.analyserHelpers.low.currentRMSAmplitude);
+    this.highTimeSeries.set(this.analyserHelpers.high.currentRMSAmplitude);
+    this.low2TimeSeries.set(this.analyserHelpers2.low.currentRMSAmplitude + 0.5);
+    this.high2TimeSeries.set(this.analyserHelpers2.high.currentRMSAmplitude + 0.5);
   }
 }

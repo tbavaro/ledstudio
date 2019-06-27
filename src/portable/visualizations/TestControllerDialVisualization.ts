@@ -2,6 +2,17 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
 export default class TestControllerDialVisualization extends Visualization.default {
+  private readonly rTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly gTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly bTimeSeries: Visualization.TimeSeriesValueSetter;
+
+  constructor(config: Visualization.Config) {
+    super(config);
+    this.rTimeSeries = config.createTimeSeries({ color: Colors.RED });
+    this.gTimeSeries = config.createTimeSeries({ color: Colors.GREEN });
+    this.bTimeSeries = config.createTimeSeries({ color: Colors.BLUE });
+  }
+
   public render(context: Visualization.FrameContext): void {
     const { controllerState } = context;
 
@@ -27,19 +38,8 @@ export default class TestControllerDialVisualization extends Visualization.defau
       }
     });
 
-    context.setFrameTimeseriesPoints([
-      {
-        color: Colors.RED,
-        value: rValue
-      },
-      {
-        color: Colors.GREEN,
-        value: gValue
-      },
-      {
-        color: Colors.BLUE,
-        value: bValue
-      }
-    ]);
+    this.rTimeSeries.set(rValue);
+    this.gTimeSeries.set(gValue);
+    this.bTimeSeries.set(bValue);
   }
 }
