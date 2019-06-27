@@ -427,6 +427,7 @@ class App extends React.Component<{}, State> {
         this.setState({ visualizerExtraDisplay: element });
       }
     };
+    this.controllerState.reset();
     const runner = new VisualizationRunner({
       visualizationName,
       scene,

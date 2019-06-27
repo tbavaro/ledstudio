@@ -17,6 +17,17 @@ export default class ControllerState {
 
     // default the last dial to 1 since it's used as global brightness
     this.dialValues[7] = 1;
+
+    this.reset();
+  }
+
+  public reset() {
+    const oldBrightness = this.dialValues[7];
+
+    this.dialValues.fill(0);
+
+    // don't let a new visualization's brightness be 0
+    this.dialValues[7] = Math.max(0.05, oldBrightness);
   }
 
   public handleEvent(event: MidiEvent) {

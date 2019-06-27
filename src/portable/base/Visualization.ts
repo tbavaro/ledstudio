@@ -36,7 +36,7 @@ export interface Config {
     dialNumber?: number;
 
     // default 0
-    // initialValue?: number;
+    initialValue?: number;
   }) => ControllerDialValueGetter;
 }
 

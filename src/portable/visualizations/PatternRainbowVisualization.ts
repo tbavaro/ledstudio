@@ -1,6 +1,8 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const MAX_SPEED = 1;
+
 export default class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
   private offset = 0;
   private width = 88; // pixels per 360 degrees
@@ -10,14 +12,13 @@ export default class PatternRainbowVisualization extends Visualization.SingleRow
   constructor(config: Visualization.Config) {
     super(config, Math.max.apply(Math, config.scene.leds.map(arr => arr.length)));
 
-    this.speedDial = config.createDialControl();
+    this.speedDial = config.createDialControl({ initialValue: 0.6 });
   }
 
   public renderSingleRow(context: Visualization.FrameContext): void {
     const { elapsedMillis } = context;
 
-    const maxSpeed = 300 / 1000;
-    const speed = (this.speedDial.get() - 0.5) * -1 * maxSpeed;
+    const speed = (this.speedDial.get() - 0.5) * MAX_SPEED;
     this.offset = (this.offset + speed * elapsedMillis) % 360.0;
 
     const step = 360 / this.width;

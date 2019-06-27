@@ -142,16 +142,8 @@ class ControllerStateHelper {
   }
 
   public createDialControl = (attrs?: {
-    // label?: string;
-
-    // if not specified, will use the next unused dial
-    // - this is 1-indexed, as that is how they are labeled on the device
-    // - dial #8 is reserved for global brightness; visualizations can still
-    //   read it and set its initial value though
     dialNumber?: number;
-
-    // default 0
-    // initialValue?: number;
+    initialValue?: number;
   }): Visualization.ControllerDialValueGetter => {
     attrs = attrs || {};
 
@@ -160,6 +152,11 @@ class ControllerStateHelper {
       dialNumber = this.nextDialNumber();
     } else {
       dialNumber = attrs.dialNumber;
+    }
+
+    if (dialNumber >= 1 && dialNumber <= this.controllerState.dialValues.length) {
+      const initialValue = attrs.initialValue || 0;
+      this.controllerState.dialValues[dialNumber - 1] = initialValue;
     }
 
     return new MyControllerDialValueGetter(this.controllerState, dialNumber);
@@ -194,7 +191,10 @@ export default class VisualizationRunner {
   }) {
     this.timeSeriesHelper = new TimeSeriesHelper();
     const controllerStateHelper = new ControllerStateHelper(attrs.controllerState);
-    this.brightnessDial = controllerStateHelper.createDialControl({ dialNumber: 8 });
+    this.brightnessDial = controllerStateHelper.createDialControl({
+      dialNumber: 8,
+      initialValue: attrs.controllerState.dialValues[7]
+    });
     const visualizationConfig: Visualization.Config = {
       scene: attrs.scene,
       audioSource: attrs.audioSource,
