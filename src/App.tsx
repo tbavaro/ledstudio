@@ -72,7 +72,6 @@ interface State {
   midiOutputs: WebMidi.MIDIOutput[];
   analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
   selectedAnalogInputId: string | null;
-  controllerState: ControllerState;
   audioSource: AudioNode | null;
   visualizerExtraDisplay: HTMLElement | null;
   simulationEnabled: boolean;
@@ -125,6 +124,7 @@ class App extends React.Component<{}, State> {
   public readonly analogAudio = new AnalogAudio.default((newAudioSource: AudioNode | null) => {
     this.configureVisualization(this.state.visualizationName, this.state.scene, newAudioSource);
   });
+  private readonly controllerState = new ControllerState();
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -239,16 +239,10 @@ class App extends React.Component<{}, State> {
             <PianoView
               midiEventEmitter={this.midiEventEmitter}
             />
-            {
-              this.state.controllerState === null
-                ? null
-                : (
-                    <ControlsView
-                      controllerState={this.state.controllerState}
-                      ref={this.setControlsViewRef}
-                    />
-                  )
-            }
+            <ControlsView
+              controllerState={this.controllerState}
+              ref={this.setControlsViewRef}
+            />
           </div>
         </div>
         <div className="App-sidebarContainer">
@@ -352,10 +346,8 @@ class App extends React.Component<{}, State> {
         newValue.addEventListener("midimessage", this.onMidiControllerInputMessage);
       }
       this.setState({
-        midiControllerInput: newValue,
-        controllerState: new ControllerState()
+        midiControllerInput: newValue
       });
-      this.updateControlsView();
       SimulatorStickySettings.set("midiControllerInputId", newValue === null ? null : newValue.id);
     }
   }
@@ -439,7 +431,8 @@ class App extends React.Component<{}, State> {
       visualizationName,
       scene,
       audioSource,
-      setVisualizerExtraDisplay
+      setVisualizerExtraDisplay,
+      controllerState: this.controllerState
     });
     runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
     const values = {
@@ -499,9 +492,7 @@ class App extends React.Component<{}, State> {
   private onMidiControllerInputMessage = (message: WebMidi.MIDIMessageEvent) => {
     const event = new MidiEvent(message.data);
     this.midiControllerEventEmitter.fire(event);
-    if (this.state.controllerState !== null) {
-      this.state.controllerState.handleEvent(event);
-    }
+    this.controllerState.handleEvent(event);
     this.updateControlsView();
   }
 
@@ -551,7 +542,7 @@ class App extends React.Component<{}, State> {
     if (this.animating) {
       this.scheduleNextAnimationFrame();
 
-      const { frameHeatmapValues, frameTimeseriesPoints } = this.state.visualizationRunner.renderFrame(this.state.controllerState);
+      const { frameHeatmapValues, frameTimeseriesPoints } = this.state.visualizationRunner.renderFrame();
       ++this.framesRenderedSinceLastTimingsCall;
 
       if (this.analogAudioViewRef) {
@@ -658,7 +649,6 @@ class App extends React.Component<{}, State> {
       midiOutputs: [],
       analogInputs: undefined,
       selectedAnalogInputId: null,
-      controllerState: new ControllerState(),
       audioSource: null,
       simulationEnabled: this.initialSimulationEnabled()
     };

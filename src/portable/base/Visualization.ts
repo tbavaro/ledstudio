@@ -2,7 +2,6 @@ import Scene from "../../scenes/Scene";
 
 import ColorRow from "./ColorRow";
 import * as Colors from "./Colors";
-import ControllerState from "./ControllerState";
 import FixedArray from "./FixedArray";
 import LedInfo from "./LedInfo";
 import PianoState from "./PianoState";
@@ -12,10 +11,10 @@ export interface TimeSeriesValueSetter {
   set: (value: number | null) => void;
 }
 
-// export interface ControllerDialValueGetter {
-//   // value will be between 0 and 1
-//   get: () => number;
-// }
+export interface ControllerDialValueGetter {
+  // value will be between 0 and 1
+  get: () => number;
+}
 
 export interface Config {
   readonly scene: Scene;
@@ -27,26 +26,24 @@ export interface Config {
     color?: Colors.Color
   }) => TimeSeriesValueSetter;
 
-  // createDialControl: (attrs?: {
-  //   label?: string;
+  createDialControl: (attrs?: {
+    // label?: string;
 
-  //   // if not specified, will use the next unused dial
-  //   // - this is 1-indexed, as that is how they are labeled on the device
-  //   // - dial #8 is reserved for global brightness; visualizations can still
-  //   //   read it and set its initial value though
-  //   dialNumber?: number;
+    // if not specified, will use the next unused dial
+    // - this is 1-indexed, as that is how they are labeled on the device
+    // - dial #8 is reserved for global brightness; visualizations can still
+    //   read it and set its initial value though
+    dialNumber?: number;
 
-  //   // default 0
-  //   initialValue?: number;
-  // }) => ControllerDialValueGetter;
+    // default 0
+    // initialValue?: number;
+  }) => ControllerDialValueGetter;
 }
 
 export interface FrameContext {
   elapsedMillis: number;
 
   pianoState: PianoState;
-
-  controllerState: ControllerState;
 
   setFrameHeatmapValues: (data: number[]) => void;
 }

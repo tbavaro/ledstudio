@@ -17,14 +17,12 @@ import Scene from "./scenes/Scene";
 class MyFrameContext implements Visualization.FrameContext {
   public elapsedMillis: number;
   public pianoState: PianoHelpers.VisualizationStateHelper;
-  public controllerState: ControllerState;
   public frameHeatmapValues: number[] | undefined;
 
   constructor() {
     const UNSET = "<unset>" as any;
     this.elapsedMillis = UNSET;
     this.pianoState = new PianoHelpers.VisualizationStateHelper();
-    this.controllerState = UNSET;
   }
 
   public setFrameHeatmapValues(values: number[]) {
@@ -39,9 +37,8 @@ class MyFrameContext implements Visualization.FrameContext {
     this.pianoState.startFrame();
   }
 
-  public endFrame(elapsedMillis: number, controllerState: ControllerState) {
+  public endFrame(elapsedMillis: number) {
     this.elapsedMillis = elapsedMillis;
-    this.controllerState = controllerState;
     this.pianoState.endFrame();
     this.frameHeatmapValues = undefined;
   }
@@ -120,6 +117,63 @@ class TimeSeriesHelper {
   }
 }
 
+class MyControllerDialValueGetter implements Visualization.ControllerDialValueGetter {
+  public readonly get: () => number;
+
+  constructor(controllerState: ControllerState, dialNumber: number) {
+    if (dialNumber < 1 || dialNumber > controllerState.dialValues.length) {
+      throw new Error(`invalid dial number: ${dialNumber}`);
+    }
+
+    this.get = () => {
+      return controllerState.dialValues[dialNumber - 1];
+    };
+  }
+
+}
+
+class ControllerStateHelper {
+  private readonly controllerState: ControllerState;
+  private readonly unusedDialNumbers: number[];
+
+  constructor(controllerState: ControllerState) {
+    this.controllerState = controllerState;
+    this.unusedDialNumbers = [1, 2, 3, 4, 5, 6, 7].reverse();
+  }
+
+  public createDialControl = (attrs?: {
+    // label?: string;
+
+    // if not specified, will use the next unused dial
+    // - this is 1-indexed, as that is how they are labeled on the device
+    // - dial #8 is reserved for global brightness; visualizations can still
+    //   read it and set its initial value though
+    dialNumber?: number;
+
+    // default 0
+    // initialValue?: number;
+  }): Visualization.ControllerDialValueGetter => {
+    attrs = attrs || {};
+
+    let dialNumber: number;
+    if (attrs.dialNumber === undefined) {
+      dialNumber = this.nextDialNumber();
+    } else {
+      dialNumber = attrs.dialNumber;
+    }
+
+    return new MyControllerDialValueGetter(this.controllerState, dialNumber);
+  }
+
+  private nextDialNumber(): number {
+    const dialNumber = this.unusedDialNumbers.pop();
+    if (dialNumber === undefined) {
+      throw new Error("all dials were used");
+    }
+    return dialNumber;
+  }
+}
+
 export default class VisualizationRunner {
   public readonly visualization: Visualization.default;
   private readonly timingHelper: MovingAverageHelper;
@@ -129,20 +183,24 @@ export default class VisualizationRunner {
   private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
   private readonly frameContext: MyFrameContext;
   private readonly timeSeriesHelper: TimeSeriesHelper;
+  private readonly brightnessDial: Visualization.ControllerDialValueGetter;
 
   constructor(attrs: {
     visualizationName: Visualizations.Name,
     scene: Scene,
     audioSource: AudioNode | null,
-    setVisualizerExtraDisplay: (element: HTMLElement) => void
+    setVisualizerExtraDisplay: (element: HTMLElement) => void,
+    controllerState: ControllerState
   }) {
     this.timeSeriesHelper = new TimeSeriesHelper();
+    const controllerStateHelper = new ControllerStateHelper(attrs.controllerState);
+    this.brightnessDial = controllerStateHelper.createDialControl({ dialNumber: 8 });
     const visualizationConfig: Visualization.Config = {
       scene: attrs.scene,
       audioSource: attrs.audioSource,
       setExtraDisplay: attrs.setVisualizerExtraDisplay,
       createTimeSeries: this.timeSeriesHelper.createTimeSeries,
-      // createDialControl: (): Visualization.ControllerDialValueGetter => { throw new Error("unsupported"); }
+      createDialControl: controllerStateHelper.createDialControl
     };
     this.visualization = Visualizations.create(attrs.visualizationName, visualizationConfig);
     this.timingHelper = new MovingAverageHelper(20);
@@ -150,7 +208,7 @@ export default class VisualizationRunner {
     this.frameContext = new MyFrameContext();
   }
 
-  public renderFrame(controllerState: ControllerState) {
+  public renderFrame() {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
@@ -158,10 +216,7 @@ export default class VisualizationRunner {
 
     // collect state
     this.timeSeriesHelper.resetAll();
-    this.frameContext.endFrame(
-      startTime - this.lastRenderTime,
-      controllerState
-    );
+    this.frameContext.endFrame(startTime - this.lastRenderTime);
 
     // render into the LED strip
     this.visualization.render(this.frameContext);
@@ -175,8 +230,7 @@ export default class VisualizationRunner {
     this.timingHelper.addValue(visTimeMillis);
 
     // send
-    const multiplier = controllerState === null ? 1 : controllerState.dialValues[7];
-    this.sendToStrips(multiplier);
+    this.sendToStrips(this.brightnessDial.get());
 
     return {
       frameHeatmapValues: frameHeatmapValues,
