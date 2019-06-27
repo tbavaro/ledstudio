@@ -11,8 +11,12 @@ export interface TimeSeriesValueSetter {
   set: (value: number | null) => void;
 }
 
+export interface ControllerButtonStateGetter {
+  get: () => boolean;
+}
+
 export interface ControllerDialValueGetter {
-  // value will be between 0 and 1
+  // value will be between `minValue` and `maxValue` specified when it was created
   get: () => number;
 }
 
@@ -25,6 +29,15 @@ export interface Config {
     // if `color` is not defined, will try to pick something reasonable
     color?: Colors.Color
   }) => TimeSeriesValueSetter;
+
+
+  createButtonControl: (attrs?: {
+    // label?: string;
+
+    // if not specified, will use the next unused button
+    // - this is 1-indexed, as that is how they are labeled on the device
+    buttonNumber?: number;
+  }) => ControllerButtonStateGetter;
 
   createDialControl: (attrs?: {
     // label?: string;

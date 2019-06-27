@@ -118,10 +118,10 @@ class TimeSeriesHelper {
 }
 
 class MyControllerDialValueGetter implements Visualization.ControllerDialValueGetter {
+  private readonly controllerState: ControllerState;
   private readonly index: number;
   private readonly minValue: number;
   private readonly maxValue: number;
-  private readonly controllerState: ControllerState;
 
   constructor(attrs: {
     controllerState: ControllerState,
@@ -149,13 +149,36 @@ class MyControllerDialValueGetter implements Visualization.ControllerDialValueGe
   }
 }
 
+class MyControllerButtonStateGetter implements Visualization.ControllerButtonStateGetter {
+  private readonly controllerState: ControllerState;
+  private readonly index: number;
+
+  constructor(attrs: {
+    controllerState: ControllerState,
+    buttonNumber: number
+  }) {
+    const { buttonNumber, controllerState } = attrs;
+    this.controllerState = controllerState;
+    this.index = buttonNumber - 1;
+    if (this.index < 0 || this.index >= this.controllerState.buttonStates.length) {
+      throw new Error("invalid button number: " + attrs.buttonNumber);
+    }
+  }
+
+  public get() {
+    return this.controllerState.buttonStates[this.index];
+  }
+}
+
 class ControllerStateHelper {
   private readonly controllerState: ControllerState;
   private readonly unusedDialNumbers: number[];
+  private readonly unusedButtonNumbers: number[];
 
   constructor(controllerState: ControllerState) {
     this.controllerState = controllerState;
     this.unusedDialNumbers = [1, 2, 3, 4, 5, 6, 7].reverse();
+    this.unusedButtonNumbers = [1, 2, 3, 4, 5, 6, 7, 8].reverse();
   }
 
   public createDialControl = (attrs?: {
@@ -171,6 +194,7 @@ class ControllerStateHelper {
       dialNumber = this.nextDialNumber();
     } else {
       dialNumber = attrs.dialNumber;
+      removeFirst(this.unusedDialNumbers, dialNumber);
     }
 
     const minValue = valueOrDefault(attrs.minValue, 0);
@@ -197,6 +221,33 @@ class ControllerStateHelper {
       throw new Error("all dials were used");
     }
     return dialNumber;
+  }
+
+  public createButtonControl = (attrs?: {
+    buttonNumber?: number;
+  }): Visualization.ControllerButtonStateGetter => {
+    attrs = attrs || {};
+
+    let buttonNumber: number;
+    if (attrs.buttonNumber === undefined) {
+      buttonNumber = this.nextButtonNumber();
+    } else {
+      buttonNumber = attrs.buttonNumber;
+      removeFirst(this.unusedButtonNumbers, buttonNumber);
+    }
+
+    return new MyControllerButtonStateGetter({
+      controllerState: this.controllerState,
+      buttonNumber: buttonNumber
+    });
+  }
+
+  private nextButtonNumber(): number {
+    const buttonNumber = this.unusedButtonNumbers.pop();
+    if (buttonNumber === undefined) {
+      throw new Error("all buttons were used");
+    }
+    return buttonNumber;
   }
 }
 
@@ -229,6 +280,7 @@ export default class VisualizationRunner {
       audioSource: attrs.audioSource,
       setExtraDisplay: attrs.setVisualizerExtraDisplay,
       createTimeSeries: this.timeSeriesHelper.createTimeSeries,
+      createButtonControl: controllerStateHelper.createButtonControl,
       createDialControl: controllerStateHelper.createDialControl
     };
     this.visualization = Visualizations.create(attrs.visualizationName, visualizationConfig);
