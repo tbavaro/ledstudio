@@ -36,6 +36,12 @@ export interface Config {
     dialNumber?: number;
 
     // default 0
+    minValue?: number;
+
+    // default 1; must be > minValue
+    maxValue?: number;
+
+    // defaults to `minValue`
     initialValue?: number;
   }) => ControllerDialValueGetter;
 }

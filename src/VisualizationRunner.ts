@@ -9,7 +9,7 @@ import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 import * as Visualizations from "./portable/Visualizations";
 
-import { MovingAverageHelper, removeFirst } from "./util/Utils";
+import { bracket, MovingAverageHelper, removeFirst, valueOrDefault } from "./util/Utils";
 
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
 import Scene from "./scenes/Scene";
@@ -118,18 +118,35 @@ class TimeSeriesHelper {
 }
 
 class MyControllerDialValueGetter implements Visualization.ControllerDialValueGetter {
-  public readonly get: () => number;
+  private readonly index: number;
+  private readonly minValue: number;
+  private readonly maxValue: number;
+  private readonly controllerState: ControllerState;
 
-  constructor(controllerState: ControllerState, dialNumber: number) {
-    if (dialNumber < 1 || dialNumber > controllerState.dialValues.length) {
-      throw new Error(`invalid dial number: ${dialNumber}`);
+  constructor(attrs: {
+    controllerState: ControllerState,
+    dialNumber: number,
+    minValue: number,
+    maxValue: number
+  }) {
+    const { dialNumber, controllerState } = attrs;
+    this.controllerState = controllerState;
+    this.index = dialNumber - 1;
+    if (this.index < 0 || this.index >= this.controllerState.dialValues.length) {
+      throw new Error("invalid dial number: " + attrs.dialNumber);
     }
-
-    this.get = () => {
-      return controllerState.dialValues[dialNumber - 1];
-    };
+    this.minValue = attrs.minValue;
+    this.maxValue = attrs.maxValue;
   }
 
+  public get() {
+    return this.controllerState.dialValues[this.index] * (this.maxValue - this.minValue) + this.minValue;
+  }
+
+  public set(value: number) {
+    value = bracket(this.minValue, this.maxValue, value);
+    this.controllerState.dialValues[this.index] = (value - this.minValue) / (this.maxValue - this.minValue);
+  }
 }
 
 class ControllerStateHelper {
@@ -144,6 +161,8 @@ class ControllerStateHelper {
   public createDialControl = (attrs?: {
     dialNumber?: number;
     initialValue?: number;
+    minValue?: number;
+    maxValue?: number;
   }): Visualization.ControllerDialValueGetter => {
     attrs = attrs || {};
 
@@ -154,12 +173,22 @@ class ControllerStateHelper {
       dialNumber = attrs.dialNumber;
     }
 
-    if (dialNumber >= 1 && dialNumber <= this.controllerState.dialValues.length) {
-      const initialValue = attrs.initialValue || 0;
-      this.controllerState.dialValues[dialNumber - 1] = initialValue;
+    const minValue = valueOrDefault(attrs.minValue, 0);
+    const maxValue = valueOrDefault(attrs.maxValue, 1);
+    if (maxValue <= minValue) {
+      throw new Error("dial minValue must be less than maxValue");
     }
 
-    return new MyControllerDialValueGetter(this.controllerState, dialNumber);
+    const helper = new MyControllerDialValueGetter({
+      controllerState: this.controllerState,
+      dialNumber: dialNumber,
+      minValue: minValue,
+      maxValue: maxValue
+    });
+
+    helper.set(valueOrDefault(attrs.initialValue, minValue));
+
+    return helper;
   }
 
   private nextDialNumber(): number {
