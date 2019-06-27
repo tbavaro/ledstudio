@@ -42,7 +42,6 @@ interface ModelDef {
   url: string;
   scale?: Vector3;
   translateBy?: Vector3;
-  floorSizeOverride?: number;
 }
 
 interface CameraDef {
@@ -58,7 +57,8 @@ interface SceneDef {
   name: string;
   initialDisplayValues?: () => { [k: string]: string | number };
   camera?: CameraDef;
-  model: ModelDef;
+  model?: ModelDef;
+  floorSizeOverride?: number;
   extraObjects?: ExtraObjectFunc[];
   leds: LedsDef;
 }
@@ -111,14 +111,20 @@ export class SceneImpl implements Scene.default {
   public async loadModel(): Promise<Three.Object3D> {
     if (this.lazyModelPromise === undefined) {
       this.lazyModelPromise = promisify<Three.Object3D>(callback => {
+        const modelDef = this.def.model;
+        if (modelDef === undefined) {
+          callback(null, new Three.Object3D());
+          return;
+        }
+
         const loader = new GLTFLoader();
         loader.load(
-          this.def.model.url,
+          modelDef.url,
           /*onLoad=*/(gltf) => {
             let model = gltf.scene;
-            if (this.def.model.scale !== undefined) {
+            if (modelDef.scale !== undefined) {
               model = model.clone();
-              model.scale.copy(this.def.model.scale);
+              model.scale.copy(modelDef.scale);
             }
 
             const boundingBox = new Three.Box3().setFromObject(model);
@@ -127,17 +133,19 @@ export class SceneImpl implements Scene.default {
             model.translateX(-center.x);
             model.translateY(-bottomY);
             model.translateZ(-center.z);
-            if (this.def.model.translateBy) {
-              model.position.add(this.def.model.translateBy);
+            if (modelDef.translateBy) {
+              model.position.add(modelDef.translateBy);
             }
-            callback(null, this.addExtraObjects(model));
+            callback(null, model);
           },
           /*onProgress=*/undefined,
           /*onError*/(error) => {
             callback(new Error(`gltf error: ${error}`), null as any);
           }
         );
-      })();
+      })().then(scene => {
+        return this.addExtraObjects(scene);
+      });
     }
     return this.lazyModelPromise;
   }
@@ -148,8 +156,8 @@ export class SceneImpl implements Scene.default {
     scene.add(model);
 
     // floor
-    if (this.def.model.floorSizeOverride !== 0) {
-      const floorSize = this.def.model.floorSizeOverride || FLOOR_SIZE_DEFAULT;
+    if (this.def.floorSizeOverride !== 0) {
+      const floorSize = this.def.floorSizeOverride || FLOOR_SIZE_DEFAULT;
       const floorGeometry = new Three.PlaneGeometry(floorSize, floorSize).rotateX(-1 * Math.PI / 2);
       const floor = new Three.Mesh(floorGeometry, FLOOR_MATERIAL);
 
@@ -382,15 +390,16 @@ function djTables(attrs: {
   return scene;
 }
 
-function createKeyboardVenue(attrs: {
-  keyboardInFront: boolean
+function createBurrowVenue(attrs: {
+  keyboardInFront: boolean,
+  hideKeyboard?: boolean
 }) {
   const tablesTranslateZ = (attrs.keyboardInFront ? 1.5 : -1);
   const keyboardTranslateZ = tablesTranslateZ + (attrs.keyboardInFront ? -1.5 : 1.35);
   const shoulderHeight = 57 * INCH;
 
   return {
-    model: {
+    model: attrs.hideKeyboard ? undefined : {
       url: "./keyboard.gltf",
       scale: new Vector3(0.1, 0.1, 0.12),
       translateBy: new Vector3(0, 0, keyboardTranslateZ)
@@ -526,7 +535,9 @@ function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
     };
   });
 
-  const kbVenue = createKeyboardVenue({ keyboardInFront: false });
+  const kbVenue = createBurrowVenue({
+    keyboardInFront: false
+  });
   kbVenue.extraObjects.push(boxHelper({
     width: 4 * INCH,
     height: 65 * INCH,
@@ -689,7 +700,10 @@ function createRealWingsSceneDef(name: string) {
 
   const postPositionX = smallDeltaX + 0.5 * interTriangleSpacing;
 
-  const kbVenue = createKeyboardVenue({ keyboardInFront: false });
+  const kbVenue = createBurrowVenue({
+    keyboardInFront: false,
+    hideKeyboard: true
+  });
   kbVenue.extraObjects.push(boxHelper({
     width: 4 * INCH,
     height: 65 * INCH,
@@ -719,7 +733,7 @@ function createRealWingsSceneDef(name: string) {
 
 registerScenes([
   {
-    ...createKeyboardVenue({ keyboardInFront: true }),
+    ...createBurrowVenue({ keyboardInFront: true }),
     name: "keyboard:3stripes",
     camera: {
       startPosition: new Vector3(0, 1.1, -1.5),
