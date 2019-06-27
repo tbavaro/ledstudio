@@ -2,9 +2,9 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
 export default class TestControllerDialVisualization extends Visualization.default {
-  private readonly rDial: Visualization.ControllerDialValueGetter;
-  private readonly gDial: Visualization.ControllerDialValueGetter;
-  private readonly bDial: Visualization.ControllerDialValueGetter;
+  private readonly rDial: Visualization.DialControl;
+  private readonly gDial: Visualization.DialControl;
+  private readonly bDial: Visualization.DialControl;
 
   private readonly rTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly gTimeSeries: Visualization.TimeSeriesValueSetter;
@@ -23,9 +23,9 @@ export default class TestControllerDialVisualization extends Visualization.defau
   }
 
   public render(context: Visualization.FrameContext): void {
-    const rValue = this.rDial.get();
-    const gValue = this.gDial.get();
-    const bValue = this.bDial.get();
+    const rValue = this.rDial.value;
+    const gValue = this.gDial.value;
+    const bValue = this.bDial.value;
 
     this.ledRows.forEach(row => {
       const midPoint = Math.floor(row.length / 2);

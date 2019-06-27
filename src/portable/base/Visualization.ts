@@ -11,13 +11,13 @@ export interface TimeSeriesValueSetter {
   set: (value: number | null) => void;
 }
 
-export interface ControllerButtonStateGetter {
-  get: () => boolean;
+export interface ButtonControl {
+  readonly value: boolean;
 }
 
-export interface ControllerDialValueGetter {
+export interface DialControl {
   // value will be between `minValue` and `maxValue` specified when it was created
-  get: () => number;
+  readonly value: number;
 }
 
 export interface Config {
@@ -37,7 +37,7 @@ export interface Config {
     // if not specified, will use the next unused button
     // - this is 1-indexed, as that is how they are labeled on the device
     buttonNumber?: number;
-  }) => ControllerButtonStateGetter;
+  }) => ButtonControl;
 
   createDialControl: (attrs?: {
     // label?: string;
@@ -56,7 +56,7 @@ export interface Config {
 
     // defaults to `minValue`
     initialValue?: number;
-  }) => ControllerDialValueGetter;
+  }) => DialControl;
 }
 
 export interface FrameContext {

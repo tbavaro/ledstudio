@@ -117,7 +117,7 @@ class TimeSeriesHelper {
   }
 }
 
-class MyControllerDialValueGetter implements Visualization.ControllerDialValueGetter {
+class MyDialControl implements Visualization.DialControl {
   private readonly controllerState: ControllerState;
   private readonly index: number;
   private readonly minValue: number;
@@ -139,17 +139,17 @@ class MyControllerDialValueGetter implements Visualization.ControllerDialValueGe
     this.maxValue = attrs.maxValue;
   }
 
-  public get() {
+  public get value() {
     return this.controllerState.dialValues[this.index] * (this.maxValue - this.minValue) + this.minValue;
   }
 
-  public set(value: number) {
+  public set value(value: number) {
     value = bracket(this.minValue, this.maxValue, value);
     this.controllerState.dialValues[this.index] = (value - this.minValue) / (this.maxValue - this.minValue);
   }
 }
 
-class MyControllerButtonStateGetter implements Visualization.ControllerButtonStateGetter {
+class MyButtonControl implements Visualization.ButtonControl {
   private readonly controllerState: ControllerState;
   private readonly index: number;
 
@@ -165,7 +165,7 @@ class MyControllerButtonStateGetter implements Visualization.ControllerButtonSta
     }
   }
 
-  public get() {
+  public get value() {
     return this.controllerState.buttonStates[this.index];
   }
 }
@@ -186,7 +186,7 @@ class ControllerStateHelper {
     initialValue?: number;
     minValue?: number;
     maxValue?: number;
-  }): Visualization.ControllerDialValueGetter => {
+  }): Visualization.DialControl => {
     attrs = attrs || {};
 
     let dialNumber: number;
@@ -203,14 +203,14 @@ class ControllerStateHelper {
       throw new Error("dial minValue must be less than maxValue");
     }
 
-    const helper = new MyControllerDialValueGetter({
+    const helper = new MyDialControl({
       controllerState: this.controllerState,
       dialNumber: dialNumber,
       minValue: minValue,
       maxValue: maxValue
     });
 
-    helper.set(valueOrDefault(attrs.initialValue, minValue));
+    helper.value = valueOrDefault(attrs.initialValue, minValue);
 
     return helper;
   }
@@ -225,7 +225,7 @@ class ControllerStateHelper {
 
   public createButtonControl = (attrs?: {
     buttonNumber?: number;
-  }): Visualization.ControllerButtonStateGetter => {
+  }): Visualization.ButtonControl => {
     attrs = attrs || {};
 
     let buttonNumber: number;
@@ -236,7 +236,7 @@ class ControllerStateHelper {
       removeFirst(this.unusedButtonNumbers, buttonNumber);
     }
 
-    return new MyControllerButtonStateGetter({
+    return new MyButtonControl({
       controllerState: this.controllerState,
       buttonNumber: buttonNumber
     });
@@ -260,7 +260,7 @@ export default class VisualizationRunner {
   private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
   private readonly frameContext: MyFrameContext;
   private readonly timeSeriesHelper: TimeSeriesHelper;
-  private readonly brightnessDial: Visualization.ControllerDialValueGetter;
+  private readonly brightnessDial: Visualization.DialControl;
 
   constructor(attrs: {
     visualizationName: Visualizations.Name,
@@ -311,7 +311,7 @@ export default class VisualizationRunner {
     this.timingHelper.addValue(visTimeMillis);
 
     // send
-    this.sendToStrips(this.brightnessDial.get());
+    this.sendToStrips(this.brightnessDial.value);
 
     return {
       frameHeatmapValues: frameHeatmapValues,

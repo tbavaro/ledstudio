@@ -8,8 +8,8 @@ export default class PatternRainbowVisualization extends Visualization.SingleRow
   private offset = 0;
   private width = 88; // pixels per 360 degrees
 
-  private readonly ludicrousSpeedButton: Visualization.ControllerButtonStateGetter;
-  private readonly speedDial: Visualization.ControllerDialValueGetter;
+  private readonly ludicrousSpeedButton: Visualization.ButtonControl;
+  private readonly speedDial: Visualization.DialControl;
 
   constructor(config: Visualization.Config) {
     super(config, Math.max.apply(Math, config.scene.leds.map(arr => arr.length)));
@@ -25,8 +25,8 @@ export default class PatternRainbowVisualization extends Visualization.SingleRow
   public renderSingleRow(context: Visualization.FrameContext): void {
     const { elapsedMillis } = context;
 
-    const ludicrousSpeed = this.ludicrousSpeedButton.get();
-    const speed = this.speedDial.get() * (ludicrousSpeed ? 5 : 1);
+    const ludicrousSpeed = this.ludicrousSpeedButton.value;
+    const speed = this.speedDial.value * (ludicrousSpeed ? 5 : 1);
     this.offset = (this.offset + speed * elapsedMillis) % 360.0;
 
     const step = 360 / this.width;
