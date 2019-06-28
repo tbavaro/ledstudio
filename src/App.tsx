@@ -2,6 +2,8 @@ import MIDIFile from "midifile";
 import * as React from "react";
 
 import ControllerState from "./portable/base/ControllerState";
+import BeatController from "./portable/visualizations/util/BeatController";
+import ManualBeatController from "./portable/visualizations/util/ManualBeatController";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as Visualizations from "./portable/Visualizations";
@@ -76,6 +78,7 @@ interface State {
   audioSource: AudioNode | null;
   visualizerExtraDisplay: HTMLElement | null;
   simulationEnabled: boolean;
+  beatController: BeatController;
 }
 
 type AllActions = RightSidebar.Actions;
@@ -244,7 +247,7 @@ class App extends React.Component<{}, State> {
               controllerState={this.controllerState}
               ref={this.setControlsViewRef}
             />
-            <BeatControlView />
+            <BeatControlView beatController={this.state.beatController}/>
           </div>
         </div>
         <div className="App-sidebarContainer">
@@ -653,7 +656,8 @@ class App extends React.Component<{}, State> {
       analogInputs: undefined,
       selectedAnalogInputId: null,
       audioSource: null,
-      simulationEnabled: this.initialSimulationEnabled()
+      simulationEnabled: this.initialSimulationEnabled(),
+      beatController: new ManualBeatController()
     };
   })();
 }

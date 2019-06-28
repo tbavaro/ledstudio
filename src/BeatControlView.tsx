@@ -2,11 +2,16 @@ import * as React from "react";
 
 import * as Colors from "./portable/base/Colors";
 
+import BeatController from "./portable/visualizations/util/BeatController";
 import ManualBeatController from "./portable/visualizations/util/ManualBeatController";
 
 import "./BeatControlView.css";
 
-export default class BeatControlView extends React.Component<{}, {}> {
+interface Props {
+  beatController: BeatController;
+}
+
+export default class BeatControlView extends React.Component<Props, {}> {
   public componentWillUnmont() {
     if (super.componentWillUnmount) {
       super.componentWillUnmount();
@@ -35,14 +40,12 @@ export default class BeatControlView extends React.Component<{}, {}> {
     );
   }
 
-  private beatController = new ManualBeatController();
-
   private onMouseDown = () => {
-    if (this.beatController.onTap) {
-      this.beatController.onTap();
+    if (this.props.beatController instanceof ManualBeatController) {
+      this.props.beatController.onTap();
     }
     this.setState({
-      bpm: this.beatController.hz() * 60
+      bpm: this.props.beatController.hz() * 60
     });
   }
 
@@ -71,18 +74,18 @@ export default class BeatControlView extends React.Component<{}, {}> {
       requestAnimationFrame(this.animate);
     }
 
-    const beatPhase = this.beatController.progressToNextBeat();
     if (this.buttonRef !== null) {
+      const beatPhase = this.props.beatController.progressToNextBeat();
       this.buttonRef.style.backgroundColor = Colors.cssColor(Colors.hsv(0, 1, 1 - beatPhase));
     }
 
     if (this.labelRef !== null) {
-      const bpm = this.beatController.hz() * 60;
+      const bpm = this.props.beatController.hz() * 60;
       this.labelRef.innerText = `${Math.round(bpm)}`;
     }
 
     if (this.label2Ref !== null) {
-      const beatNum = (this.beatController.beatsSinceSync() % 4) + 1;
+      const beatNum = (this.props.beatController.beatsSinceSync() % 4) + 1;
       this.label2Ref.innerText = `${beatNum}`;
     }
   }
