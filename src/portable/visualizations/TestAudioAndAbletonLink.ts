@@ -1,13 +1,9 @@
 import { bracket01 } from "../../util/Utils";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
-import AbletonLinkConnect from "./util/AbletonLinkConnect";
 import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
-import BeatController from "./util/BeatController";
-
 
 export default class TestAudioAndAbletonLink extends Visualization.default {
-  private link: BeatController;
   private readonly analyserHelpers: ReturnType<typeof createAnalyserHelpers> | null;
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly loudnessTimeSeries: Visualization.TimeSeriesValueSetter;
@@ -15,7 +11,6 @@ export default class TestAudioAndAbletonLink extends Visualization.default {
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.link = new AbletonLinkConnect();
 
     const audioSource = config.audioSource;
     if (audioSource !== null) {
@@ -37,7 +32,7 @@ export default class TestAudioAndAbletonLink extends Visualization.default {
 
     this.analyserHelpers.sampleAll();
 
-    const duringBeat = this.link.timeSinceLastBeat() < 0.1;
+    const duringBeat = context.beatController.timeSinceLastBeat() < 0.1;
     const loudness = bracket01(this.analyserHelpers.direct.currentMaxAmplitude);
 
     this.ledRows.forEach(row => {
