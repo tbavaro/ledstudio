@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as Three from "three";
-import { Vector3 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import * as Colors from "../portable/base/Colors";
@@ -38,59 +37,30 @@ function initializeScene() {
 
 class LedHelper {
   private static readonly LED_RADIUS = 0.014;
-  private static readonly RADIUS_MULTIPLIERS = [1];
-  private static readonly COLOR_MULTIPLIERS = [1];
-  private static readonly GLOW_POSITION_OFFSET = new Vector3(0, 0, -0.0001);
 
-  private static readonly GEOMETRIES = LedHelper.RADIUS_MULTIPLIERS.map(m => (
-    new Three.PlaneBufferGeometry(LedHelper.LED_RADIUS * m, LedHelper.LED_RADIUS * m)
-  ));
+  private static readonly GEOMETRY = new Three.PlaneBufferGeometry(LedHelper.LED_RADIUS, LedHelper.LED_RADIUS);
 
   private static readonly MATERIAL = new Three.MeshBasicMaterial({
     side: Three.DoubleSide
   });
-  private static readonly ADDITIVE_MATERIAL = new Three.MeshBasicMaterial({
-    blending: Three.AdditiveBlending,
-    transparent: true,
-    side: Three.DoubleSide,
-    depthWrite: false
-  });
 
-  private colors: Three.Color[] = [];
+  private color: Three.Color;
 
-  constructor(renderScene: Three.Scene, position: Three.Vector3, color?: Three.Color) {
-    const meshes: Three.Object3D[] = [];
-    LedHelper.GEOMETRIES.forEach((geometry, i) => {
-      // geometry = geometry.clone();
-      const isGlowMesh = (i > 0);
-      const material = (isGlowMesh ? LedHelper.ADDITIVE_MATERIAL : LedHelper.MATERIAL).clone();
-      this.colors.push(material.color);
-      const mesh = new Three.Mesh(geometry, material);
-      // if (isGlowMesh) {
-      //   mesh.rotateZ(Math.PI / 4);
-      // }
-      mesh.position.copy(position);
-      if (isGlowMesh) {
-        mesh.position.add(LedHelper.GLOW_POSITION_OFFSET);
-      }
-      mesh.castShadow = false;
-      mesh.receiveShadow = false;
-      renderScene.add(mesh);
-      meshes.push(mesh);
-    });
-    if (color !== undefined) {
-      this.setColor(color);
-    }
+  constructor(renderScene: Three.Scene, position: Three.Vector3) {
+    const material = LedHelper.MATERIAL.clone();
+    this.color = material.color;
+    const mesh = new Three.Mesh(LedHelper.GEOMETRY, material);
+    mesh.position.copy(position);
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
+    renderScene.add(mesh);
     this.removeFromScene = () => {
-      meshes.forEach(mesh => renderScene.remove(mesh));
+      renderScene.remove(mesh);
     };
   }
 
-  public setColor(color: Three.Color) {
-    LedHelper.COLOR_MULTIPLIERS.forEach((m, i) => {
-      this.colors[i].set(color);
-      this.colors[i].multiplyScalar(m);
-    });
+  public setColor(color: Colors.Color) {
+    this.color.set(color);
   }
 
   public readonly removeFromScene: () => void;
@@ -110,13 +80,11 @@ class LedSceneStrip implements SendableLedStrip {
 
   public setColor(n: number, color: Colors.Color) {
     if (n >= 0 && n < this.ledHelpers.length) {
-      this.ledHelpers[n].setColor(LedSceneStrip.convertColor(color));
+      this.ledHelpers[n].setColor(color);
     }
   }
 
   public setRange(startIndex: number, numLeds: number, color: Colors.Color) {
-    const convertedColor = LedSceneStrip.convertColor(color);
-
     if (startIndex < 0) {
       numLeds += startIndex;
       startIndex = 0;
@@ -126,7 +94,7 @@ class LedSceneStrip implements SendableLedStrip {
 
     if (numLeds > 0) {
       for (let i = startIndex; i < (startIndex + numLeds); ++i) {
-        this.ledHelpers[i].setColor(convertedColor);
+        this.ledHelpers[i].setColor(color);
       }
     }
   }
@@ -140,10 +108,6 @@ class LedSceneStrip implements SendableLedStrip {
   }
 
   public readonly averageSendTime = 0;
-
-  private static convertColor(color: Colors.Color): Three.Color {
-    return new Three.Color(color);
-  }
 }
 
 class LedScene {
