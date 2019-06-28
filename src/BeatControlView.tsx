@@ -2,19 +2,11 @@ import * as React from "react";
 
 import * as Colors from "./portable/base/Colors";
 
+import ManualBeatController from "./portable/visualizations/util/ManualBeatController";
+
 import "./BeatControlView.css";
 
-interface State {
-  buttonValue: boolean;
-  bpm: number;
-}
-
-export default class BeatControlView extends React.Component<{}, State> {
-  public state: State = {
-    buttonValue: false,
-    bpm: 120
-  };
-
+export default class BeatControlView extends React.Component<{}, {}> {
   public componentWillUnmont() {
     if (super.componentWillUnmount) {
       super.componentWillUnmount();
@@ -33,29 +25,25 @@ export default class BeatControlView extends React.Component<{}, State> {
   private renderButton() {
     return (
       <div
-        className={`BeatControlView-button ${this.state.buttonValue ? "pressed" : ""}`}
+        className="BeatControlView-button"
         onMouseDown={this.onMouseDown}
         ref={this.setButtonRef}
       >
-        <div className="BeatControlView-buttonLabel">{Math.round(this.state.bpm)}</div>
+        <div className="BeatControlView-buttonLabel" ref={this.setLabelRef}/>
+        <div className="BeatControlView-buttonLabel2" ref={this.setLabel2Ref}/>
       </div>
     );
   }
 
-  private isAlive = true;
-  private beatStartTime: number = performance.now();
-  private beatLengthMillis: number = 60000 / this.state.bpm;
-  private prevPressTime: number | null = null;
+  private beatController = new ManualBeatController();
+
   private onMouseDown = () => {
-    const now = performance.now();
-    if (this.prevPressTime !== null && now - this.prevPressTime < 1500) {
-      this.beatLengthMillis = now - this.prevPressTime;
-      this.setState({
-        bpm: 60000 / this.beatLengthMillis
-      });
+    if (this.beatController.onTap) {
+      this.beatController.onTap();
     }
-    this.beatStartTime = now;
-    this.prevPressTime = now;
+    this.setState({
+      bpm: this.beatController.hz() * 60
+    });
   }
 
   private buttonRef: HTMLDivElement | null = null;
@@ -67,14 +55,35 @@ export default class BeatControlView extends React.Component<{}, State> {
     }
   }
 
+  private labelRef: HTMLDivElement | null = null;
+  private setLabelRef = (newRef: HTMLDivElement | null) => {
+    this.labelRef = newRef;
+  }
+
+  private label2Ref: HTMLDivElement | null = null;
+  private setLabel2Ref = (newRef: HTMLDivElement | null) => {
+    this.label2Ref = newRef;
+  }
+
+  private isAlive = true;
   private animate = () => {
     if (this.isAlive) {
       requestAnimationFrame(this.animate);
     }
-    const now = performance.now();
-    const beatPhase = ((now - this.beatStartTime) % this.beatLengthMillis) / this.beatLengthMillis;
+
+    const beatPhase = this.beatController.progressToNextBeat();
     if (this.buttonRef !== null) {
       this.buttonRef.style.backgroundColor = Colors.cssColor(Colors.hsv(0, 1, 1 - beatPhase));
+    }
+
+    if (this.labelRef !== null) {
+      const bpm = this.beatController.hz() * 60;
+      this.labelRef.innerText = `${Math.round(bpm)}`;
+    }
+
+    if (this.label2Ref !== null) {
+      const beatNum = (this.beatController.beatsSinceSync() % 4) + 1;
+      this.label2Ref.innerText = `${beatNum}`;
     }
   }
 }

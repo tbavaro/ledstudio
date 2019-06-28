@@ -1,7 +1,9 @@
+import BeatController from "./BeatController";
+
 const URL = "ws://localhost:17001";
 const RECONNECT_TIME_MS = 3000;
 
-export default class AbletonLinkConnect {
+export default class AbletonLinkConnect implements BeatController {
     private static instance: Implementation;
 
     constructor() {
