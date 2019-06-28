@@ -13,6 +13,15 @@ export interface TimeSeriesValueSetter {
   set: (value: number | null) => void;
 }
 
+export interface EasyTimeSeriesValueSetters {
+  white: TimeSeriesValueSetter;
+  blue: TimeSeriesValueSetter;
+  red: TimeSeriesValueSetter;
+  yellow: TimeSeriesValueSetter;
+  green: TimeSeriesValueSetter;
+  orange: TimeSeriesValueSetter;
+}
+
 export interface ButtonControl {
   readonly value: boolean;
 }
@@ -32,6 +41,7 @@ export interface Config {
     color?: Colors.Color
   }) => TimeSeriesValueSetter;
 
+  createEasyTimeSeriesSet: () => EasyTimeSeriesValueSetters;
 
   createButtonControl: (attrs?: {
     // label?: string;

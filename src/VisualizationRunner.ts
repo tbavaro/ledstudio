@@ -285,7 +285,17 @@ export default class VisualizationRunner {
       setExtraDisplay: attrs.setVisualizerExtraDisplay,
       createTimeSeries: this.timeSeriesHelper.createTimeSeries,
       createButtonControl: controllerStateHelper.createButtonControl,
-      createDialControl: controllerStateHelper.createDialControl
+      createDialControl: controllerStateHelper.createDialControl,
+      createEasyTimeSeriesSet: () => {
+        return {
+          white: this.timeSeriesHelper.createTimeSeries({ color: Colors.WHITE }),
+          blue: this.timeSeriesHelper.createTimeSeries({ color: Colors.BLUE }),
+          red: this.timeSeriesHelper.createTimeSeries({ color: Colors.RED }),
+          yellow: this.timeSeriesHelper.createTimeSeries({ color: Colors.YELLOW }),
+          green: this.timeSeriesHelper.createTimeSeries({ color: Colors.GREEN }),
+          orange: this.timeSeriesHelper.createTimeSeries({ color: Colors.ORANGE })
+        };
+      }
     };
     this.visualization = Visualizations.create(attrs.visualizationName, visualizationConfig);
     this.timingHelper = new MovingAverageHelper(20);
