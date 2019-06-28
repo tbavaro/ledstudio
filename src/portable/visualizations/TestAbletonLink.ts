@@ -1,9 +1,10 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import AbletonLinkConnect from "./util/AbletonLinkConnect";
+import BeatController from "./util/BeatController";
 
 export default class TestAbletonLink extends Visualization.default {
-  private readonly link: AbletonLinkConnect;
+  private readonly link: BeatController;
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly progressToNextBeatTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly timeSinceLastBeatTimeSeries: Visualization.TimeSeriesValueSetter;

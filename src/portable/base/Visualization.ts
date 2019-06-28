@@ -1,5 +1,7 @@
 import Scene from "../../scenes/Scene";
 
+import BeatController from "../visualizations/util/BeatController";
+
 import ColorRow from "./ColorRow";
 import * as Colors from "./Colors";
 import FixedArray from "./FixedArray";
@@ -63,6 +65,8 @@ export interface FrameContext {
   elapsedMillis: number;
 
   pianoState: PianoState;
+
+  beatController: BeatController;
 
   setFrameHeatmapValues: (data: number[]) => void;
 }

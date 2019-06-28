@@ -1,4 +1,5 @@
 import * as Visualizations from "../portable/Visualizations";
+import { BeatControllerType } from "../RightSidebar";
 
 const LOCAL_STORAGE_PREFIX = "simulatorSettings:";
 
@@ -11,6 +12,7 @@ export interface Settings {
   midiOutputId: string | null;
   midiFilename: string;
   simulationEnabled: boolean;
+  beatControllerType: BeatControllerType;
 }
 
 export function get<K extends keyof Settings>(attrs: {

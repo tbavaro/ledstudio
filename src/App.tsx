@@ -35,6 +35,7 @@ import TimingStatsView from "./TimingStatsView";
 import VisualizationRunner from "./VisualizationRunner";
 
 import "./App.css";
+import AbletonLinkConnect from "./portable/visualizations/util/AbletonLinkConnect";
 
 const MIDI_FILES = [
   "abovo.mid",
@@ -280,6 +281,7 @@ class App extends React.Component<{}, State> {
         return "Initializing...";
 
       case "loaded":
+        const beatControllerType = (this.state.beatController instanceof ManualBeatController) ? "manual" : "ableton";
         return (
           <RightSidebar.default
             actions={this.actionManager}
@@ -298,6 +300,7 @@ class App extends React.Component<{}, State> {
             midiEventEmitters={[this.midiEventEmitter, this.midiControllerEventEmitter]}
             analogInputs={this.state.analogInputs}
             selectedAnalogInputId={this.state.selectedAnalogInputId}
+            selectedBeatControllerType={beatControllerType}
           />
         );
 
@@ -417,6 +420,21 @@ class App extends React.Component<{}, State> {
     });
   }
 
+  private createBeatControllerType = (newValue: RightSidebar.BeatControllerType): BeatController => {
+    switch (newValue) {
+      case "manual":
+        return new ManualBeatController();
+        break;
+
+      case "ableton":
+        return new AbletonLinkConnect();
+        break;
+
+      default:
+        throw new Error(`unsupported beat controller type: ${newValue}`);
+    }
+  }
+
   private configureVisualization(
     visualizationName: Visualizations.Name,
     scene: Scene,
@@ -479,6 +497,13 @@ class App extends React.Component<{}, State> {
       this.setState({ selectedAnalogInputId: newValue });
       this.analogAudio.setCurrentDeviceId(newValue);
       SimulatorStickySettings.set("analogAudioSourceId", newValue);
+    },
+    setBeatControllerType: (newValue: RightSidebar.BeatControllerType) => {
+      this.setState({
+        beatController: this.createBeatControllerType(newValue)
+      });
+      SimulatorStickySettings.set("beatControllerType", newValue);
+
     }
   };
 
@@ -548,7 +573,7 @@ class App extends React.Component<{}, State> {
     if (this.animating) {
       this.scheduleNextAnimationFrame();
 
-      const { frameHeatmapValues, frameTimeseriesPoints } = this.state.visualizationRunner.renderFrame();
+      const { frameHeatmapValues, frameTimeseriesPoints } = this.state.visualizationRunner.renderFrame(this.state.beatController);
       ++this.framesRenderedSinceLastTimingsCall;
 
       if (this.analogAudioViewRef) {
@@ -634,6 +659,14 @@ class App extends React.Component<{}, State> {
     }
   }
 
+  private initialBeatController(): BeatController {
+    const type = SimulatorStickySettings.get({
+      key: "beatControllerType",
+      defaultValue: "manual"
+    });
+    return this.createBeatControllerType(type);
+  }
+
   public state = ((): State => {
     const scene = this.initialScene();
     return {
@@ -657,7 +690,7 @@ class App extends React.Component<{}, State> {
       selectedAnalogInputId: null,
       audioSource: null,
       simulationEnabled: this.initialSimulationEnabled(),
-      beatController: new ManualBeatController()
+      beatController: this.initialBeatController()
     };
   })();
 }

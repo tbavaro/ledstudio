@@ -16,10 +16,13 @@ export interface Actions {
   setMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setMidiOutput: (newValue: WebMidi.MIDIOutput | null) => void;
   setMidiControllerInput: (newValue: WebMidi.MIDIInput | null) => void;
+  setBeatControllerType: (newValue: BeatControllerType) => void;
   setSelectedSceneName: (newValue: string) => void;
   setSelectedVisualizationName: (newValue: Visualizations.Name) => void;
   setAnalogInputId: (newValue: string | null) => void;
 }
+
+export type BeatControllerType = "manual" | "ableton";
 
 interface Props {
   actions: Actions;
@@ -38,6 +41,7 @@ interface Props {
   midiEventEmitters: MidiEventEmitter[];
   analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
   selectedAnalogInputId: string | null;
+  selectedBeatControllerType: BeatControllerType;
 }
 
 function findById<T extends { readonly id: string }>(entries: T[], id: string): T | undefined {
@@ -58,6 +62,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           {this.renderMidiOutputDevices()}
           <p/>
           {this.renderMidiControllerDevices()}
+          {this.renderBeatControllerDevices()}
           <p/>
         </div>
         <MidiEventsView
@@ -237,6 +242,35 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
+  private renderBeatControllerDevices() {
+    const { selectedBeatControllerType } = this.props;
+
+    const options: BeatControllerType[] = [
+      "manual",
+      "ableton"
+    ];
+
+    return (
+      <div className="RightSidebar-beatControllerTypes">
+        <span>Beat ctrl: </span>
+        <select
+          value={selectedBeatControllerType}
+          onChange={this.handleSetBeatControllerType}
+        >
+          {
+            options.map(opt => (
+              <option
+                key={opt}
+                value={opt}
+                children={opt}
+              />
+            ))
+          }
+        </select>
+      </div>
+    );
+  }
+
   private renderMusicControls() {
     return (
       <div className="RightSidebar-musicControls">
@@ -255,6 +289,11 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
   private handleSetMidiControllerInput = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
     this.props.actions.setMidiControllerInput(findById(this.props.midiInputs, id) || null);
+  }
+
+  private handleSetBeatControllerType = (event: React.ChangeEvent<any>) => {
+    const id = event.target.value as BeatControllerType;
+    this.props.actions.setBeatControllerType(id);
   }
 
   private handleSetMidiOutput = (event: React.ChangeEvent<any>) => {

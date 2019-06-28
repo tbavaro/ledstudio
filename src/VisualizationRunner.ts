@@ -9,6 +9,8 @@ import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 import * as Visualizations from "./portable/Visualizations";
 
+import BeatController from "./portable/visualizations/util/BeatController";
+
 import { bracket, MovingAverageHelper, removeFirst, valueOrDefault } from "./util/Utils";
 
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
@@ -18,6 +20,7 @@ class MyFrameContext implements Visualization.FrameContext {
   public elapsedMillis: number;
   public pianoState: PianoHelpers.VisualizationStateHelper;
   public frameHeatmapValues: number[] | undefined;
+  public beatController: BeatController;
 
   constructor() {
     const UNSET = "<unset>" as any;
@@ -37,10 +40,11 @@ class MyFrameContext implements Visualization.FrameContext {
     this.pianoState.startFrame();
   }
 
-  public endFrame(elapsedMillis: number) {
+  public endFrame(elapsedMillis: number, beatController: BeatController) {
     this.elapsedMillis = elapsedMillis;
     this.pianoState.endFrame();
     this.frameHeatmapValues = undefined;
+    this.beatController = beatController;
   }
 
   public applyPianoEvent(event: PianoEvent) {
@@ -289,7 +293,7 @@ export default class VisualizationRunner {
     this.frameContext = new MyFrameContext();
   }
 
-  public renderFrame() {
+  public renderFrame(beatController: BeatController) {
     const startTime = performance.now();
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
@@ -297,7 +301,7 @@ export default class VisualizationRunner {
 
     // collect state
     this.timeSeriesHelper.resetAll();
-    this.frameContext.endFrame(startTime - this.lastRenderTime);
+    this.frameContext.endFrame(startTime - this.lastRenderTime, beatController);
 
     // render into the LED strip
     this.visualization.render(this.frameContext);

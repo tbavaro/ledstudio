@@ -3,10 +3,11 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import AbletonLinkConnect from "./util/AbletonLinkConnect";
 import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
+import BeatController from "./util/BeatController";
 
 
 export default class TestAudioAndAbletonLink extends Visualization.default {
-  private link: AbletonLinkConnect;
+  private link: BeatController;
   private readonly analyserHelpers: ReturnType<typeof createAnalyserHelpers> | null;
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly loudnessTimeSeries: Visualization.TimeSeriesValueSetter;
