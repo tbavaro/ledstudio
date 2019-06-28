@@ -9,7 +9,7 @@ import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 import * as Visualizations from "./portable/Visualizations";
 
-import BeatController from "./portable/visualizations/util/BeatController";
+import BeatController from "./portable/base/BeatController";
 
 import { bracket, MovingAverageHelper, removeFirst, valueOrDefault } from "./util/Utils";
 

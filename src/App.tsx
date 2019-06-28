@@ -1,9 +1,10 @@
 import MIDIFile from "midifile";
 import * as React from "react";
 
+import ManualBeatController from "./beat/ManualBeatController";
+
+import BeatController from "./portable/base/BeatController";
 import ControllerState from "./portable/base/ControllerState";
-import BeatController from "./portable/visualizations/util/BeatController";
-import ManualBeatController from "./portable/visualizations/util/ManualBeatController";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import * as Visualizations from "./portable/Visualizations";
@@ -35,7 +36,7 @@ import TimingStatsView from "./TimingStatsView";
 import VisualizationRunner from "./VisualizationRunner";
 
 import "./App.css";
-import AbletonLinkConnect from "./portable/visualizations/util/AbletonLinkConnect";
+import AbletonLinkConnect from "./beat/AbletonLinkConnect";
 
 const MIDI_FILES = [
   "abovo.mid",

@@ -1,9 +1,9 @@
 import * as React from "react";
 
+import BeatController from "./portable/base/BeatController";
 import * as Colors from "./portable/base/Colors";
 
-import BeatController from "./portable/visualizations/util/BeatController";
-import ManualBeatController from "./portable/visualizations/util/ManualBeatController";
+import ManualBeatController from "./beat/ManualBeatController";
 
 import "./BeatControlView.css";
 

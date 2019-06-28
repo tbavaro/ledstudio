@@ -1,4 +1,4 @@
-import BeatController from "./BeatController";
+import BeatController from "../portable/base/BeatController";
 
 const DEFAULT_BPM = 120;
 

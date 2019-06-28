@@ -1,4 +1,4 @@
-import BeatController from "./BeatController";
+import BeatController from "../portable/base/BeatController";
 
 const URL = "ws://localhost:17001";
 const RECONNECT_TIME_MS = 3000;

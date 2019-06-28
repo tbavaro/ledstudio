@@ -1,6 +1,6 @@
 import Scene from "../../scenes/Scene";
 
-import BeatController from "../visualizations/util/BeatController";
+import BeatController from "./BeatController";
 
 import ColorRow from "./ColorRow";
 import * as Colors from "./Colors";
