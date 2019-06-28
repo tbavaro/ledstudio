@@ -25,13 +25,14 @@ import MIDIPlayer from "./piano/MIDIPlayer";
 import * as AnalogAudio from "./analogAudio/AnalogAudio";
 import AnalogAudioView from "./analogAudio/AnalogAudioView";
 
+import BeatControlView from "./BeatControlView";
 import ControlsView from "./ControlsView";
 import PianoView from "./PianoView";
 import * as RightSidebar from "./RightSidebar";
+import TimingStatsView from "./TimingStatsView";
 import VisualizationRunner from "./VisualizationRunner";
 
 import "./App.css";
-import TimingStatsView from "./TimingStatsView";
 
 const MIDI_FILES = [
   "abovo.mid",
@@ -243,6 +244,7 @@ class App extends React.Component<{}, State> {
               controllerState={this.controllerState}
               ref={this.setControlsViewRef}
             />
+            <BeatControlView />
           </div>
         </div>
         <div className="App-sidebarContainer">

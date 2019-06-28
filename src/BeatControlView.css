@@ -1,0 +1,32 @@
+.BeatControlView {
+  flex-shrink: 0;
+  font-size: 0.25em;
+  padding-left: 10px;
+  color: gray;
+  display: flex;
+}
+
+.BeatControlView-button {
+  flex: 1;
+  width: 24px;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background-color: black;
+  margin: 1px;
+  cursor: pointer;
+}
+
+.BeatControlView-buttonLabel {
+  position: relative;
+  padding: 5px;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  left: 0;
+  transform: translate(0, -50%);
+}
+
+.BeatControlView-button.pressed {
+  background-color: red;
+}
