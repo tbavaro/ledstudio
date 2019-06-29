@@ -6,9 +6,7 @@ export default class TestControllerDialVisualization extends Visualization.defau
   private readonly gDial: Visualization.DialControl;
   private readonly bDial: Visualization.DialControl;
 
-  private readonly rTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly gTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly bTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly timeSerieses: Visualization.EasyTimeSeriesValueSetters;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -17,9 +15,7 @@ export default class TestControllerDialVisualization extends Visualization.defau
     this.gDial = config.createDialControl();
     this.bDial = config.createDialControl();
 
-    this.rTimeSeries = config.createTimeSeries({ color: Colors.RED });
-    this.gTimeSeries = config.createTimeSeries({ color: Colors.GREEN });
-    this.bTimeSeries = config.createTimeSeries({ color: Colors.BLUE });
+    this.timeSerieses = config.createEasyTimeSeriesSet();
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -43,8 +39,8 @@ export default class TestControllerDialVisualization extends Visualization.defau
       }
     });
 
-    this.rTimeSeries.set(rValue);
-    this.gTimeSeries.set(gValue);
-    this.bTimeSeries.set(bValue);
+    this.timeSerieses.red.set(rValue);
+    this.timeSerieses.green.set(gValue);
+    this.timeSerieses.blue.set(bValue);
   }
 }
