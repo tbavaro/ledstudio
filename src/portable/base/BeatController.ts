@@ -1,9 +1,10 @@
 export default interface BeatController {
   // TODO should this be bpm instead?
+  // AC: bpm is not the SI unit for frequency (╯°□°)╯︵ ┻━┻
   hz(): number;
 
-  // TODO what's the semantic meaning here?
-  // NB: is number of full beats (ie integer)
+  // incrementing integer, the number itself is arbitrary, but you can
+  // count on its counting
   beatsSinceSync(): number;
 
   // in seconds

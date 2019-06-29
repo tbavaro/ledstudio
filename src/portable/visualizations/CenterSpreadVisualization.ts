@@ -36,7 +36,7 @@ export default class CenterSpreadVisualization extends Visualization.SingleRowVi
 
         this.time += elapsedMillis;
 
-        this.info = this.info.filter(kt => kt.time - this.time < 1000);
+        this.info = this.info.filter(kt => this.time - kt.time < 1000*1.5);
 
         let sumVelocity = 0;
         for (const key of pianoState.changedKeys) {

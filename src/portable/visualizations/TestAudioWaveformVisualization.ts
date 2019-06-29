@@ -50,46 +50,9 @@ class FloatDataCanvasHelper {
   }
 }
 
-function createAnalyserHelpers(
-  samplerConstructor: AudioWaveformSampler.Implementation,
-  audioSource: AudioNode
-) {
-  const audioContext = audioSource.context;
-  const numSamples = 1024;
-
-  const samplers: AudioWaveformSampler.default[] = [];
-
-  const createAnalyserHelper = (createFilter?: () => AudioNode) => {
-    let filteredAudioSource: AudioNode;
-    if (createFilter) {
-      const filter = createFilter();
-      audioSource.connect(filter);
-      filteredAudioSource = filter;
-    } else {
-      filteredAudioSource = audioSource;
-    }
-
-    const sampler = new samplerConstructor(filteredAudioSource, numSamples);
-    samplers.push(sampler);
-
-    return sampler;
-  };
-
-  const direct = createAnalyserHelper();
-  const low = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "lowpass" }));
-  const high = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "highpass" }));
-
-  return {
-    direct,
-    low,
-    high,
-    sampleAll: () => samplers.forEach(s => s.sample())
-  };
-}
-
 export default class TestAudioWaveformVisualization extends Visualization.default {
-  private readonly analyserHelpers: ReturnType<typeof createAnalyserHelpers> | null;
-  private readonly analyserHelpers2: ReturnType<typeof createAnalyserHelpers> | null;
+  private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
+  private readonly analyserHelpers2: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly canvasHelper: FloatDataCanvasHelper | null;
 
   private readonly lowTimeSeries: Visualization.TimeSeriesValueSetter;
@@ -102,8 +65,8 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
 
     const audioSource = config.audioSource;
     if (audioSource !== null) {
-      this.analyserHelpers = createAnalyserHelpers(AudioWaveformSampler.AnalyserNodeAudioWaveformSampler, audioSource);
-      this.analyserHelpers2 = createAnalyserHelpers(AudioWaveformSampler.ScriptProcessorNodeAudioWaveformSampler, audioSource);
+      this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(AudioWaveformSampler.AnalyserNodeAudioWaveformSampler, audioSource);
+      this.analyserHelpers2 = AudioWaveformSampler.createAnalyserHelpers(AudioWaveformSampler.ScriptProcessorNodeAudioWaveformSampler, audioSource);
       this.canvasHelper = new FloatDataCanvasHelper(this.analyserHelpers.direct.currentSamples);
       config.setExtraDisplay(this.canvasHelper.canvas);
     } else {

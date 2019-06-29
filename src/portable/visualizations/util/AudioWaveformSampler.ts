@@ -1,9 +1,14 @@
+const EMA_ALPHA = 0.01;
+
 export default interface AudioWaveformSampler {
   // updates `currentXXX` for the latest point in time, perhaps lazily
   sample(): Float32Array;
   readonly currentSamples: Float32Array;
   readonly currentMaxAmplitude: number;
   readonly currentRMSAmplitude: number;
+  readonly currentRMSExpMovingAvg: number;
+  readonly currentRMSExpMovingVar: number;
+  readonly currentRMSExpMovingZScore: number;
 }
 
 export type Implementation = new (audioSource: AudioNode, numSamples: number) => AudioWaveformSampler;
@@ -14,6 +19,8 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
   private cacheIsDirty: boolean = true;
   private cachedMaxAmplitude: number = 0;
   private cachedRMSAmplitude: number = 0;
+  private cachedRMSExpMovingAvg: number = 0;
+  private cachedRMSExpMovingVar: number = 0;
 
   constructor(audioSource: AudioNode, numSamples: number) {
     this.currentSamples = new Float32Array(numSamples);
@@ -45,6 +52,12 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
       });
       this.cachedMaxAmplitude = maxAmplitude;
       this.cachedRMSAmplitude = Math.sqrt(sumSquares / data.length);
+
+      const diff = this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg;
+      const incr = EMA_ALPHA * diff;
+      this.cachedRMSExpMovingAvg = incr +  this.cachedRMSExpMovingAvg;
+      this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingAvg + diff * incr);
+
       this.cacheIsDirty = false;
     }
   }
@@ -58,6 +71,22 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
     this.updateCachedValuesIfNeeded();
     return this.cachedRMSAmplitude;
   }
+
+  public get currentRMSExpMovingAvg() {
+    this.updateCachedValuesIfNeeded();
+    return this.cachedRMSExpMovingAvg;
+  }
+
+  public get currentRMSExpMovingVar() {
+    this.updateCachedValuesIfNeeded();
+    return this.cachedRMSExpMovingVar;
+  }
+
+  public get currentRMSExpMovingZScore() {
+    this.updateCachedValuesIfNeeded();
+    const stddev = Math.sqrt(this.cachedRMSExpMovingVar);
+    return (this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg) / stddev;
+  }
 }
 
 export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSampler {
@@ -65,6 +94,8 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
   private readonly scriptNode: ScriptProcessorNode;
   private cachedRMSAmplitude: number = 0;
   private cachedMaxAmplitude: number = 0;
+  private cachedRMSExpMovingAvg: number = 0;
+  private cachedRMSExpMovingVar: number = 0;
 
   constructor(audioSource: AudioNode, numSamples: number) {
     this.currentSamples = new Float32Array(numSamples);
@@ -98,18 +129,73 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
     channelRms.forEach(x => total += x);
     this.cachedRMSAmplitude = total / channelRms.length;
     this.cachedMaxAmplitude = myMax;
+
+    const diff = this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg;
+    const incr = EMA_ALPHA * diff;
+    this.cachedRMSExpMovingAvg = incr +  this.cachedRMSExpMovingAvg;
+    this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingAvg + diff * incr);
   }
 
   public sample() {
-    // TODO actually do something to grab the most recent samples, if we care
     return this.currentSamples;
   }
 
-  public get currentMaxAmplitude(): number {
+  public get currentMaxAmplitude() {
     return this.cachedMaxAmplitude;
   }
 
   public get currentRMSAmplitude() {
     return this.cachedRMSAmplitude;
   }
+
+  public get currentRMSExpMovingAvg() {
+    return this.cachedRMSExpMovingAvg;
+  }
+
+  public get currentRMSExpMovingVar() {
+    return this.cachedRMSExpMovingVar;
+  }
+
+  public get currentRMSExpMovingZScore() {
+    const stddev = Math.sqrt(this.cachedRMSExpMovingVar);
+    return (this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg) / stddev;
+  }
 }
+
+export function createAnalyserHelpers(
+  samplerConstructor: Implementation,
+  audioSource: AudioNode
+) {
+  const audioContext = audioSource.context;
+  const numSamples = 1024;
+
+  const samplers: AudioWaveformSampler[] = [];
+
+  const createAnalyserHelper = (createFilter?: () => AudioNode) => {
+    let filteredAudioSource: AudioNode;
+    if (createFilter) {
+      const filter = createFilter();
+      audioSource.connect(filter);
+      filteredAudioSource = filter;
+    } else {
+      filteredAudioSource = audioSource;
+    }
+
+    const sampler = new samplerConstructor(filteredAudioSource, numSamples);
+    samplers.push(sampler);
+
+    return sampler;
+  };
+
+  const direct = createAnalyserHelper();
+  const low = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "lowpass" }));
+  const high = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "highpass" }));
+
+  return {
+    direct,
+    low,
+    high,
+    sampleAll: () => samplers.forEach(s => s.sample())
+  };
+}
+
