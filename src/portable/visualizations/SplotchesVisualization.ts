@@ -12,7 +12,7 @@ export default class SplotchesVisualization extends AbstractVoronoiMapperVisuali
   private lastFrameBeatsCount: number | undefined;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
-    const currentBeatsCount = Math.floor(context.beatController.beatsSinceSync());
+    const currentBeatsCount = Math.floor(context.beatController.beatNumber());
     const newWholeBeatsSinceLastFrame = Math.max(0, currentBeatsCount - (this.lastFrameBeatsCount || currentBeatsCount));
     this.lastFrameBeatsCount = currentBeatsCount;
 

@@ -1,4 +1,4 @@
-const EMA_ALPHA = 0.01;
+const EMA_ALPHA = 0.015; // corresponds to about last 2s .. ish
 
 export default interface AudioWaveformSampler {
   // updates `currentXXX` for the latest point in time, perhaps lazily
@@ -8,7 +8,7 @@ export default interface AudioWaveformSampler {
   readonly currentRMSAmplitude: number;
   readonly currentRMSExpMovingAvg: number;
   readonly currentRMSExpMovingVar: number;
-  readonly currentRMSExpMovingZScore: number;
+  readonly currentRMSZScore: number;
 }
 
 export type Implementation = new (audioSource: AudioNode, numSamples: number) => AudioWaveformSampler;
@@ -82,7 +82,7 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
     return this.cachedRMSExpMovingVar;
   }
 
-  public get currentRMSExpMovingZScore() {
+  public get currentRMSZScore() {
     this.updateCachedValuesIfNeeded();
     const stddev = Math.sqrt(this.cachedRMSExpMovingVar);
     return (this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg) / stddev;
@@ -132,8 +132,8 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
 
     const diff = this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg;
     const incr = EMA_ALPHA * diff;
-    this.cachedRMSExpMovingAvg = incr +  this.cachedRMSExpMovingAvg;
-    this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingAvg + diff * incr);
+    this.cachedRMSExpMovingAvg = incr + this.cachedRMSExpMovingAvg;
+    this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingVar + diff * incr);
   }
 
   public sample() {
@@ -156,7 +156,7 @@ export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSam
     return this.cachedRMSExpMovingVar;
   }
 
-  public get currentRMSExpMovingZScore() {
+  public get currentRMSZScore() {
     const stddev = Math.sqrt(this.cachedRMSExpMovingVar);
     return (this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg) / stddev;
   }
@@ -171,10 +171,10 @@ export function createAnalyserHelpers(
 
   const samplers: AudioWaveformSampler[] = [];
 
-  const createAnalyserHelper = (createFilter?: () => AudioNode) => {
+  const createAnalyserHelper = (type: "lowpass" | "highpass" | null = null) => {
     let filteredAudioSource: AudioNode;
-    if (createFilter) {
-      const filter = createFilter();
+    if (type) {
+      const filter = new BiquadFilterNode(audioContext, { type });
       audioSource.connect(filter);
       filteredAudioSource = filter;
     } else {
@@ -188,8 +188,8 @@ export function createAnalyserHelpers(
   };
 
   const direct = createAnalyserHelper();
-  const low = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "lowpass" }));
-  const high = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "highpass" }));
+  const low = createAnalyserHelper("lowpass");
+  const high = createAnalyserHelper("highpass");
 
   return {
     direct,

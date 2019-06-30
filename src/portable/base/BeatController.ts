@@ -5,11 +5,13 @@ export default interface BeatController {
 
   // incrementing integer, the number itself is arbitrary, but you can
   // count on its counting
-  beatsSinceSync(): number;
+  beatNumber(): number;
 
   // in seconds
   timeSinceLastBeat(): number;
 
   // 0 to 1
   progressToNextBeat(): number;
+
+  onTap(): void;
 }

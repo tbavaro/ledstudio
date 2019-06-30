@@ -29,7 +29,7 @@ export default class ManualBeatController implements BeatController {
     return 1000 / this.beatLengthMillis;
   }
 
-  public beatsSinceSync(): number {
+  public beatNumber(): number {
     const now = performance.now();
     return Math.floor((now - this.firstBeatStartTime) / this.beatLengthMillis);
   }

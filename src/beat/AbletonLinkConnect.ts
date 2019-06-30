@@ -16,8 +16,8 @@ export default class AbletonLinkConnect implements BeatController {
         return AbletonLinkConnect.instance.getHz();
     }
 
-    public beatsSinceSync() {
-        return AbletonLinkConnect.instance.beatsSinceSync();
+    public beatNumber() {
+        return AbletonLinkConnect.instance.beatNumber();
     }
 
     public timeSinceLastBeat() {
@@ -28,6 +28,10 @@ export default class AbletonLinkConnect implements BeatController {
     public progressToNextBeat() {
         return AbletonLinkConnect.instance.progressToNextBeat();
     }
+
+    public onTap() {
+        AbletonLinkConnect.instance.requestStatus();
+    }
 }
 
 class Implementation {
@@ -36,6 +40,7 @@ class Implementation {
     private reconnectTimeout: NodeJS.Timeout | null = null;
     private hz: number = 120;
     private aBeatTime: number = 0;
+    private lastBeatSync: number = 0;
 
     constructor() {
         this.tryConnectNow();
@@ -66,7 +71,7 @@ class Implementation {
     }
 
     private onWebSocketClose = (ev: CloseEvent) => {
-        console.log("ableton link websocket closed");
+        console.log("ableton link websocket closed because " + ev.code);
         if (ev.target === this.ws) {
             this.ws = null;
             this.tryConnectSoon();
@@ -87,6 +92,7 @@ class Implementation {
                     if (match == null) {
                         continue;
                     }
+                    this.lastBeatSync = this.beatNumber(); // record the current beat number
                     this.hz = parseFloat(match[2]) / 60;
                     let beat = parseFloat(match[4]);
                     beat -= Math.floor(beat);
@@ -116,11 +122,18 @@ class Implementation {
         return beats - Math.floor(beats);
     }
 
-    public beatsSinceSync() {
+    public beatNumber() {
         const lag = nowInSeconds() - this.aBeatTime;
         const period = 1 / this.hz;
         const beats = Math.floor(lag / period);
-        return beats;
+        return beats + this.lastBeatSync;
+    }
+
+    public requestStatus() {
+        if (this.ws != null && this.ws.readyState === WebSocket.OPEN) {
+            const enc = new TextEncoder();
+            this.ws.send(enc.encode("status"));
+        }
     }
 }
 
