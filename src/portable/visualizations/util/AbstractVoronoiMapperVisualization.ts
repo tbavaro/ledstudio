@@ -10,6 +10,16 @@ const MAX_DISTANCE = 0.05;
 
 // TODO this could be made to work with any co-planar points, but right now it requires all Z
 // positions to be the same
+function mapTo2DSingle(point3d: Vector3, vector?: Vector2): Vector2 {
+  if (vector === undefined) {
+    vector = new Vector2();
+  }
+
+  vector.set(point3d.x, point3d.y);
+
+  return vector;
+}
+
 function mapTo2D(points3d: Vector3[]): Vector2[] {
   if (points3d.length === 0) {
     return [];
@@ -102,12 +112,14 @@ class VoronoiHelper {
   private readonly valuesR: number[];
   private readonly valuesG: number[];
   private readonly valuesB: number[];
+  public readonly ledMapper: (ledInfo: Scene.LedInfo, vector?: Vector2) => Vector2;
 
   constructor(attrs: {
     points: Vector2[],  // pixel coordinates
     width: number,  // pixels
     height: number,  // pixels
-    maxDistance: number  // pixels
+    maxDistance: number,  // pixels
+    ledMapper: (ledInfo: Scene.LedInfo, vector?: Vector2) => Vector2
   }) {
     this.pixelsForPoint = attrs.points.map(_ => []);
     const counts = attrs.points.map(_ => 0);
@@ -133,6 +145,7 @@ class VoronoiHelper {
     this.valuesB = new Array(attrs.points.length).fill(0);
     this.width = attrs.width;
     this.height = attrs.height;
+    this.ledMapper = attrs.ledMapper;
   }
 
   public colorsFromCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): ColorRow {
@@ -232,20 +245,31 @@ function initializeFor(scene: Scene.default): InitializationValues {
     canvasWidth = Math.ceil(maxDimension / height * width);
   }
 
-  // leds mapped to pixel locations
-  const points2d = leds2d.map(wp => {
+  const mapToCanvas = (wp: Vector2, vector?: Vector2) => {
+    if (vector === undefined) {
+      vector = new Vector2();
+    }
     const x = (1 - (wp.x - extents.minX + MAX_DISTANCE) / width) * (canvasWidth - 1);
     const y = (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
-    return new Vector2(x, y);
-  });
+    vector.set(x, y);
+    return vector;
+  };
+
+  // leds mapped to pixel locations
+  const points2d = leds2d.map(wp => mapToCanvas(wp));
 
   const maxDistancePixels = MAX_DISTANCE * (canvasWidth / width);
+
+  const ledMapperScratchVector = new Vector2();
 
   const helper = new VoronoiHelper({
     points: points2d,
     width: canvasWidth,
     height: canvasHeight,
-    maxDistance: maxDistancePixels
+    maxDistance: maxDistancePixels,
+    ledMapper: (ledInfo: Scene.LedInfo, vector?: Vector2) => {
+      return mapToCanvas(mapTo2DSingle(ledInfo.position, ledMapperScratchVector), vector);
+    }
   });
 
   // helper.drawDebugMapOnCanvas(canvas);
@@ -264,6 +288,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
   private helper: VoronoiHelper;
   protected canvas: HTMLCanvasElement;
   protected canvasContext: CanvasRenderingContext2D;
+  private allLedInfos: Scene.LedInfo[];
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -277,6 +302,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     }
     this.canvasContext = ctx;
     config.setExtraDisplay(this.canvas);
+    this.allLedInfos = flatten(config.scene.leds);
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -291,4 +317,13 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
   }
 
   protected abstract renderToCanvas(context: Visualization.FrameContext): void;
+
+  protected mapTo2d(ledInfo: Scene.LedInfo, vector?: Vector2): Vector2 {
+    return this.helper.ledMapper(ledInfo, vector);
+  }
+
+  protected randomLedPixelPosition(vector?: Vector2): Vector2 {
+    const ledInfo = this.allLedInfos[Math.floor(Math.random() * this.allLedInfos.length)];
+    return this.mapTo2d(ledInfo, vector);
+  }
 }

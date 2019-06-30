@@ -3,7 +3,6 @@ import * as Visualization from "./base/Visualization";
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
 import PatternClockVisualization from "./visualizations/PatternClockVisualization";
-import PatternDot2Visualization from "./visualizations/PatternDot2Visualization";
 import PatternDotVisualization from "./visualizations/PatternDotVisualization";
 import PatternFlagVisualization from "./visualizations/PatternFlagVisualization";
 import PatternMarqueeVisualization from "./visualizations/PatternMarqueeVisualization";
@@ -17,6 +16,7 @@ import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisual
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
 import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashesVisualization";
+import SplotchesVisualization from "./visualizations/SplotchesVisualization";
 import TestAbletonLink from "./visualizations/TestAbletonLink";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestAudioAndAbletonLink from "./visualizations/TestAudioAndAbletonLink";
@@ -32,9 +32,9 @@ const visFuncs = {
   "glowWave": GlowWaveVisualization,
   "centerSpread": CenterSpreadVisualization,
   "sparklesAndFlashes": SparklesAndFlashesVisualization,
+  "splotches": SplotchesVisualization,
   "pattern:clock": PatternClockVisualization,
   "pattern:dot": PatternDotVisualization,
-  "pattern:dot2": PatternDot2Visualization,
   "pattern:flag": PatternFlagVisualization,
   "pattern:marquee": PatternMarqueeVisualization,
   "pattern:owlEyes": PatternOwlEyesVisualization,
