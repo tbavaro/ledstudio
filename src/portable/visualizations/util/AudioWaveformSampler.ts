@@ -56,7 +56,7 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
       const diff = this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg;
       const incr = EMA_ALPHA * diff;
       this.cachedRMSExpMovingAvg = incr +  this.cachedRMSExpMovingAvg;
-      this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingAvg + diff * incr);
+      this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingVar + diff * incr);
 
       this.cacheIsDirty = false;
     }
