@@ -16,7 +16,9 @@ import PatternSparklesVisualization from "./visualizations/PatternSparklesVisual
 import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
+import PulsingRainVisualization from "./visualizations/PulsingRainVisualization";
 import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashesVisualization";
+import SpreadShootersAudioVisualization from "./visualizations/SpreadShootersAudioVisualization";
 import TestAbletonLink from "./visualizations/TestAbletonLink";
 import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestAudioAndAbletonLink from "./visualizations/TestAudioAndAbletonLink";
@@ -32,6 +34,7 @@ const visFuncs = {
   "glowWave": GlowWaveVisualization,
   "centerSpread": CenterSpreadVisualization,
   "sparklesAndFlashes": SparklesAndFlashesVisualization,
+  "spreadShootersAudioVisualization": SpreadShootersAudioVisualization,
   "pattern:clock": PatternClockVisualization,
   "pattern:dot": PatternDotVisualization,
   "pattern:dot2": PatternDot2Visualization,
@@ -46,6 +49,7 @@ const visFuncs = {
   "pattern:wingFlap": PatternWingFlapVisualization,
   "pattern:zaps": PatternZapsVisualization,
   "pattern:zoom": PatternZoomVisualization,
+  "pulsingRain": PulsingRainVisualization,
   "testAbletonLink": TestAbletonLink,
   "testAudioAndAbletonLink": TestAudioAndAbletonLink,
   "testAnalogPulse": TestAnalogPulseVisualization,

@@ -16,7 +16,7 @@ export default class TestAbletonLink extends Visualization.default {
   public render(context: Visualization.FrameContext): void {
     const { beatController } = context;
 
-    const duringBeat = beatController.timeSinceLastBeat() < 0.1 && (beatController.beatsSinceSync() % 4 === 0);
+    const duringBeat = beatController.timeSinceLastBeat() < 0.1 && (beatController.beatNumber() % 4 === 0);
 
     this.ledRows.forEach(row => {
       row.fill(duringBeat ? Colors.WHITE : Colors.BLACK);

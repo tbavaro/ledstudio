@@ -49,12 +49,21 @@ export default class AnalogAudio {
       this.currentDeviceId = deviceId;
       this.setCurrentAudioSource(null, null);
       if (deviceId !== null) {
-        navigator.mediaDevices.getUserMedia({ audio: { deviceId: deviceId } }).then(stream => {
+        const audioConstraints = {
+          deviceId,
+          autoGainControl: false,
+          channelCount: 2,
+          echoCancellation: false,
+          noiseSuppression: false,
+          sampleRate: 44100
+        };
+        navigator.mediaDevices.getUserMedia({ audio: audioConstraints }).then(stream => {
           // make sure this is still the stream I was trying to load
           if (deviceId === this.currentDeviceId) {
             const audioContext = new AudioContext();
             const audioSource = audioContext.createMediaStreamSource(stream);
             this.setCurrentAudioSource(audioContext, audioSource);
+            audioSource.connect(audioContext.destination);
           }
         });
       }

@@ -3,8 +3,6 @@ import * as React from "react";
 import BeatController from "./portable/base/BeatController";
 import * as Colors from "./portable/base/Colors";
 
-import ManualBeatController from "./beat/ManualBeatController";
-
 import "./BeatControlView.css";
 
 interface Props {
@@ -41,7 +39,7 @@ export default class BeatControlView extends React.Component<Props, {}> {
   }
 
   private onMouseDown = () => {
-    if (this.props.beatController instanceof ManualBeatController) {
+    if (this.props.beatController) {
       this.props.beatController.onTap();
     }
     this.setState({
@@ -85,7 +83,7 @@ export default class BeatControlView extends React.Component<Props, {}> {
     }
 
     if (this.label2Ref !== null) {
-      const beatNum = (this.props.beatController.beatsSinceSync() % 4) + 1;
+      const beatNum = (this.props.beatController.beatNumber() % 4) + 1;
       this.label2Ref.innerText = `${beatNum}`;
     }
   }
