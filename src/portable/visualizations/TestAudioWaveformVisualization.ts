@@ -52,42 +52,34 @@ class FloatDataCanvasHelper {
 
 export default class TestAudioWaveformVisualization extends Visualization.default {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
-  private readonly analyserHelpers2: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly canvasHelper: FloatDataCanvasHelper | null;
 
   private readonly lowTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly highTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly low2TimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly high2TimeSeries: Visualization.TimeSeriesValueSetter;
 
   constructor(config: Visualization.Config) {
     super(config);
 
     const audioSource = config.audioSource;
     if (audioSource !== null) {
-      this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(AudioWaveformSampler.AnalyserNodeAudioWaveformSampler, audioSource);
-      this.analyserHelpers2 = AudioWaveformSampler.createAnalyserHelpers(AudioWaveformSampler.ScriptProcessorNodeAudioWaveformSampler, audioSource);
+      this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(audioSource);
       this.canvasHelper = new FloatDataCanvasHelper(this.analyserHelpers.direct.currentSamples);
       config.setExtraDisplay(this.canvasHelper.canvas);
     } else {
       this.analyserHelpers = null;
-      this.analyserHelpers2 = null;
       this.canvasHelper = null;
     }
 
     this.lowTimeSeries = config.createTimeSeries({ color: Colors.BLUE });
     this.highTimeSeries = config.createTimeSeries({ color: Colors.RED });
-    this.low2TimeSeries = config.createTimeSeries({ color: Colors.BLUE });
-    this.high2TimeSeries = config.createTimeSeries({ color: Colors.RED });
   }
 
   public render(context: Visualization.FrameContext): void {
-    if (this.analyserHelpers === null || this.analyserHelpers2 === null) {
+    if (this.analyserHelpers === null) {
       return;
     }
 
     this.analyserHelpers.sampleAll();
-    this.analyserHelpers2.sampleAll();
 
     // render
     if (this.canvasHelper !== null) {
@@ -96,7 +88,5 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
 
     this.lowTimeSeries.set(this.analyserHelpers.low.currentRMSAmplitude);
     this.highTimeSeries.set(this.analyserHelpers.high.currentRMSAmplitude);
-    this.low2TimeSeries.set(this.analyserHelpers2.low.currentRMSAmplitude + 0.5);
-    this.high2TimeSeries.set(this.analyserHelpers2.high.currentRMSAmplitude + 0.5);
   }
 }

@@ -74,7 +74,7 @@ export default class PulsingRainVisualization extends Visualization.default {
 
     const audioSource = config.audioSource;
     if (audioSource !== null) {
-      this.analyserHelper = AudioWaveformSampler.createAnalyserHelpers(AudioWaveformSampler.ScriptProcessorNodeAudioWaveformSampler, audioSource);
+      this.analyserHelper = AudioWaveformSampler.createAnalyserHelpers(audioSource);
     } else {
       this.analyserHelper = null;
     }
@@ -89,6 +89,9 @@ export default class PulsingRainVisualization extends Visualization.default {
 
     const { elapsedMillis, beatController } = context;
     const now = Date.now()/1000;
+
+    this.analyserHelper.direct.sample();
+    this.analyserHelper.low.sample();
 
     // drops
     const deadSparkles: Sparkle[] = [];

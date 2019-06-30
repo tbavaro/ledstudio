@@ -89,81 +89,7 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
   }
 }
 
-export class ScriptProcessorNodeAudioWaveformSampler implements AudioWaveformSampler {
-  public readonly currentSamples: Float32Array;
-  private readonly scriptNode: ScriptProcessorNode;
-  private cachedRMSAmplitude: number = 0;
-  private cachedMaxAmplitude: number = 0;
-  private cachedRMSExpMovingAvg: number = 0;
-  private cachedRMSExpMovingVar: number = 0;
-
-  constructor(audioSource: AudioNode, numSamples: number) {
-    this.currentSamples = new Float32Array(numSamples);
-
-    const audioContext = audioSource.context;
-    this.scriptNode = audioContext.createScriptProcessor(numSamples, audioSource.channelCount, audioSource.channelCount);
-    this.scriptNode.onaudioprocess = this.onAudioProcess;
-
-    audioSource.connect(this.scriptNode);
-    this.scriptNode.connect(audioContext.destination);
-  }
-
-  private onAudioProcess = (event: AudioProcessingEvent) => {
-    const channelRms: number[] = [];
-    const inputBuffer = event.inputBuffer;
-
-    let myMax = 0;
-    for (let i = 0; i < inputBuffer.numberOfChannels; ++i) {
-      const data = inputBuffer.getChannelData(i);
-      let myRms = 0;
-      // tslint:disable-next-line:prefer-for-of
-      for (let k = 0; k < data.length; ++k) {
-        myRms += data[k] * data[k];
-        myMax = Math.max(myMax, Math.abs(data[k]));
-      }
-      myRms = Math.sqrt(myRms / data.length);
-      channelRms.push(myRms);
-    }
-
-    let total = 0;
-    channelRms.forEach(x => total += x);
-    this.cachedRMSAmplitude = total / channelRms.length;
-    this.cachedMaxAmplitude = myMax;
-
-    const diff = this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg;
-    const incr = EMA_ALPHA * diff;
-    this.cachedRMSExpMovingAvg = incr + this.cachedRMSExpMovingAvg;
-    this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingVar + diff * incr);
-  }
-
-  public sample() {
-    return this.currentSamples;
-  }
-
-  public get currentMaxAmplitude() {
-    return this.cachedMaxAmplitude;
-  }
-
-  public get currentRMSAmplitude() {
-    return this.cachedRMSAmplitude;
-  }
-
-  public get currentRMSExpMovingAvg() {
-    return this.cachedRMSExpMovingAvg;
-  }
-
-  public get currentRMSExpMovingVar() {
-    return this.cachedRMSExpMovingVar;
-  }
-
-  public get currentRMSZScore() {
-    const stddev = Math.sqrt(this.cachedRMSExpMovingVar);
-    return (this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg) / stddev;
-  }
-}
-
 export function createAnalyserHelpers(
-  samplerConstructor: Implementation,
   audioSource: AudioNode
 ) {
   const audioContext = audioSource.context;
@@ -181,7 +107,7 @@ export function createAnalyserHelpers(
       filteredAudioSource = audioSource;
     }
 
-    const sampler = new samplerConstructor(filteredAudioSource, numSamples);
+    const sampler = new AnalyserNodeAudioWaveformSampler(filteredAudioSource, numSamples);
     samplers.push(sampler);
 
     return sampler;
