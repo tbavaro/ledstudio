@@ -43,7 +43,7 @@ export default class SpreadShootersAudioVisualization extends Visualization.defa
         this.ezTS = config.createEasyTimeSeriesSet();
         const audioSource = config.audioSource;
         if (audioSource !== null) {
-          this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(AudioWaveformSampler.AnalyserNodeAudioWaveformSampler, audioSource);
+          this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(AudioWaveformSampler.ScriptProcessorNodeAudioWaveformSampler, audioSource);
         } else {
           this.analyserHelpers = null;
         }
@@ -57,8 +57,6 @@ export default class SpreadShootersAudioVisualization extends Visualization.defa
         if (this.analyserHelpers == null) {
             return;
         }
-        this.analyserHelpers.low.sample();
-        this.analyserHelpers.direct.sample();
         this.time += elapsedMillis;
 
         this.info = this.info.filter(kt => this.time - kt.time < SHOOTER_DURATION_MS*1.5);
