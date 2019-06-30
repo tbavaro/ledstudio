@@ -52,7 +52,6 @@ export default class AnalogAudio {
         const audioConstraints = {
           deviceId,
           autoGainControl: false,
-          channelCount: 2,
           echoCancellation: false,
           noiseSuppression: false,
           sampleRate: 44100
