@@ -190,7 +190,7 @@ export default class ControlsView extends React.Component<Props, {}> {
   }
 
   private setButtonValue = (index: number, value: boolean) => {
-    this.props.controllerState.buttonStates[index] = value;
+    this.props.controllerState.setButtonState(index, value);
     this.forceUpdate();
   }
 

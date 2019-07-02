@@ -174,6 +174,17 @@ class MyButtonControl implements Visualization.ButtonControl {
   public get value() {
     return this.controllerState.buttonStates[this.index];
   }
+
+  public get pressedSinceLastFrame() {
+    if (this.controllerState.pressesSinceLastFrame.length > 0) {
+      console.log(this.controllerState.pressesSinceLastFrame);
+    }
+    return this.controllerState.pressesSinceLastFrame.includes(this.index);
+  }
+
+  public get releasedSinceLastFrame() {
+    return this.controllerState.releasesSinceLastFrame.includes(this.index);
+  }
 }
 
 const ASSIGNABLE_DIAL_NUMBERS = [1, 2, 3, 4, 5, 6, 7];
@@ -279,6 +290,7 @@ export default class VisualizationRunner {
   private readonly frameContext: MyFrameContext;
   private readonly timeSeriesHelper: TimeSeriesHelper;
   private readonly brightnessDial: Visualization.DialControl;
+  private readonly controllerState: ControllerState;
 
   constructor(attrs: {
     visualizationName: Visualizations.Name,
@@ -289,6 +301,7 @@ export default class VisualizationRunner {
     forceUpdateUI: () => void
   }) {
     this.timeSeriesHelper = new TimeSeriesHelper();
+    this.controllerState = attrs.controllerState;
     const controllerStateHelper = new ControllerStateHelper(attrs.controllerState, attrs.forceUpdateUI);
     this.brightnessDial = controllerStateHelper.createDialControl({
       dialNumber: 8,
@@ -314,6 +327,7 @@ export default class VisualizationRunner {
       reset: () => {
         this.timeSeriesHelper.reset();
         controllerStateHelper.reset();
+        this.controllerState.reset();
         attrs.setVisualizerExtraDisplay(null);
       }
     };
@@ -337,6 +351,7 @@ export default class VisualizationRunner {
     this.visualization.render(this.frameContext);
     const frameHeatmapValues = this.frameContext.frameHeatmapValues || [];
 
+    this.controllerState.startFrame();
     this.frameContext.startFrame();
     this.lastRenderTime = startTime;
 

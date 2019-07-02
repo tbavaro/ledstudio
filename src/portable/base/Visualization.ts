@@ -24,6 +24,8 @@ export interface EasyTimeSeriesValueSetters {
 
 export interface ButtonControl {
   readonly value: boolean;
+  readonly pressedSinceLastFrame: boolean;
+  readonly releasedSinceLastFrame: boolean;
 }
 
 export interface DialControl {

@@ -1,4 +1,5 @@
 import MidiEvent from "../../piano/MidiEvent";
+import { removeAll } from "../../util/Utils";
 
 type ArrayOf8<T> = [T, T, T, T, T, T, T, T];
 
@@ -6,19 +7,27 @@ function arrayOf8Values<T>(value: T): ArrayOf8<T> {
   return new Array<T>(8).fill(value) as ArrayOf8<T>;
 }
 
-// TODO consider adding "presses since last frame" for buttons
 export default class ControllerState {
   public readonly buttonStates: ArrayOf8<boolean>;
+  public readonly pressesSinceLastFrame: number[];
+  public readonly releasesSinceLastFrame: number[];
   public readonly dialValues: ArrayOf8<number>;  // 0 to 1, inclusive
 
   constructor() {
     this.buttonStates = arrayOf8Values(false);
     this.dialValues = arrayOf8Values(0);
+    this.pressesSinceLastFrame = [];
+    this.releasesSinceLastFrame = [];
 
     // default the last dial to 1 since it's used as global brightness
     this.dialValues[7] = 1;
 
     this.reset();
+  }
+
+  public startFrame() {
+    removeAll(this.pressesSinceLastFrame);
+    removeAll(this.releasesSinceLastFrame);
   }
 
   public reset() {
@@ -41,9 +50,7 @@ export default class ControllerState {
       case 0x9a:
         const isPress = (statusByte === 0x9a);
         const buttonIndex = event.data[1] - 0x24;
-        if (buttonIndex >= 0 && buttonIndex < 8) {
-          this.buttonStates[buttonIndex] = isPress;
-        }
+        this.setButtonState(buttonIndex, isPress);
         break;
 
       case 0xb0: // dial
@@ -56,6 +63,13 @@ export default class ControllerState {
 
       default:
         break;
+    }
+  }
+
+  public setButtonState(index: number, value: boolean) {
+    if (index >= 0 && index < this.buttonStates.length) {
+      this.buttonStates[index] = value;
+      (value ? this.pressesSinceLastFrame : this.releasesSinceLastFrame).push(index);
     }
   }
 }

@@ -1,7 +1,5 @@
 import * as Visualization from "../../base/Visualization";
 
-const MILLIS_BETWEEN_AUTO_SWITCH = 5000;
-
 export type VisualizationClass = new (config: Visualization.Config) => Visualization.default;
 
 function branchAudioNode(audioNode: AudioNode) {
@@ -15,11 +13,17 @@ export default class PlaylistVisualization extends Visualization.default {
   private currentVisualization: Visualization.default;
   private currentVisualizationIndex: number;
   private currentBranchedAudioNode: AudioNode | null = null;
-  private millisUntilSwitch: number = MILLIS_BETWEEN_AUTO_SWITCH;
+  private millisUntilSwitch: number;
+  private button: Visualization.ButtonControl;
+  private readonly autoAdvanceMillis: number;
 
-  constructor(config: Visualization.Config, visualizations: VisualizationClass[]) {
+  constructor(config: Visualization.Config, attrs: {
+    autoAdvanceMillis: number;
+    visualizations: VisualizationClass[];
+  }) {
     super(config);
-    this.visualizations = visualizations;
+    this.autoAdvanceMillis = attrs.autoAdvanceMillis;
+    this.visualizations = attrs.visualizations;
 
     if (this.visualizations.length < 1) {
       throw new Error("must have at least 1 visualization");
@@ -42,6 +46,7 @@ export default class PlaylistVisualization extends Visualization.default {
     }
 
     this.config.reset();
+    this.button = this.config.createButtonControl({ buttonNumber: 5 });
     const newConfig: Visualization.Config = {
       ...this.config,
       audioSource: this.currentBranchedAudioNode
@@ -49,7 +54,7 @@ export default class PlaylistVisualization extends Visualization.default {
 
     const vis = new visClass(newConfig);
     this.currentVisualization = vis;
-    this.millisUntilSwitch = MILLIS_BETWEEN_AUTO_SWITCH;
+    this.millisUntilSwitch = this.autoAdvanceMillis;
 
     console.log("switched to", vis);
   }
@@ -60,8 +65,9 @@ export default class PlaylistVisualization extends Visualization.default {
 
   public render(context: Visualization.FrameContext) {
     this.millisUntilSwitch -= context.elapsedMillis;
-    if (this.millisUntilSwitch < 0) {
-      const leftoverMillis = Math.min(MILLIS_BETWEEN_AUTO_SWITCH, -1 * this.millisUntilSwitch);
+    const shouldSwitch = (this.millisUntilSwitch < 0 || this.button.pressedSinceLastFrame);
+    if (shouldSwitch) {
+      const leftoverMillis = Math.max(0, Math.min(this.autoAdvanceMillis, -1 * this.millisUntilSwitch));
       this.goToNextVisualization();
       this.millisUntilSwitch -= leftoverMillis;
     }

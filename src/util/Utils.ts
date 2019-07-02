@@ -72,6 +72,10 @@ export function removeFirst<T>(arr: T[], item: T) {
   }
 }
 
+export function removeAll<T>(arr: T[]) {
+  arr.splice(0, arr.length);
+}
+
 export function forEachReverse<T>(arr: T[], func: (value: T, index: number) => void) {
   for (let i = arr.length - 1; i >= 0; --i) {
     func(arr[i], i);

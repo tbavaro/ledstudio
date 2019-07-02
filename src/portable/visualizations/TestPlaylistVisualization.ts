@@ -6,9 +6,12 @@ import PatternSparklesVisualization from "./PatternSparklesVisualization";
 
 export default class TestPlaylistVisualization extends PlaylistVisualization {
   constructor(config: Visualization.Config) {
-    super(config, [
-      PatternSparklesVisualization,
-      PatternRainbowVisualization
-    ]);
+    super(config, {
+      autoAdvanceMillis: 5000,
+      visualizations: [
+        PatternSparklesVisualization,
+        PatternRainbowVisualization
+      ]
+    });
   }
 }
