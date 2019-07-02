@@ -2,9 +2,10 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const NAME = "pattern:clock";
 const DEGREES_PER_SECOND = 180;
 
-export default class PatternClockVisualization extends AbstractVoronoiMapperVisualization {
+class PatternClockVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
@@ -30,3 +31,6 @@ export default class PatternClockVisualization extends AbstractVoronoiMapperVisu
     ctx.stroke();
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternClockVisualization);
+export default factory;

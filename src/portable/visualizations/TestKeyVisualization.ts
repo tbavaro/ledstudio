@@ -1,10 +1,12 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const NAME = "testKey";
+
 const COLOR_PRESSED = Colors.WHITE;
 const COLOR_RELEASED = Colors.BLACK;
 
-export default class TestKeyVisualization extends Visualization.SingleRowVisualization {
+class TestKeyVisualization extends Visualization.SingleRowVisualization {
   constructor(config: Visualization.Config) {
     super(config, 88);
   }
@@ -18,3 +20,6 @@ export default class TestKeyVisualization extends Visualization.SingleRowVisuali
     });
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestKeyVisualization);
+export default factory;

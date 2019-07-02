@@ -1,10 +1,12 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const NAME = "pattern:sparkles";
+
 const SPARKLES_PER_SECOND = 300;
 const SPARKLE_HALF_LIFE_SECONDS = 0.2;
 
-export default class PatternSparklesVisualization extends Visualization.default {
+class PatternSparklesVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private numLedsRemainder = 0;
 
@@ -31,3 +33,6 @@ export default class PatternSparklesVisualization extends Visualization.default 
     this.numLedsRemainder = numLeds;
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternSparklesVisualization);
+export default factory;

@@ -3,6 +3,7 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
 
+const NAME = "pulsingRain";
 
 const BASE_SPARKLES_PER_SECOND = 200;
 const SPARKLE_HALF_LIFE_SECONDS = 0.2;
@@ -59,7 +60,7 @@ class DropHelper {
   }
 }
 
-export default class PulsingRainVisualization extends Visualization.default {
+class PulsingRainVisualization extends Visualization.default {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private readonly analyserHelper: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
@@ -154,3 +155,6 @@ export default class PulsingRainVisualization extends Visualization.default {
     });
   }
 }
+
+const factory = new Visualization.Factory(NAME, PulsingRainVisualization);
+export default factory;

@@ -1,6 +1,8 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const NAME = "testStripAddress";
+
 const CHANNEL_START_COLOR = Colors.WHITE;
 const NORMAL_BRIGHTNESS = 0.5;
 const PULSE_BRIGHTNESS = 1.0;
@@ -12,7 +14,7 @@ const PULSE_SPEED_LEDS_PER_SECOND = 16;
 
 const SHOW_CHANNEL_NUMBER_AFTER_N_LEDS = 2;
 
-export default class TestStripAddressVisualization extends Visualization.default {
+class TestStripAddressVisualization extends Visualization.default {
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
   private readonly channelHueIncrement: number;
@@ -67,3 +69,6 @@ export default class TestStripAddressVisualization extends Visualization.default
     }
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestStripAddressVisualization);
+export default factory;

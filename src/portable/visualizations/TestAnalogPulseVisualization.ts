@@ -3,6 +3,8 @@ import * as Visualization from "../base/Visualization";
 
 import { bracket } from "../../util/Utils";
 
+const NAME = "testAnalogPulse";
+
 const FFT_SIZE = 128;
 const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
 const USE_LOWPASS_FILTER = false;
@@ -45,7 +47,7 @@ class BasicFFTHelper {
   }
 }
 
-export default class TestAnalogPulseVisualization extends Visualization.default {
+class TestAnalogPulseVisualization extends Visualization.default {
   private readonly fft: BasicFFTHelper | null;
   private readonly pulseValueTimeSeries: Visualization.TimeSeriesValueSetter;
 
@@ -84,3 +86,6 @@ export default class TestAnalogPulseVisualization extends Visualization.default 
     this.pulseValueTimeSeries.set(pulseValue);
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestAnalogPulseVisualization);
+export default factory;

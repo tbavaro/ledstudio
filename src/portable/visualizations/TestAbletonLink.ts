@@ -1,7 +1,9 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-export default class TestAbletonLink extends Visualization.default {
+const NAME = "testAbletonLink";
+
+class TestAbletonLink extends Visualization.default {
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly progressToNextBeatTimeSeries: Visualization.TimeSeriesValueSetter;
   private readonly timeSinceLastBeatTimeSeries: Visualization.TimeSeriesValueSetter;
@@ -27,3 +29,6 @@ export default class TestAbletonLink extends Visualization.default {
     this.timeSinceLastBeatTimeSeries.set(beatController.timeSinceLastBeat());
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestAbletonLink);
+export default factory;

@@ -31,51 +31,60 @@ import TestStripAddressVisualization from "./visualizations/TestStripAddressVisu
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
 import TestVisualizerExtraDisplayVisualization from "./visualizations/TestVisualizerExtraDisplayVisualization";
 
-const visFuncs = {
-  "glowWave": GlowWaveVisualization,
-  "centerSpread": CenterSpreadVisualization,
-  "sparklesAndFlashes": SparklesAndFlashesVisualization,
-  "splotches": SplotchesVisualization,
-  "spreadShootersAudioVisualization": SpreadShootersAudioVisualization,
-  "pattern:clock": PatternClockVisualization,
-  "pattern:dot": PatternDotVisualization,
-  "pattern:flag": PatternFlagVisualization,
-  "pattern:marquee": PatternMarqueeVisualization,
-  "pattern:owlEyes": PatternOwlEyesVisualization,
-  "pattern:particleFire": PatternParticleFireVisualization,
-  "pattern:rain": PatternRainVisualization,
-  "pattern:rain2": PatternRain2Visualization,
-  "pattern:rainbow": PatternRainbowVisualization,
-  "pattern:sparkles": PatternSparklesVisualization,
-  "pattern:wingFlap": PatternWingFlapVisualization,
-  "pattern:zaps": PatternZapsVisualization,
-  "pattern:zoom": PatternZoomVisualization,
-  "pulsingRain": PulsingRainVisualization,
-  "testAbletonLink": TestAbletonLink,
-  "testAudioAndAbletonLink": TestAudioAndAbletonLink,
-  "testAnalogPulse": TestAnalogPulseVisualization,
-  "testAudioWaveform": TestAudioWaveformVisualization,
-  "testControllerDial": TestControllerDialVisualization,
-  "testKey": TestKeyVisualization,
-  "testKeyFade": TestKeyFadeVisualization,
-  "testPlaylist": TestPlaylistVisualization,
-  "testStripAddress": TestStripAddressVisualization,
-  "testTimeseriesData": TestTimeseriesDataVisualization,
-  "testVisualizerExtraDisplay": TestVisualizerExtraDisplayVisualization
-};
+const factories: Visualization.Factory[] = [
+  GlowWaveVisualization,
+  CenterSpreadVisualization,
+  SparklesAndFlashesVisualization,
+  SplotchesVisualization,
+  SpreadShootersAudioVisualization,
+  PatternClockVisualization,
+  PatternDotVisualization,
+  PatternFlagVisualization,
+  PatternMarqueeVisualization,
+  PatternOwlEyesVisualization,
+  PatternParticleFireVisualization,
+  PatternRainVisualization,
+  PatternRain2Visualization,
+  PatternRainbowVisualization,
+  PatternSparklesVisualization,
+  PatternWingFlapVisualization,
+  PatternZapsVisualization,
+  PatternZoomVisualization,
+  PulsingRainVisualization,
+  TestAbletonLink,
+  TestAudioAndAbletonLink,
+  TestAnalogPulseVisualization,
+  TestAudioWaveformVisualization,
+  TestControllerDialVisualization,
+  TestKeyVisualization,
+  TestKeyFadeVisualization,
+  TestPlaylistVisualization,
+  TestStripAddressVisualization,
+  TestTimeseriesDataVisualization,
+  TestVisualizerExtraDisplayVisualization
+];
 
-export type Name = keyof typeof visFuncs;
+export type Name = string;
 
 export const defaultName: Name = "testStripAddress";
 
-export const names: ReadonlyArray<Name> = Object.keys(visFuncs) as Name[];
+const map = new Map<string, Visualization.Factory>();
+factories.forEach(f => {
+  if (map.has(f.name)) {
+    throw new Error(`duplicate visualization name: ${f.name}`);
+  }
+  map.set(f.name, f);
+});
+
+export const names: ReadonlyArray<Name> = Array.from(map.keys());
 export function create(name: Name, config: Visualization.Config): Visualization.default {
-  if (!(name in visFuncs)) {
+  const factory = map.get(name);
+  if (factory === undefined) {
     throw new Error("unrecognized name");
   }
-  return new visFuncs[name](config);
+  return factory.create(config);
 }
 
 export function isValidName(name: Name): boolean {
-  return name in visFuncs;
+  return map.has(name);
 }

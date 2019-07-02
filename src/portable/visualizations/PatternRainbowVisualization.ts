@@ -1,10 +1,12 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const NAME = "pattern:rainbow";
+
 const DEFAULT_SPEED = 0.3;
 const MAX_SPEED = 1;
 
-export default class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
+class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
   private offset = 0;
   private width = 88; // pixels per 360 degrees
 
@@ -41,3 +43,6 @@ export default class PatternRainbowVisualization extends Visualization.SingleRow
     }
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternRainbowVisualization);
+export default factory;

@@ -3,10 +3,11 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const NAME = "pattern:dot";
 const DEGREES_PER_SECOND = 180;
 const RADIUS = 40;
 
-export default class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
+class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
@@ -33,3 +34,6 @@ export default class PatternDotVisualization extends AbstractVoronoiMapperVisual
     ctx.fill();
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternDotVisualization);
+export default factory;

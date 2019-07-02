@@ -1,10 +1,12 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const NAME = "pattern:zaps";
+
 const MILLIS_BETWEEN_ZAPS = 300;
 const DECAY_RATE = 0.005; // per ms
 
-export default class PatternZapsVisualization extends Visualization.default {
+class PatternZapsVisualization extends Visualization.default {
   private phase: number = 0;
   private ribChannels: number[][];  // addressing is row -> column -> channel
   private channelValues: Map<number, Colors.Color>;
@@ -79,3 +81,6 @@ export default class PatternZapsVisualization extends Visualization.default {
     });
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternZapsVisualization);
+export default factory;

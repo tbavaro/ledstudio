@@ -1,7 +1,9 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-export default class TestControllerDialVisualization extends Visualization.default {
+const NAME = "testControllerDial";
+
+class TestControllerDialVisualization extends Visualization.default {
   private readonly rDial: Visualization.DialControl;
   private readonly gDial: Visualization.DialControl;
   private readonly bDial: Visualization.DialControl;
@@ -44,3 +46,6 @@ export default class TestControllerDialVisualization extends Visualization.defau
     this.timeSerieses.blue.set(bValue);
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestControllerDialVisualization);
+export default factory;

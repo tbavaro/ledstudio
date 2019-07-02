@@ -5,10 +5,12 @@ import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisu
 
 import { bracket01 } from "../../util/Utils";
 
+const NAME = "splotches";
+
 const MIN_RADIUS = 20;
 const MAX_RADIUS = 40;
 
-export default class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
+class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
   private lastFrameBeatsCount: number | undefined;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
@@ -42,3 +44,6 @@ export default class SplotchesVisualization extends AbstractVoronoiMapperVisuali
     }
   }
 }
+
+const factory = new Visualization.Factory(NAME, SplotchesVisualization);
+export default factory;

@@ -2,6 +2,8 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
 
+const NAME = "testAudioWaveform";
+
 const CANVAS_SCALE = 0.5;
 
 class FloatDataCanvasHelper {
@@ -50,7 +52,7 @@ class FloatDataCanvasHelper {
   }
 }
 
-export default class TestAudioWaveformVisualization extends Visualization.default {
+class TestAudioWaveformVisualization extends Visualization.default {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly canvasHelper: FloatDataCanvasHelper | null;
 
@@ -90,3 +92,6 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
     this.highTimeSeries.set(this.analyserHelpers.high.currentRMSAmplitude);
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestAudioWaveformVisualization);
+export default factory;

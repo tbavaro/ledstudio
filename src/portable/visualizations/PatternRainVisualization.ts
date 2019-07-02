@@ -3,6 +3,8 @@ import * as Scene from "../../scenes/Scene";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const NAME = "pattern:rain";
+
 const SPARKLES_PER_SECOND = 15;
 const SPARKLE_HALF_LIFE_SECONDS = 0.1;
 const FALL_MILLIS = 100;
@@ -58,7 +60,7 @@ class DropHelper {
   }
 }
 
-export default class PatternRainVisualization extends Visualization.default {
+class PatternRainVisualization extends Visualization.default {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private numSparklesRemainder = 0;
@@ -115,3 +117,6 @@ export default class PatternRainVisualization extends Visualization.default {
     topRow.forEach((color, i) => topRow.set(i, Colors.add(color, TOP_GLOW)));
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternRainVisualization);
+export default factory;

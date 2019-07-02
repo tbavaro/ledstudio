@@ -1,7 +1,5 @@
 import * as Visualization from "../../base/Visualization";
 
-export type VisualizationClass = new (config: Visualization.Config) => Visualization.default;
-
 function branchAudioNode(audioNode: AudioNode) {
   const newNode = new GainNode(audioNode.context);
   audioNode.connect(newNode);
@@ -9,7 +7,7 @@ function branchAudioNode(audioNode: AudioNode) {
 }
 
 export default class PlaylistVisualization extends Visualization.default {
-  private readonly visualizations: VisualizationClass[];
+  private readonly visualizations: Visualization.Factory[];
   private currentVisualization: Visualization.default;
   private currentVisualizationIndex: number;
   private currentBranchedAudioNode: AudioNode | null = null;
@@ -19,7 +17,7 @@ export default class PlaylistVisualization extends Visualization.default {
 
   constructor(config: Visualization.Config, attrs: {
     autoAdvanceMillis: number;
-    visualizations: VisualizationClass[];
+    visualizations: Visualization.Factory[];
   }) {
     super(config);
     this.autoAdvanceMillis = attrs.autoAdvanceMillis;
@@ -34,7 +32,7 @@ export default class PlaylistVisualization extends Visualization.default {
 
   private switchToVisualization(n: number) {
     this.currentVisualizationIndex = n;
-    const visClass = this.visualizations[n];
+    const factory = this.visualizations[n];
 
     if (this.currentBranchedAudioNode !== null) {
       this.currentBranchedAudioNode.disconnect();
@@ -52,7 +50,7 @@ export default class PlaylistVisualization extends Visualization.default {
       audioSource: this.currentBranchedAudioNode
     };
 
-    const vis = new visClass(newConfig);
+    const vis = factory.create(newConfig);
     this.currentVisualization = vis;
     this.millisUntilSwitch = this.autoAdvanceMillis;
 

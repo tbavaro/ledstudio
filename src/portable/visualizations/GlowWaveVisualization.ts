@@ -4,6 +4,8 @@ import * as Visualization from "../base/Visualization";
 
 import * as Utils from "../../util/Utils";
 
+const NAME = "glowWave";
+
 const NATIVE_WIDTH = 88;
 const ROW_FADE_FACTOR = 0.6;
 
@@ -38,7 +40,7 @@ interface FadingColor {
   brightness: number;
 }
 
-export default class GlowWaveVisualization extends Visualization.default {
+class GlowWaveVisualization extends Visualization.default {
   private readonly pressedKeyColors = new Map<number, FadingColor>();
   private readonly fadeFactors: number[];
   private readonly nativeRows: ColorRow[];
@@ -101,3 +103,6 @@ export default class GlowWaveVisualization extends Visualization.default {
     });
   }
 }
+
+const factory = new Visualization.Factory(NAME, GlowWaveVisualization);
+export default factory;

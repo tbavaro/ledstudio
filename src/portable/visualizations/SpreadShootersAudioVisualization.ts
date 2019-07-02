@@ -3,6 +3,8 @@ import LedInfo from "../base/LedInfo";
 import * as Visualization from "../base/Visualization";
 import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
 
+const NAME = "spreadShootersAudioVisualization";
+
 interface Info {
     time: number;
     rib: number;
@@ -28,7 +30,7 @@ function randomHue() {
 const BASE_SHOOTER_PER_S = 0.5;
 const SHOOTER_DURATION_MS = 1000;
 
-export default class SpreadShootersAudioVisualization extends Visualization.default {
+class SpreadShootersAudioVisualization extends Visualization.default {
     private info = new Array<Info>();
     // private sparkles = new Array<SparkleInfo>();
     private time = 0;
@@ -151,3 +153,6 @@ function reverseLedInfo(ledInfos: LedInfo[][]) {
     });
     return retval;
 }
+
+const factory = new Visualization.Factory(NAME, SpreadShootersAudioVisualization);
+export default factory;

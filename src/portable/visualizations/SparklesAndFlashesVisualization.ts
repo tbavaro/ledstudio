@@ -4,11 +4,13 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import BasicAudioHelper from "./util/BasicAudioHelper";
 
+const NAME = "sparklesAndFlashes";
+
 const MIN_SPARKLES_PER_SECOND = 0;
 const MAX_SPARKLES_PER_SECOND = 5000;
 const PIXEL_HALF_LIFE_SECONDS = 0.1;
 
-export default class SparklesAndFlashesVisualization extends Visualization.default {
+class SparklesAndFlashesVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private numLedsRemainder = 0;
   private readonly audioHelper: BasicAudioHelper | null;
@@ -60,3 +62,6 @@ export default class SparklesAndFlashesVisualization extends Visualization.defau
     this.numLedsRemainder = numLeds;
   }
 }
+
+const factory = new Visualization.Factory(NAME, SparklesAndFlashesVisualization);
+export default factory;

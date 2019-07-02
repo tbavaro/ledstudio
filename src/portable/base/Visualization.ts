@@ -146,3 +146,17 @@ export class DerezVisualization extends Visualization {
     });
   }
 }
+
+export class Factory {
+  public readonly name: string;
+  private readonly ctor: new (config: Config) => Visualization;
+
+  constructor(name: string, ctor: new (config: Config) => Visualization) {
+    this.name = name;
+    this.ctor = ctor;
+  }
+
+  public create(config: Config): Visualization {
+    return new this.ctor(config);
+  }
+}

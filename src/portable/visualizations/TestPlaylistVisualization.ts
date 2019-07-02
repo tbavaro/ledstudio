@@ -4,7 +4,9 @@ import PlaylistVisualization from "./util/PlaylistVisualization";
 import PatternRainbowVisualization from "./PatternRainbowVisualization";
 import PatternSparklesVisualization from "./PatternSparklesVisualization";
 
-export default class TestPlaylistVisualization extends PlaylistVisualization {
+const NAME = "testPlaylist";
+
+class TestPlaylistVisualization extends PlaylistVisualization {
   constructor(config: Visualization.Config) {
     super(config, {
       autoAdvanceMillis: 5000,
@@ -15,3 +17,6 @@ export default class TestPlaylistVisualization extends PlaylistVisualization {
     });
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestPlaylistVisualization);
+export default factory;

@@ -1,6 +1,8 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const NAME = "pattern:wingFlap";
+
 const SPEED = 3 / 1000;
 const VERTICAL_SHARPNESS = 7;
 const FLAPPINESS = 2;
@@ -50,8 +52,11 @@ class PureWingFlapVisualization extends Visualization.default {
   }
 }
 
-export default class PatternWingFlapVisualization extends Visualization.DerezVisualization {
+class PatternWingFlapVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new PureWingFlapVisualization(config), DEREZ);
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternWingFlapVisualization);
+export default factory;

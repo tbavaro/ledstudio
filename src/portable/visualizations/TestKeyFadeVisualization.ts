@@ -3,6 +3,8 @@ import * as Visualization from "../base/Visualization";
 
 import * as Utils from "../../util/Utils";
 
+const NAME = "testKeyFade";
+
 const COLOR_PRESSED = Colors.WHITE;
 const COLOR_RELEASED = Colors.multiply(Colors.RED, 0.25);
 
@@ -20,7 +22,7 @@ function colorForValue(v: number) {
   return PALETTE[x];
 }
 
-export default class TestKeyFadeVisualization extends Visualization.SingleRowVisualization {
+class TestKeyFadeVisualization extends Visualization.SingleRowVisualization {
   private readonly values: number[];
   private readonly decayRate = 3 / 1000;
 
@@ -47,3 +49,6 @@ export default class TestKeyFadeVisualization extends Visualization.SingleRowVis
     this.values.forEach((v, i) => this.leds.set(i, colorForValue(v)));
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestKeyFadeVisualization);
+export default factory;

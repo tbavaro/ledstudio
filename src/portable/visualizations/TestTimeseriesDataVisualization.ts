@@ -1,6 +1,8 @@
 import * as Visualization from "../base/Visualization";
 
-export default class TestTimeseriesDataVisualization extends Visualization.default {
+const NAME = "testTimeseriesData";
+
+class TestTimeseriesDataVisualization extends Visualization.default {
   private phase = 0;
 
   private readonly aTimeSeries: Visualization.TimeSeriesValueSetter;
@@ -24,3 +26,6 @@ export default class TestTimeseriesDataVisualization extends Visualization.defau
     this.cTimeSeries.set(((this.phase * 10) % (Math.PI * 2) < Math.PI) ? 0.5 : null);
   }
 }
+
+const factory = new Visualization.Factory(NAME, TestTimeseriesDataVisualization);
+export default factory;

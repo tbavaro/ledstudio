@@ -3,10 +3,12 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const NAME = "pattern:zoom";
+
 const ZOOM_SPEED = 2;
 const RADIUS_STEP = 15;
 
-export default class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
+class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   private drawCircle(radius: number, color: Colors.Color) {
@@ -39,3 +41,6 @@ export default class PatternZoomVisualization extends AbstractVoronoiMapperVisua
     }
   }
 }
+
+const factory = new Visualization.Factory(NAME, PatternZoomVisualization);
+export default factory;
