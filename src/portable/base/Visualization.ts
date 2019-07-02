@@ -69,6 +69,10 @@ export interface Config {
     // defaults to `minValue`
     initialValue?: number;
   }) => DialControl;
+
+  // resets all of the state (dials created, timeseries created, etc).
+  // does not need to be called by normal visualizations
+  reset(): void;
 }
 
 export interface FrameContext {

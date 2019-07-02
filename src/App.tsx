@@ -457,7 +457,8 @@ class App extends React.Component<{}, State> {
       scene,
       audioSource,
       setVisualizerExtraDisplay,
-      controllerState: this.controllerState
+      controllerState: this.controllerState,
+      forceUpdateUI: () => this.forceUpdate()
     });
     runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
     const values = {

@@ -11,7 +11,7 @@ import * as Visualizations from "./portable/Visualizations";
 
 import BeatController from "./portable/base/BeatController";
 
-import { bracket, MovingAverageHelper, removeFirst, valueOrDefault } from "./util/Utils";
+import { bracket, MovingAverageHelper, valueOrDefault } from "./util/Utils";
 
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
 import Scene from "./scenes/Scene";
@@ -62,10 +62,6 @@ class MyTimeSeriesValueSetter implements Visualization.TimeSeriesValueSetter {
     };
   }
 
-  public reset() {
-    this.set(null);
-  }
-
   public set(value: number | null) {
     this.data.value = value;
   }
@@ -84,9 +80,9 @@ const DEFAULT_COLOR_ORDER = [
 ];
 
 class TimeSeriesHelper {
-  private readonly remainingDefaultColors = [...DEFAULT_COLOR_ORDER].reverse();
-  public readonly data: TimeseriesData.PointDef[] = [];
-  private readonly setters: MyTimeSeriesValueSetter[] = [];
+  private usedColors: Colors.Color[] = [];
+  public data: TimeseriesData.PointDef[] = [];
+  private setters: MyTimeSeriesValueSetter[] = [];
 
   public createTimeSeries = (attrs?: {
     color?: Colors.Color
@@ -98,8 +94,8 @@ class TimeSeriesHelper {
       color = this.nextDefaultColor();
     } else {
       color = attrs.color;
-      removeFirst(this.remainingDefaultColors, attrs.color);
     }
+    this.usedColors.push(color);
 
     const setter = new MyTimeSeriesValueSetter(color);
     this.data.push(setter.data);
@@ -109,15 +105,21 @@ class TimeSeriesHelper {
   }
 
   private nextDefaultColor(): Colors.Color {
-    const color = this.remainingDefaultColors.pop();
+    const color = DEFAULT_COLOR_ORDER.find(c => !this.usedColors.includes(c));
     if (color === undefined) {
       throw new Error("all default colors were used");
     }
     return color;
   }
 
-  public resetAll() {
-    this.setters.forEach(s => s.reset());
+  public setAllToNull() {
+    this.setters.forEach(s => s.set(null));
+  }
+
+  public reset() {
+    this.usedColors = [];
+    this.data = [];
+    this.setters = [];
   }
 }
 
@@ -174,15 +176,25 @@ class MyButtonControl implements Visualization.ButtonControl {
   }
 }
 
+const ASSIGNABLE_DIAL_NUMBERS = [1, 2, 3, 4, 5, 6, 7];
+const ASSIGNABLE_BUTTON_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8];
+
 class ControllerStateHelper {
   private readonly controllerState: ControllerState;
-  private readonly unusedDialNumbers: number[];
-  private readonly unusedButtonNumbers: number[];
+  private readonly forceUpdateUI: () => void;
+  private usedDialNumbers: number[];
+  private usedButtonNumbers: number[];
 
-  constructor(controllerState: ControllerState) {
+  constructor(controllerState: ControllerState, forceUpdateUI: () => void) {
     this.controllerState = controllerState;
-    this.unusedDialNumbers = [1, 2, 3, 4, 5, 6, 7].reverse();
-    this.unusedButtonNumbers = [1, 2, 3, 4, 5, 6, 7, 8].reverse();
+    this.usedButtonNumbers = [];
+    this.usedDialNumbers = [];
+    this.forceUpdateUI = forceUpdateUI;
+  }
+
+  public reset() {
+    this.usedButtonNumbers = [];
+    this.usedDialNumbers = [];
   }
 
   public createDialControl = (attrs?: {
@@ -198,8 +210,8 @@ class ControllerStateHelper {
       dialNumber = this.nextDialNumber();
     } else {
       dialNumber = attrs.dialNumber;
-      removeFirst(this.unusedDialNumbers, dialNumber);
     }
+    this.usedDialNumbers.push(dialNumber);
 
     const minValue = valueOrDefault(attrs.minValue, 0);
     const maxValue = valueOrDefault(attrs.maxValue, 1);
@@ -216,11 +228,13 @@ class ControllerStateHelper {
 
     helper.value = valueOrDefault(attrs.initialValue, minValue);
 
+    this.forceUpdateUI();
+
     return helper;
   }
 
   private nextDialNumber(): number {
-    const dialNumber = this.unusedDialNumbers.pop();
+    const dialNumber = ASSIGNABLE_DIAL_NUMBERS.find(n => !this.usedDialNumbers.includes(n));
     if (dialNumber === undefined) {
       throw new Error("all dials were used");
     }
@@ -237,8 +251,8 @@ class ControllerStateHelper {
       buttonNumber = this.nextButtonNumber();
     } else {
       buttonNumber = attrs.buttonNumber;
-      removeFirst(this.unusedButtonNumbers, buttonNumber);
     }
+    this.usedButtonNumbers.push(buttonNumber);
 
     return new MyButtonControl({
       controllerState: this.controllerState,
@@ -247,7 +261,7 @@ class ControllerStateHelper {
   }
 
   private nextButtonNumber(): number {
-    const buttonNumber = this.unusedButtonNumbers.pop();
+    const buttonNumber = ASSIGNABLE_BUTTON_NUMBERS.find(n => !this.usedButtonNumbers.includes(n));
     if (buttonNumber === undefined) {
       throw new Error("all buttons were used");
     }
@@ -270,11 +284,12 @@ export default class VisualizationRunner {
     visualizationName: Visualizations.Name,
     scene: Scene,
     audioSource: AudioNode | null,
-    setVisualizerExtraDisplay: (element: HTMLElement) => void,
-    controllerState: ControllerState
+    setVisualizerExtraDisplay: (element: HTMLElement | null) => void,
+    controllerState: ControllerState,
+    forceUpdateUI: () => void
   }) {
     this.timeSeriesHelper = new TimeSeriesHelper();
-    const controllerStateHelper = new ControllerStateHelper(attrs.controllerState);
+    const controllerStateHelper = new ControllerStateHelper(attrs.controllerState, attrs.forceUpdateUI);
     this.brightnessDial = controllerStateHelper.createDialControl({
       dialNumber: 8,
       initialValue: attrs.controllerState.dialValues[7]
@@ -295,6 +310,11 @@ export default class VisualizationRunner {
           green: this.timeSeriesHelper.createTimeSeries({ color: Colors.GREEN }),
           orange: this.timeSeriesHelper.createTimeSeries({ color: Colors.ORANGE })
         };
+      },
+      reset: () => {
+        this.timeSeriesHelper.reset();
+        controllerStateHelper.reset();
+        attrs.setVisualizerExtraDisplay(null);
       }
     };
     this.visualization = Visualizations.create(attrs.visualizationName, visualizationConfig);
@@ -310,7 +330,7 @@ export default class VisualizationRunner {
     }
 
     // collect state
-    this.timeSeriesHelper.resetAll();
+    this.timeSeriesHelper.setAllToNull();
     this.frameContext.endFrame(startTime - this.lastRenderTime, beatController);
 
     // render into the LED strip

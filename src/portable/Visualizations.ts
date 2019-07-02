@@ -26,6 +26,7 @@ import TestAudioWaveformVisualization from "./visualizations/TestAudioWaveformVi
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
+import TestPlaylistVisualization from "./visualizations/TestPlaylistVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
 import TestVisualizerExtraDisplayVisualization from "./visualizations/TestVisualizerExtraDisplayVisualization";
@@ -57,6 +58,7 @@ const visFuncs = {
   "testControllerDial": TestControllerDialVisualization,
   "testKey": TestKeyVisualization,
   "testKeyFade": TestKeyFadeVisualization,
+  "testPlaylist": TestPlaylistVisualization,
   "testStripAddress": TestStripAddressVisualization,
   "testTimeseriesData": TestTimeseriesDataVisualization,
   "testVisualizerExtraDisplay": TestVisualizerExtraDisplayVisualization
