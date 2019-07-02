@@ -3,6 +3,8 @@ import PlaylistVisualization from "./util/PlaylistVisualization";
 
 import PatternRainbowVisualization from "./PatternRainbowVisualization";
 import PatternSparklesVisualization from "./PatternSparklesVisualization";
+import SplotchesVisualization from "./SplotchesVisualization";
+import TestTimeseriesDataVisualization from "./TestTimeseriesDataVisualization";
 
 const NAME = "testPlaylist";
 
@@ -12,7 +14,9 @@ class TestPlaylistVisualization extends PlaylistVisualization {
       autoAdvanceMillis: 5000,
       visualizations: [
         PatternSparklesVisualization,
-        PatternRainbowVisualization
+        PatternRainbowVisualization,
+        TestTimeseriesDataVisualization,
+        SplotchesVisualization
       ]
     });
   }

@@ -44,9 +44,28 @@ export default class PlaylistVisualization extends Visualization.default {
     }
 
     this.config.reset();
+
+    const element = document.createElement("div");
+    const labelElement = document.createElement("div");
+    labelElement.innerText = factory.name;
+    labelElement.style.backgroundColor = "gray";
+    labelElement.style.color = "white";
+    labelElement.style.fontSize = "12px";
+    labelElement.style.padding = "5px";
+    element.appendChild(labelElement);
+    const containerElement = document.createElement("div");
+    element.appendChild(containerElement);
+    this.config.setExtraDisplay(element);
+
     this.button = this.config.createButtonControl({ buttonNumber: 5 });
     const newConfig: Visualization.Config = {
       ...this.config,
+      setExtraDisplay: (newElement: HTMLElement | null) => {
+        containerElement.innerHTML = "";
+        if (newElement !== null) {
+          containerElement.appendChild(newElement);
+        }
+      },
       audioSource: this.currentBranchedAudioNode
     };
 
