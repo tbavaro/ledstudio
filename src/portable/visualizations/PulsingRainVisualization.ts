@@ -114,7 +114,7 @@ class PulsingRainVisualization extends Visualization.default {
     const volumeAdjustment = (this.analyserHelper.direct.currentRMSAmplitude - 0.25) * 800;
     let sparkleRate = BASE_SPARKLES_PER_SECOND + volumeAdjustment;
 
-    const nearBeat = beatController.progressToNextBeat() < 0.1 || beatController.progressToNextBeat() > 0.9;
+    const nearBeat = beatController.timeSinceLastBeat() < 0.1 || beatController.progressToNextBeat() > 0.95;
     if (this.analyserHelper.low.currentRMSZScore > 4 && nearBeat) {
       this.lastDrop = now;
     }
