@@ -66,7 +66,7 @@ class SpreadShootersAudioVisualization extends Visualization.default {
         this.info = this.info.filter(kt => this.time - kt.time < SHOOTER_DURATION_MS*1.5);
 
         const beatNow = beatController.beatNumber();
-        const nearBeat = beatController.timeSinceLastBeat() < 0.3 || beatController.progressToNextBeat() > 0.95;
+        const nearBeat = beatController.timeSinceLastBeat() < 0.1 || beatController.progressToNextBeat() > 0.95;
         if (this.analyserHelpers.low.currentRMSZScore > 4 && nearBeat) {
             this.dropBeat = beatNow;
             this.dropVizLastBeat = 0;
