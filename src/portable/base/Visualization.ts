@@ -11,6 +11,8 @@ import PianoState from "./PianoState";
 export interface TimeSeriesValueSetter {
   // value should be between 0 and 1
   set: (value: number | null) => void;
+
+  value: number | null;
 }
 
 export interface EasyTimeSeriesValueSetters {

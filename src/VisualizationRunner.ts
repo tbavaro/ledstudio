@@ -65,6 +65,14 @@ class MyTimeSeriesValueSetter implements Visualization.TimeSeriesValueSetter {
   public set(value: number | null) {
     this.data.value = value;
   }
+
+  public set value(value: number | null) {
+    this.data.value = value;
+  }
+
+  public get value() {
+    return this.data.value;
+  }
 }
 
 const DEFAULT_COLOR_ORDER = [
