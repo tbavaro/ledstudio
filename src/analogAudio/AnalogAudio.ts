@@ -62,7 +62,7 @@ export default class AnalogAudio {
             const audioContext = new AudioContext();
             const audioSource = audioContext.createMediaStreamSource(stream);
             this.setCurrentAudioSource(audioContext, audioSource);
-            audioSource.connect(audioContext.destination);
+            // audioSource.connect(audioContext.destination);
           }
         });
       }
