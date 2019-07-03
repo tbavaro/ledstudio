@@ -6,8 +6,11 @@ const NUM_SAMPLES = 1024;
 export interface Values {
   samples: Float32Array;
   unfilteredRMS: number;
+  unfilteredPeak: number;
   lowRMS: number;
+  lowPeak: number;
   highRMS: number;
+  highPeak: number;
 }
 
 export default class BasicAudioHelper {
@@ -52,8 +55,11 @@ export default class BasicAudioHelper {
     this.reusedValues = {
       samples: this.unfilteredSampler.currentSamples,
       unfilteredRMS: 0,
+      unfilteredPeak: 0,
       lowRMS: 0,
-      highRMS: 0
+      lowPeak: 0,
+      highRMS: 0,
+      highPeak: 0
     };
   }
 
@@ -63,8 +69,11 @@ export default class BasicAudioHelper {
     const values = this.reusedValues;
     values.samples = this.unfilteredSampler.currentSamples;
     values.unfilteredRMS = this.unfilteredSampler.currentRMSAmplitude;
+    values.unfilteredPeak = this.unfilteredSampler.currentMaxAmplitude;
     values.lowRMS = this.lowSampler.currentRMSAmplitude;
+    values.lowPeak = this.lowSampler.currentMaxAmplitude;
     values.highRMS = this.highSampler.currentRMSAmplitude;
+    values.highPeak = this.highSampler.currentMaxAmplitude;
 
     return values;
   }

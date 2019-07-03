@@ -8,7 +8,7 @@ const NAME = "sparklesAndFlashes";
 
 const MIN_SPARKLES_PER_SECOND = 0;
 const MAX_SPARKLES_PER_SECOND = 5000;
-const PIXEL_HALF_LIFE_SECONDS = 0.1;
+const PIXEL_HALF_LIFE_SECONDS = 0.2;
 
 class LinearDecayingValue {
   public value: number;
