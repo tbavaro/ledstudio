@@ -4,13 +4,12 @@ import BeatController from "./BeatController";
 
 import ColorRow from "./ColorRow";
 import * as Colors from "./Colors";
+import FancyValue from "./FancyValue";
 import FixedArray from "./FixedArray";
 import LedInfo from "./LedInfo";
 import PianoState from "./PianoState";
 
-export interface TimeSeriesValue {
-  value: number | null;
-}
+export type TimeSeriesValue = FancyValue;
 
 export interface EasyTimeSeriesValueSetters {
   white: TimeSeriesValue;

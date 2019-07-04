@@ -1,5 +1,6 @@
 import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
+import FancyValue from "./portable/base/FancyValue";
 import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
 import * as TimeseriesData from "./portable/base/TimeseriesData";
@@ -52,25 +53,6 @@ class MyFrameContext implements Visualization.FrameContext {
   }
 }
 
-class MyTimeSeriesValueSetter implements Visualization.TimeSeriesValue {
-  public readonly data: TimeseriesData.PointDef;
-
-  constructor(color: Colors.Color) {
-    this.data = {
-      color: color,
-      value: NaN
-    };
-  }
-
-  public set value(value: number) {
-    this.data.value = value;
-  }
-
-  public get value() {
-    return this.data.value;
-  }
-}
-
 const DEFAULT_COLOR_ORDER = [
   Colors.WHITE,
   Colors.BLUE,
@@ -85,8 +67,8 @@ const DEFAULT_COLOR_ORDER = [
 
 class TimeSeriesHelper {
   private usedColors: Colors.Color[] = [];
-  public data: TimeseriesData.PointDef[] = [];
-  private setters: MyTimeSeriesValueSetter[] = [];
+  private dataInternal: TimeseriesData.PointDef[] = [];
+  private tsValues: FancyValue[] = [];
 
   public createTimeSeries = (attrs?: {
     color?: Colors.Color
@@ -101,11 +83,16 @@ class TimeSeriesHelper {
     }
     this.usedColors.push(color);
 
-    const setter = new MyTimeSeriesValueSetter(color);
-    this.data.push(setter.data);
-    this.setters.push(setter);
+    const tsValue = new FancyValue();
+    const data: TimeseriesData.PointDef = {
+      color: color,
+      value: tsValue.value
+    };
 
-    return setter;
+    this.dataInternal.push(data);
+    this.tsValues.push(tsValue);
+
+    return tsValue;
   }
 
   private nextDefaultColor(): Colors.Color {
@@ -117,13 +104,18 @@ class TimeSeriesHelper {
   }
 
   public setAllToNaN() {
-    this.setters.forEach(s => s.value = NaN);
+    this.tsValues.forEach(s => s.value = NaN);
   }
 
   public reset() {
     this.usedColors = [];
-    this.data = [];
-    this.setters = [];
+    this.dataInternal = [];
+    this.tsValues = [];
+  }
+
+  public get data(): TimeseriesData.PointDef[] {
+    this.tsValues.forEach((v, i) => this.dataInternal[i].value = v.value);
+    return this.dataInternal;
   }
 }
 

@@ -2,7 +2,7 @@ export default class FancyValue {
   public value: number;
 
   constructor(initialValue?: number) {
-    this.value = (initialValue === undefined ? 0 : initialValue);
+    this.value = (initialValue === undefined ? NaN : initialValue);
   }
 
   public decayLinearAmount(amount: number) {
