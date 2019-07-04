@@ -56,8 +56,8 @@ class TestAudioWaveformVisualization extends Visualization.default {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly canvasHelper: FloatDataCanvasHelper | null;
 
-  private readonly lowTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly highTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly lowTimeSeries: Visualization.TimeSeriesValue;
+  private readonly highTimeSeries: Visualization.TimeSeriesValue;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -88,8 +88,8 @@ class TestAudioWaveformVisualization extends Visualization.default {
       this.canvasHelper.render(this.analyserHelpers.direct.currentSamples);
     }
 
-    this.lowTimeSeries.set(this.analyserHelpers.low.currentRMSAmplitude);
-    this.highTimeSeries.set(this.analyserHelpers.high.currentRMSAmplitude);
+    this.lowTimeSeries.value = this.analyserHelpers.low.currentRMSAmplitude;
+    this.highTimeSeries.value = this.analyserHelpers.high.currentRMSAmplitude;
   }
 }
 

@@ -41,9 +41,9 @@ class SparklesAndFlashesVisualization extends Visualization.default {
 
   private flashBrightness = new LinearDecayingValue(0, 1 / 0.125);
 
-  private readonly lowTS: Visualization.TimeSeriesValueSetter;
-  private readonly highTS: Visualization.TimeSeriesValueSetter;
-  private readonly flashBrightnessTS: Visualization.TimeSeriesValueSetter;
+  private readonly lowTS: Visualization.TimeSeriesValue;
+  private readonly highTS: Visualization.TimeSeriesValue;
+  private readonly flashBrightnessTS: Visualization.TimeSeriesValue;
 
   constructor(config: Visualization.Config) {
     super(config);

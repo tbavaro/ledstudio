@@ -4,9 +4,9 @@ import * as Visualization from "../base/Visualization";
 const NAME = "testAbletonLink";
 
 class TestAbletonLink extends Visualization.default {
-  private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly progressToNextBeatTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly timeSinceLastBeatTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
+  private readonly progressToNextBeatTimeSeries: Visualization.TimeSeriesValue;
+  private readonly timeSinceLastBeatTimeSeries: Visualization.TimeSeriesValue;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -24,9 +24,9 @@ class TestAbletonLink extends Visualization.default {
       row.fill(duringBeat ? Colors.WHITE : Colors.BLACK);
     });
 
-    this.duringBeatTimeSeries.set(duringBeat ? 1 : 0);
-    this.progressToNextBeatTimeSeries.set(beatController.progressToNextBeat());
-    this.timeSinceLastBeatTimeSeries.set(beatController.timeSinceLastBeat());
+    this.duringBeatTimeSeries.value = duringBeat ? 1 : 0;
+    this.progressToNextBeatTimeSeries.value = beatController.progressToNextBeat();
+    this.timeSinceLastBeatTimeSeries.value = beatController.timeSinceLastBeat();
   }
 }
 

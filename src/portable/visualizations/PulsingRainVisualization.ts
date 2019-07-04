@@ -140,10 +140,10 @@ class PulsingRainVisualization extends Visualization.default {
     }
     this.numSparklesRemainder = numLeds;
 
-    this.ezTS.blue.set(this.analyserHelper.direct.currentRMSZScore/4);
-    this.ezTS.red.set(this.analyserHelper.direct.currentRMSAmplitude);
-    this.ezTS.white.set(this.analyserHelper.direct.currentRMSExpMovingAvg);
-    this.ezTS.green.set(now - this.lastDrop < 8 ? 1 : 0);
+    this.ezTS.blue.value = this.analyserHelper.direct.currentRMSZScore/4;
+    this.ezTS.red.value = this.analyserHelper.direct.currentRMSAmplitude;
+    this.ezTS.white.value = this.analyserHelper.direct.currentRMSExpMovingAvg;
+    this.ezTS.green.value = now - this.lastDrop < 8 ? 1 : 0;
 
     // render
 

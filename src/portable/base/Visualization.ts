@@ -8,20 +8,17 @@ import FixedArray from "./FixedArray";
 import LedInfo from "./LedInfo";
 import PianoState from "./PianoState";
 
-export interface TimeSeriesValueSetter {
-  // value should be between 0 and 1
-  set: (value: number | null) => void;
-
+export interface TimeSeriesValue {
   value: number | null;
 }
 
 export interface EasyTimeSeriesValueSetters {
-  white: TimeSeriesValueSetter;
-  blue: TimeSeriesValueSetter;
-  red: TimeSeriesValueSetter;
-  yellow: TimeSeriesValueSetter;
-  green: TimeSeriesValueSetter;
-  orange: TimeSeriesValueSetter;
+  white: TimeSeriesValue;
+  blue: TimeSeriesValue;
+  red: TimeSeriesValue;
+  yellow: TimeSeriesValue;
+  green: TimeSeriesValue;
+  orange: TimeSeriesValue;
 }
 
 export interface ButtonControl {
@@ -43,7 +40,7 @@ export interface Config {
   createTimeSeries: (attrs?: {
     // if `color` is not defined, will try to pick something reasonable
     color?: Colors.Color
-  }) => TimeSeriesValueSetter;
+  }) => TimeSeriesValue;
 
   createEasyTimeSeriesSet: () => EasyTimeSeriesValueSetters;
 

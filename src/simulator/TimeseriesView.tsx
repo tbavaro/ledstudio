@@ -82,7 +82,7 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
 
     for (let i = points.length - 1; i >= 0; --i) {
       const p = points[i];
-      if (p.value !== null) {
+      if (!isNaN(p.value)) {
         ctx.fillStyle = Colors.cssColor(p.color);
         ctx.fillRect(canvas.width - 1, (1 - p.value) * (canvas.height - POINT_VALUE_HEIGHT), 1, POINT_VALUE_HEIGHT);
       }

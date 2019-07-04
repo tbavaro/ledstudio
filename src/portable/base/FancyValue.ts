@@ -1,4 +1,4 @@
-export class FancyValue {
+export default class FancyValue {
   public value: number;
 
   constructor(initialValue?: number) {
@@ -14,8 +14,9 @@ export class FancyValue {
     return this.decayLinearAmount(rate * interval);
   }
 
-  public decayHalfLife(halflife: number, interval: number) {
-
+  public decayExponential(halfLife: number, interval: number) {
+    this.value *= Math.pow(0.5, interval / halfLife);
+    return this.value;
   }
 
   public bumpTo(value: number) {

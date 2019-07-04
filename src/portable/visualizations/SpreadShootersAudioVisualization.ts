@@ -75,10 +75,10 @@ class SpreadShootersAudioVisualization extends Visualization.default {
             console.log(beatController.progressToNextBeat());
         }
 
-        this.ezTS.white.set(this.analyserHelpers.low.currentRMSExpMovingAvg * 4);
-        this.ezTS.blue.set(this.analyserHelpers.low.currentRMSExpMovingVar * 50);
-        this.ezTS.orange.set(this.analyserHelpers.low.currentRMSZScore / 6);
-        this.ezTS.red.set(beatController.progressToNextBeat());
+        this.ezTS.white.value = this.analyserHelpers.low.currentRMSExpMovingAvg * 4;
+        this.ezTS.blue.value = this.analyserHelpers.low.currentRMSExpMovingVar * 50;
+        this.ezTS.orange.value = this.analyserHelpers.low.currentRMSZScore / 6;
+        this.ezTS.red.value = beatController.progressToNextBeat();
 
         if (beatNow - this.dropBeat < 16) {
             if (this.dropVizLastBeat !== beatNow) {

@@ -2,7 +2,7 @@ import * as Colors from "./Colors";
 
 export interface PointDef {
   color: Colors.Color;
-  value: number | null;
+  value: number;
 }
 
 export interface HeatmapDef {

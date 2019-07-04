@@ -19,7 +19,7 @@ const PERIOD = Math.PI * 2 / SPEED;
 
 class PureWingFlapVisualization extends Visualization.default {
   private phase = 0;
-  private readonly positionTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly positionTimeSeries: Visualization.TimeSeriesValue;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -48,7 +48,7 @@ class PureWingFlapVisualization extends Visualization.default {
       }
     });
 
-    this.positionTimeSeries.set(1 - positionNormalized);
+    this.positionTimeSeries.value = 1 - positionNormalized;
   }
 }
 

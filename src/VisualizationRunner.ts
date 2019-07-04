@@ -52,21 +52,17 @@ class MyFrameContext implements Visualization.FrameContext {
   }
 }
 
-class MyTimeSeriesValueSetter implements Visualization.TimeSeriesValueSetter {
+class MyTimeSeriesValueSetter implements Visualization.TimeSeriesValue {
   public readonly data: TimeseriesData.PointDef;
 
   constructor(color: Colors.Color) {
     this.data = {
       color: color,
-      value: null
+      value: NaN
     };
   }
 
-  public set(value: number | null) {
-    this.data.value = value;
-  }
-
-  public set value(value: number | null) {
+  public set value(value: number) {
     this.data.value = value;
   }
 
@@ -120,8 +116,8 @@ class TimeSeriesHelper {
     return color;
   }
 
-  public setAllToNull() {
-    this.setters.forEach(s => s.set(null));
+  public setAllToNaN() {
+    this.setters.forEach(s => s.value = NaN);
   }
 
   public reset() {
@@ -352,7 +348,7 @@ export default class VisualizationRunner {
     }
 
     // collect state
-    this.timeSeriesHelper.setAllToNull();
+    this.timeSeriesHelper.setAllToNaN();
     this.frameContext.endFrame(startTime - this.lastRenderTime, beatController);
 
     // render into the LED strip

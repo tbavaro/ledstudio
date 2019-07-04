@@ -7,9 +7,9 @@ const NAME = "testAudioAndAbletonLink";
 
 class TestAudioAndAbletonLink extends Visualization.default {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
-  private readonly duringBeatTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly loudnessTimeSeries: Visualization.TimeSeriesValueSetter;
-  private readonly currentRMSAmplitudeTimeSeries: Visualization.TimeSeriesValueSetter;
+  private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
+  private readonly loudnessTimeSeries: Visualization.TimeSeriesValue;
+  private readonly currentRMSAmplitudeTimeSeries: Visualization.TimeSeriesValue;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -41,9 +41,9 @@ class TestAudioAndAbletonLink extends Visualization.default {
       row.fill(duringBeat ? loudness * Colors.WHITE : Colors.BLACK);
     });
 
-    this.duringBeatTimeSeries.set(duringBeat ? 1 : 0);
-    this.loudnessTimeSeries.set(loudness);
-    this.currentRMSAmplitudeTimeSeries.set(this.analyserHelpers.direct.currentRMSAmplitude);
+    this.duringBeatTimeSeries.value = duringBeat ? 1 : 0;
+    this.loudnessTimeSeries.value = loudness;
+    this.currentRMSAmplitudeTimeSeries.value = this.analyserHelpers.direct.currentRMSAmplitude;
   }
 }
 

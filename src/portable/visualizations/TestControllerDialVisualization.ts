@@ -41,9 +41,9 @@ class TestControllerDialVisualization extends Visualization.default {
       }
     });
 
-    this.timeSerieses.red.set(rValue);
-    this.timeSerieses.green.set(gValue);
-    this.timeSerieses.blue.set(bValue);
+    this.timeSerieses.red.value = rValue;
+    this.timeSerieses.green.value = gValue;
+    this.timeSerieses.blue.value = bValue;
   }
 }
 
