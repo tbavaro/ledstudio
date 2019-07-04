@@ -20,7 +20,7 @@ export default class FancyValue {
   }
 
   public bumpTo(value: number) {
-    if (value > this.value) {
+    if (value > this.value || isNaN(this.value)) {
       this.value = value;
     }
   }

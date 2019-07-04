@@ -1,9 +1,7 @@
 import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
-import FancyValue from "./portable/base/FancyValue";
 import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
-import * as TimeseriesData from "./portable/base/TimeseriesData";
 import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
@@ -67,8 +65,7 @@ const DEFAULT_COLOR_ORDER = [
 
 class TimeSeriesHelper {
   private usedColors: Colors.Color[] = [];
-  private dataInternal: TimeseriesData.PointDef[] = [];
-  private tsValues: FancyValue[] = [];
+  public data: Visualization.TimeSeriesValue[] = [];
 
   public createTimeSeries = (attrs?: {
     color?: Colors.Color
@@ -83,16 +80,10 @@ class TimeSeriesHelper {
     }
     this.usedColors.push(color);
 
-    const tsValue = new FancyValue();
-    const data: TimeseriesData.PointDef = {
-      color: color,
-      value: tsValue.value
-    };
+    const data = new Visualization.TimeSeriesValue(color);
+    this.data.push(data);
 
-    this.dataInternal.push(data);
-    this.tsValues.push(tsValue);
-
-    return tsValue;
+    return data;
   }
 
   private nextDefaultColor(): Colors.Color {
@@ -103,19 +94,9 @@ class TimeSeriesHelper {
     return color;
   }
 
-  public setAllToNaN() {
-    this.tsValues.forEach(s => s.value = NaN);
-  }
-
   public reset() {
     this.usedColors = [];
-    this.dataInternal = [];
-    this.tsValues = [];
-  }
-
-  public get data(): TimeseriesData.PointDef[] {
-    this.tsValues.forEach((v, i) => this.dataInternal[i].value = v.value);
-    return this.dataInternal;
+    this.data = [];
   }
 }
 
@@ -340,7 +321,6 @@ export default class VisualizationRunner {
     }
 
     // collect state
-    this.timeSeriesHelper.setAllToNaN();
     this.frameContext.endFrame(startTime - this.lastRenderTime, beatController);
 
     // render into the LED strip

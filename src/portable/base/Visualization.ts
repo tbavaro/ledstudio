@@ -9,7 +9,14 @@ import FixedArray from "./FixedArray";
 import LedInfo from "./LedInfo";
 import PianoState from "./PianoState";
 
-export type TimeSeriesValue = FancyValue;
+export class TimeSeriesValue extends FancyValue {
+  public readonly color: Colors.Color;
+
+  constructor(color: Colors.Color, initialValue?: number) {
+    super(initialValue);
+    this.color = color;
+  }
+}
 
 export interface EasyTimeSeriesValueSetters {
   white: TimeSeriesValue;
