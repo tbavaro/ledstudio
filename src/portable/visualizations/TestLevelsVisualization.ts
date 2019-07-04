@@ -52,8 +52,8 @@ class MultiLevelHelper {
 
     this.highHelper = new LevelsHelper({
       decayRate: 3,
-      gain: 6,
-      threshold: 0.075
+      gain: 8,
+      threshold: 0.15
     });
   }
 
