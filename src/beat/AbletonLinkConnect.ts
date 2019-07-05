@@ -45,9 +45,7 @@ class Implementation {
     constructor() {
         this.tryConnectNow();
         setInterval(() => {
-           if (this.ws != null) {
-                this.ws.send(encodeString("status"));
-           }
+            this.protectedSend("status");
         }, 2000);
     }
 
@@ -73,9 +71,7 @@ class Implementation {
 
     private onWebSocketOpen = () => {
         console.log("ableton link websocket open");
-        if (this.ws != null) {
-            this.ws.send(encodeString("enable-start-stop-sync"));
-        }
+        this.protectedSend("enable-start-stop-sync");
     }
 
     private onWebSocketClose = (ev: CloseEvent) => {
@@ -84,6 +80,12 @@ class Implementation {
             this.ws = null;
             this.tryConnectSoon();
         }
+    }
+
+    private protectedSend = (msg: string) => {
+        if (this.ws != null && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(encodeString(msg));
+       }
     }
 
     private onLinkMessage = (ev: MessageEvent) => {
@@ -138,9 +140,7 @@ class Implementation {
     }
 
     public requestStatus() {
-        if (this.ws != null && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(encodeString("status"));
-        }
+        this.protectedSend("status");
     }
 }
 
