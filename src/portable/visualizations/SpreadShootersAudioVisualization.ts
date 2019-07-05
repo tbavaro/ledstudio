@@ -1,3 +1,4 @@
+import { bracket01 } from "../../util/Utils";
 import * as Colors from "../base/Colors";
 import LedInfo from "../base/LedInfo";
 import * as Visualization from "../base/Visualization";
@@ -17,11 +18,11 @@ interface LedRowInfo {
     idx: number;
 }
 
-// interface SparkleInfo {
-//     value: number;
-//     row: number;
-//     idx: number;
-// }
+interface SparkleInfo {
+    value: number;
+    row: number;
+    idx: number;
+}
 
 function randomHue() {
     return Math.floor(Math.random() * 360);
@@ -32,13 +33,12 @@ const SHOOTER_DURATION_MS = 1000;
 
 class SpreadShootersAudioVisualization extends Visualization.default {
     private info = new Array<Info>();
-    // private sparkles = new Array<SparkleInfo>();
-    private time = 0;
+    private sparkles = new Array<SparkleInfo>();
     private ezTS: Visualization.EasyTimeSeriesValueSetters;
     private analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
     private readonly reverseLedInfo: LedRowInfo[][];
     private dropVizLastBeat = 0;
-    private dropBeat = 0;
+    private dropBeat = -10000000;
 
     constructor(config: Visualization.Config) {
         super(config);
@@ -61,9 +61,10 @@ class SpreadShootersAudioVisualization extends Visualization.default {
         }
         this.analyserHelpers.low.sample();
         this.analyserHelpers.direct.sample();
-        this.time += elapsedMillis;
 
-        this.info = this.info.filter(kt => this.time - kt.time < SHOOTER_DURATION_MS*1.5);
+        const now = Date.now();
+
+        this.info = this.info.filter(kt => now - kt.time < SHOOTER_DURATION_MS*1.5);
 
         const beatNow = beatController.beatNumber();
         const nearBeat = beatController.timeSinceLastBeat() < 0.1 || beatController.progressToNextBeat() > 0.95;
@@ -71,11 +72,8 @@ class SpreadShootersAudioVisualization extends Visualization.default {
             this.dropBeat = beatNow;
             this.dropVizLastBeat = 0;
         }
-        if (this.analyserHelpers.low.currentRMSZScore > 4) {
-            console.log(beatController.progressToNextBeat());
-        }
 
-        this.ezTS.white.value = this.analyserHelpers.low.currentRMSExpMovingAvg * 4;
+        this.ezTS.white.value = this.analyserHelpers.low.currentRMSExpMovingAvg;
         this.ezTS.blue.value = this.analyserHelpers.low.currentRMSExpMovingVar * 50;
         this.ezTS.orange.value = this.analyserHelpers.low.currentRMSZScore / 6;
         this.ezTS.red.value = beatController.progressToNextBeat();
@@ -84,17 +82,17 @@ class SpreadShootersAudioVisualization extends Visualization.default {
             if (this.dropVizLastBeat !== beatNow) {
                 const hue = randomHue();
                 for (let i = 0; i < this.reverseLedInfo.length; ++i) {
-                    this.info.push({time: this.time, rib: i, brightness: 1, hue: hue});
+                    this.info.push({time: now, rib: i, brightness: 1, hue: hue});
                 }
                 this.dropVizLastBeat = beatNow;
             }
         } else {
-            const volumeAdjustment = (this.analyserHelpers.direct.currentRMSAmplitude - 0.1) / 0.1;
-            const brightness = 1;
+            const brightness = bracket01(this.analyserHelpers.direct.currentRMSAmplitude / 0.4);
+            const volumeAdjustment = bracket01(this.analyserHelpers.direct.currentRMSAmplitude / 0.2);
             const shooter = 0.0025 * Math.random() < volumeAdjustment * elapsedMillis / 1000 * BASE_SHOOTER_PER_S;
             if (shooter) {
                 const rib = Math.floor(Math.random() * this.reverseLedInfo.length);
-                this.info.push({time: this.time, rib, brightness, hue: randomHue()});
+                this.info.push({time: now, rib, brightness, hue: randomHue()});
             }
         }
 
@@ -102,7 +100,7 @@ class SpreadShootersAudioVisualization extends Visualization.default {
         this.ledRows.forEach(row => row.fill(Colors.BLACK));
 
         for (const kt of this.info) {
-            const elapsed = this.time - kt.time;
+            const elapsed = now - kt.time;
 
             const rib = this.reverseLedInfo[kt.rib];
             const ribIdx = Math.round((elapsed / SHOOTER_DURATION_MS) * (rib.length));
@@ -118,20 +116,22 @@ class SpreadShootersAudioVisualization extends Visualization.default {
             }
         }
 
-        // // add dem sparkles dat we luv
-        // this.sparkles = this.sparkles.filter(si => si.value > 0);
-        // for (let i = 0; i < this.leds.length; ++i) {
-        //     const rgb = Colors.split(this.leds.get(i));
-        //     const v = Math.max(rgb[0], rgb[1], rgb[2]);
-        //     if (v > 0 && Math.random() < 0.02 && this.sparkles.findIndex(si => si.led === i) < 0) {
-        //         this.sparkles.push({value: v, led: i});
-        //     }
-        // }
-        // for (const si of this.sparkles) {
-        //     const sparkleColor = Colors.hsv(randomHue(), Math.random()*0.25, si.value);
-        //     this.leds.add(si.led, sparkleColor);
-        //     si.value -= 0.03;
-        // }
+        // add dem sparkles dat we luv
+        this.sparkles = this.sparkles.filter(si => si.value > 0);
+        this.ledRows.forEach((row, rowIdx) =>{
+            row.forEach((color, ledIdx) => {
+                const rgb = Colors.split(color);
+                const v = Math.max(rgb[0], rgb[1], rgb[2]);
+                if (v > 0 && Math.random() < 0.002) {
+                    this.sparkles.push({value: 0.8, row: rowIdx, idx: ledIdx});
+                }
+            });
+        });
+        for (const si of this.sparkles) {
+            const sparkleColor = Colors.hsv(randomHue(), Math.random()*0.25, si.value);
+            this.ledRows.get(si.row).add(si.idx, sparkleColor);
+            si.value += Math.sin(now / 20) * 0.15 - 0.02;
+        }
     }
 }
 
