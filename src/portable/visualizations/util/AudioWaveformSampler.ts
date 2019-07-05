@@ -103,6 +103,9 @@ export function createAnalyserHelpers(
       const filter = new BiquadFilterNode(audioContext, { type });
       audioSource.connect(filter);
       filteredAudioSource = filter;
+      if (type === "lowpass") {
+        filteredAudioSource.connect(audioContext.destination);
+      }
     } else {
       filteredAudioSource = audioSource;
     }
