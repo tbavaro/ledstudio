@@ -48,6 +48,12 @@ export default class FixedArray<T> {
     this.items.fill(value);
   }
 
+  public fillRange(startIndex: number, count: number, value: T) {
+    for (let i = startIndex; i < (startIndex + count); ++i) {
+      this.set(i, value);
+    }
+  }
+
   public map<V>(func: (value: T) => V): FixedArray<V> {
     return FixedArray.from(this.items.map(func));
   }

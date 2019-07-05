@@ -11,24 +11,24 @@ const NAME = "test:levels";
 
 class LevelsHelper {
   private readonly v: FancyValue = new FancyValue();
-  private readonly decayRate: number;
-  private readonly gain: number;
-  private readonly threshold: number;
+  private readonly halfLife: number;
+  private readonly minThreshold: number;
+  private readonly maxThreshold: number;
 
   constructor(attrs: {
-    decayRate: number,
-    gain?: number,
-    threshold?: number
+    halfLife: number,
+    minThreshold?: number,
+    maxThreshold?: number
   }) {
-    this.decayRate = attrs.decayRate;
-    this.gain = valueOrDefault(attrs.gain, 1);
-    this.threshold = valueOrDefault(attrs.threshold, 0);
+    this.halfLife = attrs.halfLife;
+    this.minThreshold = valueOrDefault(attrs.minThreshold, 0);
+    this.maxThreshold = valueOrDefault(attrs.maxThreshold, 1);
   }
 
   public processValue(newValue: number, elapsedMillis: number) {
-    const v = bracket01((newValue - this.threshold) / (1 - this.threshold) * this.gain);
-    this.v.decayLinearRate(this.decayRate, elapsedMillis / 1000);
-    this.v.bumpTo(v);
+    const value = bracket01((newValue - this.minThreshold) / (this.maxThreshold - this.minThreshold));
+    this.v.decayExponential(this.halfLife, elapsedMillis / 1000);
+    this.v.bumpTo(value);
   }
 
   public get value() {
@@ -45,15 +45,15 @@ class MultiLevelHelper {
     this.audioHelper = new BasicAudioHelper(audioSource);
 
     this.lowHelper = new LevelsHelper({
-      decayRate: 1,
-      gain: 2,
-      threshold: 0.25
+      halfLife: 0.125,
+      minThreshold: 0.225,
+      maxThreshold: 0.6
     });
 
     this.highHelper = new LevelsHelper({
-      decayRate: 3,
-      gain: 8,
-      threshold: 0.15
+      halfLife: 0.075,
+      minThreshold: 0.1,
+      maxThreshold: 0.75
     });
   }
 
@@ -96,6 +96,9 @@ class TestBandsVisualization extends Visualization.default {
 
     this.lowTS.value = this.helper.lowLevel;
     this.highTS.value = this.helper.highLevel;
+
+   this.ledRows.get(0).fill(Colors.hsv(0, 0.5, this.highTS.value));
+    this.ledRows.get(this.ledRows.length - 1).fill(Colors.hsv(240, 0.5, this.lowTS.value));
   }
 }
 
