@@ -26,6 +26,7 @@ class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
   }
 
   protected renderToCanvas(context: Visualization.FrameContext) {
+    const now = Date.now();
     this.phase = (this.phase + ZOOM_SPEED * RADIUS_STEP * context.elapsedMillis / 1000) % (RADIUS_STEP * 2);
 
     const canvas = this.canvas;
@@ -36,7 +37,7 @@ class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
 
     let i = 0;
     for (let radius = this.phase + Math.max(canvas.width, canvas.height); radius > 0; radius -= RADIUS_STEP) {
-      this.drawCircle(radius, (i % 2 === 0 ? Colors.hsv(radius * 2, 1, 1) : Colors.BLACK));
+      this.drawCircle(radius, (i % 2 === 0 ? Colors.hsv(radius * 2 + now/80, 1, 1) : Colors.BLACK));
       ++i;
     }
   }
