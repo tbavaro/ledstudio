@@ -31,9 +31,13 @@ export default class ControllerState {
   }
 
   public reset() {
+    const oldDerez = this.dialValues[6];
     const oldBrightness = this.dialValues[7];
 
     this.dialValues.fill(0);
+
+    // don't let a new visualization's derez be 1
+    this.dialValues[6] = Math.min(0.95, oldDerez);
 
     // don't let a new visualization's brightness be 0
     this.dialValues[7] = Math.max(0.05, oldBrightness);
