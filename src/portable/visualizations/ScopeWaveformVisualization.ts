@@ -3,8 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
-
-const NAME = "oscilloscope";
+const NAME = "scope:waveform";
 
 const NUM_SAMPLES = 1024;
 

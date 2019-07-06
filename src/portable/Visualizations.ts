@@ -3,7 +3,6 @@ import * as Visualization from "./base/Visualization";
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import ExpandingDashesVisualization from "./visualizations/ExpandingDashesVisualization";
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
-import OscilloscopeVisualization from "./visualizations/OscilloscopeVisualization";
 import PatternClockVisualization from "./visualizations/PatternClockVisualization";
 import PatternDotVisualization from "./visualizations/PatternDotVisualization";
 import PatternFlagVisualization from "./visualizations/PatternFlagVisualization";
@@ -18,6 +17,7 @@ import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisual
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
 import PulsingRainVisualization from "./visualizations/PulsingRainVisualization";
+import ScopeWaveformVisualization from "./visualizations/ScopeWaveformVisualization";
 import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashesVisualization";
 import SplotchesVisualization from "./visualizations/SplotchesVisualization";
 import SpreadShootersAudioVisualization from "./visualizations/SpreadShootersAudioVisualization";
@@ -40,8 +40,8 @@ const factories: Visualization.Factory[] = [
   SparklesAndFlashesVisualization,
   SplotchesVisualization,
   SpreadShootersAudioVisualization,
-  OscilloscopeVisualization,
   ExpandingDashesVisualization,
+  ScopeWaveformVisualization,
   PatternClockVisualization,
   PatternDotVisualization,
   PatternFlagVisualization,
