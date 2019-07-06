@@ -17,6 +17,7 @@ import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisual
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
 import PatternZoomVisualization from "./visualizations/PatternZoomVisualization";
 import PulsingRainVisualization from "./visualizations/PulsingRainVisualization";
+import ScopeFFTVisualization from "./visualizations/ScopeFFTVisualization";
 import ScopeWaveformVisualization from "./visualizations/ScopeWaveformVisualization";
 import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashesVisualization";
 import SplotchesVisualization from "./visualizations/SplotchesVisualization";
@@ -41,6 +42,7 @@ const factories: Visualization.Factory[] = [
   SplotchesVisualization,
   SpreadShootersAudioVisualization,
   ExpandingDashesVisualization,
+  ScopeFFTVisualization,
   ScopeWaveformVisualization,
   PatternClockVisualization,
   PatternDotVisualization,

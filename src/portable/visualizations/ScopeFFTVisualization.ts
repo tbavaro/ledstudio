@@ -3,13 +3,13 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
-const NAME = "scope:waveform";
+const NAME = "scope:fft";
 
-const NUM_SAMPLES = 1024;
+const NUM_SAMPLES = 64;
 
 class MyVisualization extends AbstractVoronoiMapperVisualization {
   private readonly analyser: AnalyserNode | null;
-  private readonly buffer: Float32Array;
+  private readonly buffer: Uint8Array;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -20,7 +20,7 @@ class MyVisualization extends AbstractVoronoiMapperVisualization {
       analyser.fftSize = NUM_SAMPLES;
       config.audioSource.connect(analyser);
       this.analyser = analyser;
-      this.buffer = new Float32Array(this.analyser.fftSize);
+      this.buffer = new Uint8Array(this.analyser.frequencyBinCount);
     } else {
       this.analyser = null;
     }
@@ -42,13 +42,14 @@ class MyVisualization extends AbstractVoronoiMapperVisualization {
 
     ctx.fillStyle = "white";
 
-    const dx = canvas.width / this.buffer.length;
+    const dx = canvas.width / this.buffer.length / 2;
     const cy = (canvas.height - 1) / 2;
 
-    analyser.getFloatTimeDomainData(this.buffer);
+    analyser.getByteFrequencyData(this.buffer);
     this.buffer.forEach((v, i) => {
-      const h = cy * Math.abs(v) * 3;
-      ctx.fillRect(dx * i, cy - h / 2, dx, h);
+      const h = cy * (v / 255);
+      ctx.fillRect(canvas.width * 0.5 + dx * i, cy - h / 2, dx + 1, h);
+      ctx.fillRect(canvas.width * 0.5 - dx * i, cy - h / 2, dx + 1, h);
     });
   }
 }
