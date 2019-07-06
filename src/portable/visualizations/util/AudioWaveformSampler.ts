@@ -1,4 +1,4 @@
-const EMA_ALPHA = 0.015; // corresponds to about last 2s .. ish
+import EMAHelper from "../../../util/EMAHelper";
 
 export default interface AudioWaveformSampler {
   // updates `currentXXX` for the latest point in time, perhaps lazily
@@ -6,9 +6,8 @@ export default interface AudioWaveformSampler {
   readonly currentSamples: Float32Array;
   readonly currentMaxAmplitude: number;
   readonly currentRMSAmplitude: number;
-  readonly currentRMSExpMovingAvg: number;
-  readonly currentRMSExpMovingVar: number;
-  readonly currentRMSZScore: number;
+  readonly currentRmsEma3: EMAHelper;
+  readonly currentRmsEma20: EMAHelper;
 }
 
 export type Implementation = new (audioSource: AudioNode, numSamples: number) => AudioWaveformSampler;
@@ -19,8 +18,8 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
   private cacheIsDirty: boolean = true;
   private cachedMaxAmplitude: number = 0;
   private cachedRMSAmplitude: number = 0;
-  private cachedRMSExpMovingAvg: number = 0;
-  private cachedRMSExpMovingVar: number = 0;
+  private cachedRmsEma3 = new EMAHelper(0.015); // 0.0023 corresponds to about 20s, 2/(43*sec + 1)
+  private cachedRmsEma20 = new EMAHelper(0.0023); // 0.0023 corresponds to about 20s, 2/(43*sec + 1)
 
   constructor(audioSource: AudioNode, numSamples: number) {
     this.currentSamples = new Float32Array(numSamples);
@@ -52,12 +51,8 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
       });
       this.cachedMaxAmplitude = maxAmplitude;
       this.cachedRMSAmplitude = Math.sqrt(sumSquares / data.length);
-
-      const diff = this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg;
-      const incr = EMA_ALPHA * diff;
-      this.cachedRMSExpMovingAvg = incr +  this.cachedRMSExpMovingAvg;
-      this.cachedRMSExpMovingVar =  (1 - EMA_ALPHA) * ( this.cachedRMSExpMovingVar + diff * incr);
-
+      this.cachedRmsEma3.update(this.cachedRMSAmplitude);
+      this.cachedRmsEma20.update(this.cachedRMSAmplitude);
       this.cacheIsDirty = false;
     }
   }
@@ -72,20 +67,14 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
     return this.cachedRMSAmplitude;
   }
 
-  public get currentRMSExpMovingAvg() {
+  public get currentRmsEma3() {
     this.updateCachedValuesIfNeeded();
-    return this.cachedRMSExpMovingAvg;
+    return this.cachedRmsEma3;
   }
 
-  public get currentRMSExpMovingVar() {
+  public get currentRmsEma20() {
     this.updateCachedValuesIfNeeded();
-    return this.cachedRMSExpMovingVar;
-  }
-
-  public get currentRMSZScore() {
-    this.updateCachedValuesIfNeeded();
-    const stddev = Math.sqrt(this.cachedRMSExpMovingVar);
-    return (this.cachedRMSAmplitude - this.cachedRMSExpMovingAvg) / stddev;
+    return this.cachedRmsEma20;
   }
 }
 

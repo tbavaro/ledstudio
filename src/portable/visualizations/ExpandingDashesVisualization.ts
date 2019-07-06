@@ -1,4 +1,5 @@
-import { bracket01, valueOrDefault } from "../../util/Utils";
+import EMAHelper from "../../util/EMAHelper";
+import { bracket, bracket01, valueOrDefault } from "../../util/Utils";
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import FancyValue from "../base/FancyValue";
@@ -22,7 +23,7 @@ class ExpandingDashesVisualization extends Visualization.default {
         shuffleArray(this.palette);
 
         this.wingDashPaires = [0, 0, 0, 0].map(_ => Math.round(Math.random() * 3) + 3);
-        this.wingDashPairRatioes = [0, 0, 0, 0].map(_ => Math.random() * 0.5 + 0.25);
+        this.wingDashPairRatioes = [0, 0, 0, 0].map(_ => Math.random() > 0.5 ? 0.66 : 0.34);
 
         this.ezTimeseries = config.createEasyTimeSeriesSet();
 
@@ -34,8 +35,8 @@ class ExpandingDashesVisualization extends Visualization.default {
 
         this.ledRows.forEach(r => r.fill(Colors.BLACK));
 
-        this.ezTimeseries.orange.value = this.helper.lowLevel;
-        this.ezTimeseries.white.value = this.helper.highLevel;
+        this.ezTimeseries.orange.value = this.helper.lowHelper.halfLife;
+        this.ezTimeseries.white.value = this.helper.lowHelper.vEMA.emv * 10;
 
         this.ledRows.forEach((row, rowIdx) => {
             const wingRowLength = row.length / 2;
@@ -75,7 +76,7 @@ class ExpandingDashesVisualization extends Visualization.default {
 }
 
 function stupid(x: number) {
-    return ((x * 3) * 0.9 + 0.1) * 0.9;
+    return x * 0.75 + 0.05;
 }
 
 function shuffleArray(array: any[]) {
@@ -87,24 +88,34 @@ function shuffleArray(array: any[]) {
 
 class LevelsHelper {
     private readonly v: FancyValue = new FancyValue();
-    private readonly halfLife: number;
     private readonly minThreshold: number;
     private readonly maxThreshold: number;
+    public halfLife: number;
+    public readonly vEMA = new EMAHelper(0.015); // about 3s
+    // public readonly vEMA = new EMAHelper(0.0023); // about 20s
 
     constructor(attrs: {
-        halfLife: number,
         minThreshold?: number,
         maxThreshold?: number
     }) {
-        this.halfLife = attrs.halfLife;
         this.minThreshold = valueOrDefault(attrs.minThreshold, 0);
         this.maxThreshold = valueOrDefault(attrs.maxThreshold, 1);
+        this.halfLife = 0.125;
     }
 
     public processValue(newValue: number, elapsedMillis: number) {
         const value = bracket01((newValue - this.minThreshold) / (this.maxThreshold - this.minThreshold));
         this.v.decayExponential(this.halfLife, elapsedMillis / 1000);
         this.v.bumpTo(value);
+
+        if (!isNaN(this.value)) {
+            this.vEMA.update(this.value);
+            // const hlalpha = (this.halfLife - 0.125) / (1 - 0.125);
+            // const diff = this.vEMA.ema - (hlalpha*0.3 + (1-hlalpha)*0.1);
+            const diff = this.vEMA.ema - 0.25;
+            this.halfLife -= bracket(-0.125/10, 0.125/10, diff * 0.1);
+            this.halfLife = bracket(0.125, 1, this.halfLife);
+        }
     }
 
     public get value() {
@@ -114,29 +125,27 @@ class LevelsHelper {
 
 class MultiLevelHelper {
     private readonly audioHelper: BasicAudioHelper;
-    private readonly lowHelper: LevelsHelper;
-    private readonly highHelper: LevelsHelper;
+    public readonly lowHelper: LevelsHelper;
+    public readonly highHelper: LevelsHelper;
 
     constructor(audioSource: AudioNode | null) {
         this.audioHelper = new BasicAudioHelper(audioSource);
 
         this.lowHelper = new LevelsHelper({
-            halfLife: 0.125,
-            minThreshold: 0.225,
-            maxThreshold: 0.6
+            minThreshold: 0.3,
+            maxThreshold: 5
         });
 
         this.highHelper = new LevelsHelper({
-            halfLife: 0.125,
-            minThreshold: 0.1,
-            maxThreshold: 0.75
+            minThreshold: 0.3,
+            maxThreshold: 5
         });
     }
 
     public sample(elapsedMillis: number) {
         const audioValues = this.audioHelper.getValues();
-        this.lowHelper.processValue(audioValues.lowRMS, elapsedMillis);
-        this.highHelper.processValue(audioValues.highRMS, elapsedMillis);
+        this.lowHelper.processValue(audioValues.lowRMSZScore20, elapsedMillis);
+        this.highHelper.processValue(audioValues.highRMSZScore20, elapsedMillis);
     }
 
     public get lowLevel() {
