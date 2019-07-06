@@ -8,6 +8,8 @@ export default interface AudioWaveformSampler {
   readonly currentRMSAmplitude: number;
   readonly currentRmsEma3: EMAHelper;
   readonly currentRmsEma20: EMAHelper;
+
+  listen(): void;
 }
 
 export type Implementation = new (audioSource: AudioNode, numSamples: number) => AudioWaveformSampler;
@@ -29,6 +31,10 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
     this.analyser.fftSize = numSamples;
 
     audioSource.connect(this.analyser);
+  }
+
+  public listen() {
+    this.analyser.connect(this.analyser.context.destination);
   }
 
   public sample() {

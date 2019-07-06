@@ -44,6 +44,16 @@ class MultiLevelHelper {
   constructor(audioSource: AudioNode | null) {
     this.audioHelper = new BasicAudioHelper(audioSource);
 
+    if (audioSource !== null) {
+      const context = audioSource.context;
+      const filter = context.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.value = 3000;
+      // filter.frequency.value = 150;
+      audioSource.connect(filter);
+      filter.connect(context.destination);
+    }
+
     this.lowHelper = new LevelsHelper({
       halfLife: 0.125,
       minThreshold: 0.225,
