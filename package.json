@@ -4,6 +4,7 @@
   "version": "0.17.0",
   "private": true,
   "dependencies": {
+    "google-palette": "^1.1.0",
     "midievents": "^2.0.0",
     "midifile": "^2.0.0",
     "react": "^16.8.6",
