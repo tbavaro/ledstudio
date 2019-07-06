@@ -267,6 +267,7 @@ export default class VisualizationRunner {
   private readonly frameContext: MyFrameContext;
   private readonly timeSeriesHelper: TimeSeriesHelper;
   private readonly brightnessDial: Visualization.DialControl;
+  private readonly derezDial: Visualization.DialControl;
   private readonly controllerState: ControllerState;
 
   constructor(attrs: {
@@ -283,6 +284,10 @@ export default class VisualizationRunner {
     this.brightnessDial = controllerStateHelper.createDialControl({
       dialNumber: 8,
       initialValue: attrs.controllerState.dialValues[7]
+    });
+    this.derezDial = controllerStateHelper.createDialControl({
+      dialNumber: 7,
+      initialValue: attrs.controllerState.dialValues[6]
     });
     const visualizationConfig: Visualization.Config = {
       scene: attrs.scene,
@@ -336,7 +341,7 @@ export default class VisualizationRunner {
     this.timingHelper.addValue(visTimeMillis);
 
     // send
-    this.sendToStrips(this.brightnessDial.value);
+    this.sendToStrips(this.brightnessDial.value, this.derezDial.value);
 
     return {
       frameHeatmapValues: frameHeatmapValues,
@@ -352,11 +357,13 @@ export default class VisualizationRunner {
     return this.timingHelper.movingAverage;
   }
 
-  private sendToStrips(multiplier: number) {
+  private sendToStrips(multiplier: number, derez: number) {
     this.visualization.ledRows.forEach((row, rowIdx) => {
       const outputRow = this.adjustedLedRows.get(rowIdx);
       row.forEach((color, i) => {
-        outputRow.set(i, Colors.multiply(color, multiplier));
+        if (Math.random() > derez) {
+          outputRow.set(i, Colors.multiply(color, multiplier));
+        }
       });
     });
 
