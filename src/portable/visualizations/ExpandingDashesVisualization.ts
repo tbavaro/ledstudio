@@ -1,4 +1,3 @@
-import palette from "google-palette";
 import EMAHelper from "../../util/EMAHelper";
 import { bracket, bracket01, valueOrDefault } from "../../util/Utils";
 import { CircularQueue } from "../../util/WindowStats";
@@ -8,25 +7,26 @@ import * as Colors from "../base/Colors";
 import FancyValue from "../base/FancyValue";
 import * as Visualization from "../base/Visualization";
 import BasicAudioHelper from "./util/BasicAudioHelper";
+import { randomPalette } from "./util/Utils";
 
 const NAME = "expandingDashes";
 
 class ExpandingDashesVisualization extends Visualization.default {
 
-    private readonly regularPalette: Colors.Color[];
-    private readonly dropPalette: Colors.Color[];
+    private regularPalette: Colors.Color[];
+    private dropPalette: Colors.Color[];
     private readonly wingDashPaires: number[];
     private readonly wingDashPairRatioes: number[];
     private readonly ezTimeseries: Visualization.EasyTimeSeriesValueSetters;
     private readonly signals: SignalsHelper;
     private readonly colorOffset: number;
+    private lastPaletteSwap = Date.now();
 
     constructor(config: Visualization.Config) {
         super(config);
-        this.regularPalette = palette("rainbow", 15).map(Colors.hex2Color);
-        this.dropPalette = palette("rainbow", 4).map(Colors.hex2Color);
+        this.regularPalette = randomPalette(8);
+        this.dropPalette = randomPalette(4);
         this.colorOffset = Math.floor(Math.random() * this.regularPalette.length);
-
         this.wingDashPaires = [0, 0, 0, 0].map(_ => Math.round(Math.random() * 3) + 3);
         this.wingDashPairRatioes = [0.66, 0.34, 0.34, 0.66];
 
@@ -36,8 +36,12 @@ class ExpandingDashesVisualization extends Visualization.default {
 
     public render(context: Visualization.FrameContext): void {
         const { elapsedMillis, beatController } = context;
-        this.signals.update(elapsedMillis, beatController);
 
+        if (Date.now() - this.lastPaletteSwap > 30000 && this.signals.isStrongBeat) {
+            this.maybeSwapPalettes();
+        }
+
+        this.signals.update(elapsedMillis, beatController);
         this.ledRows.forEach(r => r.fill(Colors.BLACK));
 
         this.ezTimeseries.orange.value = this.signals.lowHelper.halfLife;
@@ -101,6 +105,12 @@ class ExpandingDashesVisualization extends Visualization.default {
             return this.dropPalette[(key + (isLeft ? 0 : 1)) % this.dropPalette.length];
         }
     }
+
+    private maybeSwapPalettes() {
+        this.regularPalette = randomPalette(8);
+        this.dropPalette = randomPalette(4);
+        this.lastPaletteSwap = Date.now();
+    }
 }
 
 function stupid(x: number) {
@@ -147,6 +157,7 @@ class SignalsHelper {
     public readonly lowHelper: LevelsHelper;
     public readonly highHelper: LevelsHelper;
     private isDropValue = false;
+    private isStrongBeatValue = false;
     private isNewBeatValue = false;
     private lastBeat = -10000000;
     private dropBeat = -10000000;
@@ -183,6 +194,13 @@ class SignalsHelper {
         } else {
             this.isDropValue = false;
         }
+
+        if (audioValues.lowRMSZScore3 > 2 && nearBeat) {
+            this.isStrongBeatValue = true;
+        } else {
+            this.isStrongBeatValue = false;
+        }
+
         this.beatSinceDropValue = beatNow - this.dropBeat;
         this.isNewBeatValue = beatNow !== this.lastBeat;
         if (this.isNewBeat) {
@@ -207,6 +225,10 @@ class SignalsHelper {
         return this.isDropValue;
     }
 
+    public get isStrongBeat() {
+        return this.isStrongBeatValue;
+    }
+
     public get beatsSinceDrop() {
         return this.beatSinceDropValue;
     }
@@ -219,7 +241,6 @@ class SignalsHelper {
         return this.beatsWithBeats.sum(x => x) > 6;
     }
 }
-
 
 const factory = new Visualization.Factory(NAME, ExpandingDashesVisualization);
 export default factory;
