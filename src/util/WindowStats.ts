@@ -1,6 +1,6 @@
 function identity<T>(v: T): T { return v; }
 
-class CircularQueue<T> {
+export class CircularQueue<T> {
   private readonly maxSize: number;
   private readonly values: T[];
   private nextIndex: number;
