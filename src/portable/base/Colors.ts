@@ -20,6 +20,15 @@ export function cssColor(color: Color): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
+export function hex2Color(hex: string): Color {
+  if (hex.startsWith("#")) {
+    hex = hex.substr(1);
+  }
+  hex = hex.toLowerCase();
+  const codes = [hex.substr(0, 2), hex.substr(2, 2), hex.substr(4, 2)];
+  return rgbUnchecked.apply(null, codes.map(code => parseInt(code, 16)));
+}
+
 // h in [0., 360.0)
 // s in [0, 1]
 // b in [0, 1]

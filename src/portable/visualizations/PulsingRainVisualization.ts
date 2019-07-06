@@ -115,7 +115,7 @@ class PulsingRainVisualization extends Visualization.default {
     let sparkleRate = BASE_SPARKLES_PER_SECOND + volumeAdjustment;
 
     const nearBeat = beatController.timeSinceLastBeat() < 0.1 || beatController.progressToNextBeat() > 0.95;
-    if (this.analyserHelper.low.currentRMSZScore > 4 && nearBeat) {
+    if (this.analyserHelper.low.currentRmsEma3.zScore > 4 && nearBeat) {
       this.lastDrop = now;
     }
     // beat brightness multiplier
@@ -140,9 +140,7 @@ class PulsingRainVisualization extends Visualization.default {
     }
     this.numSparklesRemainder = numLeds;
 
-    this.ezTS.blue.value = this.analyserHelper.direct.currentRMSZScore/4;
-    this.ezTS.red.value = this.analyserHelper.direct.currentRMSAmplitude;
-    this.ezTS.white.value = this.analyserHelper.direct.currentRMSExpMovingAvg;
+    this.ezTS.blue.value = this.analyserHelper.direct.currentRmsEma3.zScore/4;
     this.ezTS.green.value = now - this.lastDrop < 8 ? 1 : 0;
 
     // render
