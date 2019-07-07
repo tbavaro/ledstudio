@@ -72,7 +72,7 @@ class MyVisualization extends Visualization.default {
 
       const value = Math.pow(bracket01((v - MIN_THRESHOLD) / (MAX_THRESHOLD - MIN_THRESHOLD)), 2);
 
-      this.values[i].decayLinearRate(DECAY_RATE, context.elapsedMillis / 1000);
+      this.values[i].decayLinearRate(DECAY_RATE, context.elapsedSeconds);
       this.values[i].bumpTo(value);
     }
 

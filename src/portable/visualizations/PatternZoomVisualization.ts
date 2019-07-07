@@ -27,7 +27,7 @@ class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
 
   protected renderToCanvas(context: Visualization.FrameContext) {
     const now = Date.now();
-    this.phase = (this.phase + ZOOM_SPEED * RADIUS_STEP * context.elapsedMillis / 1000) % (RADIUS_STEP * 2);
+    this.phase = (this.phase + ZOOM_SPEED * RADIUS_STEP * context.elapsedSeconds) % (RADIUS_STEP * 2);
 
     const canvas = this.canvas;
     const ctx = this.canvasContext;

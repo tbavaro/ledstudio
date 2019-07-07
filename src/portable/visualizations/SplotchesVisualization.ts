@@ -23,7 +23,7 @@ class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
 
     ctx.fillStyle = "black";
     ctx.globalCompositeOperation = "source-over";
-    ctx.globalAlpha = bracket01(1 * context.elapsedMillis / 1000);
+    ctx.globalAlpha = bracket01(1 * context.elapsedSeconds);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1;
 

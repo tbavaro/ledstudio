@@ -34,7 +34,7 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
 
   protected renderToCanvas(context: Visualization.FrameContext) {
     // add particles
-    let numParticlesToAdd = this.numParticlesToAddRemainder + PARTICLES_PER_SECOND * context.elapsedMillis / 1000;
+    let numParticlesToAdd = this.numParticlesToAddRemainder + PARTICLES_PER_SECOND * context.elapsedSeconds;
     while (numParticlesToAdd >= 1) {
       const particle: Particle = this.particles.add();
       particle.distance = 0;
@@ -58,7 +58,7 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
     const cy = canvas.height / 2;
     ctx.globalCompositeOperation = "lighter";
     this.particles.forEachAndFilter(particle => {
-      particle.distance += context.elapsedMillis / 1000 * particle.speed;
+      particle.distance += context.elapsedSeconds * particle.speed;
       if (particle.distance >= this.maxDistance) {
         return false;
       } else {

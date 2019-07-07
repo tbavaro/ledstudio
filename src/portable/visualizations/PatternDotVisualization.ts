@@ -11,14 +11,14 @@ class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
-    this.phase = (this.phase + DEGREES_PER_SECOND * context.elapsedMillis / 1000) % 360;
+    this.phase = (this.phase + DEGREES_PER_SECOND * context.elapsedSeconds) % 360;
     const phaseRadians = this.phase / 180 * Math.PI;
 
     const canvas = this.canvas;
     const ctx = this.canvasContext;
 
     ctx.fillStyle = "black";
-    ctx.globalAlpha = 3 * context.elapsedMillis / 1000;
+    ctx.globalAlpha = 3 * context.elapsedSeconds;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const cx = canvas.width / 2;

@@ -9,7 +9,7 @@ class PatternClockVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
-    this.phase = (this.phase + DEGREES_PER_SECOND * context.elapsedMillis / 1000) % 360;
+    this.phase = (this.phase + DEGREES_PER_SECOND * context.elapsedSeconds) % 360;
     const phaseRadians = this.phase / 180 * Math.PI;
 
     const canvas = this.canvas;
