@@ -2,6 +2,7 @@ import * as Visualization from "./base/Visualization";
 
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import ExpandingDashesVisualization from "./visualizations/ExpandingDashesVisualization";
+import FourierTwinkleVisualization from "./visualizations/FourierTwinkleVisualization";
 import GlowWaveVisualization from "./visualizations/GlowWaveVisualization";
 import PatternClockVisualization from "./visualizations/PatternClockVisualization";
 import PatternDotVisualization from "./visualizations/PatternDotVisualization";
@@ -42,6 +43,7 @@ const factories: Visualization.Factory[] = [
   SplotchesVisualization,
   SpreadShootersAudioVisualization,
   ExpandingDashesVisualization,
+  FourierTwinkleVisualization,
   ScopeFFTVisualization,
   ScopeWaveformVisualization,
   PatternClockVisualization,

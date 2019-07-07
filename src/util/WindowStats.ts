@@ -58,6 +58,8 @@ export class CircularQueue<T> {
 // TODO optimize but keep numerical stability
 export default class WindowStats {
   private readonly values: CircularQueue<number>;
+  private cachedMean: number | undefined;
+  private cachedVariance: number | undefined;
 
   constructor(maxWindowSize: number) {
     this.values = new CircularQueue(maxWindowSize);
@@ -65,6 +67,8 @@ export default class WindowStats {
 
   public push(v: number) {
     const oldValue = this.values.push(v);
+    this.cachedMean = undefined;
+    this.cachedVariance = undefined;
     return oldValue;
   }
 
@@ -75,23 +79,31 @@ export default class WindowStats {
   public get mean() {
     // NB: reference implementation; needs optimization
 
-    return this.values.sum(identity) / this.size;
+    if (this.cachedMean === undefined) {
+      this.cachedMean = this.values.sum(identity) / this.size;
+    }
+
+    return this.cachedMean;
   }
 
   public get variance() {
     // NB: reference implementation; needs optimization
 
-    switch (this.size) {
-      case 0: return NaN;
-      case 1: return 0;
-      default: break;
+    if (this.cachedVariance === undefined) {
+      switch (this.size) {
+        case 0: return NaN;
+        case 1: return 0;
+        default: break;
+      }
+
+      const mean = this.mean;
+      this.cachedVariance = this.values.sum(v => {
+        const d = v - mean;
+        return d * d;
+      }) / (this.size - 1);
     }
 
-    const mean = this.mean;
-    return this.values.sum(v => {
-      const d = v - mean;
-      return d * d;
-    }) / (this.size - 1);
+    return this.cachedVariance;
   }
 
   public get stddev() {
@@ -116,5 +128,9 @@ export default class WindowStats {
       }
     });
     return best;
+  }
+
+  public zScore(v: number) {
+    return (v - this.mean) / this.stddev;
   }
 }
