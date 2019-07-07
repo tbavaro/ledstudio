@@ -61,7 +61,16 @@ export default class AnalogAudio {
           if (deviceId === this.currentDeviceId) {
             const audioContext = new AudioContext();
             const audioSource = audioContext.createMediaStreamSource(stream);
-            this.setCurrentAudioSource(audioContext, audioSource);
+
+            const splitter = audioContext.createChannelSplitter();
+            audioSource.connect(splitter);
+
+            const gain = audioContext.createGain();
+            gain.channelCount = 1;
+            gain.gain.value = 4;
+            splitter.connect(gain, 0, 0);
+
+            this.setCurrentAudioSource(audioContext, gain);
             // audioSource.connect(audioContext.destination);
           }
         });

@@ -327,6 +327,8 @@ export default class VisualizationRunner {
       this.lastRenderTime = startTime - 1000 / 60;
     }
 
+
+
     // collect state
     const elapsedSeconds = (startTime - this.lastRenderTime) / 1000;
     this.frameContext.endFrame(elapsedSeconds, beatController);
@@ -351,6 +353,7 @@ export default class VisualizationRunner {
       frameTimeseriesPoints: this.timeSeriesHelper.data
     };
   }
+
 
   public onPianoEvent(event: PianoEvent) {
     this.frameContext.applyPianoEvent(event);
