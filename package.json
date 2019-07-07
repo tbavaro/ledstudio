@@ -1,7 +1,7 @@
 {
   "name": "ledstudio",
   "homepage": ".",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "private": true,
   "dependencies": {
     "google-palette": "^1.1.0",
