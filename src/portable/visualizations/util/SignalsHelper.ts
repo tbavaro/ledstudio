@@ -57,7 +57,7 @@ export class SignalsHelper {
     public beatsWithBeats = new CircularQueue<number>(8);
     public audioValues: AudioValues;
 
-    constructor(audioSource: AudioNode | null) {
+    constructor(audioSource: AudioNode) {
         this.audioHelper = new BasicAudioHelper(audioSource);
 
         this.lowDecaySignal = new LevelsHelper({
