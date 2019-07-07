@@ -73,7 +73,7 @@ class SparklesAndFlashesVisualization extends Visualization.default {
     this.ledRows.forEach(row => row.multiplyAll(multiplier));
 
     // flash
-    const flashColor = Colors.hsv(0, 1, this.flashBrightness.value);
+    const flashColor = Colors.multiply(Colors.BLUE, this.flashBrightness.value);
     this.ledRows.forEach(row => row.addAll(flashColor));
 
     let numLeds = this.numLedsRemainder + elapsedSeconds * sparkleRate;
