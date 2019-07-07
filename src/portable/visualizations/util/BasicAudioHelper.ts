@@ -3,7 +3,7 @@ import * as AudioWaveformSampler from "./AudioWaveformSampler";
 const AudioWaveformSamplerImplementation = AudioWaveformSampler.AnalyserNodeAudioWaveformSampler;
 const NUM_SAMPLES = 1024;
 
-export interface Values {
+export interface AudioValues {
   samples: Float32Array;
   unfilteredRMS: number;
   unfilteredRMSZScore3: number;
@@ -24,7 +24,7 @@ export default class BasicAudioHelper {
   private readonly unfilteredSampler: AudioWaveformSampler.default;
   private readonly lowSampler: AudioWaveformSampler.default;
   private readonly highSampler: AudioWaveformSampler.default;
-  private readonly reusedValues: Values;
+  private readonly reusedValues: AudioValues;
 
   constructor(audioSource: AudioNode) {
     const audioContext = audioSource.context;
@@ -67,7 +67,7 @@ export default class BasicAudioHelper {
     };
   }
 
-  public getValues(): Values {
+  public getValues(): AudioValues {
     this.samplers.forEach(s => s.sample());
 
     const values = this.reusedValues;
