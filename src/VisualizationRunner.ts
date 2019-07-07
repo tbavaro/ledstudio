@@ -17,6 +17,7 @@ import Scene from "./scenes/Scene";
 
 class MyFrameContext implements Visualization.FrameContext {
   public elapsedMillis: number;
+  public elapsedSeconds: number;
   public pianoState: PianoHelpers.VisualizationStateHelper;
   public frameHeatmapValues: number[] | undefined;
   public beatController: BeatController;
@@ -39,8 +40,9 @@ class MyFrameContext implements Visualization.FrameContext {
     this.pianoState.startFrame();
   }
 
-  public endFrame(elapsedMillis: number, beatController: BeatController) {
-    this.elapsedMillis = elapsedMillis;
+  public endFrame(elapsedSeconds: number, beatController: BeatController) {
+    this.elapsedMillis = elapsedSeconds * 1000;
+    this.elapsedSeconds = elapsedSeconds;
     this.pianoState.endFrame();
     this.frameHeatmapValues = undefined;
     this.beatController = beatController;
@@ -326,7 +328,8 @@ export default class VisualizationRunner {
     }
 
     // collect state
-    this.frameContext.endFrame(startTime - this.lastRenderTime, beatController);
+    const elapsedSeconds = (startTime - this.lastRenderTime) / 1000;
+    this.frameContext.endFrame(elapsedSeconds, beatController);
 
     // render into the LED strip
     this.visualization.render(this.frameContext);

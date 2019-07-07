@@ -83,7 +83,8 @@ export interface Config {
 }
 
 export interface FrameContext {
-  elapsedMillis: number;
+  elapsedMillis: number;  // deprecated
+  elapsedSeconds: number;
 
   pianoState: PianoState;
 
