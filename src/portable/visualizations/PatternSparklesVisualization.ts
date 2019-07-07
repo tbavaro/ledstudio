@@ -18,12 +18,12 @@ class PatternSparklesVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedMillis } = context;
+    const { elapsedSeconds } = context;
 
-    const multiplier = Math.pow(0.5, elapsedMillis / 1000 / SPARKLE_HALF_LIFE_SECONDS);
+    const multiplier = Math.pow(0.5, elapsedSeconds / SPARKLE_HALF_LIFE_SECONDS);
     this.ledRows.forEach(row => row.forEach((color, i) => row.set(i, Colors.multiply(color, multiplier))));
 
-    let numLeds = this.numLedsRemainder + elapsedMillis / 1000 * SPARKLES_PER_SECOND;
+    let numLeds = this.numLedsRemainder + elapsedSeconds * SPARKLES_PER_SECOND;
     while (numLeds >= 1) {
       const n = Math.floor(Math.random() * this.ledAddresses.length);
       const [row, index] = this.ledAddresses[n];

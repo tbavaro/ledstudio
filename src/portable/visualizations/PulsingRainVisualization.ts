@@ -88,7 +88,7 @@ class PulsingRainVisualization extends Visualization.default {
       return;
     }
 
-    const { elapsedMillis, beatController } = context;
+    const { elapsedSeconds, beatController } = context;
     const now = Date.now()/1000;
 
     this.analyserHelper.direct.sample();
@@ -97,7 +97,7 @@ class PulsingRainVisualization extends Visualization.default {
     // drops
     const deadSparkles: Sparkle[] = [];
     this.sparkles.forEach(sparkle => {
-      sparkle.millisUntilFall -= elapsedMillis;
+      sparkle.millisUntilFall -= elapsedSeconds * 1000;
       if (sparkle.millisUntilFall <= 0) {
         const newAddress = this.dropHelper.drop(sparkle.address);
         if (newAddress === null) {
@@ -126,7 +126,7 @@ class PulsingRainVisualization extends Visualization.default {
     }
 
     // new sparkles
-    let numLeds = this.numSparklesRemainder + elapsedMillis / 1000 * sparkleRate;
+    let numLeds = this.numSparklesRemainder + elapsedSeconds * sparkleRate;
     while (numLeds >= 1) {
       const index = Math.floor(Math.random() * this.ledRows.get(0).length);
       const sparkle: Sparkle = {
@@ -145,7 +145,7 @@ class PulsingRainVisualization extends Visualization.default {
 
     // render
 
-    const multiplier = Math.pow(0.5, elapsedMillis / 1000 / SPARKLE_HALF_LIFE_SECONDS);
+    const multiplier = Math.pow(0.5, elapsedSeconds / SPARKLE_HALF_LIFE_SECONDS);
     this.ledRows.forEach(row => row.forEach((color, i) => row.set(i, Colors.multiply(color, multiplier))));
 
     this.sparkles.forEach(sparkle => {

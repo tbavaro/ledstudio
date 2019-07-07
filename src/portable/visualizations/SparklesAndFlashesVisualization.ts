@@ -22,8 +22,8 @@ class LinearDecayingValue {
     this.decayRate = decayRate;
   }
 
-  public decay(elapsedMillis: number): number {
-    this.value = Math.max(0, this.value - elapsedMillis / 1000 * this.decayRate);
+  public decay(elapsedSeconds: number): number {
+    this.value = Math.max(0, this.value - elapsedSeconds * this.decayRate);
     return this.value;
   }
 
@@ -58,9 +58,9 @@ class SparklesAndFlashesVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedMillis } = context;
+    const { elapsedSeconds } = context;
 
-    this.flashBrightness.decay(elapsedMillis);
+    this.flashBrightness.decay(elapsedSeconds);
 
     const audioValues = this.audioHelper.getValues();
     const sparkleRateNormalized = bracket01(Math.pow(audioValues.highRMS * 2, 3));
@@ -69,14 +69,14 @@ class SparklesAndFlashesVisualization extends Visualization.default {
     const sparkleRate = sparkleRateNormalized * (MAX_SPARKLES_PER_SECOND - MIN_SPARKLES_PER_SECOND) + MIN_SPARKLES_PER_SECOND;
 
     // fade all pixels
-    const multiplier = Math.pow(0.5, elapsedMillis / 1000 / PIXEL_HALF_LIFE_SECONDS);
+    const multiplier = Math.pow(0.5, elapsedSeconds / PIXEL_HALF_LIFE_SECONDS);
     this.ledRows.forEach(row => row.multiplyAll(multiplier));
 
     // flash
     const flashColor = Colors.hsv(0, 1, this.flashBrightness.value);
     this.ledRows.forEach(row => row.addAll(flashColor));
 
-    let numLeds = this.numLedsRemainder + elapsedMillis / 1000 * sparkleRate;
+    let numLeds = this.numLedsRemainder + elapsedSeconds * sparkleRate;
     while (numLeds >= 1) {
       const n = Math.floor(Math.random() * this.ledAddresses.length);
       const [row, index] = this.ledAddresses[n];

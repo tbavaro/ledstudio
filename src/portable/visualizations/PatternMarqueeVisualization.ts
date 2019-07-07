@@ -20,8 +20,8 @@ class PatternMarqueeVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedMillis } = context;
-    this.phase = (this.phase + SPEED * elapsedMillis / 1000) % LED_SEPARATION;
+    const { elapsedSeconds } = context;
+    this.phase = (this.phase + SPEED * elapsedSeconds) % LED_SEPARATION;
     const offset = Math.round(this.phase);
     this.ledAddresses.forEach((ledAddress, i) => {
       const [row, index] = ledAddress;

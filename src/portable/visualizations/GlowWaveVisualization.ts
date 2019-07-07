@@ -54,12 +54,12 @@ class GlowWaveVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedMillis, pianoState } = context;
+    const { elapsedSeconds, pianoState } = context;
 
     // decay the unpressed keys
     this.pressedKeyColors.forEach((fc, n) => {
       if (!pianoState.keys[n]) {
-        fc.brightness *= 1 - (FADE_DROPOFF * elapsedMillis / 1000);
+        fc.brightness *= 1 - (FADE_DROPOFF * elapsedSeconds);
         if (fc.brightness < 0.01) {
           this.pressedKeyColors.delete(n);
         }

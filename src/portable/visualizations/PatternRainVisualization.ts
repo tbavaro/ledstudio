@@ -72,12 +72,12 @@ class PatternRainVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedMillis } = context;
+    const { elapsedSeconds } = context;
 
     // drops
     const deadSparkles: Sparkle[] = [];
     this.sparkles.forEach(sparkle => {
-      sparkle.millisUntilFall -= elapsedMillis;
+      sparkle.millisUntilFall -= elapsedSeconds * 1000;
       if (sparkle.millisUntilFall <= 0) {
         const newAddress = this.dropHelper.drop(sparkle.address);
         if (newAddress === null) {
@@ -91,7 +91,7 @@ class PatternRainVisualization extends Visualization.default {
     deadSparkles.forEach(sparkle => this.sparkles.delete(sparkle));
 
     // new sparkles
-    let numLeds = this.numSparklesRemainder + elapsedMillis / 1000 * SPARKLES_PER_SECOND;
+    let numLeds = this.numSparklesRemainder + elapsedSeconds * SPARKLES_PER_SECOND;
     while (numLeds >= 1) {
       const sparkle: Sparkle = {
         address: { rowIndex: 0, index: Math.floor(Math.random() * this.ledRows.get(0).length) },
@@ -105,7 +105,7 @@ class PatternRainVisualization extends Visualization.default {
 
     // render
 
-    const multiplier = Math.pow(0.5, elapsedMillis / 1000 / SPARKLE_HALF_LIFE_SECONDS);
+    const multiplier = Math.pow(0.5, elapsedSeconds / SPARKLE_HALF_LIFE_SECONDS);
     this.ledRows.forEach(row => row.forEach((color, i) => row.set(i, Colors.multiply(color, multiplier))));
 
     // this.ledRows.forEach(ledRow => ledRow.fill(Colors.BLACK));
