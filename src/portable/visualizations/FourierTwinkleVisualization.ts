@@ -6,11 +6,13 @@ import { bracket01, fillArray } from "../../util/Utils";
 
 const NAME = "fourierTwinkle";
 
-const NUM_SAMPLES = 1024;
-const NUM_SAMPLES_RENDERED = NUM_SAMPLES / 4;
+const NUM_SAMPLES = 512;
+const NUM_SAMPLES_RENDERED = NUM_SAMPLES / 2;
+
+const DECAY_RATE = 4;
 
 const MIN_THRESHOLD = 0.1;
-const MAX_THRESHOLD = 0.8;
+const MAX_THRESHOLD = 0.7;
 
 class MyVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
@@ -27,6 +29,7 @@ class MyVisualization extends Visualization.default {
     const context = audioSource.context;
     const analyser = new AnalyserNode(context);
     analyser.fftSize = NUM_SAMPLES;
+    analyser.smoothingTimeConstant = 0.2;
     audioSource.connect(analyser);
     this.analyser = analyser;
     this.buffer = new Uint8Array(this.analyser.frequencyBinCount);
@@ -69,21 +72,26 @@ class MyVisualization extends Visualization.default {
 
       const value = Math.pow(bracket01((v - MIN_THRESHOLD) / (MAX_THRESHOLD - MIN_THRESHOLD)), 2);
 
-      // this.values[i].decayLinearRate(DECAY_RATE, context.elapsedMillis / 1000);
-      this.values[i].value = value;
+      this.values[i].decayLinearRate(DECAY_RATE, context.elapsedMillis / 1000);
+      this.values[i].bumpTo(value);
     }
 
     // clear
-    this.ledRows.forEach(r => r.fill(Colors.BLACK));
+    this.ledRows.forEach(r => r.multiplyAll(0.7));
 
     this.values.forEach((v, i) => {
-      const hue = 360 - i / NUM_SAMPLES_RENDERED * 180;
+      const freqPct = i / NUM_SAMPLES_RENDERED;
+
+      const hue = 360 - i / NUM_SAMPLES_RENDERED * 240;
       const [rowNum, ledNum] = this.ledAddresses[this.bucketLocations[i]];
 
-      const c = Colors.hsv(hue, 1, v.value);
+      const saturation = 1 - bracket01((v.value - 0.7) / 0.9);
+      const value = bracket01(v.value / 0.7) * Math.pow(1 - freqPct, 0.25);
+
+      const c = Colors.hsv(hue, saturation, value);
 
       const row = this.ledRows.get(rowNum);
-      row.add(ledNum, c);
+      row.set(ledNum, c);
     });
 
     context.setFrameHeatmapValues(this.values.map(v => v.value));
