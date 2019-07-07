@@ -122,6 +122,11 @@ function getByStickyIdKeyOrFirst<T extends { id: string }>(
   return getById(objs, idOrNull);
 }
 
+function createDummyAudioNode() {
+  const ctx = new AudioContext();
+  return ctx.createGain();
+}
+
 class App extends React.Component<{}, State> {
   private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
@@ -455,7 +460,7 @@ class App extends React.Component<{}, State> {
     const runner = new VisualizationRunner({
       visualizationName,
       scene,
-      audioSource,
+      audioSource: audioSource || createDummyAudioNode(),
       setVisualizerExtraDisplay,
       controllerState: this.controllerState,
       forceUpdateUI: () => this.forceUpdate()

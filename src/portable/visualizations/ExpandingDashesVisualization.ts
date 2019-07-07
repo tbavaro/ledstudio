@@ -166,7 +166,7 @@ class SignalsHelper {
     private beatOnBeat = false;
     public beatsWithBeats = new CircularQueue<number>(8);
 
-    constructor(audioSource: AudioNode | null) {
+    constructor(audioSource: AudioNode) {
         this.audioHelper = new BasicAudioHelper(audioSource);
 
         this.lowHelper = new LevelsHelper({

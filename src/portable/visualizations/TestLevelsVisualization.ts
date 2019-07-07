@@ -41,7 +41,7 @@ class MultiLevelHelper {
   private readonly lowHelper: LevelsHelper;
   private readonly highHelper: LevelsHelper;
 
-  constructor(audioSource: AudioNode | null) {
+  constructor(audioSource: AudioNode) {
     this.audioHelper = new BasicAudioHelper(audioSource);
 
     this.lowHelper = new LevelsHelper({

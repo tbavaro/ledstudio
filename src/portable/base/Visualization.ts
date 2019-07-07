@@ -40,7 +40,7 @@ export interface DialControl {
 
 export interface Config {
   readonly scene: Scene;
-  readonly audioSource: AudioNode | null;
+  readonly audioSource: AudioNode;
   setExtraDisplay: (element: HTMLElement) => void;
 
   createTimeSeries: (attrs?: {

@@ -26,26 +26,18 @@ export default class BasicAudioHelper {
   private readonly highSampler: AudioWaveformSampler.default;
   private readonly reusedValues: Values;
 
-  constructor(audioSource: AudioNode | null) {
-    let node: AudioNode;
-    if (audioSource === null) {
-      const ctx = new AudioContext();
-      node = ctx.createGain();
-    } else {
-      node = audioSource;
-    }
-
-    const audioContext = node.context;
+  constructor(audioSource: AudioNode) {
+    const audioContext = audioSource.context;
 
     this.samplers = [];
     const createAnalyserHelper = (createFilter?: () => AudioNode) => {
       let filteredAudioSource: AudioNode;
       if (createFilter) {
         const filter = createFilter();
-        node.connect(filter);
+        audioSource.connect(filter);
         filteredAudioSource = filter;
       } else {
-        filteredAudioSource = node;
+        filteredAudioSource = audioSource;
       }
 
       const sampler = new AudioWaveformSamplerImplementation(filteredAudioSource, NUM_SAMPLES);

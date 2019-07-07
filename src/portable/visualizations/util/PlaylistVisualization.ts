@@ -10,7 +10,7 @@ export default class PlaylistVisualization extends Visualization.default {
   private readonly visualizations: Visualization.Factory[];
   private currentVisualization: Visualization.default;
   private currentVisualizationIndex: number;
-  private currentBranchedAudioNode: AudioNode | null = null;
+  private currentBranchedAudioNode: AudioNode;
   private millisUntilSwitch: number;
   private button: Visualization.ButtonControl;
   private readonly autoAdvanceMillis: number;
@@ -34,9 +34,8 @@ export default class PlaylistVisualization extends Visualization.default {
     this.currentVisualizationIndex = n;
     const factory = this.visualizations[n];
 
-    if (this.currentBranchedAudioNode !== null) {
+    if (this.currentBranchedAudioNode !== undefined) {
       this.currentBranchedAudioNode.disconnect();
-      this.currentBranchedAudioNode = null;
     }
 
     if (this.config.audioSource !== null) {

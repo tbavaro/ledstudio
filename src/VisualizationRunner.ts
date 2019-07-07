@@ -273,7 +273,7 @@ export default class VisualizationRunner {
   constructor(attrs: {
     visualizationName: Visualizations.Name,
     scene: Scene,
-    audioSource: AudioNode | null,
+    audioSource: AudioNode,
     setVisualizerExtraDisplay: (element: HTMLElement | null) => void,
     controllerState: ControllerState,
     forceUpdateUI: () => void
