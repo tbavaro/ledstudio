@@ -2,7 +2,7 @@ import { bracket01 } from "../../util/Utils";
 import * as Colors from "../base/Colors";
 import LedInfo from "../base/LedInfo";
 import * as Visualization from "../base/Visualization";
-import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
+import { SignalsHelper } from "./util/SignalsHelper";
 
 const NAME = "spreadShootersAudioVisualization";
 
@@ -35,59 +35,37 @@ class SpreadShootersAudioVisualization extends Visualization.default {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private ezTS: Visualization.EasyTimeSeriesValueSetters;
-    private analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
     private readonly reverseLedInfo: LedRowInfo[][];
-    private dropVizLastBeat = 0;
-    private dropBeat = -10000000;
+    private signals: SignalsHelper;
 
     constructor(config: Visualization.Config) {
         super(config);
         this.ezTS = config.createEasyTimeSeriesSet();
-        const audioSource = config.audioSource;
-        if (audioSource !== null) {
-          this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(audioSource);
-        } else {
-          this.analyserHelpers = null;
-        }
-
         this.reverseLedInfo = reverseLedInfo(config.scene.leds);
         this.reverseLedInfo.forEach( x=> x);
+        this.signals = new SignalsHelper(config.audioSource);
     }
 
     public render(context: Visualization.FrameContext): void {
         const { elapsedMillis, beatController } = context;
-        if (this.analyserHelpers == null) {
-            return;
-        }
-        this.analyserHelpers.low.sample();
-        this.analyserHelpers.direct.sample();
+        this.signals.update(elapsedMillis, beatController);
 
         const now = Date.now();
 
         this.info = this.info.filter(kt => now - kt.time < SHOOTER_DURATION_MS*1.5);
 
-        const beatNow = beatController.beatNumber();
-        const nearBeat = beatController.timeSinceLastBeat() < 0.1 || beatController.progressToNextBeat() > 0.95;
-        if (this.analyserHelpers.low.currentRmsEma3.zScore > 4 && nearBeat) {
-            this.dropBeat = beatNow;
-            this.dropVizLastBeat = 0;
-        }
-
-        this.ezTS.white.value = this.analyserHelpers.low.currentRmsEma3.ema;
-        this.ezTS.orange.value = this.analyserHelpers.low.currentRmsEma3.zScore / 6;
         this.ezTS.red.value = beatController.progressToNextBeat();
 
-        if (beatNow - this.dropBeat < 16) {
-            if (this.dropVizLastBeat !== beatNow) {
+        if (this.signals.beatsSinceDrop < 16) {
+            if (this.signals.isNewBeat) {
                 const hue = randomHue();
                 for (let i = 0; i < this.reverseLedInfo.length; ++i) {
                     this.info.push({time: now, rib: i, brightness: 1, hue: hue});
                 }
-                this.dropVizLastBeat = beatNow;
             }
         } else {
-            const brightness = bracket01(this.analyserHelpers.direct.currentRMSAmplitude / 0.4);
-            const volumeAdjustment = bracket01(this.analyserHelpers.direct.currentRMSAmplitude / 0.2);
+            const brightness = bracket01(this.signals.audioValues.unfilteredRMS / 0.4);
+            const volumeAdjustment = bracket01(this.signals.audioValues.unfilteredRMS / 0.2);
             const shooter = 0.0025 * Math.random() < volumeAdjustment * elapsedMillis / 1000 * BASE_SHOOTER_PER_S;
             if (shooter) {
                 const rib = Math.floor(Math.random() * this.reverseLedInfo.length);
