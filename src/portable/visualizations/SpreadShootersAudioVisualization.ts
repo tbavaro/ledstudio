@@ -56,7 +56,7 @@ class SpreadShootersAudioVisualization extends Visualization.default {
         this.ezTS.red.value = beatController.progressToNextBeat();
 
         if (this.signals.beatsSinceDrop < 16) {
-            if (this.signals.isNewBeat) {
+            if (this.signals.soundsLikeNewBeat) {
                 const hue = randomHue();
                 for (let i = 0; i < this.reverseLedInfo.length; ++i) {
                     this.info.push({time: now, rib: i, brightness: 1, hue: hue});

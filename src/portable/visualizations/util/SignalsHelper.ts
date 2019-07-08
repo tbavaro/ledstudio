@@ -45,13 +45,20 @@ export class LevelsHelper {
 export interface Signals {
     beatsWithBeats: CircularQueue<number>;
     audioValues: AudioValues;
-    readonly isStrongBeat: boolean;
+    
     readonly lowLevel: number;
     readonly highLevel: number;
-    readonly isDrop: boolean;
+
     readonly beatsSinceDrop: number;
+
+    // "sounds like" are a mixture of audio triggers and beat expectations
+    readonly soundsLikeDrop: boolean;
+    readonly soundsLikeNewBeat: boolean;
+    readonly soundsLikeStrongBeat: boolean;
+    readonly soundsLikeDance: boolean;
+
+    // "is" means we definitively know; e.g. comes from beat controller directly
     readonly isNewBeat: boolean;
-    readonly isDance: boolean;
 }
 
 export class SignalsHelper implements Signals {
@@ -59,11 +66,13 @@ export class SignalsHelper implements Signals {
     private readonly lowDecaySignal: LevelsHelper;
     private readonly highDecaySignal: LevelsHelper;
     private isDropValue = false;
-    private isStrongBeatValue = false;
-    private isNewBeatValue = false;
+    private soundsLikeStrongBeatValue = false;
+    private soundsLikeNewBeatValue = false;
     private lastBeat = -10000000;
     private dropBeat = -10000000;
     private beatSinceDropValue = -10000000;
+    private prevBeatNum = -1;
+    public isNewBeat: boolean;
 
     private beatOnBeat = false;
     public beatsWithBeats = new CircularQueue<number>(8);
@@ -100,7 +109,7 @@ export class SignalsHelper implements Signals {
             this.isDropValue = false;
         }
 
-        if (this.isDance) {
+        if (this.soundsLikeDance) {
             this.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
         }
         if (this.beatsSinceDrop < 16) {
@@ -108,14 +117,14 @@ export class SignalsHelper implements Signals {
         }
 
         if (this.audioValues.lowRMSZScore3 > 2 && nearBeat) {
-            this.isStrongBeatValue = true;
+            this.soundsLikeStrongBeatValue = true;
         } else {
-            this.isStrongBeatValue = false;
+            this.soundsLikeStrongBeatValue = false;
         }
 
         this.beatSinceDropValue = beatNow - this.dropBeat;
-        this.isNewBeatValue = beatNow !== this.lastBeat;
-        if (this.isNewBeat) {
+        this.soundsLikeNewBeatValue = beatNow !== this.lastBeat;
+        if (this.soundsLikeNewBeat) {
             this.beatsWithBeats.push(this.beatOnBeat ? 1: 0);
             this.beatOnBeat = false;
         }
@@ -123,6 +132,10 @@ export class SignalsHelper implements Signals {
             this.beatOnBeat = true;
         }
         this.lastBeat = beatNow;
+
+        const beatNum = beatController.beatNumber();
+        this.isNewBeat = (this.prevBeatNum !== beatNum);
+        this.prevBeatNum = beatNum;
     }
 
     public get lowLevel() {
@@ -133,23 +146,23 @@ export class SignalsHelper implements Signals {
         return this.highDecaySignal.value;
     }
 
-    public get isDrop() {
+    public get soundsLikeDrop() {
         return this.isDropValue;
     }
 
-    public get isStrongBeat() {
-        return this.isStrongBeatValue;
+    public get soundsLikeStrongBeat() {
+        return this.soundsLikeStrongBeatValue;
     }
 
     public get beatsSinceDrop() {
         return this.beatSinceDropValue;
     }
 
-    public get isNewBeat() {
-        return this.isNewBeatValue;
+    public get soundsLikeNewBeat() {
+        return this.soundsLikeNewBeatValue;
     }
 
-    public get isDance() {
+    public get soundsLikeDance() {
         return this.beatsWithBeats.sum(x => x) > 6;
     }
 }

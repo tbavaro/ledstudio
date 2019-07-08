@@ -31,7 +31,7 @@ class ExpandingDashesVisualization extends Visualization.default {
     }
 
     public render(context: Visualization.FrameContext): void {
-        if (Date.now() - this.lastPaletteSwap > 30000 && this.signals.isStrongBeat) {
+        if (Date.now() - this.lastPaletteSwap > 30000 && this.signals.soundsLikeStrongBeat) {
             this.swapPalettes();
         }
 
