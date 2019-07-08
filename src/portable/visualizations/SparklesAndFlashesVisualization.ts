@@ -2,7 +2,7 @@ import { bracket01 } from "../../util/Utils";
 
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
-import BasicAudioHelper from "./util/BasicAudioHelper";
+import { SignalsHelper } from "./util/SignalsHelper";
 
 const NAME = "sparklesAndFlashes";
 
@@ -37,17 +37,17 @@ class LinearDecayingValue {
 class SparklesAndFlashesVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private numLedsRemainder = 0;
-  private readonly audioHelper: BasicAudioHelper;
 
   private flashBrightness = new LinearDecayingValue(0, 1 / 0.125);
 
   private readonly lowTS: Visualization.TimeSeriesValue;
   private readonly highTS: Visualization.TimeSeriesValue;
   private readonly flashBrightnessTS: Visualization.TimeSeriesValue;
+  private signals: SignalsHelper;
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.audioHelper = new BasicAudioHelper(config.audioSource);
+    this.signals = new SignalsHelper(config.audioSource);
 
     this.ledAddresses = [];
     config.scene.leds.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
@@ -58,13 +58,12 @@ class SparklesAndFlashesVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedSeconds } = context;
-
+    const { elapsedSeconds, beatController } = context;
+    this.signals.update(elapsedSeconds * 1000, beatController);
     this.flashBrightness.decay(elapsedSeconds);
 
-    const audioValues = this.audioHelper.getValues();
-    const sparkleRateNormalized = bracket01(Math.pow(audioValues.highRMS * 2, 3));
-    this.flashBrightness.bump(bracket01(Math.pow(audioValues.lowRMS * 2.5, 3) * 1.25 - 0.25));
+    const sparkleRateNormalized = bracket01(Math.pow(this.signals.audioValues.highRMS * 2, 3));
+    this.flashBrightness.bump(bracket01(Math.pow(this.signals.audioValues.lowRMS * 2.5, 3) * 1.25 - 0.25));
 
     const sparkleRate = sparkleRateNormalized * (MAX_SPARKLES_PER_SECOND - MIN_SPARKLES_PER_SECOND) + MIN_SPARKLES_PER_SECOND;
 
@@ -86,8 +85,8 @@ class SparklesAndFlashesVisualization extends Visualization.default {
     this.numLedsRemainder = numLeds;
 
     this.flashBrightnessTS.value = this.flashBrightness.value;
-    this.lowTS.value = audioValues.lowRMS;
-    this.highTS.value = audioValues.highRMS;
+    this.lowTS.value = this.signals.audioValues.lowRMS;
+    this.highTS.value = this.signals.audioValues.highRMS;
   }
 
 }

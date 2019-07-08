@@ -42,6 +42,8 @@ class ExpandingDashesVisualization extends Visualization.default {
 
         this.ezTimeseries.orange.value = this.signals.lowDecaySignal.halfLife;
         this.ezTimeseries.white.value = this.signals.beatsWithBeats.sum(x => x) / 8;
+        this.ezTimeseries.red.value = this.signals.lowLevel;
+        this.ezTimeseries.green.value = this.signals.highLevel;
 
         if (this.signals.isDrop) {
             this.signals.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
