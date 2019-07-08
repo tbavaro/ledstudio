@@ -1,5 +1,6 @@
 import * as Visualization from "./base/Visualization";
 
+import BeatRainVisualization from "./visualizations/BeatRainVisualization";
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import ExpandingDashesVisualization from "./visualizations/ExpandingDashesVisualization";
 import FourierTwinkleVisualization from "./visualizations/FourierTwinkleVisualization";
@@ -12,7 +13,6 @@ import PatternOwlEyesVisualization from "./visualizations/PatternOwlEyesVisualiz
 import PatternParticleFireVisualization from "./visualizations/PatternParticleFireVisualization";
 import PatternRain2Visualization from "./visualizations/PatternRain2Visualization";
 import PatternRainbowVisualization from "./visualizations/PatternRainbowVisualization";
-import PatternRainVisualization from "./visualizations/PatternRainVisualization";
 import PatternSparklesVisualization from "./visualizations/PatternSparklesVisualization";
 import PatternWingFlapVisualization from "./visualizations/PatternWingFlapVisualization";
 import PatternZapsVisualization from "./visualizations/PatternZapsVisualization";
@@ -45,6 +45,7 @@ const factories: Visualization.Factory[] = [
   SpreadShootersAudioVisualization,
   ExpandingDashesVisualization,
   FourierTwinkleVisualization,
+  BeatRainVisualization,
   ScopeFFTVisualization,
   ScopeWaveformVisualization,
   PatternClockVisualization,
@@ -53,7 +54,6 @@ const factories: Visualization.Factory[] = [
   PatternMarqueeVisualization,
   PatternOwlEyesVisualization,
   PatternParticleFireVisualization,
-  PatternRainVisualization,
   PatternRain2Visualization,
   PatternRainbowVisualization,
   PatternSparklesVisualization,

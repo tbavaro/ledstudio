@@ -3,9 +3,9 @@ import * as Scene from "../../scenes/Scene";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
-const NAME = "pattern:rain";
+const NAME = "beatRain";
 
-const SPARKLES_PER_SECOND = 15;
+const SPARKLES_PER_BEAT = 4;
 const SPARKLE_HALF_LIFE_SECONDS = 0.1;
 const FALL_MILLIS = 100;
 const TOP_GLOW = Colors.hsv(210, 1, 0.01);
@@ -60,10 +60,9 @@ class DropHelper {
   }
 }
 
-class PatternRainVisualization extends Visualization.default {
+class MyVisualization extends Visualization.default {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
-  private numSparklesRemainder = 0;
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -72,6 +71,7 @@ class PatternRainVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
+    const { signals } = this.config;
     const { elapsedSeconds } = context;
 
     // drops
@@ -91,17 +91,15 @@ class PatternRainVisualization extends Visualization.default {
     deadSparkles.forEach(sparkle => this.sparkles.delete(sparkle));
 
     // new sparkles
-    let numLeds = this.numSparklesRemainder + elapsedSeconds * SPARKLES_PER_SECOND;
-    while (numLeds >= 1) {
+    const numLeds = (signals.isNewBeat ? SPARKLES_PER_BEAT : 0);
+    for (let i = 0; i < numLeds; ++i) {
       const sparkle: Sparkle = {
         address: { rowIndex: 0, index: Math.floor(Math.random() * this.ledRows.get(0).length) },
         color: Colors.hsv(200 + Math.random() * 45, Math.pow(Math.random(), 0.2), Math.random() * 0.5 + 0.5),
         millisUntilFall: FALL_MILLIS
       };
       this.sparkles.add(sparkle);
-      numLeds -= 1;
     }
-    this.numSparklesRemainder = numLeds;
 
     // render
 
@@ -118,5 +116,5 @@ class PatternRainVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternRainVisualization);
+const factory = new Visualization.Factory(NAME, MyVisualization);
 export default factory;
