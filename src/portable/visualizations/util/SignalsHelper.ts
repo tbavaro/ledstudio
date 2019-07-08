@@ -42,7 +42,19 @@ export class LevelsHelper {
     }
 }
 
-export class SignalsHelper {
+export interface Signals {
+    beatsWithBeats: CircularQueue<number>;
+    audioValues: AudioValues;
+    readonly isStrongBeat: boolean;
+    readonly lowLevel: number;
+    readonly highLevel: number;
+    readonly isDrop: boolean;
+    readonly beatsSinceDrop: number;
+    readonly isNewBeat: boolean;
+    readonly isDance: boolean;
+}
+
+export class SignalsHelper implements Signals {
     private readonly audioHelper: BasicAudioHelper;
     private readonly lowDecaySignal: LevelsHelper;
     private readonly highDecaySignal: LevelsHelper;

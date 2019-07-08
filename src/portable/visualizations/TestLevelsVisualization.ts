@@ -4,6 +4,7 @@ import BasicAudioHelper from "./util/BasicAudioHelper";
 
 import { bracket01, valueOrDefault } from "../../util/Utils";
 import FancyValue from "../base/FancyValue";
+import { Signals } from "./util/SignalsHelper";
 // import WindowStats from "../../util/WindowStats";
 // import TimeSeriesBandHelper from "./util/TimeSeriesBandHelper";
 
@@ -77,7 +78,10 @@ class TestBandsVisualization extends Visualization.default {
 
   private readonly lowTS: Visualization.TimeSeriesValue;
   private readonly highTS: Visualization.TimeSeriesValue;
+  private readonly low2TS: Visualization.TimeSeriesValue;
+  private readonly high2TS: Visualization.TimeSeriesValue;
   private readonly helper: MultiLevelHelper;
+  private readonly signals: Signals;
   // private readonly lowBand: TimeSeriesBandHelper;
 
 
@@ -88,6 +92,11 @@ class TestBandsVisualization extends Visualization.default {
     this.lowTS = config.createTimeSeries({ color: Colors.BLUE });
     this.highTS = config.createTimeSeries({ color: Colors.RED });
 
+    this.low2TS = config.createTimeSeries({ color: Colors.GREEN });
+    this.high2TS = config.createTimeSeries({ color: Colors.PURPLE });
+
+    this.signals = config.signals;
+
     this.helper = new MultiLevelHelper(config.audioSource);
   }
 
@@ -96,6 +105,9 @@ class TestBandsVisualization extends Visualization.default {
 
     this.lowTS.value = this.helper.lowLevel;
     this.highTS.value = this.helper.highLevel;
+
+    this.low2TS.value = this.signals.lowLevel;
+    this.high2TS.value = this.signals.highLevel;
 
    this.ledRows.get(0).fill(Colors.hsv(0, 0.5, this.highTS.value));
     this.ledRows.get(this.ledRows.length - 1).fill(Colors.hsv(240, 0.5, this.lowTS.value));

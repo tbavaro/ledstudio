@@ -2,7 +2,7 @@ import { bracket01 } from "../../util/Utils";
 
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
-import { SignalsHelper } from "./util/SignalsHelper";
+import { Signals } from "./util/SignalsHelper";
 
 const NAME = "sparklesAndFlashes";
 
@@ -43,11 +43,11 @@ class SparklesAndFlashesVisualization extends Visualization.default {
   private readonly lowTS: Visualization.TimeSeriesValue;
   private readonly highTS: Visualization.TimeSeriesValue;
   private readonly flashBrightnessTS: Visualization.TimeSeriesValue;
-  private signals: SignalsHelper;
+  private signals: Signals;
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.signals = config.signalsHelper;
+    this.signals = config.signals;
 
     this.ledAddresses = [];
     config.scene.leds.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
@@ -58,8 +58,7 @@ class SparklesAndFlashesVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedSeconds, beatController } = context;
-    this.signals.update(elapsedSeconds * 1000, beatController);
+    const { elapsedSeconds } = context;
     this.flashBrightness.decay(elapsedSeconds);
 
     const sparkleRateNormalized = bracket01(Math.pow(this.signals.audioValues.highRMS * 2, 3));

@@ -273,6 +273,7 @@ export default class VisualizationRunner {
   private readonly brightnessDial: Visualization.DialControl;
   private readonly derezDial: Visualization.DialControl;
   private readonly controllerState: ControllerState;
+  private readonly signalsHelper: SignalsHelper;
 
   constructor(attrs: {
     visualizationName: Visualizations.Name,
@@ -293,11 +294,11 @@ export default class VisualizationRunner {
       dialNumber: 7,
       initialValue: attrs.controllerState.dialValues[6]
     });
-    const signalsHelper = new SignalsHelper(attrs.audioSource);
+    this.signalsHelper = new SignalsHelper(attrs.audioSource);
     const visualizationConfig: Visualization.Config = {
       scene: attrs.scene,
       audioSource: attrs.audioSource,
-      signalsHelper,
+      signals: this.signalsHelper,
       setExtraDisplay: attrs.setVisualizerExtraDisplay,
       createTimeSeries: this.timeSeriesHelper.createTimeSeries,
       createButtonControl: controllerStateHelper.createButtonControl,
@@ -336,6 +337,7 @@ export default class VisualizationRunner {
     this.frameContext.endFrame(elapsedSeconds, beatController);
 
     // render into the LED strip
+    this.signalsHelper.update(elapsedSeconds * 1000, beatController);
     this.visualization.render(this.frameContext);
     const frameHeatmapValues = this.frameContext.frameHeatmapValues || [];
 

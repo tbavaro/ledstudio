@@ -2,7 +2,7 @@ import { bracket01 } from "../../util/Utils";
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
-import { SignalsHelper } from "./util/SignalsHelper";
+import { Signals } from "./util/SignalsHelper";
 import { randomPalette } from "./util/Utils";
 
 const NAME = "expandingDashes";
@@ -14,7 +14,7 @@ class ExpandingDashesVisualization extends Visualization.default {
     private readonly wingDashPaires: number[];
     private readonly wingDashPairRatioes: number[];
     private readonly ezTimeseries: Visualization.EasyTimeSeriesValueSetters;
-    private readonly signals: SignalsHelper;
+    private readonly signals: Signals;
     private readonly colorOffset: number;
     private lastPaletteSwap = Date.now();
 
@@ -27,17 +27,14 @@ class ExpandingDashesVisualization extends Visualization.default {
         this.wingDashPairRatioes = [0.66, 0.34, 0.34, 0.66];
 
         this.ezTimeseries = config.createEasyTimeSeriesSet();
-        this.signals = config.signalsHelper;
+        this.signals = config.signals;
     }
 
     public render(context: Visualization.FrameContext): void {
-        const { elapsedMillis, beatController } = context;
-
         if (Date.now() - this.lastPaletteSwap > 30000 && this.signals.isStrongBeat) {
             this.swapPalettes();
         }
 
-        this.signals.update(elapsedMillis, beatController);
         this.ledRows.forEach(r => r.fill(Colors.BLACK));
 
         this.ezTimeseries.white.value = this.signals.beatsWithBeats.sum(x => x) / 8;

@@ -2,7 +2,7 @@ import { bracket01 } from "../../util/Utils";
 import * as Colors from "../base/Colors";
 import LedInfo from "../base/LedInfo";
 import * as Visualization from "../base/Visualization";
-import { SignalsHelper } from "./util/SignalsHelper";
+import { Signals } from "./util/SignalsHelper";
 
 const NAME = "spreadShootersAudioVisualization";
 
@@ -36,19 +36,18 @@ class SpreadShootersAudioVisualization extends Visualization.default {
     private sparkles = new Array<SparkleInfo>();
     private ezTS: Visualization.EasyTimeSeriesValueSetters;
     private readonly reverseLedInfo: LedRowInfo[][];
-    private signals: SignalsHelper;
+    private signals: Signals;
 
     constructor(config: Visualization.Config) {
         super(config);
         this.ezTS = config.createEasyTimeSeriesSet();
         this.reverseLedInfo = reverseLedInfo(config.scene.leds);
         this.reverseLedInfo.forEach( x=> x);
-        this.signals = config.signalsHelper;
+        this.signals = config.signals;
     }
 
     public render(context: Visualization.FrameContext): void {
         const { elapsedMillis, beatController } = context;
-        this.signals.update(elapsedMillis, beatController);
 
         const now = Date.now();
 
