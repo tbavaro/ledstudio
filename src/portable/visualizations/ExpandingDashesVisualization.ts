@@ -13,7 +13,7 @@ class ExpandingDashesVisualization extends Visualization.default {
     private dropPalette: Colors.Color[];
     private readonly wingDashPaires: number[];
     private readonly wingDashPairRatioes: number[];
-    private readonly ezTimeseries: Visualization.EasyTimeSeriesValueSetters;
+    private readonly ezTS: Visualization.EasyTimeSeriesValueSetters;
     private readonly signals: Signals;
     private readonly colorOffset: number;
     private lastPaletteSwap = Date.now();
@@ -26,7 +26,7 @@ class ExpandingDashesVisualization extends Visualization.default {
         this.wingDashPaires = [0, 0, 0, 0].map(_ => Math.round(Math.random() * 3) + 3);
         this.wingDashPairRatioes = [0.66, 0.34, 0.34, 0.66];
 
-        this.ezTimeseries = config.createEasyTimeSeriesSet();
+        this.ezTS = config.createEasyTimeSeriesSet();
         this.signals = config.signals;
     }
 
@@ -37,9 +37,10 @@ class ExpandingDashesVisualization extends Visualization.default {
 
         this.ledRows.forEach(r => r.fill(Colors.BLACK));
 
-        this.ezTimeseries.white.value = this.signals.beatsWithBeats.sum(x => x) / 8;
-        this.ezTimeseries.red.value = this.signals.lowLevel;
-        this.ezTimeseries.green.value = this.signals.highLevel;
+        this.ezTS.white.value = this.signals.beatsWithBeats.sum(x => x) / 8;
+        this.ezTS.red.value = this.signals.audioValues.lowRMSZScore20 / 4;
+        this.ezTS.green.value = this.signals.lowLevel;
+        this.ezTS.orange.value = this.signals.audioValues.lowRMSEMA20 * 4;
 
 
         const inDropAfterGlow = this.signals.beatsSinceDrop < 16;

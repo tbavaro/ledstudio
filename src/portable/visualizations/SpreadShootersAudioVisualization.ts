@@ -47,13 +47,15 @@ class SpreadShootersAudioVisualization extends Visualization.default {
     }
 
     public render(context: Visualization.FrameContext): void {
-        const { elapsedMillis, beatController } = context;
+        const { elapsedMillis } = context;
 
         const now = Date.now();
 
         this.info = this.info.filter(kt => now - kt.time < SHOOTER_DURATION_MS*1.5);
 
-        this.ezTS.red.value = beatController.progressToNextBeat();
+        this.ezTS.red.value = this.signals.audioValues.lowRMSZScore20 / 4;
+        this.ezTS.green.value = this.signals.lowLevel;
+        this.ezTS.orange.value = this.signals.audioValues.lowRMSEMA20 * 4;
 
         if (this.signals.beatsSinceDrop < 16) {
             if (this.signals.soundsLikeNewBeat) {
