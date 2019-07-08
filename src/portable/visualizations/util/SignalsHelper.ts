@@ -44,8 +44,8 @@ export class LevelsHelper {
 
 export class SignalsHelper {
     private readonly audioHelper: BasicAudioHelper;
-    public readonly lowDecaySignal: LevelsHelper;
-    public readonly highDecaySignal: LevelsHelper;
+    private readonly lowDecaySignal: LevelsHelper;
+    private readonly highDecaySignal: LevelsHelper;
     private isDropValue = false;
     private isStrongBeatValue = false;
     private isNewBeatValue = false;
@@ -82,8 +82,17 @@ export class SignalsHelper {
         if (this.audioValues.lowRMSZScore3 > 4 && nearBeat) {
             this.dropBeat = beatNow;
             this.isDropValue = true;
+            this.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
+            this.highDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
         } else {
             this.isDropValue = false;
+        }
+
+        if (this.isDance) {
+            this.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
+        }
+        if (this.beatsSinceDrop < 16) {
+            this.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
         }
 
         if (this.audioValues.lowRMSZScore3 > 2 && nearBeat) {

@@ -2,7 +2,7 @@ import { bracket01 } from "../../util/Utils";
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
-import { LevelsHelper, SignalsHelper } from "./util/SignalsHelper";
+import { SignalsHelper } from "./util/SignalsHelper";
 import { randomPalette } from "./util/Utils";
 
 const NAME = "expandingDashes";
@@ -40,24 +40,12 @@ class ExpandingDashesVisualization extends Visualization.default {
         this.signals.update(elapsedMillis, beatController);
         this.ledRows.forEach(r => r.fill(Colors.BLACK));
 
-        this.ezTimeseries.orange.value = this.signals.lowDecaySignal.halfLife;
         this.ezTimeseries.white.value = this.signals.beatsWithBeats.sum(x => x) / 8;
         this.ezTimeseries.red.value = this.signals.lowLevel;
         this.ezTimeseries.green.value = this.signals.highLevel;
 
-        if (this.signals.isDrop) {
-            this.signals.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
-            this.signals.highDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
-        }
-        if (this.signals.isDance) {
-            this.signals.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
-        }
 
         const inDropAfterGlow = this.signals.beatsSinceDrop < 16;
-        if (inDropAfterGlow) {
-            this.signals.lowDecaySignal.halfLife = LevelsHelper.HALF_LIFE_MIN;
-        }
-
         this.ledRows.forEach((row, rowIdx) => {
             const wingRowLength = row.length / 2;
             const wingRowDashPaires = this.wingDashPaires[rowIdx];

@@ -1,7 +1,7 @@
 import * as Scene from "../../scenes/Scene";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
-import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
+import { SignalsHelper } from "./util/SignalsHelper";
 
 const NAME = "pulsingRain";
 
@@ -63,36 +63,21 @@ class DropHelper {
 class PulsingRainVisualization extends Visualization.default {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
-  private readonly analyserHelper: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
-  private readonly ezTS: Visualization.EasyTimeSeriesValueSetters;
   private numSparklesRemainder = 0;
-  private lastDrop = 0;
+  private signals: SignalsHelper;
 
   constructor(config: Visualization.Config) {
     super(config);
     this.dropHelper = new DropHelper(config.scene.leds);
     this.sparkles = new Set();
 
-    const audioSource = config.audioSource;
-    if (audioSource !== null) {
-      this.analyserHelper = AudioWaveformSampler.createAnalyserHelpers(audioSource);
-    } else {
-      this.analyserHelper = null;
-    }
-
-    this.ezTS = config.createEasyTimeSeriesSet();
+    this.signals = new SignalsHelper(config.audioSource);
   }
 
   public render(context: Visualization.FrameContext): void {
-    if (this.analyserHelper == null) {
-      return;
-    }
-
     const { elapsedSeconds, beatController } = context;
     const now = Date.now()/1000;
-
-    this.analyserHelper.direct.sample();
-    this.analyserHelper.low.sample();
+    this.signals.update(elapsedSeconds/1000, beatController);
 
     // drops
     const deadSparkles: Sparkle[] = [];
@@ -111,21 +96,16 @@ class PulsingRainVisualization extends Visualization.default {
     });
     deadSparkles.forEach(sparkle => this.sparkles.delete(sparkle));
 
-    const volumeAdjustment = (this.analyserHelper.direct.currentRMSAmplitude - 0.25) * 800;
-    let sparkleRate = BASE_SPARKLES_PER_SECOND + volumeAdjustment;
 
-    const nearBeat = beatController.timeSinceLastBeat() < 0.1 || beatController.progressToNextBeat() > 0.95;
-    if (this.analyserHelper.low.currentRmsEma3.zScore > 4 && nearBeat) {
-      this.lastDrop = now;
-    }
     // beat brightness multiplier
     let beatMultiplier = 0.75;
-    if (now - this.lastDrop < 8) {
+    if (this.signals.beatsSinceDrop < 16) {
       beatMultiplier = (beatController.progressToNextBeat() - 0.5) * 2 * 0.8;
-      sparkleRate = 400;
     }
 
     // new sparkles
+    const volumeAdjustment = (this.signals.audioValues.unfilteredRMS - 0.25) * 800;
+    const sparkleRate = BASE_SPARKLES_PER_SECOND + volumeAdjustment;
     let numLeds = this.numSparklesRemainder + elapsedSeconds * sparkleRate;
     while (numLeds >= 1) {
       const index = Math.floor(Math.random() * this.ledRows.get(0).length);
@@ -139,9 +119,6 @@ class PulsingRainVisualization extends Visualization.default {
       numLeds -= 1;
     }
     this.numSparklesRemainder = numLeds;
-
-    this.ezTS.blue.value = this.analyserHelper.direct.currentRmsEma3.zScore/4;
-    this.ezTS.green.value = now - this.lastDrop < 8 ? 1 : 0;
 
     // render
 
