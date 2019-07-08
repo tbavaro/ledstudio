@@ -5,7 +5,7 @@ import * as Visualization from "../base/Visualization";
 
 const NAME = "beatRain";
 
-const SPARKLES_PER_BEAT = 4;
+const SPARKLES_PER_BEAT = 30;
 const SPARKLE_HALF_LIFE_SECONDS = 0.1;
 const FALL_MILLIS = 100;
 const TOP_GLOW = Colors.hsv(210, 1, 0.01);
