@@ -8,6 +8,8 @@ import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 import * as Visualizations from "./portable/Visualizations";
 
+import { SignalsHelper } from "./portable/visualizations/util/SignalsHelper";
+
 import BeatController from "./portable/base/BeatController";
 
 import { bracket, MovingAverageHelper, valueOrDefault } from "./util/Utils";
@@ -291,9 +293,11 @@ export default class VisualizationRunner {
       dialNumber: 7,
       initialValue: attrs.controllerState.dialValues[6]
     });
+    const signalsHelper = new SignalsHelper(attrs.audioSource);
     const visualizationConfig: Visualization.Config = {
       scene: attrs.scene,
       audioSource: attrs.audioSource,
+      signalsHelper,
       setExtraDisplay: attrs.setVisualizerExtraDisplay,
       createTimeSeries: this.timeSeriesHelper.createTimeSeries,
       createButtonControl: controllerStateHelper.createButtonControl,
@@ -326,8 +330,6 @@ export default class VisualizationRunner {
     if (this.lastRenderTime === 0) {
       this.lastRenderTime = startTime - 1000 / 60;
     }
-
-
 
     // collect state
     const elapsedSeconds = (startTime - this.lastRenderTime) / 1000;

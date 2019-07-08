@@ -47,7 +47,7 @@ class SparklesAndFlashesVisualization extends Visualization.default {
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.signals = new SignalsHelper(config.audioSource);
+    this.signals = config.signalsHelper;
 
     this.ledAddresses = [];
     config.scene.leds.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));

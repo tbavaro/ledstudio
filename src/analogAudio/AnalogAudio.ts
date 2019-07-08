@@ -67,7 +67,7 @@ export default class AnalogAudio {
 
             const gain = audioContext.createGain();
             gain.channelCount = 1;
-            gain.gain.value = 4;
+            // gain.gain.value = 4;
             splitter.connect(gain, 0, 0);
 
             this.setCurrentAudioSource(audioContext, gain);

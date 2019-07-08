@@ -43,7 +43,7 @@ class SpreadShootersAudioVisualization extends Visualization.default {
         this.ezTS = config.createEasyTimeSeriesSet();
         this.reverseLedInfo = reverseLedInfo(config.scene.leds);
         this.reverseLedInfo.forEach( x=> x);
-        this.signals = new SignalsHelper(config.audioSource);
+        this.signals = config.signalsHelper;
     }
 
     public render(context: Visualization.FrameContext): void {

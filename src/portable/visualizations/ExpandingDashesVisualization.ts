@@ -27,7 +27,7 @@ class ExpandingDashesVisualization extends Visualization.default {
         this.wingDashPairRatioes = [0.66, 0.34, 0.34, 0.66];
 
         this.ezTimeseries = config.createEasyTimeSeriesSet();
-        this.signals = new SignalsHelper(config.audioSource);
+        this.signals = config.signalsHelper;
     }
 
     public render(context: Visualization.FrameContext): void {

@@ -1,5 +1,7 @@
 import Scene from "../../scenes/Scene";
 
+import { SignalsHelper } from "../visualizations/util/SignalsHelper";
+
 import BeatController from "./BeatController";
 
 import ColorRow from "./ColorRow";
@@ -41,6 +43,7 @@ export interface DialControl {
 export interface Config {
   readonly scene: Scene;
   readonly audioSource: AudioNode;
+  readonly signalsHelper: SignalsHelper;
   setExtraDisplay: (element: HTMLElement) => void;
 
   createTimeSeries: (attrs?: {
