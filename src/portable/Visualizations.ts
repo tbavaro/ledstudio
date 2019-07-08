@@ -32,6 +32,7 @@ import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization"
 import TestKeyVisualization from "./visualizations/TestKeyVisualization";
 import TestLevelsVisualization from "./visualizations/TestLevelsVisualization";
 import TestPlaylistVisualization from "./visualizations/TestPlaylistVisualization";
+import TestSignalsVisualization from "./visualizations/TestSignalsVisualization";
 import TestStripAddressVisualization from "./visualizations/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesDataVisualization";
 import TestVisualizerExtraDisplayVisualization from "./visualizations/TestVisualizerExtraDisplayVisualization";
@@ -69,6 +70,7 @@ const factories: Visualization.Factory[] = [
   TestKeyFadeVisualization,
   TestLevelsVisualization,
   TestPlaylistVisualization,
+  TestSignalsVisualization,
   TestStripAddressVisualization,
   TestTimeseriesDataVisualization,
   TestVisualizerExtraDisplayVisualization

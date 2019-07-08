@@ -8,7 +8,7 @@ import { Signals } from "./util/SignalsHelper";
 // import WindowStats from "../../util/WindowStats";
 // import TimeSeriesBandHelper from "./util/TimeSeriesBandHelper";
 
-const NAME = "test:levels";
+const NAME = "testLevels";
 
 class LevelsHelper {
   private readonly v: FancyValue = new FancyValue();
