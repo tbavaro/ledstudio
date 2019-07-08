@@ -5,10 +5,14 @@ import * as Visualization from "../base/Visualization";
 
 const NAME = "beatRain";
 
-const SPARKLES_PER_BEAT = 30;
-const SPARKLE_HALF_LIFE_SECONDS = 0.1;
-const FALL_MILLIS = 100;
+const CONSTANT_SPARKLE_RATE = 0;
+const MIN_SPARKLES_PER_BEAT = 5;
+const MAX_SPARKLES_PER_BEAT = 40;
+const SPARKLE_HALF_LIFE_SECONDS = 0.05;
+const FALL_MILLIS = 70;
 const TOP_GLOW = Colors.hsv(210, 1, 0.01);
+
+const DEREZ = 0.8;
 
 interface LedAddress {
   rowIndex: number;
@@ -60,14 +64,17 @@ class DropHelper {
   }
 }
 
-class MyVisualization extends Visualization.default {
+class PureVisualization extends Visualization.default {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
+  private readonly ts: Visualization.EasyTimeSeriesValueSetters;
 
   constructor(config: Visualization.Config) {
     super(config);
     this.dropHelper = new DropHelper(config.scene.leds);
     this.sparkles = new Set();
+
+    this.ts = config.createEasyTimeSeriesSet();
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -91,8 +98,12 @@ class MyVisualization extends Visualization.default {
     deadSparkles.forEach(sparkle => this.sparkles.delete(sparkle));
 
     // new sparkles
-    const numLeds = (signals.isNewBeat ? SPARKLES_PER_BEAT : 0);
-    for (let i = 0; i < numLeds; ++i) {
+    const numSparkles = (
+      signals.isNewBeat
+        ? signals.lowLevel * (MAX_SPARKLES_PER_BEAT - MIN_SPARKLES_PER_BEAT) + MIN_SPARKLES_PER_BEAT
+        : CONSTANT_SPARKLE_RATE * elapsedSeconds
+    );
+    for (let i = 0; i < numSparkles; ++i) {
       const sparkle: Sparkle = {
         address: { rowIndex: 0, index: Math.floor(Math.random() * this.ledRows.get(0).length) },
         color: Colors.hsv(200 + Math.random() * 45, Math.pow(Math.random(), 0.2), Math.random() * 0.5 + 0.5),
@@ -100,6 +111,7 @@ class MyVisualization extends Visualization.default {
       };
       this.sparkles.add(sparkle);
     }
+    this.ts.red.value = numSparkles / MAX_SPARKLES_PER_BEAT;
 
     // render
 
@@ -113,6 +125,12 @@ class MyVisualization extends Visualization.default {
 
     const topRow = this.ledRows.get(0);
     topRow.forEach((color, i) => topRow.set(i, Colors.add(color, TOP_GLOW)));
+  }
+}
+
+class MyVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new PureVisualization(config), DEREZ);
   }
 }
 
