@@ -16,13 +16,12 @@ class ExpandingDashesVisualization extends Visualization.default {
     private readonly ezTS: Visualization.EasyTimeSeriesValueSetters;
     private readonly signals: Signals;
     private readonly colorOffset: number;
-    private lastPaletteSwap = Date.now();
+    private lastPaletteSwap: number;
 
     constructor(config: Visualization.Config) {
         super(config);
-        this.regularPalette = randomPalette(8);
-        this.dropPalette = randomPalette(4);
-        this.colorOffset = Math.floor(Math.random() * this.regularPalette.length);
+        this.swapPalettes();
+        this.colorOffset = this.colorOffset = Math.floor(Math.random() * 3 + 1);
         this.wingDashPaires = [0, 0, 0, 0].map(_ => Math.round(Math.random() * 3) + 3);
         this.wingDashPairRatioes = [0.66, 0.34, 0.34, 0.66];
 
@@ -55,16 +54,16 @@ class ExpandingDashesVisualization extends Visualization.default {
                 const ledsInFirstDash = Math.round(ledsPerDashPair * this.wingDashPairRatioes[rowIdx]);
                 const firstDashLevel = fudgingFunction(rowIdx % 2 === 0 ? this.signals.lowLevel : this.signals.highLevel);
                 const firstDashColorIdx = !inDropAfterGlow ? rowIdx+i + this.colorOffset : 0;
-                const firstDashLeftColor = this.randomColor(firstDashColorIdx, inDropAfterGlow, true);
-                const firstDashRightColor = this.randomColor(firstDashColorIdx, inDropAfterGlow, false);
+                const firstDashLeftColor = this.randomColor(firstDashColorIdx, inDropAfterGlow);
+                const firstDashRightColor = this.randomColor(firstDashColorIdx, inDropAfterGlow);
                 this.renderDash(firstDashStart, ledsInFirstDash, firstDashLevel, firstDashLeftColor, firstDashRightColor, row);
 
                 const secondDashStart = firstDashStart + ledsInFirstDash;
                 const ledsInSecondDash = ledsPerDashPair - ledsInFirstDash;
                 const secondDashLevel = fudgingFunction(rowIdx % 2 === 1 ? this.signals.lowLevel : this.signals.highLevel);
-                const secondDashColorIdx = !inDropAfterGlow ? rowIdx + i*12997217 + this.colorOffset : 2;
-                const secondDashLeftColor = this.randomColor(secondDashColorIdx, inDropAfterGlow, true);
-                const secondDashRightColor = this.randomColor(secondDashColorIdx, inDropAfterGlow, false);
+                const secondDashColorIdx = !inDropAfterGlow ? rowIdx + i*12997217 + this.colorOffset : 1;
+                const secondDashLeftColor = this.randomColor(secondDashColorIdx, inDropAfterGlow);
+                const secondDashRightColor = this.randomColor(secondDashColorIdx, inDropAfterGlow);
                 this.renderDash(secondDashStart, ledsInSecondDash, secondDashLevel, secondDashLeftColor, secondDashRightColor, row);
             }
         });
@@ -82,17 +81,17 @@ class ExpandingDashesVisualization extends Visualization.default {
         }
     }
 
-    private randomColor(key: number, inDropAfterGlow: boolean, isLeft: boolean) {
+    private randomColor(key: number, inDropAfterGlow: boolean) {
         if (!inDropAfterGlow) {
             return this.regularPalette[key % this.regularPalette.length];
         } else {
-            return this.dropPalette[(key + (isLeft ? 0 : 1)) % this.dropPalette.length];
+            return this.dropPalette[key];
         }
     }
 
     private swapPalettes() {
         this.regularPalette = randomPalette(8);
-        this.dropPalette = randomPalette(4);
+        this.dropPalette = [this.regularPalette[2], this.regularPalette[7]];
         this.lastPaletteSwap = Date.now();
     }
 }
