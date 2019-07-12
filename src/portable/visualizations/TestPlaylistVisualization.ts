@@ -1,22 +1,26 @@
 import * as Visualization from "../base/Visualization";
 import PlaylistVisualization from "./util/PlaylistVisualization";
 
+import ExpandingDashesVisualization from "./ExpandingDashesVisualization";
 import PatternRainbowVisualization from "./PatternRainbowVisualization";
-import PatternSparklesVisualization from "./PatternSparklesVisualization";
-import SplotchesVisualization from "./SplotchesVisualization";
-import TestTimeseriesDataVisualization from "./TestTimeseriesDataVisualization";
+// import PatternSparklesVisualization from "./PatternSparklesVisualization";
+import PatternZoomVisualization from "./PatternZoomVisualization";
+// import SplotchesVisualization from "./SplotchesVisualization";
+// import TestTimeseriesDataVisualization from "./TestTimeseriesDataVisualization";
 
 const NAME = "testPlaylist";
 
 class TestPlaylistVisualization extends PlaylistVisualization {
   constructor(config: Visualization.Config) {
     super(config, {
-      autoAdvanceMillis: 5000,
+      autoAdvanceMillis: 20000,
       visualizations: [
-        PatternSparklesVisualization,
+        // PatternSparklesVisualization,
         PatternRainbowVisualization,
-        TestTimeseriesDataVisualization,
-        SplotchesVisualization
+        PatternZoomVisualization,
+        ExpandingDashesVisualization,
+        // TestTimeseriesDataVisualization,
+        // SplotchesVisualization
       ]
     });
   }

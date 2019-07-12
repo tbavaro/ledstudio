@@ -3,7 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 const NAME = "pattern:wingFlap";
 
-const SPEED = 3 / 1000;
+// const SPEED = 3 / 1000;
 const VERTICAL_SHARPNESS = 7;
 const FLAPPINESS = 2;
 const TIP_DISTANCE = 0.65; // 0 to 1
@@ -12,7 +12,7 @@ const TIP_FADE = 4;
 const DEREZ = 0.4;
 
 // derived
-const PERIOD = Math.PI * 2 / SPEED;
+// const PERIOD = Math.PI * 2 / SPEED;
 
 // TODO improve flap motion
 // TODO see if we can smooth it out by not perfectly following ribs
@@ -27,9 +27,12 @@ class PureWingFlapVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedMillis } = context;
+    const { elapsedSeconds, beatController } = context;
 
-    this.phase = (this.phase + elapsedMillis * SPEED) % PERIOD;
+    beatController.hz();
+    // const period = 1 / beatController.hz();
+    // const speed = Math.PI * period;
+    this.phase = (this.phase + elapsedSeconds * Math.PI * beatController.hz() / 2);
 
     const positionNormalized = Math.pow(Math.sin(this.phase), FLAPPINESS);
     const position = positionNormalized * (this.ledRows.length - 1);

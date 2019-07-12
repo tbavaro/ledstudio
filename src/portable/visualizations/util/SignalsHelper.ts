@@ -11,7 +11,7 @@ export class LevelsHelper {
     private readonly v: FancyValue = new FancyValue();
     private readonly minThreshold: number;
     private readonly maxThreshold: number;
-    public static readonly HALF_LIFE_MIN = 0.125;
+    public static readonly HALF_LIFE_MIN = 0.5;
     public halfLife: number;
     public readonly vEMA = new EMAHelper(0.0023); // about 20s
 
@@ -21,7 +21,7 @@ export class LevelsHelper {
     }) {
         this.minThreshold = valueOrDefault(attrs.minThreshold, 0);
         this.maxThreshold = valueOrDefault(attrs.maxThreshold, 1);
-        this.halfLife = 0.125;
+        this.halfLife = LevelsHelper.HALF_LIFE_MIN;
     }
 
     public processValue(newValue: number, elapsedMillis: number) {
@@ -45,7 +45,7 @@ export class LevelsHelper {
 export interface Signals {
     beatsWithBeats: CircularQueue<number>;
     audioValues: AudioValues;
-    
+
     readonly lowLevel: number;
     readonly highLevel: number;
 

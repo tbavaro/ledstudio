@@ -28,7 +28,8 @@ class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
     const { elapsedMillis } = context;
 
     const ludicrousSpeed = this.ludicrousSpeedButton.value;
-    const speed = this.speedDial.value * (ludicrousSpeed ? 5 : 1);
+    let speed = this.speedDial.value * (ludicrousSpeed ? 5 : 1);
+    speed = 0.15; // dials can't be shared across viz, so this is a hack to allow more than one viz to run simultaneously
     this.offset = (this.offset + speed * elapsedMillis) % 360.0;
 
     const step = 360 / this.width;

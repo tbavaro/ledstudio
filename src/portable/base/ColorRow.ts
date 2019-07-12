@@ -49,3 +49,4 @@ export default class ColorRow extends FixedArray<Colors.Color> {
     }
   }
 }
+

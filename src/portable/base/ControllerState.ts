@@ -20,7 +20,7 @@ export default class ControllerState {
     this.releasesSinceLastFrame = [];
 
     // default the last dial to 1 since it's used as global brightness
-    this.dialValues[7] = 1;
+    this.dialValues[7] = 0.333333;
 
     this.reset();
   }

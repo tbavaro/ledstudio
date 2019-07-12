@@ -8,7 +8,9 @@ const NAME = "sparklesAndFlashes";
 
 const MIN_SPARKLES_PER_SECOND = 0;
 const MAX_SPARKLES_PER_SECOND = 5000;
-const PIXEL_HALF_LIFE_SECONDS = 0.2;
+const DANCE_HALF_LIFE_SECONDS = 0.2;
+const NOT_DANCE_HALF_LIFE_SECONDS = 1.0;
+
 
 class LinearDecayingValue {
   public value: number;
@@ -61,13 +63,17 @@ class SparklesAndFlashesVisualization extends Visualization.default {
     const { elapsedSeconds } = context;
     this.flashBrightness.decay(elapsedSeconds);
 
-    const sparkleRateNormalized = bracket01(Math.pow(this.signals.audioValues.highRMS * 2, 3));
-    this.flashBrightness.bump(bracket01(Math.pow(this.signals.audioValues.lowRMS * 2.5, 3) * 1.25 - 0.25));
+    const sparkleRateNormalized = 0; // bracket01(Math.pow(this.signals.audioValues.highRMSZScore20 / 4, 3));
+    this.flashBrightness.bump(bracket01(Math.pow(this.signals.audioValues.lowRMSZScore20 / 2, 5) * 1.25 - 0.25));
+    // const sparkleRateNormalized = bracket01(Math.pow(this.signals.audioValues.highRMS * 2.5, 3));
+    // this.flashBrightness.bump(bracket01(Math.pow(this.signals.audioValues.lowRMS * 3, 3) * 1.25 - 0.25));
 
     const sparkleRate = sparkleRateNormalized * (MAX_SPARKLES_PER_SECOND - MIN_SPARKLES_PER_SECOND) + MIN_SPARKLES_PER_SECOND;
 
     // fade all pixels
-    const multiplier = Math.pow(0.5, elapsedSeconds / PIXEL_HALF_LIFE_SECONDS);
+    const halfLife = this.signals.beatsSinceDrop < 16 || this.signals.soundsLikeDance
+      ? DANCE_HALF_LIFE_SECONDS : NOT_DANCE_HALF_LIFE_SECONDS;
+    const multiplier = Math.pow(0.5, elapsedSeconds / halfLife);
     this.ledRows.forEach(row => row.multiplyAll(multiplier));
 
     // flash

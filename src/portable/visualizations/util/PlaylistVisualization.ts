@@ -6,11 +6,15 @@ function branchAudioNode(audioNode: AudioNode) {
   return newNode;
 }
 
+const TRANSITION_TIME_MS = 10000;
+
 export default class PlaylistVisualization extends Visualization.default {
   private readonly visualizations: Visualization.Factory[];
+  private lastVisualization: Visualization.default | null = null;
   private currentVisualization: Visualization.default;
   private currentVisualizationIndex: number;
   private currentBranchedAudioNode: AudioNode;
+  private timeAtSwitch: number;
   private millisUntilSwitch: number;
   private button: Visualization.ButtonControl;
   private readonly autoAdvanceMillis: number;
@@ -69,7 +73,9 @@ export default class PlaylistVisualization extends Visualization.default {
     };
 
     const vis = factory.create(newConfig);
+    this.lastVisualization = this.currentVisualization;
     this.currentVisualization = vis;
+    this.timeAtSwitch = Date.now();
     this.millisUntilSwitch = this.autoAdvanceMillis;
 
     console.log("switched to", vis);
@@ -88,8 +94,30 @@ export default class PlaylistVisualization extends Visualization.default {
       this.millisUntilSwitch -= leftoverMillis;
     }
 
+    const now = Date.now();
+    if (now - this.timeAtSwitch > TRANSITION_TIME_MS) {
+      this.lastVisualization = null;
+    }
+
     const vis = this.currentVisualization;
     vis.render(context);
-    vis.ledRows.copy(this.ledRows);
+    vis.ledRows.forEach((row, idx) => row.copy(this.ledRows.get(idx)));
+
+    if (this.lastVisualization != null) {
+      this.lastVisualization.render(context);
+      const alpha = (now - this.timeAtSwitch) / TRANSITION_TIME_MS;
+      for (let rowIdx = 0; rowIdx < this.ledRows.length; ++rowIdx) {
+        const sourceRow = this.lastVisualization.ledRows.get(rowIdx);
+        const destRow = this.ledRows.get(rowIdx);
+        for (let ledIdx = 0; ledIdx < sourceRow.length; ++ledIdx) {
+          // tslint:disable-next-line:no-bitwise
+          const hash = (((rowIdx * 401057)| (ledIdx * 801571)) % 1000) / 1000.0;
+          const color = sourceRow.get(ledIdx);
+          if (alpha < hash) {
+            destRow.set(ledIdx, color);
+          }
+        }
+      }
+    }
   }
 }

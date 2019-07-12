@@ -3,7 +3,6 @@ import * as Visualization from "../base/Visualization";
 
 const NAME = "pattern:zaps";
 
-const MILLIS_BETWEEN_ZAPS = 300;
 const DECAY_RATE = 0.005; // per ms
 
 class PatternZapsVisualization extends Visualization.default {
@@ -57,7 +56,7 @@ class PatternZapsVisualization extends Visualization.default {
   }
 
   public render(context: Visualization.FrameContext): void {
-    const { elapsedMillis } = context;
+    const { elapsedMillis, beatController } = context;
 
     // decay
     const decayAmount = elapsedMillis * DECAY_RATE;
@@ -67,9 +66,10 @@ class PatternZapsVisualization extends Visualization.default {
 
     // do new zaps if needed
     this.phase += elapsedMillis;
-    while (this.phase > MILLIS_BETWEEN_ZAPS) {
+    const millisBetweenZaps = 1 / beatController.hz() * 1000;
+    while (this.phase > millisBetweenZaps) {
       this.doZap();
-      this.phase -= MILLIS_BETWEEN_ZAPS;
+      this.phase -= millisBetweenZaps;
     }
 
     // render
