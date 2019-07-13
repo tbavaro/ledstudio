@@ -11,7 +11,7 @@ interface Info {
     time: number;
     rib: number;
     brightness: number;
-    hue: number;
+    color: number;
     speed: number;
 }
 
@@ -27,7 +27,6 @@ interface SparkleInfo {
 }
 
 const BASE_SHOOTER_PER_S = 4.0;
-const SHOOTER_DURATION_MS = 1000;
 
 class SpreadShootersAudioVisualization extends Visualization.default {
     private info = new Array<Info>();
@@ -52,7 +51,7 @@ class SpreadShootersAudioVisualization extends Visualization.default {
         const { elapsedMillis } = context;
 
         const now = Date.now();
-        if (false && now - this.lastPaletteSwap > 30000 && this.signals.soundsLikeStrongBeat) {
+        if (now - this.lastPaletteSwap > 30000 && this.signals.soundsLikeStrongBeat) {
             this.swapPalettes();
         }
 
@@ -65,9 +64,10 @@ class SpreadShootersAudioVisualization extends Visualization.default {
 
         if (this.signals.beatsSinceDrop < 16) {
             if (this.signals.soundsLikeNewBeat) {
-                const hue = this.palette[this.signals.beatsSinceDrop % this.palette.length];
+                const color = this.randomColor();
                 for (let i = 0; i < this.reverseLedInfo.length; ++i) {
-                    this.info.push({time: now, rib: i, brightness: 1, hue: hue, speed: 1000});
+                    const speed = i % 2 === 1 ? 2000 : 1000;
+                    this.info.push({time: now, rib: i, brightness: 1, color, speed});
                 }
             }
         } else {
@@ -76,7 +76,8 @@ class SpreadShootersAudioVisualization extends Visualization.default {
             const shooters = volumeAdjustment * (elapsedMillis / 1000 * BASE_SHOOTER_PER_S);
             for (let i = 0 ; i < shooters; ++i) {
                 const rib = Math.floor(Math.random() * this.reverseLedInfo.length);
-                this.info.push({time: now, rib, brightness, hue: this.randomColor(), speed: SHOOTER_DURATION_MS});
+                const speed = rib % 2 === 1 ? 2000 : 1000;
+                this.info.push({time: now, rib, brightness, color: this.randomColor(), speed});
             }
         }
 
@@ -91,8 +92,8 @@ class SpreadShootersAudioVisualization extends Visualization.default {
 
             let brightness = kt.brightness;
             for (let i = ribIdx; i >= 0 && brightness > 0; --i) {
-                const c = Colors.hsv(kt.hue, 1, brightness);
-                brightness -= 3 / rib.length;
+                const c = Colors.multiply(kt.color, brightness);
+                brightness -= 3 / 25;
                 if (i < rib.length) {
                     const { rowIdx, idx } = rib[i];
                     this.ledRows.get(rowIdx).add(idx, c);
