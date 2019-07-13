@@ -3,6 +3,7 @@ import * as Colors from "../base/Colors";
 import LedInfo from "../base/LedInfo";
 import * as Visualization from "../base/Visualization";
 import { Signals } from "./util/SignalsHelper";
+import { randomPalette } from "./util/Utils";
 
 const NAME = "spreadShootersAudioVisualization";
 
@@ -11,6 +12,7 @@ interface Info {
     rib: number;
     brightness: number;
     hue: number;
+    speed: number;
 }
 
 interface LedRowInfo {
@@ -24,11 +26,7 @@ interface SparkleInfo {
     idx: number;
 }
 
-function randomHue() {
-    return Math.floor(Math.random() * 360);
-}
-
-const BASE_SHOOTER_PER_S = 0.5;
+const BASE_SHOOTER_PER_S = 4.0;
 const SHOOTER_DURATION_MS = 1000;
 
 class SpreadShootersAudioVisualization extends Visualization.default {
@@ -37,6 +35,9 @@ class SpreadShootersAudioVisualization extends Visualization.default {
     private ezTS: Visualization.EasyTimeSeriesValueSetters;
     private readonly reverseLedInfo: LedRowInfo[][];
     private signals: Signals;
+    private palette: number[];
+    private lastPaletteSwap: number;
+
 
     constructor(config: Visualization.Config) {
         super(config);
@@ -44,14 +45,19 @@ class SpreadShootersAudioVisualization extends Visualization.default {
         this.reverseLedInfo = reverseLedInfo(config.scene.leds);
         this.reverseLedInfo.forEach( x=> x);
         this.signals = config.signals;
+        this.swapPalettes();
     }
 
     public render(context: Visualization.FrameContext): void {
         const { elapsedMillis } = context;
 
         const now = Date.now();
+        if (false && now - this.lastPaletteSwap > 30000 && this.signals.soundsLikeStrongBeat) {
+            this.swapPalettes();
+        }
 
-        this.info = this.info.filter(kt => now - kt.time < SHOOTER_DURATION_MS*1.5);
+
+        this.info = this.info.filter(kt => now - kt.time < kt.speed*1.5);
 
         this.ezTS.red.value = this.signals.audioValues.lowRMSZScore20 / 4;
         this.ezTS.green.value = this.signals.lowLevel;
@@ -59,18 +65,18 @@ class SpreadShootersAudioVisualization extends Visualization.default {
 
         if (this.signals.beatsSinceDrop < 16) {
             if (this.signals.soundsLikeNewBeat) {
-                const hue = randomHue();
+                const hue = this.palette[this.signals.beatsSinceDrop % this.palette.length];
                 for (let i = 0; i < this.reverseLedInfo.length; ++i) {
-                    this.info.push({time: now, rib: i, brightness: 1, hue: hue});
+                    this.info.push({time: now, rib: i, brightness: 1, hue: hue, speed: 1000});
                 }
             }
         } else {
             const brightness = bracket01(this.signals.audioValues.unfilteredRMS / 0.4);
             const volumeAdjustment = bracket01(this.signals.audioValues.unfilteredRMS / 0.2);
-            const shooter = 0.0025 * Math.random() < volumeAdjustment * elapsedMillis / 1000 * BASE_SHOOTER_PER_S;
-            if (shooter) {
+            const shooters = volumeAdjustment * (elapsedMillis / 1000 * BASE_SHOOTER_PER_S);
+            for (let i = 0 ; i < shooters; ++i) {
                 const rib = Math.floor(Math.random() * this.reverseLedInfo.length);
-                this.info.push({time: now, rib, brightness, hue: randomHue()});
+                this.info.push({time: now, rib, brightness, hue: this.randomColor(), speed: SHOOTER_DURATION_MS});
             }
         }
 
@@ -81,7 +87,7 @@ class SpreadShootersAudioVisualization extends Visualization.default {
             const elapsed = now - kt.time;
 
             const rib = this.reverseLedInfo[kt.rib];
-            const ribIdx = Math.round((elapsed / SHOOTER_DURATION_MS) * (rib.length));
+            const ribIdx = Math.round((elapsed / kt.speed) * (rib.length));
 
             let brightness = kt.brightness;
             for (let i = ribIdx; i >= 0 && brightness > 0; --i) {
@@ -106,10 +112,19 @@ class SpreadShootersAudioVisualization extends Visualization.default {
             });
         });
         for (const si of this.sparkles) {
-            const sparkleColor = Colors.hsv(randomHue(), Math.random()*0.25, si.value);
+            const sparkleColor = Colors.hsv(1, Math.random()*0.25, si.value);
             this.ledRows.get(si.row).add(si.idx, sparkleColor);
             si.value += Math.sin(now / 20) * 0.15 - 0.02;
         }
+    }
+
+    private swapPalettes() {
+        this.palette = randomPalette(8);
+        this.lastPaletteSwap = Date.now();
+    }
+
+    private randomColor() {
+        return this.palette[Math.floor(Math.random() * this.palette.length)];
     }
 }
 

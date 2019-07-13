@@ -4,6 +4,8 @@ import * as Visualization from "../base/Visualization";
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
 import { bracket01 } from "../../util/Utils";
+import { Signals } from "./util/SignalsHelper";
+import { randomPalette } from "./util/Utils";
 
 const NAME = "splotches";
 
@@ -12,8 +14,23 @@ const MAX_RADIUS = 40;
 
 class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
   private lastFrameBeatsCount: number | undefined;
+  private palette: number[];
+  private lastPaletteSwap: number;
+  private signals: Signals;
+
+  constructor(config: Visualization.Config) {
+    super(config);
+    this.swapPalettes();
+    this.signals = config.signals;
+  }
 
   protected renderToCanvas(context: Visualization.FrameContext) {
+
+    if (Date.now() - this.lastPaletteSwap > 30000 && this.signals.soundsLikeStrongBeat) {
+      this.swapPalettes();
+    }
+
+
     const currentBeatsCount = Math.floor(context.beatController.beatNumber());
     const newWholeBeatsSinceLastFrame = Math.max(0, currentBeatsCount - (this.lastFrameBeatsCount || currentBeatsCount));
     this.lastFrameBeatsCount = currentBeatsCount;
@@ -31,7 +48,7 @@ class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
     while (numDots >= 1) {
       const p = this.randomLedPixelPosition();
       const radius = Math.random() * (MAX_RADIUS - MIN_RADIUS) + MIN_RADIUS;
-      const color = Colors.hsv(Math.random() * 360, 1, 1);
+      const color = this.randomColor();
 
       // draw it
       ctx.fillStyle = Colors.cssColor(color);
@@ -42,6 +59,15 @@ class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
 
       numDots -= 1;
     }
+  }
+
+  private randomColor() {
+    return this.palette[Math.floor(Math.random() * (this.palette.length - 2)) + 2];
+  }
+
+  private swapPalettes() {
+    this.palette = randomPalette(6);
+    this.lastPaletteSwap = Date.now();
   }
 }
 

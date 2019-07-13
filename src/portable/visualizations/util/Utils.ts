@@ -32,6 +32,7 @@ export function randomPalette(size: number) {
         "cb-YlOrRd",
     ];
     const scheme = schemes[schemeIdx];
+    console.log(scheme);
     schemeIdx = (schemeIdx + 1) % schemes.length;
     return (palette(scheme, size) as string[]).map(Colors.hex2Color);
 }
