@@ -150,3 +150,12 @@ function reverseLedInfo(ledInfos: LedInfo[][]) {
 
 const factory = new Visualization.Factory(NAME, SpreadShootersAudioVisualization);
 export default factory;
+
+
+class DerezSpreadShootersAudioVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new SpreadShootersAudioVisualization(config), 0.82);
+  }
+}
+
+export const DerezSpreadShootersAudioVisualizationFactory = new Visualization.Factory("Derezed Shooters", DerezSpreadShootersAudioVisualization);

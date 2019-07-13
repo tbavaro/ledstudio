@@ -45,3 +45,11 @@ class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
 
 const factory = new Visualization.Factory(NAME, PatternZoomVisualization);
 export default factory;
+
+class DerezPatternZoomVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new PatternZoomVisualization(config), 0.9);
+  }
+}
+
+export const DerezPatternZoomVisualizationFactory = new Visualization.Factory("Derezed Zoom", DerezPatternZoomVisualization);

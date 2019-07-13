@@ -34,3 +34,11 @@ class PatternClockVisualization extends AbstractVoronoiMapperVisualization {
 
 const factory = new Visualization.Factory(NAME, PatternClockVisualization);
 export default factory;
+
+class DerezPatternClockVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new PatternClockVisualization(config), 0.9);
+  }
+}
+
+export const DerezPatternClockVisualizationFactory  = new Visualization.Factory("Derezed Clock", DerezPatternClockVisualization);

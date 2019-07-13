@@ -6,28 +6,31 @@ function branchAudioNode(audioNode: AudioNode) {
   return newNode;
 }
 
-const TRANSITION_TIME_MS = 10000;
+const BASE_TRANSITION_TIME_MS = 5000;
 
-export default class PlaylistVisualization extends Visualization.default {
-  private readonly visualizations: Visualization.Factory[];
+export interface PlaylistEntry {
+  name: string;
+  factory: Visualization.Factory;
+  duration: number;
+}
+
+export class PlaylistVisualization extends Visualization.default {
+  private readonly entries: PlaylistEntry[];
   private lastVisualization: Visualization.default | null = null;
   private currentVisualization: Visualization.default;
   private currentVisualizationIndex: number;
   private currentBranchedAudioNode: AudioNode;
   private timeAtSwitch: number;
-  private millisUntilSwitch: number;
+  private secondsUntilSwitch: number;
   private button: Visualization.ButtonControl;
-  private readonly autoAdvanceMillis: number;
 
   constructor(config: Visualization.Config, attrs: {
-    autoAdvanceMillis: number;
-    visualizations: Visualization.Factory[];
+    visualizations: PlaylistEntry[];
   }) {
     super(config);
-    this.autoAdvanceMillis = attrs.autoAdvanceMillis;
-    this.visualizations = attrs.visualizations;
+    this.entries = attrs.visualizations;
 
-    if (this.visualizations.length < 1) {
+    if (this.entries.length < 1) {
       throw new Error("must have at least 1 visualization");
     }
 
@@ -36,7 +39,7 @@ export default class PlaylistVisualization extends Visualization.default {
 
   private switchToVisualization(n: number) {
     this.currentVisualizationIndex = n;
-    const factory = this.visualizations[n];
+    const entry = this.entries[n];
 
     if (this.currentBranchedAudioNode !== undefined) {
       this.currentBranchedAudioNode.disconnect();
@@ -50,7 +53,7 @@ export default class PlaylistVisualization extends Visualization.default {
 
     const element = document.createElement("div");
     const labelElement = document.createElement("div");
-    labelElement.innerText = factory.name;
+    labelElement.innerText = entry.name;
     labelElement.style.backgroundColor = "gray";
     labelElement.style.color = "white";
     labelElement.style.fontSize = "12px";
@@ -72,30 +75,28 @@ export default class PlaylistVisualization extends Visualization.default {
       audioSource: this.currentBranchedAudioNode
     };
 
-    const vis = factory.create(newConfig);
+    const vis = entry.factory.create(newConfig);
     this.lastVisualization = this.currentVisualization;
     this.currentVisualization = vis;
     this.timeAtSwitch = Date.now();
-    this.millisUntilSwitch = this.autoAdvanceMillis;
+    this.secondsUntilSwitch = entry.duration;
 
     console.log("switched to", vis);
   }
 
   private goToNextVisualization() {
-    this.switchToVisualization((this.currentVisualizationIndex + 1) % this.visualizations.length);
+    this.switchToVisualization((this.currentVisualizationIndex + 1) % this.entries.length);
   }
 
   public render(context: Visualization.FrameContext) {
-    this.millisUntilSwitch -= context.elapsedMillis;
-    const shouldSwitch = (this.millisUntilSwitch < 0 || this.button.pressedSinceLastFrame);
+    this.secondsUntilSwitch -= context.elapsedSeconds;
+    const shouldSwitch = (this.secondsUntilSwitch < 0 || this.button.pressedSinceLastFrame);
     if (shouldSwitch) {
-      const leftoverMillis = Math.max(0, Math.min(this.autoAdvanceMillis, -1 * this.millisUntilSwitch));
       this.goToNextVisualization();
-      this.millisUntilSwitch -= leftoverMillis;
     }
 
     const now = Date.now();
-    if (now - this.timeAtSwitch > TRANSITION_TIME_MS) {
+    if (now - this.timeAtSwitch > BASE_TRANSITION_TIME_MS) {
       this.lastVisualization = null;
     }
 
@@ -105,7 +106,7 @@ export default class PlaylistVisualization extends Visualization.default {
 
     if (this.lastVisualization != null) {
       this.lastVisualization.render(context);
-      const alpha = (now - this.timeAtSwitch) / TRANSITION_TIME_MS;
+      const alpha = (now - this.timeAtSwitch) / BASE_TRANSITION_TIME_MS;
       for (let rowIdx = 0; rowIdx < this.ledRows.length; ++rowIdx) {
         const sourceRow = this.lastVisualization.ledRows.get(rowIdx);
         const destRow = this.ledRows.get(rowIdx);

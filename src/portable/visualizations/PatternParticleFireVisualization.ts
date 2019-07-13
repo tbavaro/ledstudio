@@ -78,3 +78,11 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
 
 const factory = new Visualization.Factory(NAME, PatternParticleFireVisualization);
 export default factory;
+
+class DerezPatternParticleFireVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new PatternParticleFireVisualization(config), 0.9);
+  }
+}
+
+export const DerezPatternParticleFireVisualizationFactory = new Visualization.Factory(NAME, DerezPatternParticleFireVisualization);

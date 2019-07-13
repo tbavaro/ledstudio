@@ -1,6 +1,7 @@
 import * as Visualization from "./base/Visualization";
 
 import BeatRainVisualization from "./visualizations/BeatRainVisualization";
+import { BurrowPlaylist } from "./visualizations/BurrowPlaylistVisualization";
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
 import ExpandingDashesVisualization from "./visualizations/ExpandingDashesVisualization";
 import FourierTwinkleVisualization from "./visualizations/FourierTwinkleVisualization";
@@ -38,6 +39,7 @@ import TestTimeseriesDataVisualization from "./visualizations/TestTimeseriesData
 import TestVisualizerExtraDisplayVisualization from "./visualizations/TestVisualizerExtraDisplayVisualization";
 
 const factories: Visualization.Factory[] = [
+  BurrowPlaylist,
   GlowWaveVisualization,
   CenterSpreadVisualization,
   SparklesAndFlashesVisualization,

@@ -73,3 +73,11 @@ class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
 
 const factory = new Visualization.Factory(NAME, SplotchesVisualization);
 export default factory;
+
+class DerezSplotchesVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new SplotchesVisualization(config), 0.75);
+  }
+}
+
+export const DerezSplotchesVisualizationFactory  = new Visualization.Factory("Derezed Splotches", DerezSplotchesVisualization);

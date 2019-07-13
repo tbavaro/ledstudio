@@ -1,26 +1,19 @@
 import * as Visualization from "../base/Visualization";
-import PlaylistVisualization from "./util/PlaylistVisualization";
+import { PlaylistVisualization } from "./util/PlaylistVisualization";
 
-import ExpandingDashesVisualization from "./ExpandingDashesVisualization";
+import PatternMarqueeVisualization from "./PatternMarqueeVisualization";
 import PatternRainbowVisualization from "./PatternRainbowVisualization";
-// import PatternSparklesVisualization from "./PatternSparklesVisualization";
 import PatternZoomVisualization from "./PatternZoomVisualization";
-// import SplotchesVisualization from "./SplotchesVisualization";
-// import TestTimeseriesDataVisualization from "./TestTimeseriesDataVisualization";
 
 const NAME = "testPlaylist";
 
 class TestPlaylistVisualization extends PlaylistVisualization {
   constructor(config: Visualization.Config) {
     super(config, {
-      autoAdvanceMillis: 20000,
       visualizations: [
-        // PatternSparklesVisualization,
-        PatternRainbowVisualization,
-        PatternZoomVisualization,
-        ExpandingDashesVisualization,
-        // TestTimeseriesDataVisualization,
-        // SplotchesVisualization
+        {name: "Rainbow", factory: PatternRainbowVisualization, duration: 5},
+        {name: "Zoom", factory: PatternZoomVisualization, duration: 5},
+        {name: "Marquee", factory: PatternMarqueeVisualization, duration: 5},
       ]
     });
   }

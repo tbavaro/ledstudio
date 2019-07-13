@@ -37,3 +37,11 @@ class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
 
 const factory = new Visualization.Factory(NAME, PatternDotVisualization);
 export default factory;
+
+class DerezPatternDotVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new PatternDotVisualization(config), 0.9);
+  }
+}
+
+export const DerezPatternDotVisualizationFactory  = new Visualization.Factory("Derezed Dot", DerezPatternDotVisualization);

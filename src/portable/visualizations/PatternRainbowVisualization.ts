@@ -47,3 +47,11 @@ class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
 
 const factory = new Visualization.Factory(NAME, PatternRainbowVisualization);
 export default factory;
+
+class DerezPatternRainbowVisualization extends Visualization.DerezVisualization {
+  constructor(config: Visualization.Config) {
+    super(new PatternRainbowVisualization(config), 0.92);
+  }
+}
+
+export const DerezPatternRainbowVisualizationFactory  = new Visualization.Factory("Derezed Rainbow", DerezPatternRainbowVisualization);
