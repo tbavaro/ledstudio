@@ -25,11 +25,13 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
   private numParticlesToAddRemainder = 0;
   private readonly maxDistance: number;
   private readonly particles: UnorderedRecycledSet<Particle>;
+  private readonly baseHue: number;
 
   constructor(config: Visualization.Config) {
     super(config);
     this.particles = UnorderedRecycledSet.withObjectCreator(() => new Particle());
     this.maxDistance = Math.max(this.canvas.width, this.canvas.height) / 2 + MAX_RADIUS;
+    this.baseHue = Math.floor(Math.random() * 360);
   }
 
   protected renderToCanvas(context: Visualization.FrameContext) {
@@ -41,7 +43,7 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
       particle.speed = Math.random() * (PARTICLE_MAX_SPEED - PARTICLE_MIN_SPEED) + PARTICLE_MIN_SPEED;
       particle.radius = Math.random() * (MAX_RADIUS - MIN_RADIUS) + MIN_RADIUS;
       particle.angleRadians = Math.random() * Math.PI * 2;
-      particle.color = Colors.hsv(Math.pow(Math.random(), 2) * 60, 1, Math.random() * 0.3 + 0.7);
+      particle.color = Colors.hsv(Math.pow(Math.random(), 2) * 60 + this.baseHue, 1, Math.random() * 0.3 + 0.7);
       numParticlesToAdd -= 1;
     }
     this.numParticlesToAddRemainder = numParticlesToAdd;
