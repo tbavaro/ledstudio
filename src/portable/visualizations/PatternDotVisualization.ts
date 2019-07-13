@@ -4,14 +4,14 @@ import * as Visualization from "../base/Visualization";
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
 const NAME = "pattern:dot";
-const DEGREES_PER_SECOND = 180;
 const RADIUS = 40;
 
 class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
-    this.phase = (this.phase + DEGREES_PER_SECOND * context.elapsedSeconds) % 360;
+    const degreesPerSecond = 90 * context.beatController.hz();
+    this.phase = (this.phase + degreesPerSecond * context.elapsedSeconds) % 360;
     const phaseRadians = this.phase / 180 * Math.PI;
 
     const canvas = this.canvas;
