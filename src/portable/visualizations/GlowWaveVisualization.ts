@@ -13,7 +13,7 @@ const WAVE_SPACING = 18;
 const WAVE_DROPOFF = 0.7;
 const LED_DROPOFF = 0.2;
 const FADE_DROPOFF = 3.0;
-const DEREZ = 0.7;
+const DEREZ = 0.75;
 
 // full brightness requires at least this velocity
 const MAX_BRIGHTNESS_VELOCITY = 0.6;
@@ -50,7 +50,7 @@ class GlowWaveVisualization extends Visualization.default {
     const scene = config.scene;
     const middleRow = Math.floor(scene.leds.length / 2);
     this.fadeFactors = scene.leds.map((_, i) => Math.pow((1 - ROW_FADE_FACTOR), Math.abs(i - middleRow)));
-    this.nativeRows = scene.leds.map(_ => new ColorRow(NATIVE_WIDTH));
+    this.nativeRows = scene.leds.map(r => new ColorRow(r.length));
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -96,10 +96,14 @@ class GlowWaveVisualization extends Visualization.default {
     });
 
     this.nativeRows.forEach((row, i) => {
-      row.copyFancy(colors, { derezAmount: DEREZ, multiplyBy: this.fadeFactors[i] });
+      const widenedColors = new ColorRow(row.length);
+      for (let k = 0; k < widenedColors.length; ++k) {
+        widenedColors.set(k, colors.get(Math.floor(k / widenedColors.length * colors.length)));
+      }
+      row.copyFancy(widenedColors, { derezAmount: DEREZ, multiplyBy: this.fadeFactors[i] });
 
       const outputRow = this.ledRows.get(i);
-      row.copy(outputRow, Math.floor((outputRow.length - row.length) / 2));
+      row.copy(outputRow);
     });
   }
 }

@@ -36,6 +36,7 @@ class BurrowPlaylistVisualization extends PlaylistVisualization {
         {name: "Marquee", factory: PatternMarqueeVisualization, duration: 1*60},
         {name: "Splotches", factory: SplotchesVisualization, duration: 5*60},
         {name: "Derez Clock", factory: DerezPatternClockVisualizationFactory, duration: 1*60},
+        {name: "Expanding Dashes", factory: ExpandingDashesVisualization, duration: 7*60},
         {name: "Derez Fire", factory: DerezPatternParticleFireVisualizationFactory, duration: 3*60},
         {name: "Marquee", factory: PatternMarqueeVisualization, duration: 1*60},
         {name: "Zoom", factory: PatternZoomVisualization, duration: 4*60},

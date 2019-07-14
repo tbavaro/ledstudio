@@ -9,8 +9,8 @@ const NAME = "pattern:particleFire";
 
 const MIN_RADIUS = 10;
 const MAX_RADIUS = 30;
-const PARTICLES_PER_SECOND = 70;
-const PARTICLE_MIN_SPEED = 100;
+const PARTICLES_PER_SECOND = 35;
+const PARTICLE_MIN_SPEED = 50;
 const PARTICLE_MAX_SPEED = 300;
 
 class Particle {
@@ -51,7 +51,7 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
     // clear
     const canvas = this.canvas;
     const ctx = this.canvasContext;
-    ctx.fillStyle = Colors.cssColor(Colors.hsv(0, 1, 0.1));
+    ctx.fillStyle = Colors.cssColor(Colors.hsv(this.baseHue, 1, 0.1));
     ctx.globalCompositeOperation = "source-over";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
