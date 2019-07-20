@@ -9,9 +9,9 @@
     "midifile": "^2.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts-ts": "3.1.0",
+    "react-scripts-ts": "^3.1.0",
     "three": "^0.104.0",
-    "timidity": "^1.0.1"
+    "timidity": "^1.1.2"
   },
   "scripts": {
     "start": "react-scripts-ts start",
@@ -22,12 +22,12 @@
     "fcserver": "./fcserver/fcserver.sh"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.11",
-    "@types/node": "^11.13.8",
-    "@types/react": "^16.8.14",
+    "@types/jest": "^24.0.15",
+    "@types/node": "^11.13.18",
+    "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "@types/webmidi": "^2.0.3",
     "tsdevtools": "github:tbavaro/tsdevtools#dist",
-    "typescript": "^3.4.5"
+    "typescript": "^3.5.3"
   }
 }
