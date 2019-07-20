@@ -76,27 +76,10 @@ const factories: Visualization.Factory[] = [
   TestVisualizerExtraDisplayVisualization
 ];
 
-export type Name = string;
-
-export const defaultName: Name = "testStripAddress";
-
-const map = new Map<string, Visualization.Factory>();
+export const registry = new Map<string, Visualization.Factory>();
 factories.forEach(f => {
-  if (map.has(f.name)) {
+  if (registry.has(f.name)) {
     throw new Error(`duplicate visualization name: ${f.name}`);
   }
-  map.set(f.name, f);
+  registry.set(f.name, f);
 });
-
-export const names: ReadonlyArray<Name> = Array.from(map.keys());
-export function create(name: Name, config: Visualization.Config): Visualization.default {
-  const factory = map.get(name);
-  if (factory === undefined) {
-    throw new Error("unrecognized name");
-  }
-  return factory.create(config);
-}
-
-export function isValidName(name: Name): boolean {
-  return map.has(name);
-}

@@ -1,7 +1,5 @@
 import * as React from "react";
 
-import * as Visualizations from "./portable/Visualizations";
-
 import * as AnalogAudio from "./analogAudio/AnalogAudio";
 
 import { MidiEventEmitter } from "./piano/MidiEventListener";
@@ -18,7 +16,7 @@ export interface Actions {
   setMidiControllerInput: (newValue: WebMidi.MIDIInput | null) => void;
   setBeatControllerType: (newValue: BeatControllerType) => void;
   setSelectedSceneName: (newValue: string) => void;
-  setSelectedVisualizationName: (newValue: Visualizations.Name) => void;
+  setSelectedVisualizationName: (newValue: string) => void;
   setAnalogInputId: (newValue: string | null) => void;
 }
 
@@ -28,8 +26,8 @@ interface Props {
   actions: Actions;
   sceneNames: ReadonlyArray<string>;
   selectedSceneName: string;
-  visualizationNames: ReadonlyArray<Visualizations.Name>;
-  selectedVisualizationName: Visualizations.Name;
+  visualizationNames: ReadonlyArray<string>;
+  selectedVisualizationName: string;
   midiFilenames: string[];
   selectedMidiFilename: string;
   isMidiFileLoaded: boolean;
@@ -312,7 +310,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
   }
 
   private handleSetVisualizationName = (event: React.ChangeEvent<any>) => {
-    const name = event.target.value as Visualizations.Name;
+    const name = event.target.value as string;
     this.props.actions.setSelectedVisualizationName(name);
   }
 

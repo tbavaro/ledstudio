@@ -1,11 +1,10 @@
-import * as Visualizations from "../portable/Visualizations";
 import { BeatControllerType } from "../RightSidebar";
 
 const LOCAL_STORAGE_PREFIX = "simulatorSettings:";
 
 export interface Settings {
   sceneName: string;
-  visualizationName: Visualizations.Name;
+  visualizationName: string;
   analogAudioSourceId: string | null;
   midiInputId: string | null;
   midiControllerInputId: string | null;
