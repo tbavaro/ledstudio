@@ -184,19 +184,23 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
 
     return (
       <div className="RightSidebar-dropDownOption">
-        <span>{attrs.label}: </span>
-        <select
-          value={currentValue}
-          onChange={wrappedOnChange}
-        >
-          {
-            optionValues.map((value, i) => (
-              <option key={value} value={value}>
-                {optionLabels[i]}
-              </option>
-            ))
-          }
-        </select>
+        <span className="RightSidebar-dropDownOptionLabel">{attrs.label}: </span>
+        <div className="RightSidebar-dropDownOptionSelectContainer">
+          <select
+            className="RightSidebar-dropDownOptionSelect"
+            value={currentValue}
+            onChange={wrappedOnChange}
+            tabIndex={-1}
+          >
+            {
+              optionValues.map((value, i) => (
+                <option key={value} value={value}>
+                  {optionLabels[i]}
+                </option>
+              ))
+            }
+          </select>
+        </div>
       </div>
     );
   }

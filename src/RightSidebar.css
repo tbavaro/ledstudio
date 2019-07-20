@@ -6,17 +6,10 @@
   height: 100%;
   padding: 8px;
   background-color: #333;
-  color: lightgray;
+  color: gray;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-}
-
-.RightSidebar select {
-  margin-left: auto;
-  width: 190px;
-  right: 0;
-  position: relative;
 }
 
 .RightSidebar-optionsGroup {
@@ -38,4 +31,36 @@
   overflow-x: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.RightSidebar-dropDownOption {
+  display: flex;
+  align-items: center;
+  padding-top: 1px;
+}
+
+.RightSidebar-dropDownOptionLabel {
+  flex: 0 1;
+  white-space: nowrap;
+  margin-right: 0.3em;
+}
+
+.RightSidebar-dropDownOptionSelectContainer {
+  flex: 1 1;
+}
+
+.RightSidebar-dropDownOptionSelect {
+  width: 100%;
+  background-color: #555;
+  color: white;
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.RightSidebar-dropDownOptionSelect:hover {
+  background-color: #666;
+}
+
+.RightSidebar-dropDownOptionSelect:focus {
+  outline: none;
 }
