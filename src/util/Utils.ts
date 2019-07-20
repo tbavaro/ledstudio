@@ -125,3 +125,23 @@ export function roundPlaces(v: number, numPlaces: number) {
 export function valueOrDefault<T>(valueOrUndefined: T | undefined, defaultValue: T): T {
   return (valueOrUndefined === undefined ? defaultValue : valueOrUndefined);
 }
+
+export function valueOrThrow<T>(valueOrUndefined: T | undefined): T {
+  if (valueOrUndefined === undefined) {
+    throw new Error("no value");
+  }
+  return valueOrUndefined;
+}
+
+function first<T>(iterator: Iterable<T>): T {
+  const it = iterator[Symbol.iterator]();
+  const n = it.next();
+  if (n.done) {
+    throw new Error("no value");
+  }
+  return n.value;
+}
+
+export function firstKey<T>(map: Map<T, any>): T {
+  return first(map.keys());
+}

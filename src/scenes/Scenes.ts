@@ -64,7 +64,7 @@ interface SceneDef {
 }
 
 // creates a box with the bottom centered at (0,0,0)
-export function boxHelper(attrs: {
+function boxHelper(attrs: {
   width: number,
   height: number,
   depth: number,
@@ -84,7 +84,7 @@ export function boxHelper(attrs: {
   };
 }
 
-export class SceneImpl implements Scene.default {
+class SceneImpl implements Scene.default {
   private readonly def: SceneDef;
   private lazyLoadedLeds?: Scene.LedInfo[][];
   private lazyModelPromise?: Promise<Three.Object3D>;
@@ -212,19 +212,7 @@ export class SceneImpl implements Scene.default {
   }
 }
 
-const registry = new Map<string, Scene.default>();
-
-export function names(): ReadonlyArray<string> {
-  return Array.from(registry.keys());
-}
-
-export function getScene(name: string): Scene.default {
-  const result = registry.get(name);
-  if (result === undefined) {
-    throw new Error(`no scene with name: ${name}`);
-  }
-  return result;
-}
+export const registry = new Map<string, Scene.default>();
 
 function registerScenes(defs: ReadonlyArray<SceneDef>) {
   defs.forEach(def => {
@@ -235,10 +223,6 @@ function registerScenes(defs: ReadonlyArray<SceneDef>) {
     }
     registry.set(name, scene);
   });
-}
-
-export function isValidName(name: string) {
-  return names().includes(name);
 }
 
 function makeLedSegments(segments: Array<{
@@ -768,8 +752,3 @@ registerScenes([
   createWingsSceneDef("burrow:wings30x7", LedSpacings.NEOPIXEL_30, 7),
   createWingsSceneDef("burrow:wings60x7", LedSpacings.NEOPIXEL_60, 7)
 ]);
-
-export const defaultSceneName = "burrow:wings30x2";
-if (!isValidName(defaultSceneName)) {
-  throw new Error("not a valid scene name");
-}

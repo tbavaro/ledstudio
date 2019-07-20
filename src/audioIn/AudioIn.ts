@@ -7,7 +7,7 @@ export interface InputDeviceInfo {
 
 export type EventType = "deviceListChanged";
 
-export default class AnalogAudio {
+export default class AudioIn {
   private inputDevicesInternal: InputDeviceInfo[] = [];
   private deviceListChangedListeners: Array<(this: this) => void> = [];
   private currentDeviceId: string | null = null;

@@ -1,4 +1,4 @@
-.App {
+.LedStudioRoot {
   position: absolute;
   left: 0;
   width: 100%;
@@ -10,24 +10,24 @@
   user-select: none;
 }
 
-.App-viewportGroup {
+.LedStudioRoot-viewportGroup {
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
-.App-viewportContainer {
+.LedStudioRoot-viewportContainer {
   background-color: black;
   position: relative;
   flex: 1;
 }
 
-.App-analogAudioViewContainer {
+.LedStudioRoot-audioInViewContainer {
   position: relative;
   height: 64px;
 }
 
-.App-controllerStateContainer {
+.LedStudioRoot-controllerStateContainer {
   position: relative;
   display: flex;
   flex-direction: row;
@@ -37,7 +37,7 @@
   padding-bottom: 5px;
 }
 
-.App-sidebarContainer {
+.LedStudioRoot-sidebarContainer {
   position: relative;
   flex: 0;
   flex-basis: 300px;
@@ -47,7 +47,7 @@
   font-size: 0.8em;
 }
 
-.App-simulationToggleSwitch {
+.LedStudioRoot-simulationToggleSwitch {
   position: absolute;
   top: 0;
   left: 0;
@@ -58,7 +58,7 @@
   cursor: pointer;
 }
 
-.App-simulationToggleSwitch.enabled {
+.LedStudioRoot-simulationToggleSwitch.enabled {
   background-color: #222;
   color: gray;
 }

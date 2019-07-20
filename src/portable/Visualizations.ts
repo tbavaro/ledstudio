@@ -25,8 +25,8 @@ import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashes
 import SplotchesVisualization from "./visualizations/SplotchesVisualization";
 import SpreadShootersAudioVisualization from "./visualizations/SpreadShootersAudioVisualization";
 import TestAbletonLink from "./visualizations/TestAbletonLink";
-import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestAudioAndAbletonLink from "./visualizations/TestAudioAndAbletonLink";
+import TestAudioPulseVisualization from "./visualizations/TestAudioPulseVisualization";
 import TestAudioWaveformVisualization from "./visualizations/TestAudioWaveformVisualization";
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
@@ -65,7 +65,7 @@ const factories: Visualization.Factory[] = [
   PulsingRainVisualization,
   TestAbletonLink,
   TestAudioAndAbletonLink,
-  TestAnalogPulseVisualization,
+  TestAudioPulseVisualization,
   TestAudioWaveformVisualization,
   TestControllerDialVisualization,
   TestKeyVisualization,
@@ -78,27 +78,10 @@ const factories: Visualization.Factory[] = [
   TestVisualizerExtraDisplayVisualization
 ];
 
-export type Name = string;
-
-export const defaultName: Name = "testStripAddress";
-
-const map = new Map<string, Visualization.Factory>();
+export const registry = new Map<string, Visualization.Factory>();
 factories.forEach(f => {
-  if (map.has(f.name)) {
+  if (registry.has(f.name)) {
     throw new Error(`duplicate visualization name: ${f.name}`);
   }
-  map.set(f.name, f);
+  registry.set(f.name, f);
 });
-
-export const names: ReadonlyArray<Name> = Array.from(map.keys());
-export function create(name: Name, config: Visualization.Config): Visualization.default {
-  const factory = map.get(name);
-  if (factory === undefined) {
-    throw new Error("unrecognized name");
-  }
-  return factory.create(config);
-}
-
-export function isValidName(name: Name): boolean {
-  return map.has(name);
-}

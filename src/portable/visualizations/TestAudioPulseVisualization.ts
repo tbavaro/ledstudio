@@ -3,7 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 import { bracket } from "../../util/Utils";
 
-const NAME = "testAnalogPulse";
+const NAME = "testAudioPulse";
 
 const FFT_SIZE = 128;
 const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
@@ -47,7 +47,7 @@ class BasicFFTHelper {
   }
 }
 
-class TestAnalogPulseVisualization extends Visualization.default {
+class TestAudioPulseVisualization extends Visualization.default {
   private readonly fft: BasicFFTHelper | null;
   private readonly pulseValueTimeSeries: Visualization.TimeSeriesValue;
 
@@ -62,13 +62,13 @@ class TestAnalogPulseVisualization extends Visualization.default {
       return;
     }
 
-    const analogFrequencyData = this.fft.getFrequencyData();
+    const frequencyData = this.fft.getFrequencyData();
 
     let total = 0;
-    analogFrequencyData.forEach(v => total += v);
+    frequencyData.forEach(v => total += v);
 
     // between 0 and 1
-    const pulseValue = bracket(0, 1, total / analogFrequencyData.length / 255);
+    const pulseValue = bracket(0, 1, total / frequencyData.length / 255);
 
     this.ledRows.forEach(row => {
       row.fill(Colors.BLACK);
@@ -82,10 +82,10 @@ class TestAnalogPulseVisualization extends Visualization.default {
       }
     });
 
-    context.setFrameHeatmapValues(Array.from(analogFrequencyData.values()).map(v => v / 255));
+    context.setFrameHeatmapValues(Array.from(frequencyData.values()).map(v => v / 255));
     this.pulseValueTimeSeries.value = pulseValue;
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestAnalogPulseVisualization);
+const factory = new Visualization.Factory(NAME, TestAudioPulseVisualization);
 export default factory;
