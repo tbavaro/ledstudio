@@ -135,7 +135,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     const { selectedMidiInput } = this.props;
     return (
       <div className="RightSidebar-inputDevices">
-        <span>MIDI in: </span>
+        <span>Piano MIDI in: </span>
         <select
           value={selectedMidiInput === null ? "" : selectedMidiInput.id}
           onChange={this.handleSetMidiInput}
@@ -159,7 +159,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     const { selectedMidiOutput } = this.props;
     return (
       <div className="RightSidebar-outputDevices">
-        <span>MIDI out: </span>
+        <span>Piano MIDI thru: </span>
         <select
           value={selectedMidiOutput === null ? "" : selectedMidiOutput.id}
           onChange={this.handleSetMidiOutput}
