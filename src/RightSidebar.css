@@ -13,38 +13,15 @@
 }
 
 .RightSidebar select {
+  margin-left: auto;
   width: 190px;
+  right: 0;
+  position: relative;
 }
 
 .RightSidebar-optionsGroup {
   font-size: 0.8em;
   margin-bottom: 4px;
-}
-
-.RightSidebar-musicControls {
-  margin-top: 4px;
-  margin-bottom: 4px;
-}
-
-.RightSidebar-musicControls a {
-  display: inline-block;
-  cursor: pointer;
-  border: 1px solid gray;
-  padding: 4px 20px;
-  border-radius: 4px;
-  background-color: gray;
-  color: white;
-  font-weight: bold;
-}
-
-.RightSidebar-musicControls a:hover {
-  background-color: #666;
-  color: white;
-}
-
-.RightSidebar-musicControls a:active {
-  background-color: black;
-  color: white;
 }
 
 .RightSidebar-midiEventsView {

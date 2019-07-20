@@ -5,6 +5,8 @@ import * as AudioIn from "./audioIn/AudioIn";
 import { MidiEventEmitter } from "./piano/MidiEventListener";
 import MidiEventsView from "./piano/MidiEventsView";
 
+import { identity, valueOrDefault } from "./util/Utils";
+
 import "./RightSidebar.css";
 
 export interface Actions {
@@ -36,10 +38,6 @@ interface Props {
   selectedBeatControllerType: BeatControllerType;
 }
 
-function findById<T extends { readonly id: string }>(entries: T[], id: string): T | undefined {
-  return entries.find(e => e.id === id);
-}
-
 export default class RightSidebar extends React.PureComponent<Props, {}> {
   public render() {
     return (
@@ -65,39 +63,23 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
   }
 
   private renderSceneSelector() {
-    return (
-      <div className="RightSidebar-scenes">
-        <span>Scene: </span>
-        <select
-          value={this.props.selectedSceneName}
-          onChange={this.handleSetSceneName}
-        >
-          {
-            this.props.sceneNames.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))
-          }
-        </select>
-      </div>
-    );
+    return this.renderDropDownOption({
+      label: "Scene",
+      currentOption: this.props.selectedSceneName,
+      options: this.props.sceneNames,
+      optionToValueFunc: identity,
+      onChange: this.props.actions.setSelectedSceneName
+    });
   }
 
   private renderVisualizationSelector() {
-    return (
-      <div className="RightSidebar-visualizations">
-        <span>Visualization: </span>
-        <select
-          value={this.props.selectedVisualizationName}
-          onChange={this.handleSetVisualizationName}
-        >
-          {
-            this.props.visualizationNames.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))
-          }
-        </select>
-      </div>
-    );
+    return this.renderDropDownOption({
+      label: "Visualization",
+      currentOption: this.props.selectedVisualizationName,
+      options: this.props.visualizationNames,
+      optionToValueFunc: identity,
+      onChange: this.props.actions.setSelectedVisualizationName
+    });
   }
 
   private renderAudioInputDevices() {
@@ -107,99 +89,53 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       return "(initializing audio in...)";
     }
 
-    return (
-      <div className="RightSidebar-audioInputDevices">
-        <span>Audio in: </span>
-        <select
-          value={this.props.selectedAudioInputId || ""}
-          onChange={this.handleSetAudioInputId}
-        >
-          <option value="" children={"<none>"}/>
-          {
-            audioInputs.map(input => (
-              <option
-                key={input.id}
-                value={input.id}
-                children={input.name}
-              />
-            ))
-          }
-        </select>
-      </div>
-    );
+    // TODO clean this up to work more like the MIDI options
+    const ids = audioInputs.map(v => v.id);
+    return this.renderDropDownOption({
+      label: "Audio in",
+      currentOption: this.props.selectedAudioInputId || "",
+      options: ["", ...ids],
+      optionToValueFunc: identity,
+      optionToLabelFunc: (opt => {
+        const i = ids.indexOf(opt);
+        if (opt === "" || i === -1) {
+          return "<none>";
+        } else {
+          return audioInputs[i].name;
+        }
+      }),
+      onChange: (idOrEmpty: string) => {        
+        this.props.actions.setAudioInputId(idOrEmpty === "" ? null : idOrEmpty);
+      }
+    });
   }
 
   private renderPianoMidiInputDevices() {
-    const { selectedPianoMidiInput } = this.props;
-    return (
-      <div className="RightSidebar-inputDevices">
-        <span>Piano MIDI in: </span>
-        <select
-          value={selectedPianoMidiInput === null ? "" : selectedPianoMidiInput.id}
-          onChange={this.handleSetPianoMidiInput}
-        >
-          <option value="" children={"<none>"}/>
-          {
-            this.props.midiInputs.map(input => (
-              <option
-                key={input.id}
-                value={input.id}
-                children={input.name}
-              />
-            ))
-          }
-        </select>
-      </div>
-    );
+    return this.renderMidiDropDownOption({
+      label: "Piano MIDI in",
+      currentOption: this.props.selectedPianoMidiInput,
+      options: this.props.midiInputs,
+      onChange: this.props.actions.setPianoMidiInput
+    });
+
   }
 
   private renderPianoMidiThruDevices() {
-    const { selectedPianoMidiThru } = this.props;
-    return (
-      <div className="RightSidebar-outputDevices">
-        <span>Piano MIDI thru: </span>
-        <select
-          value={selectedPianoMidiThru === null ? "" : selectedPianoMidiThru.id}
-          onChange={this.handleSetPianoMidiThru}
-        >
-          <option value="" children={"<none>"}/>
-          {
-            this.props.midiOutputs.map(output => (
-              <option
-                key={output.id}
-                value={output.id}
-                children={output.name}
-              />
-            ))
-          }
-        </select>
-      </div>
-    );
+    return this.renderMidiDropDownOption({
+      label: "Piano MIDI thru",
+      currentOption: this.props.selectedPianoMidiThru,
+      options: this.props.midiOutputs,
+      onChange: this.props.actions.setPianoMidiThru
+    });
   }
 
-
   private renderControllerMidiDevices() {
-    const { selectedControllerMidiInput } = this.props;
-    return (
-      <div className="RightSidebar-midiControllerDevices">
-        <span>Ctrl MIDI in: </span>
-        <select
-          value={selectedControllerMidiInput === null ? "" : selectedControllerMidiInput.id}
-          onChange={this.handleSetControllerMidiInput}
-        >
-          <option value="" children={"<none>"}/>
-          {
-            this.props.midiInputs.map(input => (
-              <option
-                key={input.id}
-                value={input.id}
-                children={input.name}
-              />
-            ))
-          }
-        </select>
-      </div>
-    );
+    return this.renderMidiDropDownOption({
+      label: "Ctrl MIDI in",
+      currentOption: this.props.selectedControllerMidiInput,
+      options: this.props.midiInputs,
+      onChange: this.props.actions.setControllerMidiInput
+    });
   }
 
   private renderBeatControllerDevices() {
@@ -210,59 +146,69 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       "ableton"
     ];
 
+    return this.renderDropDownOption({
+      label: "Beat ctrl",
+      currentOption: selectedBeatControllerType,
+      options,
+      optionToValueFunc: identity,
+      onChange: this.props.actions.setBeatControllerType
+    });
+  }
+
+  private renderMidiDropDownOption<T extends (WebMidi.MIDIInput | WebMidi.MIDIOutput) | null>(attrs: {
+    label: string;
+    currentOption: T;
+    options: T[];
+    onChange: (newOption: T) => void;
+  }) {
+    return this.renderDropDownOption({
+      label: attrs.label,
+      currentOption: attrs.currentOption,
+      options: [null, ...attrs.options],
+      optionToValueFunc: (opt => (opt === null ? "" : opt.id)),
+      optionToLabelFunc: (opt => (opt === null ? "<none>" : valueOrDefault(opt.name, opt.id))),
+      onChange: attrs.onChange
+    });
+  }
+
+  private renderDropDownOption<T>(attrs: {
+    label: string;
+    currentOption: T;
+    options: readonly T[];
+    optionToValueFunc: (option: T) => string;
+    optionToLabelFunc?: (option: T) => string;
+    onChange: (newOption: T) => void;
+  }) {
+    const { currentOption, options, optionToLabelFunc, optionToValueFunc } = attrs;
+
+    const optionValues = options.map(optionToValueFunc);
+    const optionLabels = (optionToLabelFunc ? options.map(optionToLabelFunc) : optionValues);
+    const currentValue = optionToValueFunc(currentOption);
+
+    const wrappedOnChange = (event: React.ChangeEvent<any>) => {      
+      const i = optionValues.indexOf(event.target.value);
+      if (i === -1) {
+        throw new Error("invalid value");
+      }
+      attrs.onChange(options[i]);
+    };
+
     return (
-      <div className="RightSidebar-beatControllerTypes">
-        <span>Beat ctrl: </span>
+      <div className="RightSidebar-dropDownOption">
+        <span>{attrs.label}: </span>
         <select
-          value={selectedBeatControllerType}
-          onChange={this.handleSetBeatControllerType}
+          value={currentValue}
+          onChange={wrappedOnChange}
         >
           {
-            options.map(opt => (
-              <option
-                key={opt}
-                value={opt}
-                children={opt}
-              />
+            optionValues.map((value, i) => (
+              <option key={value} value={value}>
+                {optionLabels[i]}
+              </option>
             ))
           }
         </select>
       </div>
     );
-  }
-
-  private handleSetPianoMidiInput = (event: React.ChangeEvent<any>) => {
-    const id = event.target.value as string;
-    this.props.actions.setPianoMidiInput(findById(this.props.midiInputs, id) || null);
-  }
-
-  private handleSetControllerMidiInput = (event: React.ChangeEvent<any>) => {
-    const id = event.target.value as string;
-    this.props.actions.setControllerMidiInput(findById(this.props.midiInputs, id) || null);
-  }
-
-  private handleSetBeatControllerType = (event: React.ChangeEvent<any>) => {
-    const id = event.target.value as BeatControllerType;
-    this.props.actions.setBeatControllerType(id);
-  }
-
-  private handleSetPianoMidiThru = (event: React.ChangeEvent<any>) => {
-    const id = event.target.value as string;
-    this.props.actions.setPianoMidiThru(findById(this.props.midiOutputs, id) || null);
-  }
-
-  private handleSetAudioInputId = (event: React.ChangeEvent<any>) => {
-    const id = event.target.value as string;
-    this.props.actions.setAudioInputId((id === "") ? null : id);
-  }
-
-  private handleSetVisualizationName = (event: React.ChangeEvent<any>) => {
-    const name = event.target.value as string;
-    this.props.actions.setSelectedVisualizationName(name);
-  }
-
-  private handleSetSceneName = (event: React.ChangeEvent<any>) => {
-    const name = event.target.value as string;
-    this.props.actions.setSelectedSceneName(name);
   }
 }

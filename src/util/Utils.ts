@@ -145,3 +145,7 @@ function first<T>(iterator: Iterable<T>): T {
 export function firstKey<T>(map: Map<T, any>): T {
   return first(map.keys());
 }
+
+export function identity<T>(v: T): T {
+  return v;
+}
