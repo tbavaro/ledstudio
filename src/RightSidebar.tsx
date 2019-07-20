@@ -8,9 +8,6 @@ import MidiEventsView from "./piano/MidiEventsView";
 import "./RightSidebar.css";
 
 export interface Actions {
-  playMusic: () => void;
-  stopMusic: () => void;
-  setSelectedMidiFilename: (newValue: string) => void;
   setMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setMidiOutput: (newValue: WebMidi.MIDIOutput | null) => void;
   setMidiControllerInput: (newValue: WebMidi.MIDIInput | null) => void;
@@ -28,9 +25,6 @@ interface Props {
   selectedSceneName: string;
   visualizationNames: ReadonlyArray<string>;
   selectedVisualizationName: string;
-  midiFilenames: string[];
-  selectedMidiFilename: string;
-  isMidiFileLoaded: boolean;
   midiInputs: WebMidi.MIDIInput[];
   selectedMidiInput: WebMidi.MIDIInput | null;
   selectedMidiControllerInput: WebMidi.MIDIInput | null;
@@ -137,28 +131,8 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderMidiFileSelector() {
-    return (
-      <div className="RightSidebar-midiFiles">
-        <span> MIDI file: </span>
-        <select
-          value={this.props.selectedMidiFilename}
-          onChange={this.handleSetMidiFilename}
-        >
-          {
-            this.props.midiFilenames.map(filename => (
-              <option key={filename} value={filename}>{filename}</option>
-            ))
-          }
-        </select>
-        {this.props.isMidiFileLoaded ? " (loaded)" : " (not loaded)" }
-      </div>
-    );
-  }
-
   private renderMidiInputDevices() {
     const { selectedMidiInput } = this.props;
-    const showInAppInputUI = (selectedMidiInput === null);
     return (
       <div className="RightSidebar-inputDevices">
         <span>MIDI in: </span>
@@ -166,7 +140,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           value={selectedMidiInput === null ? "" : selectedMidiInput.id}
           onChange={this.handleSetMidiInput}
         >
-          <option value="" children={"<in-app>"}/>
+          <option value="" children={"<none>"}/>
           {
             this.props.midiInputs.map(input => (
               <option
@@ -177,16 +151,6 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
             ))
           }
         </select>
-        {
-          showInAppInputUI
-            ? (
-                <div className="RightSidebar-inAppInputUI">
-                  {this.renderMidiFileSelector()}
-                  {this.renderMusicControls()}
-                </div>
-              )
-            : null
-        }
       </div>
     );
   }
@@ -269,16 +233,6 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderMusicControls() {
-    return (
-      <div className="RightSidebar-musicControls">
-        <a onClick={this.props.actions.playMusic}>Play</a>
-        &nbsp;
-        <a onClick={this.props.actions.stopMusic}>Stop</a>
-      </div>
-    );
-  }
-
   private handleSetMidiInput = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
     this.props.actions.setMidiInput(findById(this.props.midiInputs, id) || null);
@@ -302,11 +256,6 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
   private handleSetAnalogInputId = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
     this.props.actions.setAnalogInputId((id === "") ? null : id);
-  }
-
-  private handleSetMidiFilename = (event: React.ChangeEvent<any>) => {
-    const filename = event.target.value as string;
-    this.props.actions.setSelectedMidiFilename(filename);
   }
 
   private handleSetVisualizationName = (event: React.ChangeEvent<any>) => {

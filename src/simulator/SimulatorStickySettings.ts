@@ -9,7 +9,6 @@ export interface Settings {
   midiInputId: string | null;
   midiControllerInputId: string | null;
   midiOutputId: string | null;
-  midiFilename: string;
   simulationEnabled: boolean;
   beatControllerType: BeatControllerType;
 }

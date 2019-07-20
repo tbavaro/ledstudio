@@ -1,4 +1,3 @@
-import MIDIFile from "midifile";
 import * as React from "react";
 
 import ManualBeatController from "./beat/ManualBeatController";
@@ -21,7 +20,6 @@ import VisualizerExtraDisplayContainer from "./simulator/VisualizerExtraDisplayC
 
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { MidiEventEmitter, QueuedMidiEventEmitter } from "./piano/MidiEventListener";
-import MIDIPlayer from "./piano/MIDIPlayer";
 
 import * as AnalogAudio from "./analogAudio/AnalogAudio";
 import AnalogAudioView from "./analogAudio/AnalogAudioView";
@@ -38,8 +36,6 @@ import "./LedStudioRoot.css";
 import AbletonLinkConnect from "./beat/AbletonLinkConnect";
 import * as Visualization from "./portable/base/Visualization";
 
-const MIDI_FILE_PATH_PREFIX = "./";
-
 type MidiState = {
   status: "initializing"
 } | {
@@ -54,7 +50,6 @@ const TARGET_FPS = 60;
 const TARGET_FRAME_MILLIS = 1000 / TARGET_FPS;
 
 interface Props {
-  midiFiles: string[];
   scenes: Map<string, Scene>;
   visualizations: Map<string, Visualization.Factory>;
 }
@@ -72,8 +67,6 @@ interface State {
   midiInput: WebMidi.MIDIInput | null;
   midiControllerInput: WebMidi.MIDIInput | null;
   midiOutput: WebMidi.MIDIOutput | null;
-  midiFilename: string;
-  midiData: ArrayBuffer | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
   analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
@@ -129,7 +122,6 @@ function createDummyAudioNode() {
 }
 
 class LedStudioRoot extends React.Component<InnerProps, State> {
-  private readonly midiPlayer = new MIDIPlayer();
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly midiControllerEventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
@@ -144,7 +136,6 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     }
 
     this.analogAudio.addEventListener("deviceListChanged", this.updateAnalogDevices);
-    this.midiPlayer.onSend = this.onSendMidiEvent;
 
     if (navigator.requestMIDIAccess) {
       navigator.requestMIDIAccess().then(webMidi => {
@@ -186,11 +177,6 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       });
     }
 
-    this.loadMidiFile(SimulatorStickySettings.get({
-      key: "midiFilename",
-      defaultValue: this.props.midiFiles[0],
-      validateFunc: v => this.props.midiFiles.includes(v)
-    }));
     this.midiEventEmitter.addListener(this.myMidiListener);
   }
 
@@ -207,7 +193,6 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     }
 
     this.stopAnimation();
-    this.midiPlayer.stop();
 
     const { midiState } = this.state;
     if (midiState.status === "loaded") {
@@ -296,9 +281,6 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             selectedSceneName={this.state.scene.name}
             visualizationNames={this.props.visualizationNames}
             selectedVisualizationName={this.state.visualizationName}
-            midiFilenames={this.props.midiFiles}
-            isMidiFileLoaded={this.state.midiData !== null}
-            selectedMidiFilename={this.state.midiFilename}
             midiInputs={this.state.midiInputs}
             selectedMidiInput={this.state.midiInput}
             selectedMidiControllerInput={this.state.midiControllerInput}
@@ -318,27 +300,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
   private getMessage2 = () => this.state.scene.displayMessage;
 
-  private handlePlayMusic = () => {
-    if (this.state.midiState.status !== "loaded") {
-      alert("midi subsystem is not loaded");
-      return;
-    }
-
-    if (this.state.midiData === null) {
-      alert("midi data is not loaded");
-      return;
-    }
-
-    const file = new MIDIFile(this.state.midiData);
-    this.midiPlayer.load(file);
-    this.midiPlayer.play();
-  }
-
-  private handleStopMusic = () => this.midiPlayer.stop();
-
   private setMidiInput = (newValue: WebMidi.MIDIInput | null) => {
     if (newValue !== this.state.midiInput) {
-      this.midiPlayer.stop();
       if (this.state.midiInput) {
         this.state.midiInput.removeEventListener("midimessage", this.onMidiInputMessage);
         this.resetAllKeys();
@@ -369,38 +332,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
   private setMidiOutput = (newValue: WebMidi.MIDIOutput | null) => {
     if (newValue !== this.state.midiOutput) {
-      this.midiPlayer.output = newValue;
       this.setState({ midiOutput: newValue });
       SimulatorStickySettings.set("midiOutputId", newValue === null ? null : newValue.id);
-    }
-  }
-
-  private onSendMidiEvent = (
-    data: number[] | Uint8Array,
-    timestamp?: number
-  ) => {
-    const event = new MidiEvent(data);
-    this.midiEventEmitter.fireLater(event, timestamp || performance.now());
-  }
-
-  private loadMidiFile = (filename: string) => {
-    if (filename !== this.state.midiFilename) {
-      this.midiPlayer.stop();
-      this.setState({
-        midiData: null,
-        midiFilename: filename
-      });
-      SimulatorStickySettings.set("midiFilename", filename);
-
-      const req = new XMLHttpRequest();
-      req.open("GET", MIDI_FILE_PATH_PREFIX + filename, true);
-      req.responseType = "arraybuffer";
-      req.onload = () => {
-        if (filename === this.state.midiFilename) {
-          this.setState({ midiData: req.response });
-        }
-      };
-      req.send();
     }
   }
 
@@ -483,12 +416,9 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   }
 
   private actionManager: AllActions = {
-    playMusic: this.handlePlayMusic,
-    stopMusic: this.handleStopMusic,
     setMidiInput: this.setMidiInput,
     setMidiControllerInput: this.setMidiControllerInput,
     setMidiOutput: this.setMidiOutput,
-    setSelectedMidiFilename: this.loadMidiFile,
     setSelectedSceneName: (name: string) => {
       if (name !== this.state.scene.name) {
         const scene = valueOrThrow(this.props.scenes.get(name));
@@ -691,8 +621,6 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       midiInput: null,
       midiControllerInput: null,
       midiOutput: null,
-      midiFilename: "<<not assigned>>",
-      midiData: null,
       midiInputs: [],
       midiOutputs: [],
       analogInputs: undefined,
