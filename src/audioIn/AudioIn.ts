@@ -71,7 +71,7 @@ export default class AudioIn {
             splitter.connect(gain, 0, 0);
 
             this.setCurrentAudioSource(audioContext, gain);
-            audioSource.connect(audioContext.destination);
+            // audioSource.connect(audioContext.destination);
           }
         });
       }
