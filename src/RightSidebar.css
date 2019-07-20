@@ -64,3 +64,13 @@
 .RightSidebar-dropDownOptionSelect:focus {
   outline: none;
 }
+
+.RightSidebar-appVersion {
+  position: absolute;
+  padding: 0.5em;
+  right: 0;
+  bottom: 0;
+  font-size: 0.8em;
+  color: white;
+  opacity: 0.3;
+}

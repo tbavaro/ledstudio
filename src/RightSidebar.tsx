@@ -58,6 +58,9 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           entryClassName="RightSidebar-midiEventEntry"
           midiEventEmitters={this.props.midiEventEmitters}
         />
+        <div className="RightSidebar-appVersion">
+          v{process.env.REACT_APP_VERSION}
+        </div>
       </div>
     );
   }
