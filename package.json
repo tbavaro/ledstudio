@@ -4,6 +4,7 @@
   "version": "0.17.1",
   "private": true,
   "dependencies": {
+    "fsevents": "^2.0.7",
     "google-palette": "^1.1.0",
     "midievents": "^2.0.0",
     "midifile": "^2.0.0",

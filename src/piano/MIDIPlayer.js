@@ -1,6 +1,6 @@
 /* tslint:disable */
 
-'use strict';
+// 'use strict';
 
 // "forked" from https://github.com/nfroidure/midiplayer/blob/ec63f6af331a8ee77c0d78b945c1545c38aadeb2/src/MIDIPlayer.js
 
