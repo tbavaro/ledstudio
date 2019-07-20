@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import ManualBeatController from "./beat/ManualBeatController";
-
 import BeatController from "./portable/base/BeatController";
+import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
+import * as Visualization from "./portable/base/Visualization";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 
@@ -16,13 +16,13 @@ import Scene from "./scenes/Scene";
 
 import SimulationViewport from "./simulator/SimulationViewport";
 import * as SimulatorStickySettings from "./simulator/SimulatorStickySettings";
+import TimeseriesView from "./simulator/TimeseriesView";
 import VisualizerExtraDisplayContainer from "./simulator/VisualizerExtraDisplayContainer";
 
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { MidiEventEmitter, QueuedMidiEventEmitter } from "./piano/MidiEventListener";
 
 import * as AudioIn from "./audioIn/AudioIn";
-import AudioInView from "./audioIn/AudioInView";
 
 import BeatControlView from "./BeatControlView";
 import ControlsView from "./ControlsView";
@@ -31,10 +31,10 @@ import * as RightSidebar from "./RightSidebar";
 import TimingStatsView from "./TimingStatsView";
 import VisualizationRunner from "./VisualizationRunner";
 
-import "./LedStudioRoot.css";
-
 import AbletonLinkConnect from "./beat/AbletonLinkConnect";
-import * as Visualization from "./portable/base/Visualization";
+import ManualBeatController from "./beat/ManualBeatController";
+
+import "./LedStudioRoot.css";
 
 type MidiState = {
   status: "initializing"
@@ -230,7 +230,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             <TimingStatsView getTimings={this.getTimings} message2={this.getMessage2}/>
           </div>
           <div className="LedStudioRoot-audioInViewContainer">
-            <AudioInView ref={this.setAudioInViewRef}/>
+            <TimeseriesView ref={this.setTimeseriesViewRef} height={64}/>
           </div>
           <div className="LedStudioRoot-controllerStateContainer">
             <PianoView
@@ -515,8 +515,11 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       const { frameHeatmapValues, frameTimeseriesPoints } = this.state.visualizationRunner.renderFrame(this.state.beatController);
       ++this.framesRenderedSinceLastTimingsCall;
 
-      if (this.audioInViewRef) {
-        this.audioInViewRef.displayFrequencyData(frameHeatmapValues, frameTimeseriesPoints);
+      if (this.timeseriesViewRef) {
+        this.timeseriesViewRef.displayData(frameTimeseriesPoints, {
+          baseColor: Colors.RED,
+          values: frameHeatmapValues
+        });
       }
     }
   }
@@ -551,8 +554,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     }
   }
 
-  private audioInViewRef: AudioInView | undefined = undefined;
-  private setAudioInViewRef = (newRef: AudioInView) => this.audioInViewRef = newRef;
+  private timeseriesViewRef: TimeseriesView | undefined = undefined;
+  private setTimeseriesViewRef = (newRef: TimeseriesView) => this.timeseriesViewRef = newRef;
 
   private controlsViewRef: ControlsView | null = null;
   private setControlsViewRef = (newRef: ControlsView | null) => this.controlsViewRef = newRef;
