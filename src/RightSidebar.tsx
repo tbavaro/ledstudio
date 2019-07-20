@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import * as AnalogAudio from "./analogAudio/AnalogAudio";
+import * as AudioIn from "./audioIn/AudioIn";
 
 import { MidiEventEmitter } from "./piano/MidiEventListener";
 import MidiEventsView from "./piano/MidiEventsView";
@@ -8,13 +8,13 @@ import MidiEventsView from "./piano/MidiEventsView";
 import "./RightSidebar.css";
 
 export interface Actions {
-  setMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
-  setMidiOutput: (newValue: WebMidi.MIDIOutput | null) => void;
-  setMidiControllerInput: (newValue: WebMidi.MIDIInput | null) => void;
+  setPianoMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
+  setPianoMidiThru: (newValue: WebMidi.MIDIOutput | null) => void;
+  setControllerMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setBeatControllerType: (newValue: BeatControllerType) => void;
   setSelectedSceneName: (newValue: string) => void;
   setSelectedVisualizationName: (newValue: string) => void;
-  setAnalogInputId: (newValue: string | null) => void;
+  setAudioInputId: (newValue: string | null) => void;
 }
 
 export type BeatControllerType = "manual" | "ableton";
@@ -26,13 +26,13 @@ interface Props {
   visualizationNames: ReadonlyArray<string>;
   selectedVisualizationName: string;
   midiInputs: WebMidi.MIDIInput[];
-  selectedMidiInput: WebMidi.MIDIInput | null;
-  selectedMidiControllerInput: WebMidi.MIDIInput | null;
+  selectedPianoMidiInput: WebMidi.MIDIInput | null;
+  selectedControllerMidiInput: WebMidi.MIDIInput | null;
   midiOutputs: WebMidi.MIDIOutput[];
-  selectedMidiOutput: WebMidi.MIDIOutput | null;
+  selectedPianoMidiThru: WebMidi.MIDIOutput | null;
   midiEventEmitters: MidiEventEmitter[];
-  analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
-  selectedAnalogInputId: string | null;
+  audioInputs: AudioIn.InputDeviceInfo[] | undefined;
+  selectedAudioInputId: string | null;
   selectedBeatControllerType: BeatControllerType;
 }
 
@@ -48,12 +48,10 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           {this.renderSceneSelector()}
           {this.renderVisualizationSelector()}
           <p/>
-          {this.renderAnalogInputDevices()}
-          <p/>
-          {this.renderMidiInputDevices()}
-          {this.renderMidiOutputDevices()}
-          <p/>
-          {this.renderMidiControllerDevices()}
+          {this.renderAudioInputDevices()}
+          {this.renderPianoMidiInputDevices()}
+          {this.renderPianoMidiThruDevices()}
+          {this.renderControllerMidiDevices()}
           {this.renderBeatControllerDevices()}
           <p/>
         </div>
@@ -102,23 +100,23 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderAnalogInputDevices() {
-    const { analogInputs } = this.props;
+  private renderAudioInputDevices() {
+    const { audioInputs } = this.props;
 
-    if (analogInputs === undefined) {
-      return "(initializing analog audio...)";
+    if (audioInputs === undefined) {
+      return "(initializing audio in...)";
     }
 
     return (
-      <div className="RightSidebar-analogInputDevices">
-        <span>Analog audio in: </span>
+      <div className="RightSidebar-audioInputDevices">
+        <span>Audio in: </span>
         <select
-          value={this.props.selectedAnalogInputId || ""}
-          onChange={this.handleSetAnalogInputId}
+          value={this.props.selectedAudioInputId || ""}
+          onChange={this.handleSetAudioInputId}
         >
           <option value="" children={"<none>"}/>
           {
-            analogInputs.map(input => (
+            audioInputs.map(input => (
               <option
                 key={input.id}
                 value={input.id}
@@ -131,14 +129,14 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderMidiInputDevices() {
-    const { selectedMidiInput } = this.props;
+  private renderPianoMidiInputDevices() {
+    const { selectedPianoMidiInput } = this.props;
     return (
       <div className="RightSidebar-inputDevices">
         <span>Piano MIDI in: </span>
         <select
-          value={selectedMidiInput === null ? "" : selectedMidiInput.id}
-          onChange={this.handleSetMidiInput}
+          value={selectedPianoMidiInput === null ? "" : selectedPianoMidiInput.id}
+          onChange={this.handleSetPianoMidiInput}
         >
           <option value="" children={"<none>"}/>
           {
@@ -155,14 +153,14 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderMidiOutputDevices() {
-    const { selectedMidiOutput } = this.props;
+  private renderPianoMidiThruDevices() {
+    const { selectedPianoMidiThru } = this.props;
     return (
       <div className="RightSidebar-outputDevices">
         <span>Piano MIDI thru: </span>
         <select
-          value={selectedMidiOutput === null ? "" : selectedMidiOutput.id}
-          onChange={this.handleSetMidiOutput}
+          value={selectedPianoMidiThru === null ? "" : selectedPianoMidiThru.id}
+          onChange={this.handleSetPianoMidiThru}
         >
           <option value="" children={"<none>"}/>
           {
@@ -180,14 +178,14 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
   }
 
 
-  private renderMidiControllerDevices() {
-    const { selectedMidiControllerInput } = this.props;
+  private renderControllerMidiDevices() {
+    const { selectedControllerMidiInput } = this.props;
     return (
       <div className="RightSidebar-midiControllerDevices">
-        <span>MIDI ctrl: </span>
+        <span>Ctrl MIDI in: </span>
         <select
-          value={selectedMidiControllerInput === null ? "" : selectedMidiControllerInput.id}
-          onChange={this.handleSetMidiControllerInput}
+          value={selectedControllerMidiInput === null ? "" : selectedControllerMidiInput.id}
+          onChange={this.handleSetControllerMidiInput}
         >
           <option value="" children={"<none>"}/>
           {
@@ -233,14 +231,14 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private handleSetMidiInput = (event: React.ChangeEvent<any>) => {
+  private handleSetPianoMidiInput = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
-    this.props.actions.setMidiInput(findById(this.props.midiInputs, id) || null);
+    this.props.actions.setPianoMidiInput(findById(this.props.midiInputs, id) || null);
   }
 
-  private handleSetMidiControllerInput = (event: React.ChangeEvent<any>) => {
+  private handleSetControllerMidiInput = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
-    this.props.actions.setMidiControllerInput(findById(this.props.midiInputs, id) || null);
+    this.props.actions.setControllerMidiInput(findById(this.props.midiInputs, id) || null);
   }
 
   private handleSetBeatControllerType = (event: React.ChangeEvent<any>) => {
@@ -248,14 +246,14 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     this.props.actions.setBeatControllerType(id);
   }
 
-  private handleSetMidiOutput = (event: React.ChangeEvent<any>) => {
+  private handleSetPianoMidiThru = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
-    this.props.actions.setMidiOutput(findById(this.props.midiOutputs, id) || null);
+    this.props.actions.setPianoMidiThru(findById(this.props.midiOutputs, id) || null);
   }
 
-  private handleSetAnalogInputId = (event: React.ChangeEvent<any>) => {
+  private handleSetAudioInputId = (event: React.ChangeEvent<any>) => {
     const id = event.target.value as string;
-    this.props.actions.setAnalogInputId((id === "") ? null : id);
+    this.props.actions.setAudioInputId((id === "") ? null : id);
   }
 
   private handleSetVisualizationName = (event: React.ChangeEvent<any>) => {

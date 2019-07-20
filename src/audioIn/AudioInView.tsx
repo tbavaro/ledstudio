@@ -8,7 +8,7 @@ import TimeseriesView from "../simulator/TimeseriesView";
 
 const HEIGHT = 64;
 
-export default class AnalogAudioView extends React.PureComponent<{}, {}> {
+export default class AudioInView extends React.PureComponent<{}, {}> {
   private ref?: TimeseriesView;
 
   public render() {

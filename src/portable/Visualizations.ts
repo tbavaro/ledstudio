@@ -24,8 +24,8 @@ import SparklesAndFlashesVisualization from "./visualizations/SparklesAndFlashes
 import SplotchesVisualization from "./visualizations/SplotchesVisualization";
 import SpreadShootersAudioVisualization from "./visualizations/SpreadShootersAudioVisualization";
 import TestAbletonLink from "./visualizations/TestAbletonLink";
-import TestAnalogPulseVisualization from "./visualizations/TestAnalogPulseVisualization";
 import TestAudioAndAbletonLink from "./visualizations/TestAudioAndAbletonLink";
+import TestAudioPulseVisualization from "./visualizations/TestAudioPulseVisualization";
 import TestAudioWaveformVisualization from "./visualizations/TestAudioWaveformVisualization";
 import TestControllerDialVisualization from "./visualizations/TestControllerDialVisualization";
 import TestKeyFadeVisualization from "./visualizations/TestKeyFadeVisualization";
@@ -63,7 +63,7 @@ const factories: Visualization.Factory[] = [
   PulsingRainVisualization,
   TestAbletonLink,
   TestAudioAndAbletonLink,
-  TestAnalogPulseVisualization,
+  TestAudioPulseVisualization,
   TestAudioWaveformVisualization,
   TestControllerDialVisualization,
   TestKeyVisualization,

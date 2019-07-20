@@ -5,7 +5,7 @@ const LOCAL_STORAGE_PREFIX = "simulatorSettings:";
 export interface Settings {
   sceneName: string;
   visualizationName: string;
-  analogAudioSourceId: string | null;
+  audioInSourceId: string | null;
   midiInputId: string | null;
   midiControllerInputId: string | null;
   midiOutputId: string | null;

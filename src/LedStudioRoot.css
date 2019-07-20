@@ -22,7 +22,7 @@
   flex: 1;
 }
 
-.LedStudioRoot-analogAudioViewContainer {
+.LedStudioRoot-audioInViewContainer {
   position: relative;
   height: 64px;
 }

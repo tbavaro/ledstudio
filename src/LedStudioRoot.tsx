@@ -21,8 +21,8 @@ import VisualizerExtraDisplayContainer from "./simulator/VisualizerExtraDisplayC
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { MidiEventEmitter, QueuedMidiEventEmitter } from "./piano/MidiEventListener";
 
-import * as AnalogAudio from "./analogAudio/AnalogAudio";
-import AnalogAudioView from "./analogAudio/AnalogAudioView";
+import * as AudioIn from "./audioIn/AudioIn";
+import AudioInView from "./audioIn/AudioInView";
 
 import BeatControlView from "./BeatControlView";
 import ControlsView from "./ControlsView";
@@ -69,8 +69,8 @@ interface State {
   midiOutput: WebMidi.MIDIOutput | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
-  analogInputs: AnalogAudio.InputDeviceInfo[] | undefined;
-  selectedAnalogInputId: string | null;
+  audioInputs: AudioIn.InputDeviceInfo[] | undefined;
+  selectedAudioInputId: string | null;
   audioSource: AudioNode | null;
   visualizerExtraDisplay: HTMLElement | null;
   simulationEnabled: boolean;
@@ -125,7 +125,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly midiControllerEventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
-  public readonly analogAudio = new AnalogAudio.default((newAudioSource: AudioNode | null) => {
+  public readonly audioIn = new AudioIn.default((newAudioSource: AudioNode | null) => {
     this.configureVisualization(this.state.visualizationName, this.state.scene, newAudioSource);
   });
   private readonly controllerState = new ControllerState();
@@ -135,7 +135,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       super.componentWillMount();
     }
 
-    this.analogAudio.addEventListener("deviceListChanged", this.updateAnalogDevices);
+    this.audioIn.addEventListener("deviceListChanged", this.updateAudioInDevices);
 
     if (navigator.requestMIDIAccess) {
       navigator.requestMIDIAccess().then(webMidi => {
@@ -200,7 +200,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     }
     this.midiEventEmitter.removeListener(this.myMidiListener);
 
-    this.analogAudio.removeEventListener("deviceListChanged", this.updateAnalogDevices);
+    this.audioIn.removeEventListener("deviceListChanged", this.updateAudioInDevices);
   }
 
   public render() {
@@ -229,8 +229,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             {this.renderSimulationToggleSwitch()}
             <TimingStatsView getTimings={this.getTimings} message2={this.getMessage2}/>
           </div>
-          <div className="LedStudioRoot-analogAudioViewContainer">
-            <AnalogAudioView ref={this.setAnalogAudioViewRef}/>
+          <div className="LedStudioRoot-audioInViewContainer">
+            <AudioInView ref={this.setAudioInViewRef}/>
           </div>
           <div className="LedStudioRoot-controllerStateContainer">
             <PianoView
@@ -282,13 +282,13 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             visualizationNames={this.props.visualizationNames}
             selectedVisualizationName={this.state.visualizationName}
             midiInputs={this.state.midiInputs}
-            selectedMidiInput={this.state.midiInput}
-            selectedMidiControllerInput={this.state.midiControllerInput}
+            selectedPianoMidiInput={this.state.midiInput}
+            selectedControllerMidiInput={this.state.midiControllerInput}
             midiOutputs={this.state.midiOutputs}
-            selectedMidiOutput={this.state.midiOutput}
+            selectedPianoMidiThru={this.state.midiOutput}
             midiEventEmitters={[this.midiEventEmitter, this.midiControllerEventEmitter]}
-            analogInputs={this.state.analogInputs}
-            selectedAnalogInputId={this.state.selectedAnalogInputId}
+            audioInputs={this.state.audioInputs}
+            selectedAudioInputId={this.state.selectedAudioInputId}
             selectedBeatControllerType={beatControllerType}
           />
         );
@@ -416,9 +416,9 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   }
 
   private actionManager: AllActions = {
-    setMidiInput: this.setMidiInput,
-    setMidiControllerInput: this.setMidiControllerInput,
-    setMidiOutput: this.setMidiOutput,
+    setPianoMidiInput: this.setMidiInput,
+    setControllerMidiInput: this.setMidiControllerInput,
+    setPianoMidiThru: this.setMidiOutput,
     setSelectedSceneName: (name: string) => {
       if (name !== this.state.scene.name) {
         const scene = valueOrThrow(this.props.scenes.get(name));
@@ -432,10 +432,10 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
         SimulatorStickySettings.set("visualizationName", newValue);
       }
     },
-    setAnalogInputId: (newValue: string | null) => {
-      this.setState({ selectedAnalogInputId: newValue });
-      this.analogAudio.setCurrentDeviceId(newValue);
-      SimulatorStickySettings.set("analogAudioSourceId", newValue);
+    setAudioInputId: (newValue: string | null) => {
+      this.setState({ selectedAudioInputId: newValue });
+      this.audioIn.setCurrentDeviceId(newValue);
+      SimulatorStickySettings.set("audioInSourceId", newValue);
     },
     setBeatControllerType: (newValue: RightSidebar.BeatControllerType) => {
       this.setState({
@@ -515,8 +515,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       const { frameHeatmapValues, frameTimeseriesPoints } = this.state.visualizationRunner.renderFrame(this.state.beatController);
       ++this.framesRenderedSinceLastTimingsCall;
 
-      if (this.analogAudioViewRef) {
-        this.analogAudioViewRef.displayFrequencyData(frameHeatmapValues, frameTimeseriesPoints);
+      if (this.audioInViewRef) {
+        this.audioInViewRef.displayFrequencyData(frameHeatmapValues, frameTimeseriesPoints);
       }
     }
   }
@@ -540,19 +540,19 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     this.renderTimingHelper.addValue(renderMillis);
   }
 
-  private updateAnalogDevices = () => {
-    const isInitialization = (this.state.analogInputs === undefined);
+  private updateAudioInDevices = () => {
+    const isInitialization = (this.state.audioInputs === undefined);
     this.setState({
-      analogInputs: this.analogAudio.inputDevices,
+      audioInputs: this.audioIn.inputDevices,
     });
 
     if (isInitialization) {
-      this.actionManager.setAnalogInputId(this.initialAnalogAudioDeviceId());
+      this.actionManager.setAudioInputId(this.initialAudioInDeviceId());
     }
   }
 
-  private analogAudioViewRef: AnalogAudioView | undefined = undefined;
-  private setAnalogAudioViewRef = (newRef: AnalogAudioView) => this.analogAudioViewRef = newRef;
+  private audioInViewRef: AudioInView | undefined = undefined;
+  private setAudioInViewRef = (newRef: AudioInView) => this.audioInViewRef = newRef;
 
   private controlsViewRef: ControlsView | null = null;
   private setControlsViewRef = (newRef: ControlsView | null) => this.controlsViewRef = newRef;
@@ -579,11 +579,11 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     return valueOrThrow(this.props.scenes.get(name));
   }
 
-  private initialAnalogAudioDeviceId(): string | null {
+  private initialAudioInDeviceId(): string | null {
     return SimulatorStickySettings.get({
-      key: "analogAudioSourceId",
-      defaultValue: this.analogAudio.defaultDeviceId,
-      validateFunc: this.analogAudio.isValidId
+      key: "audioInSourceId",
+      defaultValue: this.audioIn.defaultDeviceId,
+      validateFunc: this.audioIn.isValidId
     });
   }
 
@@ -623,8 +623,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       midiOutput: null,
       midiInputs: [],
       midiOutputs: [],
-      analogInputs: undefined,
-      selectedAnalogInputId: null,
+      audioInputs: undefined,
+      selectedAudioInputId: null,
       audioSource: null,
       simulationEnabled: this.initialSimulationEnabled(),
       beatController: this.initialBeatController()
