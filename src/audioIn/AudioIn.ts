@@ -27,6 +27,15 @@ export default class AudioIn {
     return this.inputDevicesInternal;
   }
 
+  public inputDeviceById(id: string | null): InputDeviceInfo | null {
+    if (id === null) {
+      return null;
+    }
+
+    const i = this.inputDevicesInternal.findIndex(v => v.id === id);
+    return (i === -1 ? null : this.inputDevicesInternal[i]);
+  }
+
   public isValidId = (id: string | null) => {
     if (id === null) {
       return true;

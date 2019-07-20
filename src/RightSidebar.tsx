@@ -16,7 +16,7 @@ export interface Actions {
   setBeatControllerType: (newValue: BeatControllerType) => void;
   setSelectedSceneName: (newValue: string) => void;
   setSelectedVisualizationName: (newValue: string) => void;
-  setAudioInputId: (newValue: string | null) => void;
+  setAudioInput: (newValue: AudioIn.InputDeviceInfo | null) => void;
 }
 
 export type BeatControllerType = "manual" | "ableton";
@@ -34,7 +34,7 @@ interface Props {
   selectedPianoMidiThru: WebMidi.MIDIOutput | null;
   midiEventEmitters: MidiEventEmitter[];
   audioInputs: AudioIn.InputDeviceInfo[] | undefined;
-  selectedAudioInputId: string | null;
+  selectedAudioInput: AudioIn.InputDeviceInfo | null;
   selectedBeatControllerType: BeatControllerType;
 }
 
@@ -89,24 +89,13 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       return "(initializing audio in...)";
     }
 
-    // TODO clean this up to work more like the MIDI options
-    const ids = audioInputs.map(v => v.id);
     return this.renderDropDownOption({
       label: "Audio in",
-      currentOption: this.props.selectedAudioInputId || "",
-      options: ["", ...ids],
-      optionToValueFunc: identity,
-      optionToLabelFunc: (opt => {
-        const i = ids.indexOf(opt);
-        if (opt === "" || i === -1) {
-          return "<none>";
-        } else {
-          return audioInputs[i].name;
-        }
-      }),
-      onChange: (idOrEmpty: string) => {        
-        this.props.actions.setAudioInputId(idOrEmpty === "" ? null : idOrEmpty);
-      }
+      currentOption: this.props.selectedAudioInput,
+      options: [null, ...audioInputs],
+      optionToValueFunc: opt => (opt === null ? "" : opt.id),
+      optionToLabelFunc: opt => (opt === null ? "<none>" : opt.name),
+      onChange: this.props.actions.setAudioInput
     });
   }
 

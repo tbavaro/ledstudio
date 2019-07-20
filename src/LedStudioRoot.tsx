@@ -70,7 +70,7 @@ interface State {
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
   audioInputs: AudioIn.InputDeviceInfo[] | undefined;
-  selectedAudioInputId: string | null;
+  selectedAudioInput: AudioIn.InputDeviceInfo | null;
   audioSource: AudioNode | null;
   visualizerExtraDisplay: HTMLElement | null;
   simulationEnabled: boolean;
@@ -288,7 +288,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             selectedPianoMidiThru={this.state.midiOutput}
             midiEventEmitters={[this.midiEventEmitter, this.midiControllerEventEmitter]}
             audioInputs={this.state.audioInputs}
-            selectedAudioInputId={this.state.selectedAudioInputId}
+            selectedAudioInput={this.state.selectedAudioInput}
             selectedBeatControllerType={beatControllerType}
           />
         );
@@ -432,10 +432,11 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
         SimulatorStickySettings.set("visualizationName", newValue);
       }
     },
-    setAudioInputId: (newValue: string | null) => {
-      this.setState({ selectedAudioInputId: newValue });
-      this.audioIn.setCurrentDeviceId(newValue);
-      SimulatorStickySettings.set("audioInSourceId", newValue);
+    setAudioInput: (newValue: AudioIn.InputDeviceInfo | null) => {
+      this.setState({ selectedAudioInput: newValue });
+      const newId = newValue === null ? null : newValue.id;
+      this.audioIn.setCurrentDeviceId(newId);
+      SimulatorStickySettings.set("audioInSourceId", newId);
     },
     setBeatControllerType: (newValue: RightSidebar.BeatControllerType) => {
       this.setState({
@@ -550,7 +551,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     });
 
     if (isInitialization) {
-      this.actionManager.setAudioInputId(this.initialAudioInDeviceId());
+      this.actionManager.setAudioInput(this.initialAudioInDevice());
     }
   }
 
@@ -582,12 +583,13 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     return valueOrThrow(this.props.scenes.get(name));
   }
 
-  private initialAudioInDeviceId(): string | null {
-    return SimulatorStickySettings.get({
+  private initialAudioInDevice(): AudioIn.InputDeviceInfo | null {
+    const id = SimulatorStickySettings.get({
       key: "audioInSourceId",
       defaultValue: this.audioIn.defaultDeviceId,
       validateFunc: this.audioIn.isValidId
     });
+    return this.audioIn.inputDeviceById(id);
   }
 
   private initialSimulationEnabled(): boolean {
@@ -627,7 +629,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       midiInputs: [],
       midiOutputs: [],
       audioInputs: undefined,
-      selectedAudioInputId: null,
+      selectedAudioInput: null,
       audioSource: null,
       simulationEnabled: this.initialSimulationEnabled(),
       beatController: this.initialBeatController()
