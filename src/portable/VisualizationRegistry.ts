@@ -17,17 +17,17 @@ export class VisualizationRegistryBuilder {
     return this.registry;
   }
 
-  public add(groupName: string, name: string, factory: Visualization.Factory) {
+  public add(groupName: string, name: string, ctor: Visualization.Constructor) {
     if (this.built) {
       throw new Error("can't add after registry has been built");
     }
-    this.registry.add(groupName, name, factory);
+    this.registry.add(groupName, name, ctor);
   }
 }
 
 class VisualizationRegistryImpl implements VisualizationRegistry {
   private readonly groupedNames: Map<string, string[]> = new Map();
-  private readonly flatMap: Map<string, Visualization.Factory> = new Map();
+  private readonly flatMap: Map<string, Visualization.Constructor> = new Map();
   private cachedGroupNames: string[] | undefined;
   
   public get groupNames() {
@@ -42,11 +42,11 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
   }
 
   public createVisualization(visualizationName: string, config: Visualization.Config) {
-    const factory = valueOrThrow(this.flatMap.get(visualizationName));
-    return new factory(config);
+    const ctor = valueOrThrow(this.flatMap.get(visualizationName));
+    return new ctor(config);
   }
 
-  public add(groupName: string, name: string, factory: Visualization.Factory) {
+  public add(groupName: string, name: string, ctor: Visualization.Constructor) {
     // clear caches
     this.cachedGroupNames = undefined;
 
@@ -64,6 +64,6 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
     visNamesInGroup.push(name);
 
     // add
-    this.flatMap.set(name, factory);
+    this.flatMap.set(name, ctor);
   }
 }

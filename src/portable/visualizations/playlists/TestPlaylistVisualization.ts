@@ -9,9 +9,9 @@ export default class TestPlaylistVisualization extends PlaylistVisualization {
   constructor(config: Visualization.Config) {
     super(config, {
       visualizations: [
-        {name: "Rainbow", factory: PatternRainbowVisualization, duration: 5},
-        {name: "Zoom", factory: PatternZoomVisualization, duration: 5},
-        {name: "Marquee", factory: PatternMarqueeVisualization, duration: 5},
+        {displayName: "Rainbow", visualization: PatternRainbowVisualization, duration: 5},
+        {displayName: "Zoom", visualization: PatternZoomVisualization, duration: 5},
+        {displayName: "Marquee", visualization: PatternMarqueeVisualization, duration: 5},
       ]
     });
   }

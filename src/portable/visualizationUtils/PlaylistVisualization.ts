@@ -9,8 +9,8 @@ function branchAudioNode(audioNode: AudioNode) {
 const BASE_TRANSITION_TIME_MS = 5000;
 
 export interface PlaylistEntry {
-  name: string;
-  factory: Visualization.Factory;
+  displayName: string;
+  visualization: Visualization.Constructor;
   duration: number;
 }
 
@@ -53,7 +53,7 @@ export class PlaylistVisualization extends Visualization.default {
 
     const element = document.createElement("div");
     const labelElement = document.createElement("div");
-    labelElement.innerText = entry.name;
+    labelElement.innerText = entry.displayName;
     labelElement.style.backgroundColor = "gray";
     labelElement.style.color = "white";
     labelElement.style.fontSize = "12px";
@@ -75,7 +75,7 @@ export class PlaylistVisualization extends Visualization.default {
       audioSource: this.currentBranchedAudioNode
     };
 
-    const vis = new entry.factory(newConfig);
+    const vis = new entry.visualization(newConfig);
     this.lastVisualization = this.currentVisualization;
     this.currentVisualization = vis;
     this.timeAtSwitch = Date.now();

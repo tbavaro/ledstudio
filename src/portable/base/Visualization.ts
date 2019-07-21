@@ -156,4 +156,4 @@ export class DerezVisualization extends Visualization {
   }
 }
 
-export type Factory = new (config: Config) => Visualization;
+export type Constructor = new (config: Config) => Visualization;
