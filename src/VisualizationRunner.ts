@@ -3,6 +3,7 @@ import ControllerState from "./portable/base/ControllerState";
 import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
 import * as Visualization from "./portable/base/Visualization";
+import { VisualizationRegistry } from "./portable/VisualizationRegistry";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
@@ -275,7 +276,8 @@ export default class VisualizationRunner {
   private readonly signalsHelper: SignalsHelper;
 
   constructor(attrs: {
-    visualizationFactory: Visualization.Factory,
+    visualizationRegistry: VisualizationRegistry,
+    visualizationName: string,
     scene: Scene,
     audioSource: AudioNode,
     setVisualizerExtraDisplay: (element: HTMLElement | null) => void,
@@ -319,7 +321,7 @@ export default class VisualizationRunner {
         attrs.setVisualizerExtraDisplay(null);
       }
     };
-    this.visualization = attrs.visualizationFactory.create(visualizationConfig);
+    this.visualization = attrs.visualizationRegistry.createVisualization(attrs.visualizationName, visualizationConfig);
     this.timingHelper = new MovingAverageHelper(20);
     this.adjustedLedRows = this.visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
     this.frameContext = new MyFrameContext();

@@ -133,7 +133,7 @@ export function valueOrThrow<T>(valueOrUndefined: T | undefined): T {
   return valueOrUndefined;
 }
 
-function first<T>(iterator: Iterable<T>): T {
+export function first<T>(iterator: Iterable<T>): T {
   const it = iterator[Symbol.iterator]();
   const n = it.next();
   if (n.done) {

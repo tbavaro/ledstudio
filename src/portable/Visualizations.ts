@@ -1,4 +1,5 @@
 import * as Visualization from "./base/Visualization";
+import { VisualizationRegistryFactory } from "./VisualizationRegistry";
 
 import BeatRainVisualization from "./visualizations/BeatRainVisualization";
 import { BurrowPlaylist } from "./visualizations/BurrowPlaylistVisualization";
@@ -78,10 +79,7 @@ const factories: Visualization.Factory[] = [
   TestVisualizerExtraDisplayVisualization
 ];
 
-export const registry = new Map<string, Visualization.Factory>();
-factories.forEach(f => {
-  if (registry.has(f.name)) {
-    throw new Error(`duplicate visualization name: ${f.name}`);
-  }
-  registry.set(f.name, f);
-});
+const registryFactory = new VisualizationRegistryFactory();
+factories.forEach(f => registryFactory.add(f));
+
+export const registry = registryFactory.build();

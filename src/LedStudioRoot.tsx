@@ -3,11 +3,11 @@ import * as React from "react";
 import BeatController from "./portable/base/BeatController";
 import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
-import * as Visualization from "./portable/base/Visualization";
+import { VisualizationRegistry } from "./portable/VisualizationRegistry";
 
 import * as PianoHelpers from "./portable/PianoHelpers";
 
-import { firstKey, MovingAverageHelper, valueOrThrow } from "./util/Utils";
+import { first, firstKey, MovingAverageHelper, valueOrThrow } from "./util/Utils";
 
 import FadecandyClient from "./hardware/FadecandyClient";
 import FadecandyLedSender from "./hardware/FadecandyLedSender";
@@ -51,16 +51,16 @@ const TARGET_FRAME_MILLIS = 1000 / TARGET_FPS;
 
 interface Props {
   scenes: Map<string, Scene>;
-  visualizations: Map<string, Visualization.Factory>;
+  visualizations: VisualizationRegistry;
 }
 
 interface InnerProps extends Props {
   sceneNames: string[];
-  visualizationNames: string[];
 }
 
 interface State {
   scene: Scene;
+  visualizationGroupName: string;
   visualizationName: string;
   visualizationRunner: VisualizationRunner;
   midiState: Readonly<MidiState>;
@@ -274,12 +274,13 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
       case "loaded":
         const beatControllerType = (this.state.beatController instanceof ManualBeatController) ? "manual" : "ableton";
+        const { visualizationGroupName } = this.state;
         return (
           <RightSidebar.default
             actions={this.actionManager}
             sceneNames={this.props.sceneNames}
             selectedSceneName={this.state.scene.name}
-            visualizationNames={this.props.visualizationNames}
+            visualizationNames={this.props.visualizations.visualizationNamesInGroup(visualizationGroupName)}
             selectedVisualizationName={this.state.visualizationName}
             midiInputs={this.state.midiInputs}
             selectedPianoMidiInput={this.state.midiInput}
@@ -391,9 +392,9 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       }
     };
     this.controllerState.reset();
-    const visualizationFactory = valueOrThrow(this.props.visualizations.get(visualizationName));
     const runner = new VisualizationRunner({
-      visualizationFactory,
+      visualizationRegistry: this.props.visualizations,
+      visualizationName,
       scene,
       audioSource: audioSource || createDummyAudioNode(),
       setVisualizerExtraDisplay,
@@ -566,11 +567,18 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     }
   }
 
+  private initialVisualizationGroupName(): string {
+    return first(this.props.visualizations.groupNames);
+  }
+
   private initialVisualizationName(): string {
+    const groupName = this.initialVisualizationGroupName();
+    const defaultVisualizationName = first(this.props.visualizations.visualizationNamesInGroup(groupName));
+
     return SimulatorStickySettings.get({
       key: "visualizationName",
-      defaultValue: firstKey(this.props.visualizations),
-      validateFunc: v => this.props.visualizations.has(v)
+      defaultValue: defaultVisualizationName,
+      validateFunc: v => this.props.visualizations.visualizationNamesInGroup(groupName).includes(v)
     });
   }
 
@@ -613,7 +621,9 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
   public state = ((): State => {
     const scene = this.initialScene();
+    const visualizationGroupName = this.initialVisualizationGroupName();
     return {
+      visualizationGroupName,
       ...this.configureVisualization(
         this.initialVisualizationName(),
         scene,
@@ -651,7 +661,6 @@ export default class LedStudioRootWrapper extends React.PureComponent<Props, {}>
     return React.createElement(LedStudioRoot, {
       ...this.props,
       sceneNames: Array.from(this.props.scenes.keys()),
-      visualizationNames: Array.from(this.props.visualizations.keys()),
       key
     });
   }
