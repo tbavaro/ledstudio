@@ -8,6 +8,7 @@ import { Signals } from "./util/SignalsHelper";
 // import WindowStats from "../../util/WindowStats";
 // import TimeSeriesBandHelper from "./util/TimeSeriesBandHelper";
 
+const GROUP_NAME = "tests";
 const NAME = "testLevels";
 
 class LevelsHelper {
@@ -114,5 +115,5 @@ class TestBandsVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestBandsVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestBandsVisualization });
 export default factory;

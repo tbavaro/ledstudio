@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:sparkles";
 
 const SPARKLES_PER_SECOND = 300;
@@ -34,5 +35,5 @@ class PatternSparklesVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternSparklesVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternSparklesVisualization });
 export default factory;

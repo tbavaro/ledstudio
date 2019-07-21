@@ -16,6 +16,8 @@ import PulsingRainVisualization from "./PulsingRainVisualization";
 // import SparklesAndFlashesVisualization from "./SparklesAndFlashesVisualization";
 import SplotchesVisualization, { DerezSplotchesVisualizationFactory } from "./SplotchesVisualization";
 import SpreadShootersAudioVisualization, { DerezSpreadShootersAudioVisualizationFactory } from "./SpreadShootersAudioVisualization";
+
+const GROUP_NAME = "playlists";
 const NAME = "burrowPlaylist";
 
 class BurrowPlaylistVisualization extends PlaylistVisualization {
@@ -54,4 +56,8 @@ class BurrowPlaylistVisualization extends PlaylistVisualization {
   }
 }
 
-export const BurrowPlaylist = new Visualization.Factory(NAME, BurrowPlaylistVisualization);
+export const BurrowPlaylist = new Visualization.Factory({
+  groupName: GROUP_NAME,
+  name: NAME,
+  ctor: BurrowPlaylistVisualization
+});

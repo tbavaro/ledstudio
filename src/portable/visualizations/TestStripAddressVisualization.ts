@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "tests";
 const NAME = "testStripAddress";
 
 const CHANNEL_START_COLOR = Colors.WHITE;
@@ -70,5 +71,5 @@ class TestStripAddressVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestStripAddressVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestStripAddressVisualization });
 export default factory;

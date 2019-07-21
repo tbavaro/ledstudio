@@ -7,6 +7,7 @@ import { bracket01 } from "../../util/Utils";
 import { Signals } from "./util/SignalsHelper";
 import { randomPalette } from "./util/Utils";
 
+const GROUP_NAME = "burrow";
 const NAME = "splotches";
 
 const MIN_RADIUS = 20;
@@ -71,7 +72,7 @@ class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, SplotchesVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: SplotchesVisualization });
 export default factory;
 
 class DerezSplotchesVisualization extends Visualization.DerezVisualization {
@@ -80,4 +81,4 @@ class DerezSplotchesVisualization extends Visualization.DerezVisualization {
   }
 }
 
-export const DerezSplotchesVisualizationFactory  = new Visualization.Factory("Derezed Splotches", DerezSplotchesVisualization);
+export const DerezSplotchesVisualizationFactory  = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Splotches", ctor: DerezSplotchesVisualization });

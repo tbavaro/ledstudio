@@ -5,6 +5,7 @@ import * as Visualization from "../base/Visualization";
 import { Signals } from "./util/SignalsHelper";
 import { randomPalette } from "./util/Utils";
 
+const GROUP_NAME = "burrow";
 const NAME = "expandingDashes";
 
 class ExpandingDashesVisualization extends Visualization.default {
@@ -100,5 +101,5 @@ function fudgingFunction(x: number) {
     return x * 0.75 + 0.05;
 }
 
-const factory = new Visualization.Factory(NAME, ExpandingDashesVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: ExpandingDashesVisualization });
 export default factory;

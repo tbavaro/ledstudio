@@ -280,6 +280,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             actions={this.actionManager}
             sceneNames={this.props.sceneNames}
             selectedSceneName={this.state.scene.name}
+            visualizationGroupNames={this.props.visualizations.groupNames}
+            selectedVisualizationGroupName={visualizationGroupName}
             visualizationNames={this.props.visualizations.visualizationNamesInGroup(visualizationGroupName)}
             selectedVisualizationName={this.state.visualizationName}
             midiInputs={this.state.midiInputs}
@@ -416,6 +418,13 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     return values;
   }
 
+  private setSelectedVisualizationName = (newValue: string) => {
+    if (this.state.visualizationName !== newValue) {
+      this.configureVisualization(newValue, this.state.scene, this.state.audioSource);
+      SimulatorStickySettings.set("visualizationName", newValue);
+    }
+  }
+
   private actionManager: AllActions = {
     setPianoMidiInput: this.setMidiInput,
     setControllerMidiInput: this.setMidiControllerInput,
@@ -427,12 +436,15 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
         SimulatorStickySettings.set("sceneName", name);
       }
     },
-    setSelectedVisualizationName: (newValue: string) => {
-      if (this.state.visualizationName !== newValue) {
-        this.configureVisualization(newValue, this.state.scene, this.state.audioSource);
-        SimulatorStickySettings.set("visualizationName", newValue);
+    setSelectedVisualizationGroupName: (newValue: string) => {
+      if (this.state.visualizationGroupName !== newValue) {
+        this.setState({ visualizationGroupName: newValue });
+        const visualizationName = first(this.props.visualizations.visualizationNamesInGroup(newValue));
+        this.setSelectedVisualizationName(visualizationName);
+        SimulatorStickySettings.set("visualizationGroupName", newValue);
       }
     },
+    setSelectedVisualizationName: this.setSelectedVisualizationName,
     setAudioInput: (newValue: AudioIn.InputDeviceInfo | null) => {
       this.setState({ selectedAudioInput: newValue });
       const newId = newValue === null ? null : newValue.id;
@@ -568,7 +580,11 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   }
 
   private initialVisualizationGroupName(): string {
-    return first(this.props.visualizations.groupNames);
+    return SimulatorStickySettings.get({
+      key: "visualizationGroupName",
+      defaultValue: first(this.props.visualizations.groupNames),
+      validateFunc: v => this.props.visualizations.groupNames.includes(v)
+    });
   }
 
   private initialVisualizationName(): string {

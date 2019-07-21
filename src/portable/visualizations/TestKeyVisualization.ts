@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "tests";
 const NAME = "testKey";
 
 const COLOR_PRESSED = Colors.WHITE;
@@ -21,5 +22,5 @@ class TestKeyVisualization extends Visualization.SingleRowVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestKeyVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestKeyVisualization });
 export default factory;

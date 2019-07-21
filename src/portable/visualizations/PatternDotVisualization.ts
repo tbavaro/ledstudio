@@ -3,6 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:dot";
 const RADIUS = 40;
 
@@ -35,7 +36,7 @@ class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternDotVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternDotVisualization });
 export default factory;
 
 class DerezPatternDotVisualization extends Visualization.DerezVisualization {
@@ -44,4 +45,4 @@ class DerezPatternDotVisualization extends Visualization.DerezVisualization {
   }
 }
 
-export const DerezPatternDotVisualizationFactory  = new Visualization.Factory("Derezed Dot", DerezPatternDotVisualization);
+export const DerezPatternDotVisualizationFactory  = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Dot", ctor: DerezPatternDotVisualization });

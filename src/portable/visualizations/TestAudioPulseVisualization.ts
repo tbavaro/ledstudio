@@ -3,6 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 import { bracket } from "../../util/Utils";
 
+const GROUP_NAME = "tests";
 const NAME = "testAudioPulse";
 
 const FFT_SIZE = 128;
@@ -87,5 +88,5 @@ class TestAudioPulseVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestAudioPulseVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestAudioPulseVisualization });
 export default factory;

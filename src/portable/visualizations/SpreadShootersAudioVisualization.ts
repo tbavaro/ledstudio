@@ -5,6 +5,7 @@ import * as Visualization from "../base/Visualization";
 import { Signals } from "./util/SignalsHelper";
 import { randomPalette } from "./util/Utils";
 
+const GROUP_NAME = "burrow";
 const NAME = "spreadShootersAudioVisualization";
 
 interface Info {
@@ -148,7 +149,7 @@ function reverseLedInfo(ledInfos: LedInfo[][]) {
     return retval;
 }
 
-const factory = new Visualization.Factory(NAME, SpreadShootersAudioVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: SpreadShootersAudioVisualization });
 export default factory;
 
 
@@ -158,4 +159,4 @@ class DerezSpreadShootersAudioVisualization extends Visualization.DerezVisualiza
   }
 }
 
-export const DerezSpreadShootersAudioVisualizationFactory = new Visualization.Factory("Derezed Shooters", DerezSpreadShootersAudioVisualization);
+export const DerezSpreadShootersAudioVisualizationFactory = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Shooters", ctor: DerezSpreadShootersAudioVisualization });

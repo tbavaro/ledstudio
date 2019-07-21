@@ -4,6 +4,7 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import { Signals } from "./util/SignalsHelper";
 
+const GROUP_NAME = "burrow";
 const NAME = "sparklesAndFlashes";
 
 const MIN_SPARKLES_PER_SECOND = 0;
@@ -96,5 +97,5 @@ class SparklesAndFlashesVisualization extends Visualization.default {
 
 }
 
-const factory = new Visualization.Factory(NAME, SparklesAndFlashesVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: SparklesAndFlashesVisualization });
 export default factory;

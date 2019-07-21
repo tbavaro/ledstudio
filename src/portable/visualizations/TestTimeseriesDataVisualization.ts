@@ -1,5 +1,6 @@
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "tests";
 const NAME = "testTimeseriesData";
 
 class TestTimeseriesDataVisualization extends Visualization.default {
@@ -27,5 +28,5 @@ class TestTimeseriesDataVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestTimeseriesDataVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestTimeseriesDataVisualization });
 export default factory;

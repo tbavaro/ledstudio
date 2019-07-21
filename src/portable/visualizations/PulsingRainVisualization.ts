@@ -3,6 +3,7 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import { SignalsHelper } from "./util/SignalsHelper";
 
+const GROUP_NAME = "burrow";
 const NAME = "pulsingRain";
 
 const BASE_SPARKLES_PER_SECOND = 200;
@@ -131,5 +132,5 @@ class PulsingRainVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PulsingRainVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PulsingRainVisualization });
 export default factory;

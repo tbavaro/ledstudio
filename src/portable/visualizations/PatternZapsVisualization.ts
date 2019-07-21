@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:zaps";
 
 const DECAY_RATE = 0.005; // per ms
@@ -82,5 +83,5 @@ class PatternZapsVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternZapsVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternZapsVisualization });
 export default factory;

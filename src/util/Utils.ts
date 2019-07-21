@@ -149,3 +149,18 @@ export function firstKey<T>(map: Map<T, any>): T {
 export function identity<T>(v: T): T {
   return v;
 }
+
+export function getOrCreateMap<K1, K2, V>(outerMap: Map<K1, Map<K2, V>>, outerKey: K1): Map<K2, V> {
+  let innerMap = outerMap.get(outerKey);
+  if (innerMap === undefined) {
+    innerMap = new Map();
+    outerMap.set(outerKey, innerMap);
+  }
+  return innerMap;
+}
+
+export function forEachValueInSortedKeyOrder<V>(map: Map<string, V>, func: (value: V) => void) {
+  Array.from(map.keys()).sort().forEach(k => {
+    func(map.get(k) as V);
+  });
+}

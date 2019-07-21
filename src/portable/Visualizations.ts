@@ -1,6 +1,8 @@
 import * as Visualization from "./base/Visualization";
 import { VisualizationRegistryFactory } from "./VisualizationRegistry";
 
+import { forEachValueInSortedKeyOrder, getOrCreateMap } from "../util/Utils";
+
 import BeatRainVisualization from "./visualizations/BeatRainVisualization";
 import { BurrowPlaylist } from "./visualizations/BurrowPlaylistVisualization";
 import CenterSpreadVisualization from "./visualizations/CenterSpreadVisualization";
@@ -80,6 +82,18 @@ const factories: Visualization.Factory[] = [
 ];
 
 const registryFactory = new VisualizationRegistryFactory();
-factories.forEach(f => registryFactory.add(f));
+
+// add the visualizations in sorted groupName+name order
+const map: Map<string, Map<string, Visualization.Factory>> = new Map();
+factories.forEach(f => {
+  const innerMap = getOrCreateMap(map, f.groupName);
+  if (innerMap.has(f.name)) {
+    throw new Error("duplicate name: " + f.name);
+  }
+  innerMap.set(f.name, f);
+});
+forEachValueInSortedKeyOrder(map, groupMap => {
+  forEachValueInSortedKeyOrder(groupMap, visFactory => registryFactory.add(visFactory));
+});
 
 export const registry = registryFactory.build();

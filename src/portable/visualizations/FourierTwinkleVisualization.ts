@@ -4,6 +4,7 @@ import * as Visualization from "../base/Visualization";
 
 import { bracket01, fillArray } from "../../util/Utils";
 
+const GROUP_NAME = "burrow";
 const NAME = "fourierTwinkle";
 
 const NUM_SAMPLES = 512;
@@ -98,5 +99,5 @@ class MyVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, MyVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
 export default factory;

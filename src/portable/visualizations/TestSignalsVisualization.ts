@@ -4,6 +4,7 @@ import { Signals } from "./util/SignalsHelper";
 
 import { valueOrDefault } from "../../util/Utils";
 
+const GROUP_NAME = "tests";
 const NAME = "testSignals";
 
 type KeysOfType<T, TProp> = { [P in keyof T]: T[P] extends TProp ? P : never }[keyof T];
@@ -106,5 +107,5 @@ class MyVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, MyVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
 export default factory;

@@ -3,6 +3,7 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
 
+const GROUP_NAME = "tests";
 const NAME = "testAudioAndAbletonLink";
 
 class TestAudioAndAbletonLink extends Visualization.default {
@@ -47,5 +48,5 @@ class TestAudioAndAbletonLink extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestAudioAndAbletonLink);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestAudioAndAbletonLink });
 export default factory;

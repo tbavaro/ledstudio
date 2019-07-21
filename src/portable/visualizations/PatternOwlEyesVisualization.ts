@@ -2,6 +2,7 @@ import * as Visualization from "../base/Visualization";
 
 import StaticImageVisualization from "./util/StaticImageVisualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:owlEyes";
 
 class PatternOwlEyesVisualization extends StaticImageVisualization {
@@ -10,5 +11,5 @@ class PatternOwlEyesVisualization extends StaticImageVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternOwlEyesVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternOwlEyesVisualization });
 export default factory;

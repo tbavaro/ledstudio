@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:wingFlap";
 
 // const SPEED = 3 / 1000;
@@ -61,5 +62,5 @@ class PatternWingFlapVisualization extends Visualization.DerezVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternWingFlapVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternWingFlapVisualization });
 export default factory;

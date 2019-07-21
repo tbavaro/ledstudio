@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "tests";
 const NAME = "testControllerDial";
 
 class TestControllerDialVisualization extends Visualization.default {
@@ -47,5 +48,5 @@ class TestControllerDialVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestControllerDialVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestControllerDialVisualization });
 export default factory;

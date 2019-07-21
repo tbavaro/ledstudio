@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "tests";
 const NAME = "testAbletonLink";
 
 class TestAbletonLink extends Visualization.default {
@@ -30,5 +31,5 @@ class TestAbletonLink extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestAbletonLink);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestAbletonLink });
 export default factory;

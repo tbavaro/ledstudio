@@ -3,6 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const GROUP_NAME = "tests";
 const NAME = "scope:fft";
 
 const NUM_SAMPLES = 64;
@@ -54,5 +55,5 @@ class MyVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, MyVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
 export default factory;

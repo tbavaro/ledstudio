@@ -5,6 +5,7 @@ import { UnorderedRecycledSet } from "../../util/RecycledSet";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:particleFire";
 
 const MIN_RADIUS = 10;
@@ -76,7 +77,7 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternParticleFireVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternParticleFireVisualization });
 export default factory;
 
 class DerezPatternParticleFireVisualization extends Visualization.DerezVisualization {
@@ -85,4 +86,4 @@ class DerezPatternParticleFireVisualization extends Visualization.DerezVisualiza
   }
 }
 
-export const DerezPatternParticleFireVisualizationFactory = new Visualization.Factory(NAME, DerezPatternParticleFireVisualization);
+export const DerezPatternParticleFireVisualizationFactory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: DerezPatternParticleFireVisualization });

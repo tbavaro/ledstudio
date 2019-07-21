@@ -4,6 +4,7 @@ import * as Visualization from "../base/Visualization";
 
 import * as Utils from "../../util/Utils";
 
+const GROUP_NAME = "burrow:midi";
 const NAME = "glowWave";
 
 const NATIVE_WIDTH = 88;
@@ -108,5 +109,5 @@ class GlowWaveVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, GlowWaveVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: GlowWaveVisualization });
 export default factory;

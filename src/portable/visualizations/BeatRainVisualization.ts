@@ -3,6 +3,7 @@ import * as Scene from "../../scenes/Scene";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "burrow";
 const NAME = "beatRain";
 
 const CONSTANT_SPARKLE_RATE = 0;
@@ -134,5 +135,5 @@ class MyVisualization extends Visualization.DerezVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, MyVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
 export default factory;

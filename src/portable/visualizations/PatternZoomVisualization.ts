@@ -3,6 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:zoom";
 
 const ZOOM_SPEED = 2;
@@ -43,7 +44,7 @@ class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternZoomVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternZoomVisualization });
 export default factory;
 
 class DerezPatternZoomVisualization extends Visualization.DerezVisualization {
@@ -52,4 +53,4 @@ class DerezPatternZoomVisualization extends Visualization.DerezVisualization {
   }
 }
 
-export const DerezPatternZoomVisualizationFactory = new Visualization.Factory("Derezed Zoom", DerezPatternZoomVisualization);
+export const DerezPatternZoomVisualizationFactory = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Zoom", ctor: DerezPatternZoomVisualization });

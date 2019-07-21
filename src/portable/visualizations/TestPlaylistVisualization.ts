@@ -5,6 +5,7 @@ import PatternMarqueeVisualization from "./PatternMarqueeVisualization";
 import PatternRainbowVisualization from "./PatternRainbowVisualization";
 import PatternZoomVisualization from "./PatternZoomVisualization";
 
+const GROUP_NAME = "playlists";
 const NAME = "testPlaylist";
 
 class TestPlaylistVisualization extends PlaylistVisualization {
@@ -19,5 +20,5 @@ class TestPlaylistVisualization extends PlaylistVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestPlaylistVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestPlaylistVisualization });
 export default factory;

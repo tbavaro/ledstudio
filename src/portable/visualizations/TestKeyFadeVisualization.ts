@@ -3,6 +3,7 @@ import * as Visualization from "../base/Visualization";
 
 import * as Utils from "../../util/Utils";
 
+const GROUP_NAME = "tests";
 const NAME = "testKeyFade";
 
 const COLOR_PRESSED = Colors.WHITE;
@@ -50,5 +51,5 @@ class TestKeyFadeVisualization extends Visualization.SingleRowVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestKeyFadeVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestKeyFadeVisualization });
 export default factory;

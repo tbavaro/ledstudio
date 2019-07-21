@@ -3,6 +3,7 @@ import * as Scene from "../../scenes/Scene";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:rain2";
 
 const SPARKLES_PER_SECOND = 200;
@@ -117,5 +118,5 @@ class PatternRain2Visualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternRain2Visualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternRain2Visualization });
 export default factory;

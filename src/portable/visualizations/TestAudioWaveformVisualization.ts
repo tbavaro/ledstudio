@@ -2,6 +2,7 @@ import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 import * as AudioWaveformSampler from "./util/AudioWaveformSampler";
 
+const GROUP_NAME = "tests";
 const NAME = "testAudioWaveform";
 
 const CANVAS_SCALE = 0.5;
@@ -93,5 +94,5 @@ class TestAudioWaveformVisualization extends Visualization.default {
   }
 }
 
-const factory = new Visualization.Factory(NAME, TestAudioWaveformVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestAudioWaveformVisualization });
 export default factory;

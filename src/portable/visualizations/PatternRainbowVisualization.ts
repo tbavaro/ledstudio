@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:rainbow";
 
 const DEFAULT_SPEED = 0.3;
@@ -45,7 +46,7 @@ class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternRainbowVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternRainbowVisualization });
 export default factory;
 
 class DerezPatternRainbowVisualization extends Visualization.DerezVisualization {
@@ -54,4 +55,4 @@ class DerezPatternRainbowVisualization extends Visualization.DerezVisualization 
   }
 }
 
-export const DerezPatternRainbowVisualizationFactory  = new Visualization.Factory("Derezed Rainbow", DerezPatternRainbowVisualization);
+export const DerezPatternRainbowVisualizationFactory  = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Rainbow", ctor: DerezPatternRainbowVisualization });

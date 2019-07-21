@@ -15,6 +15,7 @@ export interface Actions {
   setControllerMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setBeatControllerType: (newValue: BeatControllerType) => void;
   setSelectedSceneName: (newValue: string) => void;
+  setSelectedVisualizationGroupName: (newValue: string) => void;
   setSelectedVisualizationName: (newValue: string) => void;
   setAudioInput: (newValue: AudioIn.InputDeviceInfo | null) => void;
 }
@@ -25,6 +26,8 @@ interface Props {
   actions: Actions;
   sceneNames: ReadonlyArray<string>;
   selectedSceneName: string;
+  visualizationGroupNames: ReadonlyArray<string>;
+  selectedVisualizationGroupName: string;
   visualizationNames: ReadonlyArray<string>;
   selectedVisualizationName: string;
   midiInputs: WebMidi.MIDIInput[];
@@ -44,6 +47,8 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       <div className="RightSidebar">
         <div className="RightSidebar-optionsGroup">
           {this.renderSceneSelector()}
+          <p/>
+          {this.renderVisualizationGroupSelector()}
           {this.renderVisualizationSelector()}
           <p/>
           {this.renderAudioInputDevices()}
@@ -72,6 +77,16 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       options: this.props.sceneNames,
       optionToValueFunc: identity,
       onChange: this.props.actions.setSelectedSceneName
+    });
+  }
+
+  private renderVisualizationGroupSelector() {
+    return this.renderDropDownOption({
+      label: "Vis Group",
+      currentOption: this.props.selectedVisualizationGroupName,
+      options: this.props.visualizationGroupNames,
+      optionToValueFunc: identity,
+      onChange: this.props.actions.setSelectedVisualizationGroupName
     });
   }
 

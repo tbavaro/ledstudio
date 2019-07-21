@@ -1,6 +1,7 @@
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
 
+const GROUP_NAME = "burrow:midi";
 const NAME = "centerSpread";
 const TAIL_LENGTH_CONST = 0.02;
 
@@ -92,5 +93,5 @@ class CenterSpreadVisualization extends Visualization.SingleRowVisualization {
     }
 }
 
-const factory = new Visualization.Factory(NAME, CenterSpreadVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: CenterSpreadVisualization });
 export default factory;

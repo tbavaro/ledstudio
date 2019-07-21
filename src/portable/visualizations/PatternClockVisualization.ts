@@ -2,6 +2,7 @@ import * as Visualization from "../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "./util/AbstractVoronoiMapperVisualization";
 
+const GROUP_NAME = "patterns";
 const NAME = "pattern:clock";
 const DEGREES_PER_SECOND = 180;
 
@@ -32,7 +33,7 @@ class PatternClockVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory(NAME, PatternClockVisualization);
+const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternClockVisualization });
 export default factory;
 
 class DerezPatternClockVisualization extends Visualization.DerezVisualization {
@@ -41,4 +42,4 @@ class DerezPatternClockVisualization extends Visualization.DerezVisualization {
   }
 }
 
-export const DerezPatternClockVisualizationFactory  = new Visualization.Factory("Derezed Clock", DerezPatternClockVisualization);
+export const DerezPatternClockVisualizationFactory  = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Clock", ctor: DerezPatternClockVisualization });

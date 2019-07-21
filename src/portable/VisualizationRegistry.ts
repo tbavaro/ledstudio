@@ -50,7 +50,7 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
     // clear caches
     this.cachedGroupNames = undefined;
 
-    const groupName = "<default>";
+    const groupName = factory.groupName;
     const name = factory.name;
 
     // ensure this vis name is globally unique

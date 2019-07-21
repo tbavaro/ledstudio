@@ -157,12 +157,18 @@ export class DerezVisualization extends Visualization {
 }
 
 export class Factory {
+  public readonly groupName: string;
   public readonly name: string;
   private readonly ctor: new (config: Config) => Visualization;
 
-  constructor(name: string, ctor: new (config: Config) => Visualization) {
-    this.name = name;
-    this.ctor = ctor;
+  constructor(attrs: {
+    groupName: string;
+    name: string;
+    ctor: new (config: Config) => Visualization;
+  }) {
+    this.groupName = attrs.groupName;
+    this.name = attrs.name;
+    this.ctor = attrs.ctor;
   }
 
   public create(config: Config): Visualization {
