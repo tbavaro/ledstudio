@@ -5,9 +5,6 @@ import { UnorderedRecycledSet } from "../../../util/RecycledSet";
 
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
-const GROUP_NAME = "patterns";
-const NAME = "pattern:particleFire";
-
 const MIN_RADIUS = 10;
 const MAX_RADIUS = 30;
 const PARTICLES_PER_SECOND = 35;
@@ -22,7 +19,7 @@ class Particle {
   public color: Colors.Color = Colors.BLACK;
 }
 
-class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualization {
+export default class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualization {
   private numParticlesToAddRemainder = 0;
   private readonly maxDistance: number;
   private readonly particles: UnorderedRecycledSet<Particle>;
@@ -77,13 +74,8 @@ class PatternParticleFireVisualization extends AbstractVoronoiMapperVisualizatio
   }
 }
 
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternParticleFireVisualization });
-export default factory;
-
-class DerezPatternParticleFireVisualization extends Visualization.DerezVisualization {
+export class DerezPatternParticleFireVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new PatternParticleFireVisualization(config), 0.9);
   }
 }
-
-export const DerezPatternParticleFireVisualizationFactory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: DerezPatternParticleFireVisualization });

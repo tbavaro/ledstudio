@@ -3,9 +3,6 @@ import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import { SignalsHelper } from "../../visualizationUtils/SignalsHelper";
 
-const GROUP_NAME = "burrow";
-const NAME = "pulsingRain";
-
 const BASE_SPARKLES_PER_SECOND = 200;
 const SPARKLE_HALF_LIFE_SECONDS = 0.2;
 const FALL_MILLIS = 100;
@@ -61,7 +58,7 @@ class DropHelper {
   }
 }
 
-class PulsingRainVisualization extends Visualization.default {
+export default class PulsingRainVisualization extends Visualization.default {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private numSparklesRemainder = 0;
@@ -131,6 +128,3 @@ class PulsingRainVisualization extends Visualization.default {
     });
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PulsingRainVisualization });
-export default factory;

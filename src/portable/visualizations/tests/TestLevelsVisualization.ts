@@ -8,9 +8,6 @@ import { Signals } from "../../visualizationUtils/SignalsHelper";
 // import WindowStats from "../../util/WindowStats";
 // import TimeSeriesBandHelper from "./util/TimeSeriesBandHelper";
 
-const GROUP_NAME = "tests";
-const NAME = "testLevels";
-
 class LevelsHelper {
   private readonly v: FancyValue = new FancyValue();
   private readonly halfLife: number;
@@ -74,7 +71,7 @@ class MultiLevelHelper {
   }
 }
 
-class TestBandsVisualization extends Visualization.default {
+export default class TestBandsVisualization extends Visualization.default {
   // private readonly valueTS: Visualization.TimeSeriesValue;
 
   private readonly lowTS: Visualization.TimeSeriesValue;
@@ -114,6 +111,3 @@ class TestBandsVisualization extends Visualization.default {
     this.ledRows.get(this.ledRows.length - 1).fill(Colors.hsv(240, 0.5, this.lowTS.value));
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestBandsVisualization });
-export default factory;

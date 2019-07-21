@@ -1,13 +1,10 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 
-const GROUP_NAME = "patterns";
-const NAME = "pattern:rainbow";
-
 const DEFAULT_SPEED = 0.3;
 const MAX_SPEED = 1;
 
-class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
+export default class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
   private offset = 0;
   private width = 88; // pixels per 360 degrees
 
@@ -46,13 +43,8 @@ class PatternRainbowVisualization extends Visualization.SingleRowVisualization {
   }
 }
 
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternRainbowVisualization });
-export default factory;
-
-class DerezPatternRainbowVisualization extends Visualization.DerezVisualization {
+export class DerezPatternRainbowVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new PatternRainbowVisualization(config), 0.92);
   }
 }
-
-export const DerezPatternRainbowVisualizationFactory  = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Rainbow", ctor: DerezPatternRainbowVisualization });

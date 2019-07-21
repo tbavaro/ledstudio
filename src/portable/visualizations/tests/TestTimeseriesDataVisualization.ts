@@ -1,9 +1,6 @@
 import * as Visualization from "../../base/Visualization";
 
-const GROUP_NAME = "tests";
-const NAME = "testTimeseriesData";
-
-class TestTimeseriesDataVisualization extends Visualization.default {
+export default class TestTimeseriesDataVisualization extends Visualization.default {
   private phase = 0;
 
   private readonly aTimeSeries: Visualization.TimeSeriesValue;
@@ -27,6 +24,3 @@ class TestTimeseriesDataVisualization extends Visualization.default {
     this.cTimeSeries.value = ((this.phase * 10) % (Math.PI * 2) < Math.PI) ? 0.5 : NaN;
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestTimeseriesDataVisualization });
-export default factory;

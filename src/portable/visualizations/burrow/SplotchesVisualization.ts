@@ -7,13 +7,10 @@ import { randomPalette } from "../../visualizationUtils/Utils";
 
 import { bracket01 } from "../../../util/Utils";
 
-const GROUP_NAME = "burrow";
-const NAME = "splotches";
-
 const MIN_RADIUS = 20;
 const MAX_RADIUS = 40;
 
-class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
+export default class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
   private lastFrameBeatsCount: number | undefined;
   private palette: number[];
   private lastPaletteSwap: number;
@@ -72,13 +69,8 @@ class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: SplotchesVisualization });
-export default factory;
-
-class DerezSplotchesVisualization extends Visualization.DerezVisualization {
+export class DerezSplotchesVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new SplotchesVisualization(config), 0.75);
   }
 }
-
-export const DerezSplotchesVisualizationFactory  = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Splotches", ctor: DerezSplotchesVisualization });

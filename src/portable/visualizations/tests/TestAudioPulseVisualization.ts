@@ -3,9 +3,6 @@ import * as Visualization from "../../base/Visualization";
 
 import { bracket } from "../../../util/Utils";
 
-const GROUP_NAME = "tests";
-const NAME = "testAudioPulse";
-
 const FFT_SIZE = 128;
 const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
 const USE_LOWPASS_FILTER = false;
@@ -48,7 +45,7 @@ class BasicFFTHelper {
   }
 }
 
-class TestAudioPulseVisualization extends Visualization.default {
+export default class TestAudioPulseVisualization extends Visualization.default {
   private readonly fft: BasicFFTHelper | null;
   private readonly pulseValueTimeSeries: Visualization.TimeSeriesValue;
 
@@ -87,6 +84,3 @@ class TestAudioPulseVisualization extends Visualization.default {
     this.pulseValueTimeSeries.value = pulseValue;
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestAudioPulseVisualization });
-export default factory;

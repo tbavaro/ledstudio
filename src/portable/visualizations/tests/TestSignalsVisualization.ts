@@ -4,12 +4,9 @@ import { Signals } from "../../visualizationUtils/SignalsHelper";
 
 import { valueOrDefault } from "../../../util/Utils";
 
-const GROUP_NAME = "tests";
-const NAME = "testSignals";
-
 type KeysOfType<T, TProp> = { [P in keyof T]: T[P] extends TProp ? P : never }[keyof T];
 
-class MyVisualization extends Visualization.default {
+export default class MyVisualization extends Visualization.default {
   private readonly signals: Signals;
 
   private readonly updateFuncs: Array<() => void>;
@@ -106,6 +103,3 @@ class MyVisualization extends Visualization.default {
     });
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
-export default factory;

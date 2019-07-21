@@ -3,10 +3,7 @@ import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import * as AudioWaveformSampler from "../../visualizationUtils/AudioWaveformSampler";
 
-const GROUP_NAME = "tests";
-const NAME = "testAudioAndAbletonLink";
-
-class TestAudioAndAbletonLink extends Visualization.default {
+export default class TestAudioAndAbletonLink extends Visualization.default {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly loudnessTimeSeries: Visualization.TimeSeriesValue;
@@ -47,6 +44,3 @@ class TestAudioAndAbletonLink extends Visualization.default {
     this.currentRMSAmplitudeTimeSeries.value = this.analyserHelpers.direct.currentRMSAmplitude;
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestAudioAndAbletonLink });
-export default factory;

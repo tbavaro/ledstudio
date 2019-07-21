@@ -1,12 +1,10 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 
-const GROUP_NAME = "patterns";
-const NAME = "pattern:marquee";
 const LED_SEPARATION = 3;
 const SPEED = 10; // LEDs per second
 
-class PatternMarqueeVisualization extends Visualization.default {
+export default class PatternMarqueeVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private phase = 0;
 
@@ -31,6 +29,3 @@ class PatternMarqueeVisualization extends Visualization.default {
     });
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternMarqueeVisualization });
-export default factory;

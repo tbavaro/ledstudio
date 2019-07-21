@@ -3,9 +3,6 @@ import * as Scene from "../../../scenes/Scene";
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 
-const GROUP_NAME = "burrow";
-const NAME = "beatRain";
-
 const CONSTANT_SPARKLE_RATE = 0;
 const MIN_SPARKLES_PER_BEAT = 5;
 const MAX_SPARKLES_PER_BEAT = 40;
@@ -129,11 +126,8 @@ class PureVisualization extends Visualization.default {
   }
 }
 
-class MyVisualization extends Visualization.DerezVisualization {
+export default class MyVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new PureVisualization(config), DEREZ);
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
-export default factory;

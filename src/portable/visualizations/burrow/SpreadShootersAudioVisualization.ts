@@ -5,9 +5,6 @@ import * as Visualization from "../../base/Visualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
 import { randomPalette } from "../../visualizationUtils/Utils";
 
-const GROUP_NAME = "burrow";
-const NAME = "spreadShootersAudioVisualization";
-
 interface Info {
     time: number;
     rib: number;
@@ -29,7 +26,7 @@ interface SparkleInfo {
 
 const BASE_SHOOTER_PER_S = 4.0;
 
-class SpreadShootersAudioVisualization extends Visualization.default {
+export default class SpreadShootersAudioVisualization extends Visualization.default {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private ezTS: Visualization.EasyTimeSeriesValueSetters;
@@ -149,14 +146,8 @@ function reverseLedInfo(ledInfos: LedInfo[][]) {
     return retval;
 }
 
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: SpreadShootersAudioVisualization });
-export default factory;
-
-
-class DerezSpreadShootersAudioVisualization extends Visualization.DerezVisualization {
+export class DerezSpreadShootersAudioVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new SpreadShootersAudioVisualization(config), 0.82);
   }
 }
-
-export const DerezSpreadShootersAudioVisualizationFactory = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Shooters", ctor: DerezSpreadShootersAudioVisualization });

@@ -1,9 +1,6 @@
 import * as Visualization from "../../base/Visualization";
 
-const GROUP_NAME = "tests";
-const NAME = "testVisualizerExtraDisplay";
-
-class TestVisualizerExtraDisplayVisualization extends Visualization.default {
+export default class TestVisualizerExtraDisplayVisualization extends Visualization.default {
   private element: HTMLDivElement;
   private totalMillis = 0;
 
@@ -23,6 +20,3 @@ class TestVisualizerExtraDisplayVisualization extends Visualization.default {
     this.element.innerText = `total millis: ${Math.floor(this.totalMillis)}`;
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestVisualizerExtraDisplayVisualization });
-export default factory;

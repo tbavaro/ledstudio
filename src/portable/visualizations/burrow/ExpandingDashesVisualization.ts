@@ -5,11 +5,7 @@ import * as Visualization from "../../base/Visualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
 import { randomPalette } from "../../visualizationUtils/Utils";
 
-const GROUP_NAME = "burrow";
-const NAME = "expandingDashes";
-
-class ExpandingDashesVisualization extends Visualization.default {
-
+export default class ExpandingDashesVisualization extends Visualization.default {
     private regularPalette: Colors.Color[];
     private dropPalette: Colors.Color[];
     private readonly wingDashPaires: number[];
@@ -100,6 +96,3 @@ class ExpandingDashesVisualization extends Visualization.default {
 function fudgingFunction(x: number) {
     return x * 0.75 + 0.05;
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: ExpandingDashesVisualization });
-export default factory;

@@ -1,10 +1,7 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 
-const GROUP_NAME = "tests";
-const NAME = "testControllerDial";
-
-class TestControllerDialVisualization extends Visualization.default {
+export default class TestControllerDialVisualization extends Visualization.default {
   private readonly rDial: Visualization.DialControl;
   private readonly gDial: Visualization.DialControl;
   private readonly bDial: Visualization.DialControl;
@@ -47,6 +44,3 @@ class TestControllerDialVisualization extends Visualization.default {
     this.timeSerieses.blue.value = bValue;
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestControllerDialVisualization });
-export default factory;

@@ -3,13 +3,10 @@ import * as Visualization from "../../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
-const GROUP_NAME = "patterns";
-const NAME = "pattern:zoom";
-
 const ZOOM_SPEED = 2;
 const RADIUS_STEP = 15;
 
-class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
+export default class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   private drawCircle(radius: number, color: Colors.Color) {
@@ -44,13 +41,8 @@ class PatternZoomVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternZoomVisualization });
-export default factory;
-
-class DerezPatternZoomVisualization extends Visualization.DerezVisualization {
+export class DerezPatternZoomVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new PatternZoomVisualization(config), 0.9);
   }
 }
-
-export const DerezPatternZoomVisualizationFactory = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Zoom", ctor: DerezPatternZoomVisualization });

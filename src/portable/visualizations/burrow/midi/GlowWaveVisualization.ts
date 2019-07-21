@@ -4,9 +4,6 @@ import * as Visualization from "../../../base/Visualization";
 
 import * as Utils from "../../../../util/Utils";
 
-const GROUP_NAME = "burrow:midi";
-const NAME = "glowWave";
-
 const NATIVE_WIDTH = 88;
 const ROW_FADE_FACTOR = 0.6;
 
@@ -41,7 +38,7 @@ interface FadingColor {
   brightness: number;
 }
 
-class GlowWaveVisualization extends Visualization.default {
+export default class GlowWaveVisualization extends Visualization.default {
   private readonly pressedKeyColors = new Map<number, FadingColor>();
   private readonly fadeFactors: number[];
   private readonly nativeRows: ColorRow[];
@@ -108,6 +105,3 @@ class GlowWaveVisualization extends Visualization.default {
     });
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: GlowWaveVisualization });
-export default factory;

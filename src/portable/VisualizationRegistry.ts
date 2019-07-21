@@ -43,7 +43,7 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
 
   public createVisualization(visualizationName: string, config: Visualization.Config) {
     const factory = valueOrThrow(this.flatMap.get(visualizationName));
-    return factory.create(config);
+    return new factory(config);
   }
 
   public add(groupName: string, name: string, factory: Visualization.Factory) {

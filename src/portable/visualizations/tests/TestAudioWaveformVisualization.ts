@@ -2,9 +2,6 @@ import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import * as AudioWaveformSampler from "../../visualizationUtils/AudioWaveformSampler";
 
-const GROUP_NAME = "tests";
-const NAME = "testAudioWaveform";
-
 const CANVAS_SCALE = 0.5;
 
 class FloatDataCanvasHelper {
@@ -53,7 +50,7 @@ class FloatDataCanvasHelper {
   }
 }
 
-class TestAudioWaveformVisualization extends Visualization.default {
+export default class TestAudioWaveformVisualization extends Visualization.default {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly canvasHelper: FloatDataCanvasHelper | null;
 
@@ -93,6 +90,3 @@ class TestAudioWaveformVisualization extends Visualization.default {
     this.highTimeSeries.value = this.analyserHelpers.high.currentRMSAmplitude;
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: TestAudioWaveformVisualization });
-export default factory;

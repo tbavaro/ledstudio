@@ -1,8 +1,6 @@
 import * as Colors from "../../../base/Colors";
 import * as Visualization from "../../../base/Visualization";
 
-const GROUP_NAME = "burrow:midi";
-const NAME = "centerSpread";
 const TAIL_LENGTH_CONST = 0.02;
 
 interface Info {
@@ -20,7 +18,7 @@ function randomHue() {
     return Math.floor(Math.random() * 360);
 }
 
-class CenterSpreadVisualization extends Visualization.SingleRowVisualization {
+export default class CenterSpreadVisualization extends Visualization.SingleRowVisualization {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private time = 0;
@@ -92,6 +90,3 @@ class CenterSpreadVisualization extends Visualization.SingleRowVisualization {
         }
     }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: CenterSpreadVisualization });
-export default factory;

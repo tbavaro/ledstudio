@@ -4,9 +4,6 @@ import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
 
-const GROUP_NAME = "burrow";
-const NAME = "sparklesAndFlashes";
-
 const MIN_SPARKLES_PER_SECOND = 0;
 const MAX_SPARKLES_PER_SECOND = 5000;
 const DANCE_HALF_LIFE_SECONDS = 0.2;
@@ -37,7 +34,7 @@ class LinearDecayingValue {
   }
 }
 
-class SparklesAndFlashesVisualization extends Visualization.default {
+export default class SparklesAndFlashesVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private numLedsRemainder = 0;
 
@@ -94,8 +91,4 @@ class SparklesAndFlashesVisualization extends Visualization.default {
     this.lowTS.value = this.signals.audioValues.lowRMS;
     this.highTS.value = this.signals.audioValues.highRMS;
   }
-
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: SparklesAndFlashesVisualization });
-export default factory;

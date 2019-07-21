@@ -3,11 +3,9 @@ import * as Visualization from "../../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
-const GROUP_NAME = "patterns";
-const NAME = "pattern:dot";
 const RADIUS = 40;
 
-class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
+export default class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
   private phase = 0;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
@@ -36,13 +34,8 @@ class PatternDotVisualization extends AbstractVoronoiMapperVisualization {
   }
 }
 
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: PatternDotVisualization });
-export default factory;
-
-class DerezPatternDotVisualization extends Visualization.DerezVisualization {
+export class DerezPatternDotVisualization extends Visualization.DerezVisualization {
   constructor(config: Visualization.Config) {
     super(new PatternDotVisualization(config), 0.9);
   }
 }
-
-export const DerezPatternDotVisualizationFactory  = new Visualization.Factory({ groupName: GROUP_NAME, name: "Derezed Dot", ctor: DerezPatternDotVisualization });

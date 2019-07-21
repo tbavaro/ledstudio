@@ -3,12 +3,9 @@ import * as Visualization from "../../base/Visualization";
 
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
-const GROUP_NAME = "tests";
-const NAME = "scope:waveform";
-
 const NUM_SAMPLES = 1024;
 
-class MyVisualization extends AbstractVoronoiMapperVisualization {
+export default class MyVisualization extends AbstractVoronoiMapperVisualization {
   private readonly analyser: AnalyserNode | null;
   private readonly buffer: Float32Array;
 
@@ -53,6 +50,3 @@ class MyVisualization extends AbstractVoronoiMapperVisualization {
     });
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
-export default factory;

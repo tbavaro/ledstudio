@@ -75,7 +75,7 @@ export class PlaylistVisualization extends Visualization.default {
       audioSource: this.currentBranchedAudioNode
     };
 
-    const vis = entry.factory.create(newConfig);
+    const vis = new entry.factory(newConfig);
     this.lastVisualization = this.currentVisualization;
     this.currentVisualization = vis;
     this.timeAtSwitch = Date.now();

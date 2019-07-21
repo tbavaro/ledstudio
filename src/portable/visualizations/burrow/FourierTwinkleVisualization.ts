@@ -4,9 +4,6 @@ import * as Visualization from "../../base/Visualization";
 
 import { bracket01, fillArray } from "../../../util/Utils";
 
-const GROUP_NAME = "burrow";
-const NAME = "fourierTwinkle";
-
 const NUM_SAMPLES = 512;
 const NUM_SAMPLES_RENDERED = NUM_SAMPLES / 2;
 
@@ -15,7 +12,7 @@ const DECAY_RATE = 4;
 const MIN_THRESHOLD = 0.1;
 const MAX_THRESHOLD = 0.7;
 
-class MyVisualization extends Visualization.default {
+export default class MyVisualization extends Visualization.default {
   private readonly ledAddresses: Array<[number, number]>;
   private readonly analyser: AnalyserNode;
   private readonly buffer: Uint8Array;
@@ -98,6 +95,3 @@ class MyVisualization extends Visualization.default {
     context.setFrameHeatmapValues(this.values.map(v => v.value));
   }
 }
-
-const factory = new Visualization.Factory({ groupName: GROUP_NAME, name: NAME, ctor: MyVisualization });
-export default factory;
