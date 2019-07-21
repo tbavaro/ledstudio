@@ -1,7 +1,8 @@
 import * as React from "react";
 import LedStudioRoot from "./LedStudioRoot";
-import * as Visualizations from "./portable/Visualizations";
 import * as Scenes from "./scenes/Scenes";
+
+import * as Visualizations from "./generated/Visualizations";
 
 export default class App extends React.PureComponent<{}, {}> {
   public render() {

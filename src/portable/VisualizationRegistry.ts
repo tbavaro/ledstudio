@@ -8,7 +8,7 @@ export interface VisualizationRegistry {
   createVisualization(visualizationName: string, config: Visualization.Config): Visualization.default;
 }
 
-export class VisualizationRegistryFactory {
+export class VisualizationRegistryBuilder {
   private readonly registry = new VisualizationRegistryImpl();
   private built = false;
 
@@ -17,11 +17,11 @@ export class VisualizationRegistryFactory {
     return this.registry;
   }
 
-  public add(factory: Visualization.Factory) {
+  public add(groupName: string, name: string, factory: Visualization.Factory) {
     if (this.built) {
       throw new Error("can't add after registry has been built");
     }
-    this.registry.add(factory);
+    this.registry.add(groupName, name, factory);
   }
 }
 
@@ -46,12 +46,9 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
     return factory.create(config);
   }
 
-  public add(factory: Visualization.Factory) {
+  public add(groupName: string, name: string, factory: Visualization.Factory) {
     // clear caches
     this.cachedGroupNames = undefined;
-
-    const groupName = factory.groupName;
-    const name = factory.name;
 
     // ensure this vis name is globally unique
     if (this.flatMap.has(name)) {

@@ -8,7 +8,7 @@ import { VisualizationRegistry } from "./portable/VisualizationRegistry";
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
 
-import { SignalsHelper } from "./portable/visualizations/util/SignalsHelper";
+import { SignalsHelper } from "./portable/visualizationUtils/SignalsHelper";
 
 import BeatController from "./portable/base/BeatController";
 

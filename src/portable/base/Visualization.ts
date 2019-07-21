@@ -1,6 +1,6 @@
 import Scene from "../../scenes/Scene";
 
-import { Signals } from "../visualizations/util/SignalsHelper";
+import { Signals } from "../visualizationUtils/SignalsHelper";
 
 import BeatController from "./BeatController";
 

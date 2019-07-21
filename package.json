@@ -19,7 +19,8 @@
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
     "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
-    "fcserver": "./fcserver/fcserver.sh"
+    "fcserver": "./fcserver/fcserver.sh",
+    "codegen": "./node_modules/.bin/tsc codegen/GenerateVisualizationRegistry.ts && ./node_modules/.bin/node codegen/GenerateVisualizationRegistry.js"
   },
   "devDependencies": {
     "@types/jest": "^24.0.15",
@@ -27,6 +28,8 @@
     "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "@types/webmidi": "^2.0.3",
+    "handlebars": "^4.1.2",
+    "node": "^12.6.0",
     "tsdevtools": "github:tbavaro/tsdevtools#dist",
     "typescript": "^3.5.3"
   },
