@@ -35,21 +35,36 @@ function initializeScene() {
   return renderScene;
 }
 
-class LedHelper {
-  private static readonly LED_RADIUS = 0.014;
+interface LedHelper {
+  setColor(color: Colors.Color): void;
+  removeFromScene(): void;
+}
 
-  private static readonly GEOMETRY = new Three.PlaneBufferGeometry(LedHelper.LED_RADIUS, LedHelper.LED_RADIUS);
+class LedHelperFactory {
+  private readonly renderScene: Three.Scene;
+  private readonly ledGeometry: Three.PlaneBufferGeometry;
 
+  constructor(renderScene: Three.Scene, ledRadius: number) {
+    this.renderScene = renderScene;
+    this.ledGeometry = new Three.PlaneBufferGeometry(ledRadius * 2, ledRadius * 2);
+  }
+
+  public createAt(position: Three.Vector3): LedHelper {
+    return new LedHelperImpl(this.renderScene, this.ledGeometry, position);
+  }
+}
+
+class LedHelperImpl implements LedHelper {
   private static readonly MATERIAL = new Three.MeshBasicMaterial({
     side: Three.DoubleSide
   });
 
   private color: Three.Color;
 
-  constructor(renderScene: Three.Scene, position: Three.Vector3) {
-    const material = LedHelper.MATERIAL.clone();
+  constructor(renderScene: Three.Scene, geometry: Three.PlaneBufferGeometry, position: Three.Vector3) {
+    const material = LedHelperImpl.MATERIAL.clone();
     this.color = material.color;
-    const mesh = new Three.Mesh(LedHelper.GEOMETRY, material);
+    const mesh = new Three.Mesh(geometry, material);
     mesh.position.copy(position);
     mesh.castShadow = false;
     mesh.receiveShadow = false;
@@ -116,9 +131,11 @@ class LedScene {
   private ledHelpers: LedHelper[] = [];
 
   constructor(scene: Scene, renderScene: Three.Scene, doRender: () => void) {
+    const ledHelperFactory = new LedHelperFactory(renderScene, scene.ledRadius);
+
     this.scene = scene;
     scene.leds.forEach(row => row.forEach(led => {
-      this.ledHelpers.push(new LedHelper(renderScene, led.position));
+      this.ledHelpers.push(ledHelperFactory.createAt(led.position));
     }));
 
     this.ledStrip = new LedSceneStrip(this.ledHelpers, doRender);

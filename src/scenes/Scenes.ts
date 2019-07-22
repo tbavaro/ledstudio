@@ -6,7 +6,6 @@ import { promisify } from "util";
 import * as SimulationUtils from "../simulator/SimulationUtils";
 
 import * as Scene from "./Scene";
-import * as SceneUtils from "./SceneUtils";
 
 const FLOOR_SIZE_DEFAULT = 10;
 const FLOOR_MATERIAL = new Three.MeshLambertMaterial({
@@ -61,6 +60,7 @@ interface SceneDef {
   floorSizeOverride?: number;
   extraObjects?: ExtraObjectFunc[];
   leds: LedsDef;
+  ledRadius: number;
 }
 
 // creates a box with the bottom centered at (0,0,0)
@@ -90,10 +90,12 @@ class SceneImpl implements Scene.default {
   private lazyModelPromise?: Promise<Three.Object3D>;
   private displayValues: { [k: string]: string | number } | undefined;
   private cachedDisplayMessage: string | undefined;
+  public readonly ledRadius: number;
 
   constructor(def: SceneDef) {
     this.def = def;
     this.lazyLoadedLeds = undefined;
+    this.ledRadius = def.ledRadius;
   }
 
   public get name() {
@@ -225,15 +227,19 @@ function registerScenes(defs: ReadonlyArray<SceneDef>) {
   });
 }
 
-function makeLedSegments(segments: Array<{
-  numLeds: number;
-  startPoint: Three.Vector3;
-  endPoint: Three.Vector3;
-  hardwareChannel: number;
-}>): LedsDef {
+function makeLedSegments(
+  segments: Array<{
+    numLeds: number;
+    startPoint: Three.Vector3;
+    endPoint: Three.Vector3;
+    hardwareChannel: number;
+  }>,
+  firstRowHint?: number
+): LedsDef {
+  const rowHintOffset = firstRowHint || 0;
   return {
     calculate: () => {
-      return segments.map(segment => {
+      return segments.map((segment, rowIndex) => {
         const positions: Scene.LedInfo[] = [];
         const numLeds = segment.numLeds;
         const step = segment.endPoint.clone();
@@ -246,7 +252,8 @@ function makeLedSegments(segments: Array<{
           const led: Scene.LedInfo = {
             position: position,
             hardwareChannel: segment.hardwareChannel,
-            hardwareIndex: i
+            hardwareIndex: i,
+            rowHint: rowHintOffset + rowIndex
           };
           positions.push(led);
         }
@@ -415,140 +422,6 @@ function createBurrowVenue(attrs: {
   };
 }
 
-function createWingsSceneDef(name: string, ledSpacing: number, ribs: number) {
-  const extraLength = 1 * INCH;
-  const skipFirst = 0.75 * INCH;
-
-  const innerTopLength = 30 * INCH + extraLength;
-  const innerBottomLength = 36 * INCH + extraLength;
-  const spineLength = 24 * INCH;
-  const outerTopLength = 60 * INCH + extraLength;
-  const outerBottomLength = 72 * INCH;
-  const shortenEachSubsequentOuterRibBy = 2 * INCH;
-
-  const centerPointHeight = 57 * INCH; // colombi's shoulders
-
-  const innerTriangle = SceneUtils.triangleFromLengths({
-    verticalLength: spineLength,
-    topSideLength: innerTopLength,
-    bottomSideLength: innerBottomLength
-  });
-  const innerTriangleWidth = SceneUtils.width2D(innerTriangle);
-
-  const calculate = doLazy(() => {
-    const triangleTranslation = new Vector2(-1 * innerTriangleWidth, 0);
-    innerTriangle.forEach(p => p.add(triangleTranslation));
-
-    const outerTriangle = SceneUtils.triangleFromLengths({
-      verticalLength: spineLength,
-      topSideLength: outerTopLength,
-      bottomSideLength: outerBottomLength,
-      flipX: true
-    });
-    outerTriangle.forEach(p => p.add(triangleTranslation));
-
-    const middleCenter = innerTriangle[2];
-    const leftLegTop = innerTriangle[1];
-    const leftLegBottom = innerTriangle[0];
-    const leftWingTip = outerTriangle[2];
-
-    const legPoints = SimulationUtils.pointsFromTo({
-      start: leftLegTop,
-      end: leftLegBottom,
-      spacing: leftLegTop.clone().sub(leftLegBottom).length() / (ribs - 1)
-    });
-
-    const ribCounts: any[] = [];
-
-    const makeChannelLeds = (channel: number, points2d: Vector2[]): Scene.LedInfo[] => {
-      const points3d = SimulationUtils.map2dTo3d({
-        points: points2d,
-        bottomLeft: new Vector3(0, centerPointHeight - innerTriangle[2].y, 1.25),
-        rightDirection: new Vector3(1, 0, 0),
-        upDirection: new Vector3(0, 1, 0)
-      });
-      return points3d.map((p, idx) => ({ position: p, hardwareChannel: channel, hardwareIndex: idx }));
-    };
-
-    const firstChannel = 1;
-    let nextChannel = firstChannel;
-
-    const leftSideLeds = legPoints.map((legPoint, row) => {
-      const innerLeds = makeChannelLeds(nextChannel++, SimulationUtils.pointsFromTo({
-        start: legPoint,
-        end: middleCenter,
-        spacing: ledSpacing,
-        skipFirst: skipFirst,
-        shortenBy: 0.75 * INCH
-      }));
-
-      const outerLeds = makeChannelLeds(nextChannel++, SimulationUtils.pointsFromTo({
-        start: legPoint,
-        end: leftWingTip, // .clone().add(new Vector2(0, -0.01 * row)),
-        spacing: ledSpacing,
-        skipFirst: skipFirst,
-        shortenBy: row * shortenEachSubsequentOuterRibBy
-      }));
-
-      ribCounts.push({
-        i: innerLeds.length,
-        o: outerLeds.length
-      });
-
-      return [...innerLeds, ...outerLeds];
-    });
-
-    const rightSideChannelOffset = nextChannel - firstChannel;
-
-    // mirror left and right side and sort left-to-right
-    const allLeds = leftSideLeds.map(row => {
-      const leds = [...row, ...row.map(led => ({
-        position: new Vector3(-1 * led.position.x, led.position.y, led.position.z),
-        hardwareChannel: led.hardwareChannel + rightSideChannelOffset,
-        hardwareIndex: led.hardwareIndex
-      }))];
-      leds.sort((a, b) => a.position.x - b.position.x);
-      return leds;
-    });
-
-    return {
-      leds: allLeds,
-      displayValues: {
-        ribCounts: JSON.stringify(ribCounts)
-      }
-    };
-  });
-
-  const kbVenue = createBurrowVenue({
-    keyboardInFront: false
-  });
-  kbVenue.extraObjects.push(boxHelper({
-    width: 4 * INCH,
-    height: 65 * INCH,
-    depth: 4 * INCH,
-    translateBy: new Vector3(innerTriangleWidth, 0, 1.32 ),
-  }));
-  kbVenue.extraObjects.push(boxHelper({
-    width: 4 * INCH,
-    height: 65 * INCH,
-    depth: 4 * INCH,
-    translateBy: new Vector3(-1 * innerTriangleWidth, 0, 1.32),
-  }));
-
-  const sceneDef: SceneDef = {
-    ...kbVenue,
-    name,
-    camera: {
-      startPosition: new Vector3(0, 1.4, -2.5),
-      target: new Vector3(0, 1.2, 0)
-    },
-    leds: { calculate: () => calculate().leds },
-    initialDisplayValues: () => calculate().displayValues
-  };
-
-  return sceneDef;
-}
-
 function createRealWingsSceneDef(name: string) {
   const ledSpacing = LedSpacings.NEOPIXEL_30;
 
@@ -667,7 +540,8 @@ function createRealWingsSceneDef(name: string) {
         rowLedInfos.push({
           position: p,
           hardwareChannel: ribIndex + 1,
-          hardwareIndex: ledIndex
+          hardwareIndex: ledIndex,
+          rowHint: rowNum
         });
       });
     });
@@ -709,6 +583,7 @@ function createRealWingsSceneDef(name: string) {
       target: new Vector3(0, 1.2, 0)
     },
     leds: { calculate: () => calculate().leds },
+    ledRadius: 0.007,
     initialDisplayValues: () => calculate().displayValues
   };
 
@@ -742,13 +617,8 @@ registerScenes([
         endPoint: new Three.Vector3(0.6, .71, -0.173),
         hardwareChannel: 3
       }
-    ])
+    ]),
+    ledRadius: 0.0035
   },
-  createWingsSceneDef("burrow:wings30x2", LedSpacings.NEOPIXEL_30, 2),
-  createWingsSceneDef("burrow:wings30x3", LedSpacings.NEOPIXEL_30, 3),
-  createWingsSceneDef("burrow:wings30x4", LedSpacings.NEOPIXEL_30, 4),
-  createRealWingsSceneDef("burrow:wings30x4-real"),
-  createWingsSceneDef("burrow:wings30x5", LedSpacings.NEOPIXEL_30, 5),
-  createWingsSceneDef("burrow:wings30x7", LedSpacings.NEOPIXEL_30, 7),
-  createWingsSceneDef("burrow:wings60x7", LedSpacings.NEOPIXEL_60, 7)
+  createRealWingsSceneDef("burrow:wings30x4-real")
 ]);

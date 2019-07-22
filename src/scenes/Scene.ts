@@ -11,6 +11,7 @@ export interface LedInfo extends PortableLedInfo {
 export interface Scene {
   readonly name: string;
   readonly leds: LedInfo[][];
+  readonly ledRadius: number;
   readonly cameraStartPosition: Three.Vector3;
   readonly cameraTarget: Three.Vector3;
   readonly displayMessage: string;
