@@ -10,10 +10,9 @@ export default class PatternMarqueeVisualization extends Visualization.RowColumn
 
   constructor(config: Visualization.Config) {
     super(config);
-    const scene = config.scene;
     this.ledAddresses = [];
     this.ledRowMetadatas[0].forEach((_, i) => this.ledAddresses.push([0, i]));
-    const bottomRow = scene.ledMetadatas.length - 1;
+    const bottomRow = this.ledRowMetadatas.length - 1;
     const bottomRowCount = this.ledRowMetadatas[bottomRow].length;
     this.ledRowMetadatas[bottomRow].forEach((_, i) => this.ledAddresses.push([bottomRow, bottomRowCount - i - 1]));
   }
