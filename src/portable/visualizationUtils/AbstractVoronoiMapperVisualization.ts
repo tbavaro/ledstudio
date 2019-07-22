@@ -21,15 +21,7 @@ function mapTo2DSingle(point3d: Vector3, vector?: Vector2): Vector2 {
 }
 
 function mapTo2D(points3d: Vector3[]): Vector2[] {
-  if (points3d.length === 0) {
-    return [];
-  }
-
-  const z = points3d[0].z;
   return points3d.map(p => {
-    if (Math.abs(p.z - z) > 0.00001) {
-      throw new Error("all Z values must be the same");
-    }
     return new Vector2(p.x, p.y);
   });
 }
