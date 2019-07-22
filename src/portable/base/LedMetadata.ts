@@ -1,4 +1,4 @@
-export interface LedInfo {
+export interface LedMetadata {
   position: { x: number, y: number, z: number };
   hardwareChannel: number;
   hardwareIndex: number;
@@ -7,4 +7,4 @@ export interface LedInfo {
   rowHint: number;
 }
 
-export default LedInfo;
+export default LedMetadata;

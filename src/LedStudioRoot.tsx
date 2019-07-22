@@ -403,7 +403,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       controllerState: this.controllerState,
       forceUpdateUI: () => this.forceUpdate()
     });
-    runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.leds);
+    runner.hardwareLedSender = new FadecandyLedSender(this.fadecandyClient, scene.ledMetadatas);
     const values = {
       visualizationRunner: runner,
       visualizationName: visualizationName,

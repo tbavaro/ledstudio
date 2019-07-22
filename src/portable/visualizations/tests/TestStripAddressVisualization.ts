@@ -21,7 +21,7 @@ export default class TestStripAddressVisualization extends Visualization.default
     super(config);
 
     let maxChannel = 0;
-    config.scene.leds.forEach(row => row.forEach(led => {
+    config.scene.ledMetadatas.forEach(row => row.forEach(led => {
       if (led.hardwareChannel > maxChannel) {
         maxChannel = led.hardwareChannel;
       }
@@ -49,13 +49,13 @@ export default class TestStripAddressVisualization extends Visualization.default
   }
 
   private colorForPixel(rowNumber: number, rowIndex: number, flashBrightness: number, pulseLocation: number): Colors.Color {
-    const ledInfo = this.ledInfos[rowNumber][rowIndex];
-    const n = ledInfo.hardwareIndex;
+    const ledMetadata = this.ledMetadatas[rowNumber][rowIndex];
+    const n = ledMetadata.hardwareIndex;
 
-    if (n >= SHOW_CHANNEL_NUMBER_AFTER_N_LEDS && n < (ledInfo.hardwareChannel + SHOW_CHANNEL_NUMBER_AFTER_N_LEDS)) {
+    if (n >= SHOW_CHANNEL_NUMBER_AFTER_N_LEDS && n < (ledMetadata.hardwareChannel + SHOW_CHANNEL_NUMBER_AFTER_N_LEDS)) {
       return Colors.multiply(CHANNEL_START_COLOR, flashBrightness);
     } else {
-      const segmentNumber = ledInfo.hardwareChannel;
+      const segmentNumber = ledMetadata.hardwareChannel;
       const hue = (segmentNumber * this.channelHueIncrement) % 360;
       let brightness;
       if ((n - pulseLocation) % PULSE_SEPARATION_LEDS === 0) {

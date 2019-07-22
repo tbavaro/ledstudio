@@ -46,9 +46,9 @@ export default class GlowWaveVisualization extends Visualization.default {
   constructor(config: Visualization.Config) {
     super(config);
     const scene = config.scene;
-    const middleRow = Math.floor(scene.leds.length / 2);
-    this.fadeFactors = scene.leds.map((_, i) => Math.pow((1 - ROW_FADE_FACTOR), Math.abs(i - middleRow)));
-    this.nativeRows = scene.leds.map(r => new ColorRow(r.length));
+    const middleRow = Math.floor(scene.ledMetadatas.length / 2);
+    this.fadeFactors = scene.ledMetadatas.map((_, i) => Math.pow((1 - ROW_FADE_FACTOR), Math.abs(i - middleRow)));
+    this.nativeRows = scene.ledMetadatas.map(r => new ColorRow(r.length));
   }
 
   public render(context: Visualization.FrameContext): void {

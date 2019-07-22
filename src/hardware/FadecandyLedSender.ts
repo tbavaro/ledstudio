@@ -1,6 +1,6 @@
 import * as Colors from "../portable/base/Colors";
 import FixedArray from "../portable/base/FixedArray";
-import LedInfo from "../portable/base/LedInfo";
+import LedMetadata from "../portable/base/LedMetadata";
 
 import { MovingAverageHelper } from "../util/Utils";
 
@@ -12,9 +12,9 @@ export default class FadecandyLedSender {
   private readonly client: FadecandyClient;
   private readonly timingHelper: MovingAverageHelper = new MovingAverageHelper(20);
   private readonly channelToBufferMap: Map<number, Buffer>;
-  private readonly leds: LedInfo[][];
+  private readonly leds: LedMetadata[][];
 
-  constructor(client: FadecandyClient, leds: LedInfo[][]) {
+  constructor(client: FadecandyClient, leds: LedMetadata[][]) {
     this.client = client;
     this.leds = leds;
 

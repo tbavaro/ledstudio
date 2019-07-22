@@ -1,6 +1,6 @@
 import { bracket01 } from "../../../util/Utils";
 import * as Colors from "../../base/Colors";
-import LedInfo from "../../base/LedInfo";
+import LedMetadata from "../../base/LedMetadata";
 import * as Visualization from "../../base/Visualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
 import { randomPalette } from "../../visualizationUtils/Utils";
@@ -39,7 +39,7 @@ export default class SpreadShootersAudioVisualization extends Visualization.defa
     constructor(config: Visualization.Config) {
         super(config);
         this.ezTS = config.createEasyTimeSeriesSet();
-        this.reverseLedInfo = reverseLedInfo(config.scene.leds);
+        this.reverseLedInfo = reverseLedInfo(config.scene.ledMetadatas);
         this.reverseLedInfo.forEach( x=> x);
         this.signals = config.signals;
         this.swapPalettes();
@@ -127,9 +127,9 @@ export default class SpreadShootersAudioVisualization extends Visualization.defa
     }
 }
 
-function reverseLedInfo(ledInfos: LedInfo[][]) {
+function reverseLedInfo(ledMetadatas: LedMetadata[][]) {
     let nChannels = 0;
-    ledInfos.forEach(infoRow => {
+    ledMetadatas.forEach(infoRow => {
         infoRow.forEach(info => {
             nChannels = Math.max(nChannels, info.hardwareChannel);
         });
@@ -138,9 +138,9 @@ function reverseLedInfo(ledInfos: LedInfo[][]) {
     for (let i = 0; i < nChannels; ++i) {
         retval.push([]);
     }
-    ledInfos.forEach((infoRow, rowIdx) => {
-        infoRow.forEach((info, idx) => {
-            retval[info.hardwareChannel-1][info.hardwareIndex] = {rowIdx, idx};
+    ledMetadatas.forEach((rowLedMetadatas, rowIdx) => {
+        rowLedMetadatas.forEach((ledMetadata, idx) => {
+            retval[ledMetadata.hardwareChannel-1][ledMetadata.hardwareIndex] = {rowIdx, idx};
         });
     });
     return retval;

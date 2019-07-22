@@ -12,10 +12,10 @@ export default class PatternMarqueeVisualization extends Visualization.default {
     super(config);
     const scene = config.scene;
     this.ledAddresses = [];
-    scene.leds[0].forEach((_, i) => this.ledAddresses.push([0, i]));
-    const bottomRow = scene.leds.length - 1;
-    const bottomRowCount = scene.leds[bottomRow].length;
-    scene.leds[bottomRow].forEach((_, i) => this.ledAddresses.push([bottomRow, bottomRowCount - i - 1]));
+    scene.ledMetadatas[0].forEach((_, i) => this.ledAddresses.push([0, i]));
+    const bottomRow = scene.ledMetadatas.length - 1;
+    const bottomRowCount = scene.ledMetadatas[bottomRow].length;
+    scene.ledMetadatas[bottomRow].forEach((_, i) => this.ledAddresses.push([bottomRow, bottomRowCount - i - 1]));
   }
 
   public render(context: Visualization.FrameContext): void {

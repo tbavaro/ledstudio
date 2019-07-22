@@ -50,7 +50,7 @@ export default class SparklesAndFlashesVisualization extends Visualization.defau
     this.signals = config.signals;
 
     this.ledAddresses = [];
-    config.scene.leds.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
+    config.scene.ledMetadatas.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
 
     this.lowTS = config.createTimeSeries({ color: Colors.BLUE });
     this.highTS = config.createTimeSeries({ color: Colors.RED });

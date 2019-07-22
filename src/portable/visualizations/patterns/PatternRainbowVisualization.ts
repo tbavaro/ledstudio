@@ -12,7 +12,7 @@ export default class PatternRainbowVisualization extends Visualization.SingleRow
   private readonly speedDial: Visualization.DialControl;
 
   constructor(config: Visualization.Config) {
-    super(config, Math.max.apply(Math, config.scene.leds.map(arr => arr.length)));
+    super(config, Math.max.apply(Math, config.scene.ledMetadatas.map(arr => arr.length)));
 
     this.speedDial = config.createDialControl({
       initialValue: DEFAULT_SPEED,

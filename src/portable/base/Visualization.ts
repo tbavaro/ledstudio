@@ -8,7 +8,7 @@ import ColorRow from "./ColorRow";
 import * as Colors from "./Colors";
 import FancyValue from "./FancyValue";
 import FixedArray from "./FixedArray";
-import LedInfo from "./LedInfo";
+import LedMetadata from "./LedMetadata";
 import PianoState from "./PianoState";
 
 export class TimeSeriesValue extends FancyValue {
@@ -98,13 +98,13 @@ export interface FrameContext {
 
 export default abstract class Visualization {
   public readonly config: Config;
-  public readonly ledInfos: LedInfo[][];
+  public readonly ledMetadatas: LedMetadata[][];
   public readonly ledRows: FixedArray<ColorRow>;
 
   constructor(config: Config) {
     this.config = config;
-    this.ledInfos = config.scene.leds;
-    this.ledRows = new FixedArray(this.ledInfos.length, i => new ColorRow(this.ledInfos[i].length));
+    this.ledMetadatas = config.scene.ledMetadatas;
+    this.ledRows = new FixedArray(this.ledMetadatas.length, i => new ColorRow(this.ledMetadatas[i].length));
   }
 
   public abstract render(context: FrameContext): void;

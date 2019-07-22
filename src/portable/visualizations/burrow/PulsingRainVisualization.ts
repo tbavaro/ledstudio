@@ -22,11 +22,11 @@ interface Sparkle {
 class DropHelper {
   private readonly fallGraph: LedAddress[][][];
 
-  constructor(ledRows: Scene.LedInfo[][]) {
+  constructor(ledRows: Scene.LedMetadata[][]) {
     // construct "fall graph"; every location maps to the 0, 1, or 2 places it could fall to;
     // that is, the next row's nearest LEDs down and to the left/right of this one
     this.fallGraph = ledRows.map((ledRow, rowIndex) => {
-      const nextRow: Scene.LedInfo[] | undefined = ledRows[rowIndex + 1];
+      const nextRow: Scene.LedMetadata[] | undefined = ledRows[rowIndex + 1];
       const makeAddress = (index: number) => ({ rowIndex: rowIndex + 1, index });
       return ledRow.map(led => {
         if (nextRow === undefined || nextRow.length === 0) {
@@ -66,7 +66,7 @@ export default class PulsingRainVisualization extends Visualization.default {
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.dropHelper = new DropHelper(config.scene.leds);
+    this.dropHelper = new DropHelper(config.scene.ledMetadatas);
     this.sparkles = new Set();
 
     this.signals = new SignalsHelper(config.audioSource);

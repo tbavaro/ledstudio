@@ -49,7 +49,7 @@ interface CameraDef {
 }
 
 interface LedsDef {
-  calculate: () => Scene.LedInfo[][];
+  calculate: () => Scene.LedMetadata[][];
 }
 
 interface SceneDef {
@@ -86,7 +86,7 @@ function boxHelper(attrs: {
 
 class SceneImpl implements Scene.default {
   private readonly def: SceneDef;
-  private lazyLoadedLeds?: Scene.LedInfo[][];
+  private lazyLoadedLeds?: Scene.LedMetadata[][];
   private lazyModelPromise?: Promise<Three.Object3D>;
   private displayValues: { [k: string]: string | number } | undefined;
   private cachedDisplayMessage: string | undefined;
@@ -102,7 +102,7 @@ class SceneImpl implements Scene.default {
     return this.def.name;
   }
 
-  public get leds(): Scene.LedInfo[][] {
+  public get ledMetadatas(): Scene.LedMetadata[][] {
     if (this.lazyLoadedLeds === undefined) {
       this.lazyLoadedLeds = this.def.leds.calculate();
       this.setDisplayValue("#leds", this.lazyLoadedLeds.reduce((accum, row) => accum + row.length, 0));
@@ -240,7 +240,7 @@ function makeLedSegments(
   return {
     calculate: () => {
       return segments.map((segment, rowIndex) => {
-        const positions: Scene.LedInfo[] = [];
+        const positions: Scene.LedMetadata[] = [];
         const numLeds = segment.numLeds;
         const step = segment.endPoint.clone();
         step.sub(segment.startPoint);
@@ -249,7 +249,7 @@ function makeLedSegments(
           const position = step.clone();
           position.multiplyScalar(i);
           position.add(segment.startPoint);
-          const led: Scene.LedInfo = {
+          const led: Scene.LedMetadata = {
             position: position,
             hardwareChannel: segment.hardwareChannel,
             hardwareIndex: i,
@@ -532,12 +532,12 @@ function createRealWingsSceneDef(name: string) {
       upDirection: new Vector3(0, 1, 0)
     }));
 
-    const ledInfos: Scene.LedInfo[][] = [[], [], [], []];
+    const ledMetadatas: Scene.LedMetadata[][] = [[], [], [], []];
     positions3d.map((ribPositions, ribIndex) => {
       const rowNum = Math.floor((ribIndex % 8) / 2);
-      const rowLedInfos = ledInfos[rowNum];
+      const rowLedMetadatas = ledMetadatas[rowNum];
       ribPositions.forEach((p, ledIndex) => {
-        rowLedInfos.push({
+        rowLedMetadatas.push({
           position: p,
           hardwareChannel: ribIndex + 1,
           hardwareIndex: ledIndex,
@@ -546,12 +546,12 @@ function createRealWingsSceneDef(name: string) {
       });
     });
 
-    ledInfos.forEach(rowLedInfos => {
-      rowLedInfos.sort((a, b) => (a.position.x - b.position.x));
+    ledMetadatas.forEach(rowLedMetadatas => {
+      rowLedMetadatas.sort((a, b) => (a.position.x - b.position.x));
     });
 
     return {
-      leds: ledInfos,
+      leds: ledMetadatas,
       displayValues: { l: JSON.stringify(ribLengths) }
     };
   });

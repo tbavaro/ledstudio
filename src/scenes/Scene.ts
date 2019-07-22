@@ -1,16 +1,14 @@
 import * as Three from "three";
 
-import PortableLedInfo from "../portable/base/LedInfo";
+import PortableLedMetadata from "../portable/base/LedMetadata";
 
-export interface LedInfo extends PortableLedInfo {
+export interface LedMetadata extends PortableLedMetadata {
   position: Three.Vector3;
-  hardwareChannel: number;
-  hardwareIndex: number;
 }
 
 export interface Scene {
   readonly name: string;
-  readonly leds: LedInfo[][];
+  readonly ledMetadatas: LedMetadata[][];
   readonly ledRadius: number;
   readonly cameraStartPosition: Three.Vector3;
   readonly cameraTarget: Three.Vector3;

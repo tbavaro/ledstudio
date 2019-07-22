@@ -112,14 +112,14 @@ class VoronoiHelper {
   private readonly valuesR: number[];
   private readonly valuesG: number[];
   private readonly valuesB: number[];
-  public readonly ledMapper: (ledInfo: Scene.LedInfo, vector?: Vector2) => Vector2;
+  public readonly ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => Vector2;
 
   constructor(attrs: {
     points: Vector2[],  // pixel coordinates
     width: number,  // pixels
     height: number,  // pixels
     maxDistance: number,  // pixels
-    ledMapper: (ledInfo: Scene.LedInfo, vector?: Vector2) => Vector2
+    ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => Vector2
   }) {
     this.pixelsForPoint = attrs.points.map(_ => []);
     const counts = attrs.points.map(_ => 0);
@@ -229,7 +229,7 @@ function initializeFor(scene: Scene.default): InitializationValues {
     return cachedInitializationValues;
   }
 
-  const allLeds = flatten(scene.leds);
+  const allLeds = flatten(scene.ledMetadatas);
   const leds2d = mapTo2D(allLeds.map(led => led.position));
   const extents = getExtents(leds2d);
   const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
@@ -267,8 +267,8 @@ function initializeFor(scene: Scene.default): InitializationValues {
     width: canvasWidth,
     height: canvasHeight,
     maxDistance: maxDistancePixels,
-    ledMapper: (ledInfo: Scene.LedInfo, vector?: Vector2) => {
-      return mapToCanvas(mapTo2DSingle(ledInfo.position, ledMapperScratchVector), vector);
+    ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => {
+      return mapToCanvas(mapTo2DSingle(ledMetadata.position, ledMapperScratchVector), vector);
     }
   });
 
@@ -288,7 +288,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
   private helper: VoronoiHelper;
   protected canvas: HTMLCanvasElement;
   protected canvasContext: CanvasRenderingContext2D;
-  private allLedInfos: Scene.LedInfo[];
+  private allLedMetadatas: Scene.LedMetadata[];
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -302,7 +302,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     }
     this.canvasContext = ctx;
     config.setExtraDisplay(this.canvas);
-    this.allLedInfos = flatten(config.scene.leds);
+    this.allLedMetadatas = flatten(config.scene.ledMetadatas);
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -318,12 +318,12 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
 
   protected abstract renderToCanvas(context: Visualization.FrameContext): void;
 
-  protected mapTo2d(ledInfo: Scene.LedInfo, vector?: Vector2): Vector2 {
-    return this.helper.ledMapper(ledInfo, vector);
+  protected mapTo2d(ledMetadata: Scene.LedMetadata, vector?: Vector2): Vector2 {
+    return this.helper.ledMapper(ledMetadata, vector);
   }
 
   protected randomLedPixelPosition(vector?: Vector2): Vector2 {
-    const ledInfo = this.allLedInfos[Math.floor(Math.random() * this.allLedInfos.length)];
-    return this.mapTo2d(ledInfo, vector);
+    const ledMetadata = this.allLedMetadatas[Math.floor(Math.random() * this.allLedMetadatas.length)];
+    return this.mapTo2d(ledMetadata, vector);
   }
 }
