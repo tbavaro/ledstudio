@@ -8,7 +8,7 @@ export interface LedMetadata extends PortableLedMetadata {
 
 export interface Scene {
   readonly name: string;
-  readonly ledMetadatas: LedMetadata[][];
+  readonly ledMetadatas: LedMetadata[];
   readonly ledRadius: number;
   readonly cameraStartPosition: Three.Vector3;
   readonly cameraTarget: Three.Vector3;

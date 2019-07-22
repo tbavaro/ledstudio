@@ -13,10 +13,9 @@ export default class PatternZapsVisualization extends Visualization.default {
   constructor(config: Visualization.Config) {
     super(config);
 
-    const scene = config.scene;
     this.ribChannels = [];
     this.channelValues = new Map();
-    scene.ledMetadatas.forEach((rowLeds, rowIndex) => {
+    this.ledRowMetadatas.forEach((rowLeds, rowIndex) => {
       const rowChannels: number[] = [];
       rowLeds.forEach(led => {
         const channel = led.hardwareChannel;
@@ -71,7 +70,7 @@ export default class PatternZapsVisualization extends Visualization.default {
     }
 
     // render
-    this.config.scene.ledMetadatas.forEach((rowLeds, rowIndex) => {
+    this.ledRowMetadatas.forEach((rowLeds, rowIndex) => {
       const ledRow = this.ledRows.get(rowIndex);
       rowLeds.forEach((ledMetadata, index) => {
         ledRow.set(index, this.channelValues.get(ledMetadata.hardwareChannel) || Colors.BLACK);

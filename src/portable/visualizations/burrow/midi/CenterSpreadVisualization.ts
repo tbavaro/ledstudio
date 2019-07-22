@@ -25,7 +25,7 @@ export default class CenterSpreadVisualization extends Visualization.SingleRowVi
     private keyToHue = new Array<number>();
 
     constructor(config: Visualization.Config) {
-        super(config, Math.max.apply(Math, config.scene.ledMetadatas.map(row => row.length)));
+        super(config);
         for(let i = 0; i < this.leds.length; ++i) {
             this.keyToHue[i] = randomHue();
         }

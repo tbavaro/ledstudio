@@ -49,7 +49,7 @@ interface CameraDef {
 }
 
 interface LedsDef {
-  calculate: () => Scene.LedMetadata[][];
+  calculate: () => Scene.LedMetadata[];
 }
 
 interface SceneDef {
@@ -86,7 +86,7 @@ function boxHelper(attrs: {
 
 class SceneImpl implements Scene.default {
   private readonly def: SceneDef;
-  private lazyLoadedLeds?: Scene.LedMetadata[][];
+  private lazyLoadedLeds?: Scene.LedMetadata[];
   private lazyModelPromise?: Promise<Three.Object3D>;
   private displayValues: { [k: string]: string | number } | undefined;
   private cachedDisplayMessage: string | undefined;
@@ -102,10 +102,10 @@ class SceneImpl implements Scene.default {
     return this.def.name;
   }
 
-  public get ledMetadatas(): Scene.LedMetadata[][] {
+  public get ledMetadatas(): Scene.LedMetadata[] {
     if (this.lazyLoadedLeds === undefined) {
       this.lazyLoadedLeds = this.def.leds.calculate();
-      this.setDisplayValue("#leds", this.lazyLoadedLeds.reduce((accum, row) => accum + row.length, 0));
+      this.setDisplayValue("#leds", this.lazyLoadedLeds.length);
     }
     return this.lazyLoadedLeds;
   }
@@ -239,8 +239,8 @@ function makeLedSegments(
   const rowHintOffset = firstRowHint || 0;
   return {
     calculate: () => {
-      return segments.map((segment, rowIndex) => {
-        const positions: Scene.LedMetadata[] = [];
+      const ledMetadatas: Scene.LedMetadata[] = [];
+      segments.forEach((segment, rowIndex) => {
         const numLeds = segment.numLeds;
         const step = segment.endPoint.clone();
         step.sub(segment.startPoint);
@@ -255,10 +255,10 @@ function makeLedSegments(
             hardwareIndex: i,
             rowHint: rowHintOffset + rowIndex
           };
-          positions.push(led);
+          ledMetadatas.push(led);
         }
-        return positions;
       });
+      return ledMetadatas;
     }
   };
 }
@@ -532,22 +532,17 @@ function createRealWingsSceneDef(name: string) {
       upDirection: new Vector3(0, 1, 0)
     }));
 
-    const ledMetadatas: Scene.LedMetadata[][] = [[], [], [], []];
+    const ledMetadatas: Scene.LedMetadata[] = [];
     positions3d.map((ribPositions, ribIndex) => {
       const rowNum = Math.floor((ribIndex % 8) / 2);
-      const rowLedMetadatas = ledMetadatas[rowNum];
       ribPositions.forEach((p, ledIndex) => {
-        rowLedMetadatas.push({
+        ledMetadatas.push({
           position: p,
           hardwareChannel: ribIndex + 1,
           hardwareIndex: ledIndex,
           rowHint: rowNum
         });
       });
-    });
-
-    ledMetadatas.forEach(rowLedMetadatas => {
-      rowLedMetadatas.sort((a, b) => (a.position.x - b.position.x));
     });
 
     return {

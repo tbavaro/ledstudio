@@ -1,5 +1,6 @@
 import Scene from "../../scenes/Scene";
 
+import RowColumnLedMapper from "../visualizationUtils/RowColumnLedMapper";
 import { Signals } from "../visualizationUtils/SignalsHelper";
 
 import BeatController from "./BeatController";
@@ -98,16 +99,32 @@ export interface FrameContext {
 
 export default abstract class Visualization {
   public readonly config: Config;
-  public readonly ledMetadatas: LedMetadata[][];
+  public readonly ledColors: ColorRow;
+
   public readonly ledRows: FixedArray<ColorRow>;
+  public readonly ledRowMetadatas: LedMetadata[][];
+
+  private readonly rowColumnMapper: RowColumnLedMapper;
+
+  // TODO this will go away when Visualizations instantiate their own rowColumnMapper
+  protected usesRowColumnMapper: boolean = true;
 
   constructor(config: Config) {
     this.config = config;
-    this.ledMetadatas = config.scene.ledMetadatas;
-    this.ledRows = new FixedArray(this.ledMetadatas.length, i => new ColorRow(this.ledMetadatas[i].length));
+    this.ledColors = new ColorRow(config.scene.ledMetadatas.length);
+    this.rowColumnMapper = new RowColumnLedMapper(config.scene.ledMetadatas, this.ledColors);
+    this.ledRowMetadatas = this.rowColumnMapper.rowLedMetadatas;
+    this.ledRows = this.rowColumnMapper.ledRows;
   }
 
   public abstract render(context: FrameContext): void;
+
+  // TODO this is only needed temporarily, until Visualizations instantiate their own rowColumnMapper
+  public finishFrame() {
+    if (this.usesRowColumnMapper) {
+      this.rowColumnMapper.finishFrame();
+    }
+  }
 }
 
 export abstract class SingleRowVisualization extends Visualization {
@@ -116,10 +133,15 @@ export abstract class SingleRowVisualization extends Visualization {
   protected readonly length: number;
   protected readonly leds: ColorRow;
 
-  constructor(config: Config, length: number) {
+  constructor(config: Config, overrideLength?: number) {
     super(config);
-    this.length = length;
-    this.leds = new ColorRow(length);
+
+    if (overrideLength === undefined) {
+      this.length = Math.max.apply(Math, this.ledRows.mapToArray(cr => cr.length));
+    } else {
+      this.length = overrideLength;
+    }
+    this.leds = new ColorRow(this.length);
   }
 
   protected abstract renderSingleRow(context: FrameContext): void;

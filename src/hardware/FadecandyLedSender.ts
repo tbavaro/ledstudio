@@ -12,21 +12,21 @@ export default class FadecandyLedSender {
   private readonly client: FadecandyClient;
   private readonly timingHelper: MovingAverageHelper = new MovingAverageHelper(20);
   private readonly channelToBufferMap: Map<number, Buffer>;
-  private readonly leds: LedMetadata[][];
+  private readonly leds: LedMetadata[];
 
-  constructor(client: FadecandyClient, leds: LedMetadata[][]) {
+  constructor(client: FadecandyClient, leds: LedMetadata[]) {
     this.client = client;
     this.leds = leds;
 
     const channelToIndicesMap = new Map<number, number[]>();
-    leds.forEach(row => row.forEach(led => {
+    leds.forEach(led => {
       let indices = channelToIndicesMap.get(led.hardwareChannel);
       if (indices === undefined) {
         indices = [];
         channelToIndicesMap.set(led.hardwareChannel, indices);
       }
       indices.push(led.hardwareIndex);
-    }));
+    });
 
     this.channelToBufferMap = new Map();
     const channelToLedCountMap = new Map<number, number>();
@@ -53,38 +53,32 @@ export default class FadecandyLedSender {
     });
   }
 
-  public send(colorRows: FixedArray<FixedArray<Colors.Color>>) {
+  public send(colorRow: FixedArray<Colors.Color>) {
     this.timingHelper.addTiming(() => {
-      if (colorRows.length !== this.leds.length) {
-        throw new Error("colorRows length doesn't match led row count");
+      // update buffers with these colors
+      const ledRow = this.leds;
+      if (colorRow.length !== ledRow.length) {
+        throw new Error("colorRow length doesn't match led row length");
       }
 
-      // update buffers with these colors
-      colorRows.forEach((colorRow, row) => {
-        const ledRow = this.leds[row];
-        if (colorRow.length !== ledRow.length) {
-          throw new Error("colorRow length doesn't match led row length");
+      colorRow.forEach((color, i) => {
+        const led = ledRow[i];
+        const buffer = this.channelToBufferMap.get(led.hardwareChannel);
+        if (buffer === undefined) {
+          throw new Error("couldn't find buffer for channel");
         }
 
-        colorRow.forEach((color, i) => {
-          const led = ledRow[i];
-          const buffer = this.channelToBufferMap.get(led.hardwareChannel);
-          if (buffer === undefined) {
-            throw new Error("couldn't find buffer for channel");
-          }
-
-          const [r, g, b] = Colors.splitRGB(color);
-          const offset = HEADER_LENGTH + led.hardwareIndex * 3;
-          buffer.writeUInt8(r, offset);
-          buffer.writeUInt8(g, offset + 1);
-          buffer.writeUInt8(b, offset + 2);
-        });
+        const [r, g, b] = Colors.splitRGB(color);
+        const offset = HEADER_LENGTH + led.hardwareIndex * 3;
+        buffer.writeUInt8(r, offset);
+        buffer.writeUInt8(g, offset + 1);
+        buffer.writeUInt8(b, offset + 2);
       });
+    });
 
-      // send the buffers
-      this.channelToBufferMap.forEach(buffer => {
-        this.client.sendData(buffer);
-      });
+    // send the buffers
+    this.channelToBufferMap.forEach(buffer => {
+      this.client.sendData(buffer);
     });
   }
 

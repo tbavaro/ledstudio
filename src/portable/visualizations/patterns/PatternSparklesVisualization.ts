@@ -12,7 +12,7 @@ export default class PatternSparklesVisualization extends Visualization.default 
     super(config);
 
     this.ledAddresses = [];
-    config.scene.ledMetadatas.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
+    this.ledRowMetadatas.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
   }
 
   public render(context: Visualization.FrameContext): void {

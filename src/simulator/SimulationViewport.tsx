@@ -134,9 +134,9 @@ class LedScene {
     const ledHelperFactory = new LedHelperFactory(renderScene, scene.ledRadius);
 
     this.scene = scene;
-    scene.ledMetadatas.forEach(row => row.forEach(led => {
+    scene.ledMetadatas.forEach(led => {
       this.ledHelpers.push(ledHelperFactory.createAt(led.position));
-    }));
+    });
 
     this.ledStrip = new LedSceneStrip(this.ledHelpers, doRender);
   }

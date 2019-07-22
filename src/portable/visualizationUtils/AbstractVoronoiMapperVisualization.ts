@@ -34,12 +34,6 @@ function mapTo2D(points3d: Vector3[]): Vector2[] {
   });
 }
 
-function flatten<T>(arrays: T[][]): T[] {
-  const output: T[] = [];
-  arrays.forEach(arr => arr.forEach(v => output.push(v)));
-  return output;
-}
-
 function createCanvas(width: number, height: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.style.backgroundColor = "black";
@@ -229,7 +223,7 @@ function initializeFor(scene: Scene.default): InitializationValues {
     return cachedInitializationValues;
   }
 
-  const allLeds = flatten(scene.ledMetadatas);
+  const allLeds = scene.ledMetadatas;
   const leds2d = mapTo2D(allLeds.map(led => led.position));
   const extents = getExtents(leds2d);
   const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
@@ -302,18 +296,14 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     }
     this.canvasContext = ctx;
     config.setExtraDisplay(this.canvas);
-    this.allLedMetadatas = flatten(config.scene.ledMetadatas);
+    this.allLedMetadatas = config.scene.ledMetadatas;
+    this.usesRowColumnMapper = false;
   }
 
   public render(context: Visualization.FrameContext): void {
     this.renderToCanvas(context);
     const colors = this.helper.colorsFromCanvas(this.canvas, this.canvasContext);
-    let index = 0;
-    this.ledRows.forEach(leds => {
-      for (let i = 0; i < leds.length; ++i) {
-        leds.set(i, colors.get(index++));
-      }
-    });
+    colors.forEach((color, i) => this.ledColors.set(i, color));
   }
 
   protected abstract renderToCanvas(context: Visualization.FrameContext): void;

@@ -1,6 +1,5 @@
-import * as Scene from "../../../scenes/Scene";
-
 import * as Colors from "../../base/Colors";
+import LedMetadata from "../../base/LedMetadata";
 import * as Visualization from "../../base/Visualization";
 
 const CONSTANT_SPARKLE_RATE = 0;
@@ -26,11 +25,11 @@ interface Sparkle {
 class DropHelper {
   private readonly fallGraph: LedAddress[][][];
 
-  constructor(ledRows: Scene.LedMetadata[][]) {
+  constructor(ledRows: LedMetadata[][]) {
     // construct "fall graph"; every location maps to the 0, 1, or 2 places it could fall to;
     // that is, the next row's nearest LEDs down and to the left/right of this one
     this.fallGraph = ledRows.map((ledRow, rowIndex) => {
-      const nextRow: Scene.LedMetadata[] | undefined = ledRows[rowIndex + 1];
+      const nextRow: LedMetadata[] | undefined = ledRows[rowIndex + 1];
       const makeAddress = (index: number) => ({ rowIndex: rowIndex + 1, index });
       return ledRow.map(led => {
         if (nextRow === undefined || nextRow.length === 0) {
@@ -69,7 +68,7 @@ class PureVisualization extends Visualization.default {
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.dropHelper = new DropHelper(config.scene.ledMetadatas);
+    this.dropHelper = new DropHelper(this.ledRowMetadatas);
     this.sparkles = new Set();
 
     this.ts = config.createEasyTimeSeriesSet();

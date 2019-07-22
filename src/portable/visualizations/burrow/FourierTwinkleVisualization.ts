@@ -35,7 +35,7 @@ export default class MyVisualization extends Visualization.default {
     this.values = fillArray(NUM_SAMPLES_RENDERED, _ => new FancyValue(0));
 
     this.ledAddresses = [];
-    config.scene.ledMetadatas.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
+    this.ledRowMetadatas.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
     this.shuffleLocations();
   }
 

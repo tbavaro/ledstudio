@@ -11,6 +11,7 @@ export default class RowColumnLedMapper {
   public readonly ledRows: FixedArray<ColorRow>;
   private readonly originalIndices: number[][];
   private readonly originalLedColors: ColorRow;
+  private readonly originalLedMetadatas: LedMetadata[];
 
   constructor(ledMetadatas: LedMetadata[], ledColors: ColorRow) {
     if (ledMetadatas.length !== ledColors.length) {
@@ -62,8 +63,20 @@ export default class RowColumnLedMapper {
     this.ledRows = new FixedArray(this.originalIndices.length, i => new ColorRow(this.originalIndices[i].length));
 
     this.originalLedColors = ledColors;
+    this.originalLedMetadatas = ledMetadatas;
   }
 
+  private cachedRowLedMetadatas: LedMetadata[][] | undefined;
+  public get rowLedMetadatas(): LedMetadata[][] {
+    if (this.cachedRowLedMetadatas === undefined) {
+      this.cachedRowLedMetadatas = this.originalIndices.map(rowIndices => {
+        return rowIndices.map(i => this.originalLedMetadatas[i]);
+      });
+    }
+    return this.cachedRowLedMetadatas;
+  }
+
+  // TODO make it so operations automatically get applied to the `originalLedColors` and this method isn't needed
   public finishFrame() {
     this.ledRows.forEach((ledRow, rowNum) => {
       const rowOriginalIndices = this.originalIndices[rowNum];

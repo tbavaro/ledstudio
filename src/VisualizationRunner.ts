@@ -267,7 +267,7 @@ export default class VisualizationRunner {
   private lastRenderTime: number = 0;
   public hardwareLedSender?: FadecandyLedSender;
   public simulationLedStrip?: SendableLedStrip;
-  private adjustedLedRows: FixedArray<FixedArray<Colors.Color>>;
+  private adjustedLeds: FixedArray<Colors.Color>;
   private readonly frameContext: MyFrameContext;
   private readonly timeSeriesHelper: TimeSeriesHelper;
   private readonly brightnessDial: Visualization.DialControl;
@@ -323,7 +323,7 @@ export default class VisualizationRunner {
     };
     this.visualization = attrs.visualizationRegistry.createVisualization(attrs.visualizationName, visualizationConfig);
     this.timingHelper = new MovingAverageHelper(20);
-    this.adjustedLedRows = this.visualization.ledRows.map(row => row.map(_ => Colors.BLACK));
+    this.adjustedLeds = this.visualization.ledColors.map(_ => Colors.BLACK);
     this.frameContext = new MyFrameContext();
   }
 
@@ -340,6 +340,7 @@ export default class VisualizationRunner {
     // render into the LED strip
     this.signalsHelper.update(elapsedSeconds * 1000, beatController);
     this.visualization.render(this.frameContext);
+    this.visualization.finishFrame();
     const frameHeatmapValues = this.frameContext.frameHeatmapValues || [];
 
     this.controllerState.startFrame();
@@ -369,28 +370,20 @@ export default class VisualizationRunner {
   }
 
   private sendToStrips(multiplier: number, derez: number) {
-    this.visualization.ledRows.forEach((row, rowIdx) => {
-      const outputRow = this.adjustedLedRows.get(rowIdx);
-      row.forEach((color, i) => {
-        if (Math.random() > derez) {
-          outputRow.set(i, Colors.multiply(color, multiplier));
-        }
-      });
+    this.visualization.ledColors.forEach((color, i) => {
+      if (Math.random() > derez) {
+        this.adjustedLeds.set(i, Colors.multiply(color, multiplier));
+      }
     });
 
     if (this.simulationLedStrip !== undefined) {
       const strip = this.simulationLedStrip;
-      let i = 0;
-      this.adjustedLedRows.forEach(row => {
-        row.forEach(color => {
-          strip.setColor(i++, color);
-        });
-      });
+      this.adjustedLeds.forEach((color, i) => strip.setColor(i, color));
       strip.send();
     }
 
     if (this.hardwareLedSender !== undefined) {
-      this.hardwareLedSender.send(this.adjustedLedRows);
+      this.hardwareLedSender.send(this.adjustedLeds);
     }
   }
 }

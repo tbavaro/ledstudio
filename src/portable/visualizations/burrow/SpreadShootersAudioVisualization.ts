@@ -39,7 +39,7 @@ export default class SpreadShootersAudioVisualization extends Visualization.defa
     constructor(config: Visualization.Config) {
         super(config);
         this.ezTS = config.createEasyTimeSeriesSet();
-        this.reverseLedInfo = reverseLedInfo(config.scene.ledMetadatas);
+        this.reverseLedInfo = reverseLedInfo(this.ledRowMetadatas);
         this.reverseLedInfo.forEach( x=> x);
         this.signals = config.signals;
         this.swapPalettes();
