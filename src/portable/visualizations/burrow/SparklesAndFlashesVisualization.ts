@@ -34,7 +34,7 @@ class LinearDecayingValue {
   }
 }
 
-export default class SparklesAndFlashesVisualization extends Visualization.default {
+export default class SparklesAndFlashesVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly ledAddresses: Array<[number, number]>;
   private numLedsRemainder = 0;
 

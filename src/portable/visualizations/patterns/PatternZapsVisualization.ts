@@ -3,7 +3,7 @@ import * as Visualization from "../../base/Visualization";
 
 const DECAY_RATE = 0.005; // per ms
 
-export default class PatternZapsVisualization extends Visualization.default {
+export default class PatternZapsVisualization extends Visualization.RowColumnMappedVisualization {
   private phase: number = 0;
   private ribChannels: number[][];  // addressing is row -> column -> channel
   private channelValues: Map<number, Colors.Color>;

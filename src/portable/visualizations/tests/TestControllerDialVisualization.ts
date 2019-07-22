@@ -1,7 +1,7 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 
-export default class TestControllerDialVisualization extends Visualization.default {
+export default class TestControllerDialVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly rDial: Visualization.DialControl;
   private readonly gDial: Visualization.DialControl;
   private readonly bDial: Visualization.DialControl;

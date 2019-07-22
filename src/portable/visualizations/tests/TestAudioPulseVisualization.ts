@@ -45,7 +45,7 @@ class BasicFFTHelper {
   }
 }
 
-export default class TestAudioPulseVisualization extends Visualization.default {
+export default class TestAudioPulseVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly fft: BasicFFTHelper | null;
   private readonly pulseValueTimeSeries: Visualization.TimeSeriesValue;
 

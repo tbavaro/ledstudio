@@ -3,7 +3,7 @@ import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import * as AudioWaveformSampler from "../../visualizationUtils/AudioWaveformSampler";
 
-export default class TestAudioAndAbletonLink extends Visualization.default {
+export default class TestAudioAndAbletonLink extends Visualization.RowColumnMappedVisualization {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly loudnessTimeSeries: Visualization.TimeSeriesValue;

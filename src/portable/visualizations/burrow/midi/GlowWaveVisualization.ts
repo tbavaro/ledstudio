@@ -38,7 +38,7 @@ interface FadingColor {
   brightness: number;
 }
 
-export default class GlowWaveVisualization extends Visualization.default {
+export default class GlowWaveVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly pressedKeyColors = new Map<number, FadingColor>();
   private readonly fadeFactors: number[];
   private readonly nativeRows: ColorRow[];

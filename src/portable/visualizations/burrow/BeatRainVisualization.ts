@@ -61,7 +61,7 @@ class DropHelper {
   }
 }
 
-class PureVisualization extends Visualization.default {
+class PureVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private readonly ts: Visualization.EasyTimeSeriesValueSetters;

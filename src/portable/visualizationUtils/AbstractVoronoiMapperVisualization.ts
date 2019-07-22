@@ -297,7 +297,6 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
     this.canvasContext = ctx;
     config.setExtraDisplay(this.canvas);
     this.allLedMetadatas = config.scene.ledMetadatas;
-    this.usesRowColumnMapper = false;
   }
 
   public render(context: Visualization.FrameContext): void {

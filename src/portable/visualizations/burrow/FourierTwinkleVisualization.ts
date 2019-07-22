@@ -12,7 +12,7 @@ const DECAY_RATE = 4;
 const MIN_THRESHOLD = 0.1;
 const MAX_THRESHOLD = 0.7;
 
-export default class MyVisualization extends Visualization.default {
+export default class MyVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly ledAddresses: Array<[number, number]>;
   private readonly analyser: AnalyserNode;
   private readonly buffer: Uint8Array;

@@ -26,7 +26,7 @@ interface SparkleInfo {
 
 const BASE_SHOOTER_PER_S = 4.0;
 
-export default class SpreadShootersAudioVisualization extends Visualization.default {
+export default class SpreadShootersAudioVisualization extends Visualization.RowColumnMappedVisualization {
     private info = new Array<Info>();
     private sparkles = new Array<SparkleInfo>();
     private ezTS: Visualization.EasyTimeSeriesValueSetters;

@@ -101,33 +101,37 @@ export default abstract class Visualization {
   public readonly config: Config;
   public readonly ledColors: ColorRow;
 
-  public readonly ledRows: FixedArray<ColorRow>;
-  public readonly ledRowMetadatas: LedMetadata[][];
-
-  private readonly rowColumnMapper: RowColumnLedMapper;
-
-  // TODO this will go away when Visualizations instantiate their own rowColumnMapper
-  protected usesRowColumnMapper: boolean = true;
-
   constructor(config: Config) {
     this.config = config;
     this.ledColors = new ColorRow(config.scene.ledMetadatas.length);
-    this.rowColumnMapper = new RowColumnLedMapper(config.scene.ledMetadatas, this.ledColors);
-    this.ledRowMetadatas = this.rowColumnMapper.rowLedMetadatas;
-    this.ledRows = this.rowColumnMapper.ledRows;
   }
 
   public abstract render(context: FrameContext): void;
 
   // TODO this is only needed temporarily, until Visualizations instantiate their own rowColumnMapper
   public finishFrame() {
-    if (this.usesRowColumnMapper) {
-      this.rowColumnMapper.finishFrame();
-    }
+    // no-op
   }
 }
 
-export abstract class SingleRowVisualization extends Visualization {
+export abstract class RowColumnMappedVisualization extends Visualization {
+  protected readonly ledRows: FixedArray<ColorRow>;
+  protected readonly ledRowMetadatas: LedMetadata[][];
+  private readonly rowColumnMapper: RowColumnLedMapper;
+
+  constructor(config: Config) {
+    super(config);
+    this.rowColumnMapper = new RowColumnLedMapper(config.scene.ledMetadatas, this.ledColors);
+    this.ledRowMetadatas = this.rowColumnMapper.rowLedMetadatas;
+    this.ledRows = this.rowColumnMapper.ledRows;
+  }
+
+  public finishFrame() {
+    this.rowColumnMapper.finishFrame();
+  }
+}
+
+export abstract class SingleRowVisualization extends RowColumnMappedVisualization {
   private static UNMAPPED_LED_COLOR = Colors.hsv(300, 1, 0.25);
 
   protected readonly length: number;
@@ -170,11 +174,12 @@ export class DerezVisualization extends Visualization {
 
   public render(context: FrameContext): void {
     this.delegate.render(context);
+  }
 
-    this.delegate.ledRows.forEach((pureLeds, row) => {
-      const leds = this.ledRows.get(row);
-      leds.copyFancy(pureLeds, { derezAmount: this.derez });
-    });
+  public finishFrame() {
+    this.delegate.finishFrame();
+    this.ledColors.copyFancy(this.delegate.ledColors, { derezAmount: this.derez });
+    super.finishFrame();
   }
 }
 

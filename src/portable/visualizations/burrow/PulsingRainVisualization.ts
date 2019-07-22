@@ -58,7 +58,7 @@ class DropHelper {
   }
 }
 
-export default class PulsingRainVisualization extends Visualization.default {
+export default class PulsingRainVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private numSparklesRemainder = 0;

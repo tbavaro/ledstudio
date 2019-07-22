@@ -71,7 +71,7 @@ class MultiLevelHelper {
   }
 }
 
-export default class TestBandsVisualization extends Visualization.default {
+export default class TestBandsVisualization extends Visualization.RowColumnMappedVisualization {
   // private readonly valueTS: Visualization.TimeSeriesValue;
 
   private readonly lowTS: Visualization.TimeSeriesValue;

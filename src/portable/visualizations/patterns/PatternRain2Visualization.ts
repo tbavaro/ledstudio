@@ -57,7 +57,7 @@ class DropHelper {
   }
 }
 
-export default class PatternRain2Visualization extends Visualization.default {
+export default class PatternRain2Visualization extends Visualization.RowColumnMappedVisualization {
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private numSparklesRemainder = 0;

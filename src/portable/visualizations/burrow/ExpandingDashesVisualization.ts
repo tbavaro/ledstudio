@@ -5,7 +5,7 @@ import * as Visualization from "../../base/Visualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
 import { randomPalette } from "../../visualizationUtils/Utils";
 
-export default class ExpandingDashesVisualization extends Visualization.default {
+export default class ExpandingDashesVisualization extends Visualization.RowColumnMappedVisualization {
     private regularPalette: Colors.Color[];
     private dropPalette: Colors.Color[];
     private readonly wingDashPaires: number[];

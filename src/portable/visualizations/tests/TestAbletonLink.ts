@@ -1,7 +1,7 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 
-export default class TestAbletonLink extends Visualization.default {
+export default class TestAbletonLink extends Visualization.RowColumnMappedVisualization {
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly progressToNextBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly timeSinceLastBeatTimeSeries: Visualization.TimeSeriesValue;

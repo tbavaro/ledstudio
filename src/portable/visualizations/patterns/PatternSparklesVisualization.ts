@@ -4,7 +4,7 @@ import * as Visualization from "../../base/Visualization";
 const SPARKLES_PER_SECOND = 300;
 const SPARKLE_HALF_LIFE_SECONDS = 0.2;
 
-export default class PatternSparklesVisualization extends Visualization.default {
+export default class PatternSparklesVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly ledAddresses: Array<[number, number]>;
   private numLedsRemainder = 0;
 

@@ -102,23 +102,20 @@ export class PlaylistVisualization extends Visualization.default {
 
     const vis = this.currentVisualization;
     vis.render(context);
-    vis.ledRows.forEach((row, idx) => row.copy(this.ledRows.get(idx)));
+    vis.finishFrame();
+    vis.ledColors.copy(this.ledColors);
 
     if (this.lastVisualization != null) {
       this.lastVisualization.render(context);
+      this.lastVisualization.finishFrame();
       const alpha = (now - this.timeAtSwitch) / BASE_TRANSITION_TIME_MS;
-      for (let rowIdx = 0; rowIdx < this.ledRows.length; ++rowIdx) {
-        const sourceRow = this.lastVisualization.ledRows.get(rowIdx);
-        const destRow = this.ledRows.get(rowIdx);
-        for (let ledIdx = 0; ledIdx < sourceRow.length; ++ledIdx) {
-          // tslint:disable-next-line:no-bitwise
-          const hash = (((rowIdx * 401057)| (ledIdx * 801571)) % 1000) / 1000.0;
-          const color = sourceRow.get(ledIdx);
-          if (alpha < hash) {
-            destRow.set(ledIdx, color);
-          }
+      this.lastVisualization.ledColors.forEach((color, ledIdx) => {
+        // tslint:disable-next-line:no-bitwise
+        const hash = ((ledIdx * 801571) % 1000) / 1000.0;
+        if (alpha < hash) {
+          this.ledColors.set(ledIdx, color);
         }
-      }
+      });
     }
   }
 }

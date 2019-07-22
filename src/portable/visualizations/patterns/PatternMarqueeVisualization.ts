@@ -4,7 +4,7 @@ import * as Visualization from "../../base/Visualization";
 const LED_SEPARATION = 3;
 const SPEED = 10; // LEDs per second
 
-export default class PatternMarqueeVisualization extends Visualization.default {
+export default class PatternMarqueeVisualization extends Visualization.RowColumnMappedVisualization {
   private readonly ledAddresses: Array<[number, number]>;
   private phase = 0;
 

@@ -15,7 +15,7 @@ const DEREZ = 0.4;
 // TODO improve flap motion
 // TODO see if we can smooth it out by not perfectly following ribs
 
-class PureWingFlapVisualization extends Visualization.default {
+class PureWingFlapVisualization extends Visualization.RowColumnMappedVisualization {
   private phase = 0;
   private readonly positionTimeSeries: Visualization.TimeSeriesValue;
 
