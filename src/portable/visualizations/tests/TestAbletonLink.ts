@@ -1,7 +1,7 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 
-export default class TestAbletonLink extends Visualization.RowColumnMappedVisualization {
+export default class TestAbletonLink extends Visualization.default {
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly progressToNextBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly timeSinceLastBeatTimeSeries: Visualization.TimeSeriesValue;
@@ -18,9 +18,7 @@ export default class TestAbletonLink extends Visualization.RowColumnMappedVisual
 
     const duringBeat = beatController.timeSinceLastBeat() < 0.1 && (beatController.beatNumber() % 4 === 0);
 
-    this.ledRows.forEach(row => {
-      row.fill(duringBeat ? Colors.WHITE : Colors.BLACK);
-    });
+    this.ledColors.fill(duringBeat ? Colors.WHITE : Colors.BLACK);
 
     this.duringBeatTimeSeries.value = duringBeat ? 1 : 0;
     this.progressToNextBeatTimeSeries.value = beatController.progressToNextBeat();

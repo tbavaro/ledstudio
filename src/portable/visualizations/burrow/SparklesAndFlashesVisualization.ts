@@ -34,8 +34,7 @@ class LinearDecayingValue {
   }
 }
 
-export default class SparklesAndFlashesVisualization extends Visualization.RowColumnMappedVisualization {
-  private readonly ledAddresses: Array<[number, number]>;
+export default class SparklesAndFlashesVisualization extends Visualization.default {
   private numLedsRemainder = 0;
 
   private flashBrightness = new LinearDecayingValue(0, 1 / 0.125);
@@ -48,9 +47,6 @@ export default class SparklesAndFlashesVisualization extends Visualization.RowCo
   constructor(config: Visualization.Config) {
     super(config);
     this.signals = config.signals;
-
-    this.ledAddresses = [];
-    this.ledRowMetadatas.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
 
     this.lowTS = config.createTimeSeries({ color: Colors.BLUE });
     this.highTS = config.createTimeSeries({ color: Colors.RED });
@@ -72,17 +68,16 @@ export default class SparklesAndFlashesVisualization extends Visualization.RowCo
     const halfLife = this.signals.beatsSinceDrop < 16 || this.signals.soundsLikeDance
       ? DANCE_HALF_LIFE_SECONDS : NOT_DANCE_HALF_LIFE_SECONDS;
     const multiplier = Math.pow(0.5, elapsedSeconds / halfLife);
-    this.ledRows.forEach(row => row.multiplyAll(multiplier));
+    this.ledColors.multiplyAll(multiplier);
 
     // flash
     const flashColor = Colors.multiply(Colors.BLUE, this.flashBrightness.value);
-    this.ledRows.forEach(row => row.addAll(flashColor));
+    this.ledColors.addAll(flashColor);
 
     let numLeds = this.numLedsRemainder + elapsedSeconds * sparkleRate;
     while (numLeds >= 1) {
-      const n = Math.floor(Math.random() * this.ledAddresses.length);
-      const [row, index] = this.ledAddresses[n];
-      this.ledRows.get(row).set(index, Colors.WHITE);
+      const n = Math.floor(Math.random() * this.ledColors.length);
+      this.ledColors.set(n, Colors.WHITE);
       numLeds -= 1;
     }
     this.numLedsRemainder = numLeds;

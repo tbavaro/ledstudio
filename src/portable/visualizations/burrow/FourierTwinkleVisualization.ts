@@ -12,8 +12,7 @@ const DECAY_RATE = 4;
 const MIN_THRESHOLD = 0.1;
 const MAX_THRESHOLD = 0.7;
 
-export default class MyVisualization extends Visualization.RowColumnMappedVisualization {
-  private readonly ledAddresses: Array<[number, number]>;
+export default class MyVisualization extends Visualization.default {
   private readonly analyser: AnalyserNode;
   private readonly buffer: Uint8Array;
   private bucketLocations: number[];
@@ -34,8 +33,6 @@ export default class MyVisualization extends Visualization.RowColumnMappedVisual
 
     this.values = fillArray(NUM_SAMPLES_RENDERED, _ => new FancyValue(0));
 
-    this.ledAddresses = [];
-    this.ledRowMetadatas.forEach((row, rowNum) => row.forEach((_, i) => this.ledAddresses.push([rowNum, i])));
     this.shuffleLocations();
   }
 
@@ -46,7 +43,7 @@ export default class MyVisualization extends Visualization.RowColumnMappedVisual
     for (let i = 0; i < numBuckets; ++i) {
       let v: number;
       do {
-        v = Math.floor(Math.random() * this.ledAddresses.length);
+        v = Math.floor(Math.random() * this.ledColors.length);
       } while (this.bucketLocations.includes(v));
       this.bucketLocations[i] = v;
     }
@@ -75,21 +72,19 @@ export default class MyVisualization extends Visualization.RowColumnMappedVisual
     }
 
     // clear
-    this.ledRows.forEach(r => r.multiplyAll(0.7));
+    this.ledColors.multiplyAll(0.7);
 
     this.values.forEach((v, i) => {
       const freqPct = i / NUM_SAMPLES_RENDERED;
 
+      const ledNum = this.bucketLocations[i];
+      
       const hue = 360 - i / NUM_SAMPLES_RENDERED * 240;
-      const [rowNum, ledNum] = this.ledAddresses[this.bucketLocations[i]];
-
       const saturation = 1 - bracket01((v.value - 0.7) / 0.9);
       const value = bracket01(v.value / 0.7) * Math.pow(1 - freqPct, 0.25);
 
       const c = Colors.hsv(hue, saturation, value);
-
-      const row = this.ledRows.get(rowNum);
-      row.set(ledNum, c);
+      this.ledColors.set(ledNum, c);
     });
 
     context.setFrameHeatmapValues(this.values.map(v => v.value));

@@ -3,7 +3,7 @@ import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import * as AudioWaveformSampler from "../../visualizationUtils/AudioWaveformSampler";
 
-export default class TestAudioAndAbletonLink extends Visualization.RowColumnMappedVisualization {
+export default class TestAudioAndAbletonLink extends Visualization.default {
   private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly loudnessTimeSeries: Visualization.TimeSeriesValue;
@@ -35,9 +35,7 @@ export default class TestAudioAndAbletonLink extends Visualization.RowColumnMapp
     const duringBeat = context.beatController.timeSinceLastBeat() < 0.1;
     const loudness = bracket01(this.analyserHelpers.direct.currentMaxAmplitude);
 
-    this.ledRows.forEach(row => {
-      row.fill(duringBeat ? loudness * Colors.WHITE : Colors.BLACK);
-    });
+    this.ledColors.fill(duringBeat ? loudness * Colors.WHITE : Colors.BLACK);
 
     this.duringBeatTimeSeries.value = duringBeat ? 1 : 0;
     this.loudnessTimeSeries.value = loudness;

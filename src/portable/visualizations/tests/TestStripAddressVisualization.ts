@@ -12,7 +12,7 @@ const PULSE_SPEED_LEDS_PER_SECOND = 16;
 
 const SHOW_CHANNEL_NUMBER_AFTER_N_LEDS = 2;
 
-export default class TestStripAddressVisualization extends Visualization.RowColumnMappedVisualization {
+export default class TestStripAddressVisualization extends Visualization.default {
   private timeCounter: number = 0;
   private pulseLocationFloat: number = 0;
   private readonly channelHueIncrement: number;
@@ -21,11 +21,11 @@ export default class TestStripAddressVisualization extends Visualization.RowColu
     super(config);
 
     let maxChannel = 0;
-    this.ledRowMetadatas.forEach(row => row.forEach(led => {
+    config.scene.ledMetadatas.forEach(led => {
       if (led.hardwareChannel > maxChannel) {
         maxChannel = led.hardwareChannel;
       }
-    }));
+    });
 
     const numChannels = maxChannel + 1;
 
@@ -41,15 +41,13 @@ export default class TestStripAddressVisualization extends Visualization.RowColu
     this.timeCounter = (this.timeCounter + elapsedMillis) % LED_ZERO_BLINK_TIME;
     const flashBrightness = 2 * Math.abs(0.5 - this.timeCounter / LED_ZERO_BLINK_TIME);
 
-    this.ledRows.forEach((row, rowIdx) => {
-      for (let i = 0; i < row.length; ++i) {
-        row.set(i, this.colorForPixel(rowIdx, i, flashBrightness, pulseLocation));
-      }
-    });
+    for (let i = 0; i < this.ledColors.length; ++i) {
+      this.ledColors.set(i, this.colorForPixel(i, flashBrightness, pulseLocation));
+    }
   }
 
-  private colorForPixel(rowNumber: number, rowIndex: number, flashBrightness: number, pulseLocation: number): Colors.Color {
-    const ledMetadata = this.ledRowMetadatas[rowNumber][rowIndex];
+  private colorForPixel(ledIndex: number, flashBrightness: number, pulseLocation: number): Colors.Color {
+    const ledMetadata = this.config.scene.ledMetadatas[ledIndex];
     const n = ledMetadata.hardwareIndex;
 
     if (n >= SHOW_CHANNEL_NUMBER_AFTER_N_LEDS && n < (ledMetadata.hardwareChannel + SHOW_CHANNEL_NUMBER_AFTER_N_LEDS)) {
