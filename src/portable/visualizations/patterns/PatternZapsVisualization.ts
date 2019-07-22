@@ -52,7 +52,7 @@ export default class PatternZapsVisualization extends Visualization.RowColumnMap
     }
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const { elapsedMillis, beatController } = context;
 
     // decay

@@ -98,7 +98,7 @@ export default class TestBandsVisualization extends Visualization.RowColumnMappe
     this.helper = new MultiLevelHelper(config.audioSource);
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     this.helper.sample(context.elapsedMillis);
 
     this.lowTS.value = this.helper.lowLevel;

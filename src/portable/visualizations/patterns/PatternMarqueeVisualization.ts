@@ -18,7 +18,7 @@ export default class PatternMarqueeVisualization extends Visualization.RowColumn
     this.ledRowMetadatas[bottomRow].forEach((_, i) => this.ledAddresses.push([bottomRow, bottomRowCount - i - 1]));
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const { elapsedSeconds } = context;
     this.phase = (this.phase + SPEED * elapsedSeconds) % LED_SEPARATION;
     const offset = Math.round(this.phase);

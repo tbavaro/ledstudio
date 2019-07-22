@@ -107,11 +107,6 @@ export default abstract class Visualization {
   }
 
   public abstract render(context: FrameContext): void;
-
-  // TODO this is only needed temporarily, until Visualizations instantiate their own rowColumnMapper
-  public finishFrame() {
-    // no-op
-  }
 }
 
 export abstract class RowColumnMappedVisualization extends Visualization {
@@ -126,9 +121,12 @@ export abstract class RowColumnMappedVisualization extends Visualization {
     this.ledRows = this.rowColumnMapper.ledRows;
   }
 
-  public finishFrame() {
+  public render(context: FrameContext) {
+    this.renderRows(context);
     this.rowColumnMapper.finishFrame();
   }
+
+  public abstract renderRows(context: FrameContext): void;
 }
 
 export abstract class SingleRowVisualization extends RowColumnMappedVisualization {
@@ -150,7 +148,7 @@ export abstract class SingleRowVisualization extends RowColumnMappedVisualizatio
 
   protected abstract renderSingleRow(context: FrameContext): void;
 
-  public render(context: FrameContext): void {
+  public renderRows(context: FrameContext): void {
     this.renderSingleRow(context);
 
     this.ledRows.forEach(ledRow => {
@@ -174,12 +172,7 @@ export class DerezVisualization extends Visualization {
 
   public render(context: FrameContext): void {
     this.delegate.render(context);
-  }
-
-  public finishFrame() {
-    this.delegate.finishFrame();
     this.ledColors.copyFancy(this.delegate.ledColors, { derezAmount: this.derez });
-    super.finishFrame();
   }
 }
 

@@ -68,7 +68,7 @@ export default class PatternRain2Visualization extends Visualization.RowColumnMa
     this.sparkles = new Set();
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const { elapsedSeconds } = context;
 
     // drops

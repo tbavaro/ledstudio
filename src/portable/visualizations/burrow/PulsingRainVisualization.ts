@@ -72,7 +72,7 @@ export default class PulsingRainVisualization extends Visualization.RowColumnMap
     this.signals = new SignalsHelper(config.audioSource);
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const { elapsedSeconds, beatController } = context;
     const now = Date.now()/1000;
     this.signals.update(elapsedSeconds/1000, beatController);

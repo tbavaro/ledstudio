@@ -45,7 +45,7 @@ export default class SpreadShootersAudioVisualization extends Visualization.RowC
         this.swapPalettes();
     }
 
-    public render(context: Visualization.FrameContext): void {
+    public renderRows(context: Visualization.FrameContext): void {
         const { elapsedMillis } = context;
 
         const now = Date.now();

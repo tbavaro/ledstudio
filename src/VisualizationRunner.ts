@@ -340,7 +340,6 @@ export default class VisualizationRunner {
     // render into the LED strip
     this.signalsHelper.update(elapsedSeconds * 1000, beatController);
     this.visualization.render(this.frameContext);
-    this.visualization.finishFrame();
     const frameHeatmapValues = this.frameContext.frameHeatmapValues || [];
 
     this.controllerState.startFrame();
@@ -359,7 +358,6 @@ export default class VisualizationRunner {
       frameTimeseriesPoints: this.timeSeriesHelper.data
     };
   }
-
 
   public onPianoEvent(event: PianoEvent) {
     this.frameContext.applyPianoEvent(event);

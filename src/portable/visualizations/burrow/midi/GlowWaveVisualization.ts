@@ -51,7 +51,7 @@ export default class GlowWaveVisualization extends Visualization.RowColumnMapped
     this.nativeRows = rowLengths.map(len => new ColorRow(len));
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const { elapsedSeconds, pianoState } = context;
 
     // decay the unpressed keys

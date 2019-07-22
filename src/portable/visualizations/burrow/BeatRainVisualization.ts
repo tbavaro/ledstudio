@@ -74,7 +74,7 @@ class PureVisualization extends Visualization.RowColumnMappedVisualization {
     this.ts = config.createEasyTimeSeriesSet();
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const { signals } = this.config;
     const { elapsedSeconds } = context;
 

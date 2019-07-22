@@ -102,12 +102,10 @@ export class PlaylistVisualization extends Visualization.default {
 
     const vis = this.currentVisualization;
     vis.render(context);
-    vis.finishFrame();
     vis.ledColors.copy(this.ledColors);
 
     if (this.lastVisualization != null) {
       this.lastVisualization.render(context);
-      this.lastVisualization.finishFrame();
       const alpha = (now - this.timeAtSwitch) / BASE_TRANSITION_TIME_MS;
       this.lastVisualization.ledColors.forEach((color, ledIdx) => {
         // tslint:disable-next-line:no-bitwise

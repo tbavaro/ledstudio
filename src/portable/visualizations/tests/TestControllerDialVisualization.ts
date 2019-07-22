@@ -18,7 +18,7 @@ export default class TestControllerDialVisualization extends Visualization.RowCo
     this.timeSerieses = config.createEasyTimeSeriesSet();
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const rValue = this.rDial.value;
     const gValue = this.gDial.value;
     const bValue = this.bDial.value;

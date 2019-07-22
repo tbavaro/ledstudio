@@ -24,7 +24,7 @@ class PureWingFlapVisualization extends Visualization.RowColumnMappedVisualizati
     this.positionTimeSeries = config.createTimeSeries();
   }
 
-  public render(context: Visualization.FrameContext): void {
+  public renderRows(context: Visualization.FrameContext): void {
     const { elapsedSeconds, beatController } = context;
 
     beatController.hz();

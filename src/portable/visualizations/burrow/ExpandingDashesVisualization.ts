@@ -26,7 +26,7 @@ export default class ExpandingDashesVisualization extends Visualization.RowColum
         this.signals = config.signals;
     }
 
-    public render(context: Visualization.FrameContext): void {
+    public renderRows(context: Visualization.FrameContext): void {
         if (Date.now() - this.lastPaletteSwap > 30000 && this.signals.soundsLikeStrongBeat) {
             this.swapPalettes();
         }
