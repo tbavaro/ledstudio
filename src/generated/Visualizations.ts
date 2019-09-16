@@ -29,6 +29,7 @@ import PatternWingFlapVisualization from "../portable/visualizations/patterns/Pa
 import PatternZapsVisualization from "../portable/visualizations/patterns/PatternZapsVisualization";
 import PatternZoomVisualization from "../portable/visualizations/patterns/PatternZoomVisualization";
 import BurrowPlaylistVisualization from "../portable/visualizations/playlists/BurrowPlaylistVisualization";
+import ChillitsPlaylistVisualization from "../portable/visualizations/playlists/ChillitsPlaylistVisualization";
 import TestPlaylistVisualization from "../portable/visualizations/playlists/TestPlaylistVisualization";
 import ScopeFFTVisualization from "../portable/visualizations/tests/ScopeFFTVisualization";
 import ScopeWaveformVisualization from "../portable/visualizations/tests/ScopeWaveformVisualization";
@@ -69,6 +70,7 @@ registryBuilder.add("patterns", "PatternWingFlap", PatternWingFlapVisualization)
 registryBuilder.add("patterns", "PatternZaps", PatternZapsVisualization);
 registryBuilder.add("patterns", "PatternZoom", PatternZoomVisualization);
 registryBuilder.add("playlists", "BurrowPlaylist", BurrowPlaylistVisualization);
+registryBuilder.add("playlists", "ChillitsPlaylist", ChillitsPlaylistVisualization);
 registryBuilder.add("playlists", "TestPlaylist", TestPlaylistVisualization);
 registryBuilder.add("tests", "ScopeFFT", ScopeFFTVisualization);
 registryBuilder.add("tests", "ScopeWaveform", ScopeWaveformVisualization);
