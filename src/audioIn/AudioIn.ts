@@ -19,10 +19,13 @@ export default class AudioIn {
 
   constructor(onAudioSourceChanged: (audioSource: AudioNode | null) => void) {
     this.onAudioSourceChanged = onAudioSourceChanged;
+    this.doAsyncInit();
+  }
 
+  private async doAsyncInit() {
     if (navigator.mediaDevices !== undefined) {
-      navigator.mediaDevices.getUserMedia({ audio: true });
-      navigator.mediaDevices.enumerateDevices().then(this.setDevices);
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      await navigator.mediaDevices.enumerateDevices().then(this.setDevices);
     }
   }
 
