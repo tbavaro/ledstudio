@@ -198,3 +198,16 @@ export function memoize<T>(func: () => T): () => T {
     return result;
   };
 }
+
+type MemoizableValue = number | object;
+export type MaybeMemoizedValue<T extends MemoizableValue> = T | (() => T);
+
+export function resolveMMV<T extends MemoizableValue>(
+  v: MaybeMemoizedValue<T>
+): T {
+  if (typeof v === "function") {
+    return v();
+  } else {
+    return v;
+  }
+}

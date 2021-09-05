@@ -1,13 +1,11 @@
-import { createPianoThreeStripesScene } from "./PianoThreeStripesScene";
-import { createRealWingsSceneDef } from "./RealWingsScene";
-import * as Scene from "./Scene";
-import SceneDef from "./SceneDef";
+import PianoThreeStripesScene from "./PianoThreeStripesScene";
+import RealWingsScene from "./RealWingsScene";
+import Scene from "./Scene";
 
-export const registry = new Map<string, Scene.default>();
+export const registry = new Map<string, Scene>();
 
-function registerScenes(defs: ReadonlyArray<SceneDef>) {
-  defs.forEach(def => {
-    const scene = new Scene.SceneImpl(def);
+function registerScenes(defs: ReadonlyArray<Scene>) {
+  defs.forEach(scene => {
     const name = scene.name;
     if (registry.has(name)) {
       throw new Error(`scene already registered with name: ${name}`);
@@ -17,6 +15,6 @@ function registerScenes(defs: ReadonlyArray<SceneDef>) {
 }
 
 registerScenes([
-  createPianoThreeStripesScene("keyboard:3stripes"),
-  createRealWingsSceneDef("burrow:wings30x4-real")
+  new PianoThreeStripesScene("keyboard:3stripes"),
+  new RealWingsScene("burrow:wings30x4-real")
 ]);

@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "three";
 
-import * as Scene from "../../scenes/Scene";
+import Scene, { SceneLedMetadata } from "../../scenes/Scene";
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
@@ -102,7 +102,7 @@ class VoronoiHelper {
   private readonly valuesG: number[];
   private readonly valuesB: number[];
   public readonly ledMapper: (
-    ledMetadata: Scene.LedMetadata,
+    ledMetadata: SceneLedMetadata,
     vector?: Vector2
   ) => Vector2;
 
@@ -111,7 +111,7 @@ class VoronoiHelper {
     width: number; // pixels
     height: number; // pixels
     maxDistance: number; // pixels
-    ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => Vector2;
+    ledMapper: (ledMetadata: SceneLedMetadata, vector?: Vector2) => Vector2;
   }) {
     this.pixelsForPoint = attrs.points.map(_ => []);
     const counts = attrs.points.map(_ => 0);
@@ -214,7 +214,7 @@ class VoronoiHelper {
 }
 
 interface InitializationValues {
-  scene: Scene.default;
+  scene: Scene;
   helper: VoronoiHelper;
   canvasWidth: number;
   canvasHeight: number;
@@ -222,7 +222,7 @@ interface InitializationValues {
 
 let cachedInitializationValues: InitializationValues | undefined;
 
-function initializeFor(scene: Scene.default): InitializationValues {
+function initializeFor(scene: Scene): InitializationValues {
   if (
     cachedInitializationValues &&
     cachedInitializationValues.scene === scene
@@ -270,7 +270,7 @@ function initializeFor(scene: Scene.default): InitializationValues {
     width: canvasWidth,
     height: canvasHeight,
     maxDistance: maxDistancePixels,
-    ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => {
+    ledMapper: (ledMetadata: SceneLedMetadata, vector?: Vector2) => {
       return mapToCanvas(
         mapTo2DSingle(ledMetadata.position, ledMapperScratchVector),
         vector
@@ -294,7 +294,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
   private helper: VoronoiHelper;
   protected canvas: HTMLCanvasElement;
   protected canvasContext: CanvasRenderingContext2D;
-  private allLedMetadatas: Scene.LedMetadata[];
+  private allLedMetadatas: SceneLedMetadata[];
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -322,7 +322,7 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
 
   protected abstract renderToCanvas(context: Visualization.FrameContext): void;
 
-  protected mapTo2d(ledMetadata: Scene.LedMetadata, vector?: Vector2): Vector2 {
+  protected mapTo2d(ledMetadata: SceneLedMetadata, vector?: Vector2): Vector2 {
     return this.helper.ledMapper(ledMetadata, vector);
   }
 

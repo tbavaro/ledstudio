@@ -1,7 +1,7 @@
 import { Vector2, Vector3 } from "three";
 import * as Three from "three";
 
-import { ExtraObjectFunc } from "./SceneDef";
+import { ExtraObjectFunc } from "./Scene";
 
 // makes a triangle from a vertical piece and two arms.
 // vertical piece starts at (0,0) and goes up (+y)

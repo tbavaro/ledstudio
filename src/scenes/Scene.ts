@@ -5,53 +5,58 @@ import { Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import PortableLedMetadata from "../portable/base/LedMetadata";
-import SceneDef from "./SceneDef";
 
-export interface LedMetadata extends PortableLedMetadata {
+export interface SceneLedMetadata extends PortableLedMetadata {
   position: Three.Vector3;
 }
-
-export interface Scene {
-  readonly name: string;
-  readonly ledMetadatas: LedMetadata[];
-  readonly ledRadius: number;
-  readonly cameraStartPosition: Three.Vector3;
-  readonly cameraTarget: Three.Vector3;
-  readonly displayMessage: string;
-  loadModel(): Promise<Three.Object3D>;
-}
-
-export default Scene;
 
 const FLOOR_SIZE_DEFAULT = 10;
 const FLOOR_MATERIAL = new Three.MeshLambertMaterial({
   color: 0x090909
 });
 
-export class SceneImpl implements Scene {
+export type ExtraObjectFunc = () => Three.Object3D;
+
+export interface ModelDef {
+  url: string;
+  scale?: Vector3;
+  translateBy?: Vector3;
+}
+
+export interface CameraDef {
+  target?: Vector3;
+  startPosition?: Vector3;
+}
+
+export interface SceneDef {
+  name: string;
+  initialDisplayValues?: { [k: string]: string | number };
+  camera?: CameraDef;
+  model?: ModelDef;
+  floorSizeOverride?: number;
+  extraObjects?: ExtraObjectFunc[];
+  leds: SceneLedMetadata[];
+  ledRadius: number;
+}
+
+export default class Scene {
   private readonly def: SceneDef;
-  private lazyLoadedLeds?: LedMetadata[];
   private lazyModelPromise?: Promise<Three.Object3D>;
   private displayValues: { [k: string]: string | number } | undefined;
   private cachedDisplayMessage: string | undefined;
+
   public readonly ledRadius: number;
+  public readonly ledMetadatas: SceneLedMetadata[];
 
   constructor(def: SceneDef) {
     this.def = def;
-    this.lazyLoadedLeds = undefined;
+    this.ledMetadatas = this.def.leds;
+    this.setDisplayValue("#leds", this.def.leds.length);
     this.ledRadius = def.ledRadius;
   }
 
   public get name() {
     return this.def.name;
-  }
-
-  public get ledMetadatas(): LedMetadata[] {
-    if (this.lazyLoadedLeds === undefined) {
-      this.lazyLoadedLeds = this.def.leds.calculate();
-      this.setDisplayValue("#leds", this.lazyLoadedLeds.length);
-    }
-    return this.lazyLoadedLeds;
   }
 
   public async loadModel(): Promise<Three.Object3D> {
@@ -144,7 +149,7 @@ export class SceneImpl implements Scene {
   private initDisplayValuesIfNeeded(): { [k: string]: string | number } {
     if (this.displayValues === undefined) {
       if (this.def.initialDisplayValues) {
-        this.displayValues = this.def.initialDisplayValues();
+        this.displayValues = this.def.initialDisplayValues;
       } else {
         this.displayValues = {};
       }
