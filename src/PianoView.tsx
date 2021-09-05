@@ -50,9 +50,12 @@ interface Props {
   midiEventEmitter: MidiEventEmitter;
 }
 
-export default class PianoView extends React.PureComponent<Props, State> implements MidiEventListener {
+export default class PianoView
+  extends React.PureComponent<Props, State>
+  implements MidiEventListener
+{
   public state: State = {
-    keyState: defaultKeyState()
+    keyState: defaultKeyState(),
   };
 
   private registeredMidiEventEmitter: MidiEventEmitter | null = null;
@@ -75,7 +78,9 @@ export default class PianoView extends React.PureComponent<Props, State> impleme
       if (!isBlack) {
         offset++;
       }
-      (isBlack ? blackKeys : whiteKeys).push(this.renderKey(n, offset, isBlack, this.state.keyState[n]));
+      (isBlack ? blackKeys : whiteKeys).push(
+        this.renderKey(n, offset, isBlack, this.state.keyState[n])
+      );
     }
 
     return (
@@ -88,24 +93,31 @@ export default class PianoView extends React.PureComponent<Props, State> impleme
     );
   }
 
-  private renderKey(n: number, offset: number, isBlack: boolean, isPressed: boolean) {
+  private renderKey(
+    n: number,
+    offset: number,
+    isBlack: boolean,
+    isPressed: boolean
+  ) {
     return (
       <div
         key={n}
-        className={ (isBlack ? "PianoView-blackKey" : "PianoView-whiteKey") + (isPressed ? " pressed" : "") }
+        className={
+          (isBlack ? "PianoView-blackKey" : "PianoView-whiteKey") +
+          (isPressed ? " pressed" : "")
+        }
         style={{
           width: isBlack ? BLACK_KEY_WIDTH_PCT_STR : WHITE_KEY_WIDTH_PCT_STR,
-          left: (
-            isBlack
-              ? `${(offset + 1) * WHITE_KEY_WIDTH_PCT - 0.5 * BLACK_KEY_WIDTH_PCT}%`
-              : `${offset * WHITE_KEY_WIDTH_PCT}%`
-          )
+          left: isBlack
+            ? `${
+                (offset + 1) * WHITE_KEY_WIDTH_PCT - 0.5 * BLACK_KEY_WIDTH_PCT
+              }%`
+            : `${offset * WHITE_KEY_WIDTH_PCT}%`,
         }}
         ref={this.setKeyRefs[n]}
       />
     );
   }
-
 
   private keyRefs: HTMLDivElement[] = [];
   private setKeyRefs = (() => {
@@ -124,9 +136,12 @@ export default class PianoView extends React.PureComponent<Props, State> impleme
       return;
     }
 
-    this.state.keyState[n] = isPressed;
+    const { keyState } = this.state;
+    keyState[n] = isPressed;
     const keyRef = this.keyRefs[n];
-    const classNames = keyRef.className.split(" ").filter(x => x !== "pressed");
+    const classNames = keyRef.className
+      .split(" ")
+      .filter((x) => x !== "pressed");
     if (isPressed) {
       classNames.push("pressed");
     }
@@ -135,7 +150,7 @@ export default class PianoView extends React.PureComponent<Props, State> impleme
 
   public reset() {
     this.setState({
-      keyState: defaultKeyState()
+      keyState: defaultKeyState(),
     });
     this.forceUpdate();
   }
@@ -145,11 +160,11 @@ export default class PianoView extends React.PureComponent<Props, State> impleme
     if (pianoEvent !== null) {
       switch (pianoEvent.type) {
         case "keyPressed":
-          this.setKeyPressed(pianoEvent.key, /*isPressed=*/true);
+          this.setKeyPressed(pianoEvent.key, /*isPressed=*/ true);
           break;
 
         case "keyReleased":
-          this.setKeyPressed(pianoEvent.key, /*isPressed=*/false);
+          this.setKeyPressed(pianoEvent.key, /*isPressed=*/ false);
           break;
 
         default:

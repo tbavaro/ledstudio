@@ -13,12 +13,15 @@ export default class AudioIn {
   private currentDeviceId: string | null = null;
   private currentAudioContext: AudioContext | null = null;
   private currentAudioSource: AudioNode | null = null;
-  private readonly onAudioSourceChanged: (audioSource: AudioNode | null) => void;
+  private readonly onAudioSourceChanged: (
+    audioSource: AudioNode | null
+  ) => void;
 
   constructor(onAudioSourceChanged: (audioSource: AudioNode | null) => void) {
     this.onAudioSourceChanged = onAudioSourceChanged;
 
     if (navigator.mediaDevices !== undefined) {
+      navigator.mediaDevices.getUserMedia({ audio: true });
       navigator.mediaDevices.enumerateDevices().then(this.setDevices);
     }
   }
@@ -32,20 +35,22 @@ export default class AudioIn {
       return null;
     }
 
-    const i = this.inputDevicesInternal.findIndex(v => v.id === id);
-    return (i === -1 ? null : this.inputDevicesInternal[i]);
+    const i = this.inputDevicesInternal.findIndex((v) => v.id === id);
+    return i === -1 ? null : this.inputDevicesInternal[i];
   }
 
   public isValidId = (id: string | null) => {
     if (id === null) {
       return true;
     } else {
-      return this.inputDevices.find(d => d.id === id) !== undefined;
+      return this.inputDevices.find((d) => d.id === id) !== undefined;
     }
-  }
+  };
 
   public get defaultDeviceId(): string | null {
-    const defaultDevice = this.inputDevicesInternal.find(d => d.name === "Soundflower (2ch)");
+    const defaultDevice = this.inputDevicesInternal.find(
+      (d) => d.name === "Soundflower (2ch)"
+    );
     if (defaultDevice === undefined) {
       return null;
     } else {
@@ -63,31 +68,36 @@ export default class AudioIn {
           autoGainControl: false,
           echoCancellation: false,
           noiseSuppression: false,
-          sampleRate: 44100
+          sampleRate: 44100,
         };
-        navigator.mediaDevices.getUserMedia({ audio: audioConstraints }).then(stream => {
-          // make sure this is still the stream I was trying to load
-          if (deviceId === this.currentDeviceId) {
-            const audioContext = new AudioContext();
-            const audioSource = audioContext.createMediaStreamSource(stream);
+        navigator.mediaDevices
+          .getUserMedia({ audio: audioConstraints })
+          .then((stream) => {
+            // make sure this is still the stream I was trying to load
+            if (deviceId === this.currentDeviceId) {
+              const audioContext = new AudioContext();
+              const audioSource = audioContext.createMediaStreamSource(stream);
 
-            const splitter = audioContext.createChannelSplitter();
-            audioSource.connect(splitter);
+              const splitter = audioContext.createChannelSplitter();
+              audioSource.connect(splitter);
 
-            const gain = audioContext.createGain();
-            gain.channelCount = 1;
-            gain.gain.value = 4;
-            splitter.connect(gain, 0, 0);
+              const gain = audioContext.createGain();
+              gain.channelCount = 1;
+              gain.gain.value = 4;
+              splitter.connect(gain, 0, 0);
 
-            this.setCurrentAudioSource(audioContext, gain);
-            // audioSource.connect(audioContext.destination);
-          }
-        });
+              this.setCurrentAudioSource(audioContext, gain);
+              // audioSource.connect(audioContext.destination);
+            }
+          });
       }
     }
   }
 
-  private setCurrentAudioSource(newAudioContext: AudioContext | null, newAudioSource: AudioNode | null) {
+  private setCurrentAudioSource(
+    newAudioContext: AudioContext | null,
+    newAudioSource: AudioNode | null
+  ) {
     if (newAudioContext !== this.currentAudioContext) {
       if (this.currentAudioContext !== null) {
         this.currentAudioContext.close();
@@ -107,20 +117,28 @@ export default class AudioIn {
   }
 
   private setDevices = async (devices: MediaDeviceInfo[]) => {
-    this.inputDevicesInternal = devices.filter(d => d.kind === "audioinput").map(d => ({
-      id: d.deviceId,
-      name: d.label || d.deviceId
-    }));
-    this.deviceListChangedListeners.forEach(listener => listener.call(this));
-  }
+    this.inputDevicesInternal = devices
+      .filter((d) => d.kind === "audioinput")
+      .map((d) => ({
+        id: d.deviceId,
+        name: d.label || d.deviceId,
+      }));
+    this.deviceListChangedListeners.forEach((listener) => listener.call(this));
+  };
 
-  public addEventListener(eventType: EventType, listener: (this: this) => void) {
+  public addEventListener(
+    eventType: EventType,
+    listener: (this: this) => void
+  ) {
     if (!this.deviceListChangedListeners.includes(listener)) {
       this.deviceListChangedListeners.push(listener);
     }
   }
 
-  public removeEventListener(eventType: EventType, listener: (this: this) => void) {
+  public removeEventListener(
+    eventType: EventType,
+    listener: (this: this) => void
+  ) {
     removeFirst(this.deviceListChangedListeners, listener);
   }
 }

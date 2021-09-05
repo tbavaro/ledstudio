@@ -47,16 +47,16 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       <div className="RightSidebar">
         <div className="RightSidebar-optionsGroup">
           {this.renderSceneSelector()}
-          <p/>
+          <p />
           {this.renderVisualizationGroupSelector()}
           {this.renderVisualizationSelector()}
-          <p/>
+          <p />
           {this.renderAudioInputDevices()}
           {this.renderPianoMidiInputDevices()}
           {this.renderPianoMidiThruDevices()}
           {this.renderControllerMidiDevices()}
           {this.renderBeatControllerDevices()}
-          <p/>
+          <p />
         </div>
         <MidiEventsView
           className="RightSidebar-midiEventsView"
@@ -76,7 +76,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: this.props.selectedSceneName,
       options: this.props.sceneNames,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setSelectedSceneName
+      onChange: this.props.actions.setSelectedSceneName,
     });
   }
 
@@ -86,7 +86,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: this.props.selectedVisualizationGroupName,
       options: this.props.visualizationGroupNames,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setSelectedVisualizationGroupName
+      onChange: this.props.actions.setSelectedVisualizationGroupName,
     });
   }
 
@@ -96,7 +96,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: this.props.selectedVisualizationName,
       options: this.props.visualizationNames,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setSelectedVisualizationName
+      onChange: this.props.actions.setSelectedVisualizationName,
     });
   }
 
@@ -111,9 +111,9 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Audio in",
       currentOption: this.props.selectedAudioInput,
       options: [null, ...audioInputs],
-      optionToValueFunc: opt => (opt === null ? "" : opt.id),
-      optionToLabelFunc: opt => (opt === null ? "<none>" : opt.name),
-      onChange: this.props.actions.setAudioInput
+      optionToValueFunc: (opt) => (opt === null ? "" : opt.id),
+      optionToLabelFunc: (opt) => (opt === null ? "<none>" : opt.name),
+      onChange: this.props.actions.setAudioInput,
     });
   }
 
@@ -122,9 +122,8 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Piano MIDI in",
       currentOption: this.props.selectedPianoMidiInput,
       options: this.props.midiInputs,
-      onChange: this.props.actions.setPianoMidiInput
+      onChange: this.props.actions.setPianoMidiInput,
     });
-
   }
 
   private renderPianoMidiThruDevices() {
@@ -132,7 +131,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Piano MIDI thru",
       currentOption: this.props.selectedPianoMidiThru,
       options: this.props.midiOutputs,
-      onChange: this.props.actions.setPianoMidiThru
+      onChange: this.props.actions.setPianoMidiThru,
     });
   }
 
@@ -141,40 +140,40 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Ctrl MIDI in",
       currentOption: this.props.selectedControllerMidiInput,
       options: this.props.midiInputs,
-      onChange: this.props.actions.setControllerMidiInput
+      onChange: this.props.actions.setControllerMidiInput,
     });
   }
 
   private renderBeatControllerDevices() {
     const { selectedBeatControllerType } = this.props;
 
-    const options: BeatControllerType[] = [
-      "manual",
-      "ableton"
-    ];
+    const options: BeatControllerType[] = ["manual", "ableton"];
 
     return this.renderDropDownOption({
       label: "Beat ctrl",
       currentOption: selectedBeatControllerType,
       options,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setBeatControllerType
+      onChange: this.props.actions.setBeatControllerType,
     });
   }
 
-  private renderMidiDropDownOption<T extends (WebMidi.MIDIInput | WebMidi.MIDIOutput) | null>(attrs: {
+  private renderMidiDropDownOption<
+    T extends WebMidi.MIDIInput | WebMidi.MIDIOutput
+  >(attrs: {
     label: string;
-    currentOption: T;
+    currentOption: T | null;
     options: T[];
-    onChange: (newOption: T) => void;
+    onChange: (newOption: T | null) => void;
   }) {
-    return this.renderDropDownOption({
+    return this.renderDropDownOption<T | null>({
       label: attrs.label,
       currentOption: attrs.currentOption,
       options: [null, ...attrs.options],
-      optionToValueFunc: (opt => (opt === null ? "" : opt.id)),
-      optionToLabelFunc: (opt => (opt === null ? "<none>" : valueOrDefault(opt.name, opt.id))),
-      onChange: attrs.onChange
+      optionToValueFunc: (opt) => (opt === null ? "" : opt.id),
+      optionToLabelFunc: (opt) =>
+        opt === null ? "<none>" : valueOrDefault(opt.name, opt.id),
+      onChange: attrs.onChange,
     });
   }
 
@@ -186,13 +185,16 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     optionToLabelFunc?: (option: T) => string;
     onChange: (newOption: T) => void;
   }) {
-    const { currentOption, options, optionToLabelFunc, optionToValueFunc } = attrs;
+    const { currentOption, options, optionToLabelFunc, optionToValueFunc } =
+      attrs;
 
     const optionValues = options.map(optionToValueFunc);
-    const optionLabels = (optionToLabelFunc ? options.map(optionToLabelFunc) : optionValues);
+    const optionLabels = optionToLabelFunc
+      ? options.map(optionToLabelFunc)
+      : optionValues;
     const currentValue = optionToValueFunc(currentOption);
 
-    const wrappedOnChange = (event: React.ChangeEvent<any>) => {      
+    const wrappedOnChange = (event: React.ChangeEvent<any>) => {
       const i = optionValues.indexOf(event.target.value);
       if (i === -1) {
         throw new Error("invalid value");
@@ -202,7 +204,9 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
 
     return (
       <div className="RightSidebar-dropDownOption">
-        <span className="RightSidebar-dropDownOptionLabel">{attrs.label}: </span>
+        <span className="RightSidebar-dropDownOptionLabel">
+          {attrs.label}:{" "}
+        </span>
         <div className="RightSidebar-dropDownOptionSelectContainer">
           <select
             className="RightSidebar-dropDownOptionSelect"
@@ -210,13 +214,11 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
             onChange={wrappedOnChange}
             tabIndex={-1}
           >
-            {
-              optionValues.map((value, i) => (
-                <option key={value} value={value}>
-                  {optionLabels[i]}
-                </option>
-              ))
-            }
+            {optionValues.map((value, i) => (
+              <option key={value} value={value}>
+                {optionLabels[i]}
+              </option>
+            ))}
           </select>
         </div>
       </div>

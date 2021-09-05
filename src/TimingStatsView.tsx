@@ -8,10 +8,10 @@ const TARGET_MILLIS = 1000 / TARGET_FPS;
 
 interface Props {
   getTimings: () => {
-    visualizationMillis: number,
-    fadeCandyMillis: number,
-    renderMillis: number,
-    framesRenderedSinceLastCall: number
+    visualizationMillis: number;
+    fadeCandyMillis: number;
+    renderMillis: number;
+    framesRenderedSinceLastCall: number;
   };
   message2?: () => string;
 }
@@ -26,10 +26,8 @@ export default class TimingStatsView extends React.Component<Props, State> {
   private lastUpdateTime?: number;
   private updateInterval?: NodeJS.Timeout;
 
-  public componentWillMount() {
-    if (super.componentWillMount) {
-      super.componentWillMount();
-    }
+  public componentDidMount() {
+    super.componentDidMount?.();
 
     this.updateInterval = setInterval(this.update, UPDATE_FREQ_MILLIS);
     this.update();
@@ -47,20 +45,13 @@ export default class TimingStatsView extends React.Component<Props, State> {
   }
 
   public render() {
-    const message2: string = (
-      this.props.message2 === undefined
-        ? ""
-        : this.props.message2()
-    );
+    const message2: string =
+      this.props.message2 === undefined ? "" : this.props.message2();
 
     return (
       <div className="TimingStatsView">
         {this.state.message}
-        {
-          message2 === ""
-            ? null
-            : <div>{message2}</div>
-        }
+        {message2 === "" ? null : <div>{message2}</div>}
       </div>
     );
   }
@@ -69,8 +60,8 @@ export default class TimingStatsView extends React.Component<Props, State> {
     const timings = this.props.getTimings();
 
     const now = performance.now();
-    const timeElapsed = this.lastUpdateTime ? (now - this.lastUpdateTime) : 0;
-    const fps = timings.framesRenderedSinceLastCall / timeElapsed * 1000;
+    const timeElapsed = this.lastUpdateTime ? now - this.lastUpdateTime : 0;
+    const fps = (timings.framesRenderedSinceLastCall / timeElapsed) * 1000;
 
     const vLoad = timings.visualizationMillis / TARGET_MILLIS;
     const fLoad = timings.fadeCandyMillis / TARGET_MILLIS;
@@ -83,9 +74,9 @@ export default class TimingStatsView extends React.Component<Props, State> {
         `v=${Math.round(vLoad * 100)}%`,
         `f=${Math.round(fLoad * 100)}%`,
         `r=${Math.round(rLoad * 100)}%`,
-        `t=${Math.round(load * 100)}%`
-      ].join(" / ")
+        `t=${Math.round(load * 100)}%`,
+      ].join(" / "),
     });
     this.lastUpdateTime = now;
-  }
+  };
 }

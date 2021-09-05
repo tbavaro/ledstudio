@@ -154,7 +154,11 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   );
   private readonly controllerState = new ControllerState();
 
-  public componentWillMount() {
+  private _isMounted = false;
+
+  public componentDidMount() {
+    super.componentDidMount?.();
+
     if (super.componentWillMount) {
       super.componentWillMount();
     }
@@ -214,19 +218,14 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     }
 
     this.midiEventEmitter.addListener(this.myMidiListener);
-  }
 
-  public componentDidMount() {
-    if (super.componentDidMount) {
-      super.componentDidMount();
-    }
     this.startAnimation();
+
+    this._isMounted = true;
   }
 
   public componentWillUnmount() {
-    if (super.componentWillUnmount) {
-      super.componentWillUnmount();
-    }
+    this._isMounted = false;
 
     this.stopAnimation();
 
@@ -243,6 +242,8 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       "deviceListChanged",
       this.updateAudioInDevices
     );
+
+    super.componentWillUnmount?.();
   }
 
   public render() {
@@ -472,7 +473,11 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       audioSource: audioSource || createDummyAudioNode(),
       setVisualizerExtraDisplay,
       controllerState: this.controllerState,
-      forceUpdateUI: () => this.forceUpdate(),
+      forceUpdateUI: () => {
+        if (this._isMounted) {
+          this.forceUpdate();
+        }
+      },
     });
     runner.hardwareLedSender = new FadecandyLedSender(
       this.fadecandyClient,

@@ -27,6 +27,8 @@ class MyFrameContext implements Visualization.FrameContext {
   constructor() {
     const UNSET = "<unset>" as any;
     this.elapsedMillis = UNSET;
+    this.elapsedSeconds = UNSET;
+    this.beatController = UNSET;
     this.pianoState = new PianoHelpers.VisualizationStateHelper();
   }
 
@@ -64,16 +66,14 @@ const DEFAULT_COLOR_ORDER = [
   Colors.ORANGE,
   Colors.CYAN,
   Colors.PURPLE,
-  Colors.CHARTREUSE
+  Colors.CHARTREUSE,
 ];
 
 class TimeSeriesHelper {
   private usedColors: Colors.Color[] = [];
   public data: Visualization.TimeSeriesValue[] = [];
 
-  public createTimeSeries = (attrs?: {
-    color?: Colors.Color
-  }) => {
+  public createTimeSeries = (attrs?: { color?: Colors.Color }) => {
     attrs = attrs || {};
 
     let color: Colors.Color;
@@ -88,10 +88,10 @@ class TimeSeriesHelper {
     this.data.push(data);
 
     return data;
-  }
+  };
 
   private nextDefaultColor(): Colors.Color {
-    const color = DEFAULT_COLOR_ORDER.find(c => !this.usedColors.includes(c));
+    const color = DEFAULT_COLOR_ORDER.find((c) => !this.usedColors.includes(c));
     if (color === undefined) {
       throw new Error("all default colors were used");
     }
@@ -111,15 +111,18 @@ class MyDialControl implements Visualization.DialControl {
   private readonly maxValue: number;
 
   constructor(attrs: {
-    controllerState: ControllerState,
-    dialNumber: number,
-    minValue: number,
-    maxValue: number
+    controllerState: ControllerState;
+    dialNumber: number;
+    minValue: number;
+    maxValue: number;
   }) {
     const { dialNumber, controllerState } = attrs;
     this.controllerState = controllerState;
     this.index = dialNumber - 1;
-    if (this.index < 0 || this.index >= this.controllerState.dialValues.length) {
+    if (
+      this.index < 0 ||
+      this.index >= this.controllerState.dialValues.length
+    ) {
       throw new Error("invalid dial number: " + attrs.dialNumber);
     }
     this.minValue = attrs.minValue;
@@ -127,12 +130,17 @@ class MyDialControl implements Visualization.DialControl {
   }
 
   public get value() {
-    return this.controllerState.dialValues[this.index] * (this.maxValue - this.minValue) + this.minValue;
+    return (
+      this.controllerState.dialValues[this.index] *
+        (this.maxValue - this.minValue) +
+      this.minValue
+    );
   }
 
   public set value(value: number) {
     value = bracket(this.minValue, this.maxValue, value);
-    this.controllerState.dialValues[this.index] = (value - this.minValue) / (this.maxValue - this.minValue);
+    this.controllerState.dialValues[this.index] =
+      (value - this.minValue) / (this.maxValue - this.minValue);
   }
 }
 
@@ -141,13 +149,16 @@ class MyButtonControl implements Visualization.ButtonControl {
   private readonly index: number;
 
   constructor(attrs: {
-    controllerState: ControllerState,
-    buttonNumber: number
+    controllerState: ControllerState;
+    buttonNumber: number;
   }) {
     const { buttonNumber, controllerState } = attrs;
     this.controllerState = controllerState;
     this.index = buttonNumber - 1;
-    if (this.index < 0 || this.index >= this.controllerState.buttonStates.length) {
+    if (
+      this.index < 0 ||
+      this.index >= this.controllerState.buttonStates.length
+    ) {
       throw new Error("invalid button number: " + attrs.buttonNumber);
     }
   }
@@ -215,7 +226,7 @@ class ControllerStateHelper {
       controllerState: this.controllerState,
       dialNumber: dialNumber,
       minValue: minValue,
-      maxValue: maxValue
+      maxValue: maxValue,
     });
 
     helper.value = valueOrDefault(attrs.initialValue, minValue);
@@ -223,10 +234,12 @@ class ControllerStateHelper {
     this.forceUpdateUI();
 
     return helper;
-  }
+  };
 
   private nextDialNumber(): number {
-    const dialNumber = ASSIGNABLE_DIAL_NUMBERS.find(n => !this.usedDialNumbers.includes(n));
+    const dialNumber = ASSIGNABLE_DIAL_NUMBERS.find(
+      (n) => !this.usedDialNumbers.includes(n)
+    );
     if (dialNumber === undefined) {
       throw new Error("all dials were used");
     }
@@ -248,12 +261,14 @@ class ControllerStateHelper {
 
     return new MyButtonControl({
       controllerState: this.controllerState,
-      buttonNumber: buttonNumber
+      buttonNumber: buttonNumber,
     });
-  }
+  };
 
   private nextButtonNumber(): number {
-    const buttonNumber = ASSIGNABLE_BUTTON_NUMBERS.find(n => !this.usedButtonNumbers.includes(n));
+    const buttonNumber = ASSIGNABLE_BUTTON_NUMBERS.find(
+      (n) => !this.usedButtonNumbers.includes(n)
+    );
     if (buttonNumber === undefined) {
       throw new Error("all buttons were used");
     }
@@ -276,24 +291,27 @@ export default class VisualizationRunner {
   private readonly signalsHelper: SignalsHelper;
 
   constructor(attrs: {
-    visualizationRegistry: VisualizationRegistry,
-    visualizationName: string,
-    scene: Scene,
-    audioSource: AudioNode,
-    setVisualizerExtraDisplay: (element: HTMLElement | null) => void,
-    controllerState: ControllerState,
-    forceUpdateUI: () => void
+    visualizationRegistry: VisualizationRegistry;
+    visualizationName: string;
+    scene: Scene;
+    audioSource: AudioNode;
+    setVisualizerExtraDisplay: (element: HTMLElement | null) => void;
+    controllerState: ControllerState;
+    forceUpdateUI: () => void;
   }) {
     this.timeSeriesHelper = new TimeSeriesHelper();
     this.controllerState = attrs.controllerState;
-    const controllerStateHelper = new ControllerStateHelper(attrs.controllerState, attrs.forceUpdateUI);
+    const controllerStateHelper = new ControllerStateHelper(
+      attrs.controllerState,
+      attrs.forceUpdateUI
+    );
     this.brightnessDial = controllerStateHelper.createDialControl({
       dialNumber: 8,
-      initialValue: attrs.controllerState.dialValues[7]
+      initialValue: attrs.controllerState.dialValues[7],
     });
     this.derezDial = controllerStateHelper.createDialControl({
       dialNumber: 7,
-      initialValue: attrs.controllerState.dialValues[6]
+      initialValue: attrs.controllerState.dialValues[6],
     });
     this.signalsHelper = new SignalsHelper(attrs.audioSource);
     const visualizationConfig: Visualization.Config = {
@@ -306,12 +324,20 @@ export default class VisualizationRunner {
       createDialControl: controllerStateHelper.createDialControl,
       createEasyTimeSeriesSet: () => {
         return {
-          white: this.timeSeriesHelper.createTimeSeries({ color: Colors.WHITE }),
+          white: this.timeSeriesHelper.createTimeSeries({
+            color: Colors.WHITE,
+          }),
           blue: this.timeSeriesHelper.createTimeSeries({ color: Colors.BLUE }),
           red: this.timeSeriesHelper.createTimeSeries({ color: Colors.RED }),
-          yellow: this.timeSeriesHelper.createTimeSeries({ color: Colors.YELLOW }),
-          green: this.timeSeriesHelper.createTimeSeries({ color: Colors.GREEN }),
-          orange: this.timeSeriesHelper.createTimeSeries({ color: Colors.ORANGE })
+          yellow: this.timeSeriesHelper.createTimeSeries({
+            color: Colors.YELLOW,
+          }),
+          green: this.timeSeriesHelper.createTimeSeries({
+            color: Colors.GREEN,
+          }),
+          orange: this.timeSeriesHelper.createTimeSeries({
+            color: Colors.ORANGE,
+          }),
         };
       },
       reset: () => {
@@ -319,11 +345,14 @@ export default class VisualizationRunner {
         controllerStateHelper.reset();
         this.controllerState.reset();
         attrs.setVisualizerExtraDisplay(null);
-      }
+      },
     };
-    this.visualization = attrs.visualizationRegistry.createVisualization(attrs.visualizationName, visualizationConfig);
+    this.visualization = attrs.visualizationRegistry.createVisualization(
+      attrs.visualizationName,
+      visualizationConfig
+    );
     this.timingHelper = new MovingAverageHelper(20);
-    this.adjustedLeds = this.visualization.ledColors.map(_ => Colors.BLACK);
+    this.adjustedLeds = this.visualization.ledColors.map((_) => Colors.BLACK);
     this.frameContext = new MyFrameContext();
   }
 
@@ -355,7 +384,7 @@ export default class VisualizationRunner {
 
     return {
       frameHeatmapValues: frameHeatmapValues,
-      frameTimeseriesPoints: this.timeSeriesHelper.data
+      frameTimeseriesPoints: this.timeSeriesHelper.data,
     };
   }
 
