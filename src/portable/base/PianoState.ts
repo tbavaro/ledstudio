@@ -10,9 +10,9 @@ export default class PianoState {
   // sorted indexes of keys changed since last frame
   public changedKeys: number[];
 
-  constructor() {
-    this.keys = new Array<boolean>(NUM_KEYS).fill(false),
-    this.keyVelocities = new Array<number>(NUM_KEYS).fill(0),
+  public constructor() {
+    this.keys = new Array<boolean>(NUM_KEYS).fill(false);
+    this.keyVelocities = new Array<number>(NUM_KEYS).fill(0);
     this.changedKeys = [];
   }
 

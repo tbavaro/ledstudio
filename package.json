@@ -4,36 +4,55 @@
   "version": "0.21.0",
   "private": true,
   "dependencies": {
-    "fsevents": "^2.0.7",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
     "google-palette": "^1.1.0",
     "midievents": "^2.0.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts-ts": "^4.0.8",
-    "three": "^0.104.0",
-    "timidity": "^1.1.2"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "^4.0.3",
+    "three": "^0.132.2",
+    "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "npm run codegen && react-scripts-ts start",
-    "build": "npm run codegen && react-scripts-ts build",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
+    "start": "npm run codegen && react-scripts start",
+    "build": "npm run codegen && react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
     "fcserver": "./fcserver/fcserver.sh",
-    "codegen": "./node_modules/.bin/tsc codegen/GenerateVisualizationRegistry.ts && ./node_modules/.bin/node codegen/GenerateVisualizationRegistry.js"
+    "codegen": "tsc src/codegen/GenerateVisualizationRegistry.ts && node src/codegen/GenerateVisualizationRegistry.js"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.3.2"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.15",
-    "@types/node": "^11.13.18",
-    "@types/react": "^16.8.23",
-    "@types/react-dom": "^16.8.4",
-    "@types/webmidi": "^2.0.3",
-    "handlebars": "^4.1.2",
-    "node": "^12.6.0",
+    "@types/node": "^16.7.10",
+    "@types/react": "^17.0.19",
+    "@types/react-dom": "^17.0.9",
+    "@types/webmidi": "^2.0.6",
+    "handlebars": "^4.7.7",
+    "node": "^16.6.1",
     "tsdevtools": "github:tbavaro/tsdevtools#dist",
-    "typescript": "^3.5.3"
-  },
-  "browserslist": [
-    "last 2 Chrome versions"
-  ]
+    "typescript": "^4.4.2"
+  }
 }
