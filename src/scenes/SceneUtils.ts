@@ -5,10 +5,10 @@ import { Vector2 } from "three";
 // top and bottom sides point to the right (+x)
 // vertex order is [(0,0), (0,`verticalLength`), (<other vertex>)]
 export function triangleFromLengths(attrs: {
-  verticalLength: number,
-  topSideLength: number,
-  bottomSideLength: number,
-  flipX?: boolean
+  verticalLength: number;
+  topSideLength: number;
+  bottomSideLength: number;
+  flipX?: boolean;
 }): [Vector2, Vector2, Vector2] {
   const v = attrs.verticalLength;
   const t = attrs.topSideLength;

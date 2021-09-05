@@ -1,7 +1,6 @@
+import WindowStats from "../../util/WindowStats";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
-
-import WindowStats from "../../util/WindowStats";
 
 export default class TimeSeriesBandHelper extends WindowStats {
   public readonly color: Colors.Color;
@@ -10,9 +9,9 @@ export default class TimeSeriesBandHelper extends WindowStats {
   private readonly lowTS: Visualization.TimeSeriesValue;
 
   constructor(attrs: {
-    config: Visualization.Config,
-    maxSize: number,
-    color?: Colors.Color
+    config: Visualization.Config;
+    maxSize: number;
+    color?: Colors.Color;
   }) {
     super(attrs.maxSize);
 

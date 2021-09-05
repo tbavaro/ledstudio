@@ -1,9 +1,9 @@
+import "./ControlsView.css";
+
 import * as React from "react";
 
 import ControllerState from "./portable/base/ControllerState";
 import { bracket01 } from "./util/Utils";
-
-import "./ControlsView.css";
 
 interface Props {
   controllerState: ControllerState;
@@ -37,16 +37,16 @@ class MyButton extends React.PureComponent<MyButtonProps, {}> {
   private onMouseDown = () => {
     this.props.setButtonValue(this.props.index, true);
     document.addEventListener("mouseup", this.onMouseUp);
-  }
+  };
 
   private onMouseUp = () => {
     this.props.setButtonValue(this.props.index, false);
     this.removeListeners();
-  }
+  };
 
   private removeListeners = () => {
     document.removeEventListener("mouseup", this.onMouseUp);
-  }
+  };
 }
 
 interface MyDialProps {
@@ -75,22 +75,22 @@ class MyDial extends React.PureComponent<MyDialProps, MyDialState> {
   public render() {
     return (
       <div
-      className={[
-        "ControlsView-dial",
-        this.state.isDragging ? "dragging" : ""
-      ].join(" ")}
-    onMouseDown={this.onMouseDown}
+        className={[
+          "ControlsView-dial",
+          this.state.isDragging ? "dragging" : ""
+        ].join(" ")}
+        onMouseDown={this.onMouseDown}
       >
         <span
           className="ControlsView-dialIndicator"
           style={{
-            transform: `translateX(-50%) rotate(${-135 + 270 * this.props.value}deg)`
+            transform: `translateX(-50%) rotate(${
+              -135 + 270 * this.props.value
+            }deg)`
           }}
         />
-        <span className="ControlsView-dialLabel">
-          {this.props.index + 1}
-        </span>
-    </div>
+        <span className="ControlsView-dialLabel">{this.props.index + 1}</span>
+      </div>
     );
   }
 
@@ -100,21 +100,24 @@ class MyDial extends React.PureComponent<MyDialProps, MyDialState> {
     this.setState({ isDragging: true });
     document.addEventListener("mousemove", this.onMouseMove as any);
     document.addEventListener("mouseup", this.onMouseUp);
-  }
+  };
 
   private onMouseUp = () => {
     this.setState({ isDragging: false });
     this.removeListeners();
-  }
+  };
 
   private onMouseMove = (event: React.MouseEvent<any>) => {
-    this.props.setDialValue(this.props.index, bracket01(this.startDragValue + (event.pageX - this.startDragX) / 100));
-  }
+    this.props.setDialValue(
+      this.props.index,
+      bracket01(this.startDragValue + (event.pageX - this.startDragX) / 100)
+    );
+  };
 
   private removeListeners = () => {
     document.removeEventListener("mousemove", this.onMouseMove as any);
     document.removeEventListener("mouseup", this.onMouseUp);
-  }
+  };
 }
 
 export default class ControlsView extends React.Component<Props, {}> {
@@ -133,7 +136,12 @@ export default class ControlsView extends React.Component<Props, {}> {
     return this.render4by2({
       values: this.props.controllerState.buttonStates,
       renderFunc: (value, i) => (
-        <MyButton key={`button${i}`} index={i} value={value} setButtonValue={this.setButtonValue}/>
+        <MyButton
+          key={`button${i}`}
+          index={i}
+          value={value}
+          setButtonValue={this.setButtonValue}
+        />
       ),
       flipped: true
     });
@@ -143,8 +151,13 @@ export default class ControlsView extends React.Component<Props, {}> {
     return this.render4by2({
       values: this.props.controllerState.dialValues,
       renderFunc: (value, i) => (
-        <MyDial key={`dial${i}`} index={i} value={value} setDialValue={this.setDialValue}/>
-      ),
+        <MyDial
+          key={`dial${i}`}
+          index={i}
+          value={value}
+          setDialValue={this.setDialValue}
+        />
+      )
     });
   }
 
@@ -160,20 +173,16 @@ export default class ControlsView extends React.Component<Props, {}> {
 
     return (
       <div className={`ControlsView-controlsCluster ${attrs.className || ""}`}>
-        {
-          (attrs.flipped ? [1, 0] : [0, 1]).map(rowIdx => {
-            return (
-              <div key={`row${rowIdx}`} className="ControlsView-controlsRow">
-                {
-                  [0, 1, 2, 3].map(offset => {
-                    const n = rowIdx * 4 + offset;
-                    return attrs.renderFunc(attrs.values[n], n);
-                  })
-                }
-              </div>
-            );
-          })
-        }
+        {(attrs.flipped ? [1, 0] : [0, 1]).map(rowIdx => {
+          return (
+            <div key={`row${rowIdx}`} className="ControlsView-controlsRow">
+              {[0, 1, 2, 3].map(offset => {
+                const n = rowIdx * 4 + offset;
+                return attrs.renderFunc(attrs.values[n], n);
+              })}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -192,10 +201,10 @@ export default class ControlsView extends React.Component<Props, {}> {
   private setButtonValue = (index: number, value: boolean) => {
     this.props.controllerState.setButtonState(index, value);
     this.forceUpdate();
-  }
+  };
 
   private setDialValue = (index: number, value: number) => {
     this.props.controllerState.dialValues[index] = value;
     this.forceUpdate();
-  }
+  };
 }

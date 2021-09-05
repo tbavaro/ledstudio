@@ -1,4 +1,5 @@
 import * as fs from "fs";
+
 import * as handlebars from "handlebars";
 
 const VISUALIZATION_ROOT = "src/portable/visualizations";
@@ -12,7 +13,7 @@ function crawl(
   visitor: (relPath: string, name: string) => void
 ) {
   fs.readdirSync(`${root}/${relPath}`, { withFileTypes: true }).forEach(
-    (entry) => {
+    entry => {
       if (entry.isFile() && entry.name.match(/^.*\.ts$/)) {
         visitor(relPath, entry.name);
       } else if (entry.isDirectory()) {
@@ -47,13 +48,13 @@ crawl(VISUALIZATION_ROOT, "", (relPath: string, fileName: string) => {
 
   includeEntries.push({
     variableName,
-    includePath,
+    includePath
   });
 
   addToRegistryEntries.push({
     groupName,
     visualizationName,
-    variableName,
+    variableName
   });
 
   // console.log(JSON.stringify({
@@ -78,15 +79,15 @@ function sortWithTransform<T>(arr: T[], func: (value: T) => string): T[] {
   return arr;
 }
 
-sortWithTransform(includeEntries, (e) => e.includePath.toLowerCase());
+sortWithTransform(includeEntries, e => e.includePath.toLowerCase());
 sortWithTransform(
   addToRegistryEntries,
-  (e) => `${e.groupName}\t${e.visualizationName}`
+  e => `${e.groupName}\t${e.visualizationName}`
 );
 
 const data = {
   includeEntries,
-  addToRegistryEntries,
+  addToRegistryEntries
 };
 
 const template = handlebars.compile(

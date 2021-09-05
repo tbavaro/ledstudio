@@ -27,7 +27,7 @@ export default class FixedArray<T> {
     return this.items[i];
   }
 
-  public getOr<T2>(i: number, or: T): (T | T2) {
+  public getOr<T2>(i: number, or: T): T | T2 {
     if (i < 0 || i >= this.items.length) {
       return or;
     }
@@ -49,7 +49,7 @@ export default class FixedArray<T> {
   }
 
   public fillRange(startIndex: number, count: number, value: T) {
-    for (let i = startIndex; i < (startIndex + count); ++i) {
+    for (let i = startIndex; i < startIndex + count; ++i) {
       this.set(i, value);
     }
   }
@@ -70,7 +70,12 @@ export default class FixedArray<T> {
     return this.items.toString();
   }
 
-  public copy(target: FixedArray<T>, targetStart?: number, sourceStart?: number, sourceEnd?: number) {
+  public copy(
+    target: FixedArray<T>,
+    targetStart?: number,
+    sourceStart?: number,
+    sourceEnd?: number
+  ) {
     let adjTargetStart = targetStart || 0;
     if (adjTargetStart >= target.length) {
       return;
@@ -88,7 +93,10 @@ export default class FixedArray<T> {
       adjTargetStart = 0;
     }
 
-    const n = Math.min(adjSourceEnd - adjSourceStart, target.length - adjTargetStart);
+    const n = Math.min(
+      adjSourceEnd - adjSourceStart,
+      target.length - adjTargetStart
+    );
     for (let i = 0; i < n; ++i) {
       target.set(adjTargetStart + i, this.get(adjSourceStart + i));
     }

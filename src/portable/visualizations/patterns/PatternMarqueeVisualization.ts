@@ -14,7 +14,9 @@ export default class PatternMarqueeVisualization extends Visualization.RowColumn
     this.ledRowMetadatas[0].forEach((_, i) => this.ledAddresses.push([0, i]));
     const bottomRow = this.ledRowMetadatas.length - 1;
     const bottomRowCount = this.ledRowMetadatas[bottomRow].length;
-    this.ledRowMetadatas[bottomRow].forEach((_, i) => this.ledAddresses.push([bottomRow, bottomRowCount - i - 1]));
+    this.ledRowMetadatas[bottomRow].forEach((_, i) =>
+      this.ledAddresses.push([bottomRow, bottomRowCount - i - 1])
+    );
   }
 
   public renderRows(context: Visualization.FrameContext): void {
@@ -23,7 +25,8 @@ export default class PatternMarqueeVisualization extends Visualization.RowColumn
     const offset = Math.round(this.phase);
     this.ledAddresses.forEach((ledAddress, i) => {
       const [row, index] = ledAddress;
-      const color = ((i + offset) % LED_SEPARATION === 0) ? Colors.WHITE : Colors.BLACK;
+      const color =
+        (i + offset) % LED_SEPARATION === 0 ? Colors.WHITE : Colors.BLACK;
       this.ledRows.get(row).set(index, color);
     });
   }

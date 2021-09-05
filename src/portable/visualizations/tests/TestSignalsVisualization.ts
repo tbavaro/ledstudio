@@ -1,10 +1,11 @@
+import { valueOrDefault } from "../../../util/Utils";
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
 
-import { valueOrDefault } from "../../../util/Utils";
-
-type KeysOfType<T, TProp> = { [P in keyof T]: T[P] extends TProp ? P : never }[keyof T];
+type KeysOfType<T, TProp> = {
+  [P in keyof T]: T[P] extends TProp ? P : never;
+}[keyof T];
 
 export default class MyVisualization extends Visualization.default {
   private readonly signals: Signals;
@@ -55,9 +56,9 @@ export default class MyVisualization extends Visualization.default {
   }
 
   private attachTimeSeries<S extends keyof Signals>(attrs: {
-    color: Colors.Color,
-    signalName: S,
-    mapToNormalizedValue: (value: Signals[S]) => number
+    color: Colors.Color;
+    signalName: S;
+    mapToNormalizedValue: (value: Signals[S]) => number;
   }) {
     const ts = this.config.createTimeSeries({
       color: attrs.color
@@ -69,23 +70,21 @@ export default class MyVisualization extends Visualization.default {
     });
   }
 
-  private attachBooleanTimeSeries<S extends KeysOfType<Signals, boolean>>(attrs: {
-    color: Colors.Color,
-    signalName: S,
-    yValue: number
-  }) {
+  private attachBooleanTimeSeries<
+    S extends KeysOfType<Signals, boolean>
+  >(attrs: { color: Colors.Color; signalName: S; yValue: number }) {
     this.attachTimeSeries({
       color: attrs.color,
       signalName: attrs.signalName,
-      mapToNormalizedValue: (v: boolean) => v ? attrs.yValue : NaN
+      mapToNormalizedValue: (v: boolean) => (v ? attrs.yValue : NaN)
     });
   }
 
   private attachNumberTimeSeries<S extends KeysOfType<Signals, number>>(attrs: {
-    color: Colors.Color,
-    signalName: S,
-    scaledMinY?: number,
-    scaledMaxY?: number
+    color: Colors.Color;
+    signalName: S;
+    scaledMinY?: number;
+    scaledMaxY?: number;
   }) {
     const scaledMinY = valueOrDefault(attrs.scaledMinY, 0);
     const scaledMaxY = valueOrDefault(attrs.scaledMaxY, 1);

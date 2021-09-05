@@ -1,10 +1,10 @@
+import { bracket01, valueOrDefault } from "../../../util/Utils";
 import * as Colors from "../../base/Colors";
+import FancyValue from "../../base/FancyValue";
 import * as Visualization from "../../base/Visualization";
 import BasicAudioHelper from "../../visualizationUtils/BasicAudioHelper";
-
-import { bracket01, valueOrDefault } from "../../../util/Utils";
-import FancyValue from "../../base/FancyValue";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
+
 // import WindowStats from "../../util/WindowStats";
 // import TimeSeriesBandHelper from "./util/TimeSeriesBandHelper";
 
@@ -15,9 +15,9 @@ class LevelsHelper {
   private readonly maxThreshold: number;
 
   constructor(attrs: {
-    halfLife: number,
-    minThreshold?: number,
-    maxThreshold?: number
+    halfLife: number;
+    minThreshold?: number;
+    maxThreshold?: number;
   }) {
     this.halfLife = attrs.halfLife;
     this.minThreshold = valueOrDefault(attrs.minThreshold, 0);
@@ -25,7 +25,9 @@ class LevelsHelper {
   }
 
   public processValue(newValue: number, elapsedMillis: number) {
-    const value = bracket01((newValue - this.minThreshold) / (this.maxThreshold - this.minThreshold));
+    const value = bracket01(
+      (newValue - this.minThreshold) / (this.maxThreshold - this.minThreshold)
+    );
     this.v.decayExponential(this.halfLife, elapsedMillis / 1000);
     this.v.bumpTo(value);
   }
@@ -82,7 +84,6 @@ export default class TestBandsVisualization extends Visualization.RowColumnMappe
   private readonly signals: Signals;
   // private readonly lowBand: TimeSeriesBandHelper;
 
-
   constructor(config: Visualization.Config) {
     super(config);
 
@@ -107,7 +108,9 @@ export default class TestBandsVisualization extends Visualization.RowColumnMappe
     this.low2TS.value = this.signals.lowLevel;
     this.high2TS.value = this.signals.highLevel;
 
-   this.ledRows.get(0).fill(Colors.hsv(0, 0.5, this.highTS.value));
-    this.ledRows.get(this.ledRows.length - 1).fill(Colors.hsv(240, 0.5, this.lowTS.value));
+    this.ledRows.get(0).fill(Colors.hsv(0, 0.5, this.highTS.value));
+    this.ledRows
+      .get(this.ledRows.length - 1)
+      .fill(Colors.hsv(240, 0.5, this.lowTS.value));
   }
 }

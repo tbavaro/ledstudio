@@ -1,11 +1,13 @@
-import * as Visualization from "./base/Visualization";
-
 import { valueOrThrow } from "../util/Utils";
+import * as Visualization from "./base/Visualization";
 
 export interface VisualizationRegistry {
   readonly groupNames: ReadonlyArray<string>;
   visualizationNamesInGroup(groupName: string): ReadonlyArray<string>;
-  createVisualization(visualizationName: string, config: Visualization.Config): Visualization.default;
+  createVisualization(
+    visualizationName: string,
+    config: Visualization.Config
+  ): Visualization.default;
 }
 
 export class VisualizationRegistryBuilder {
@@ -29,7 +31,7 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
   private readonly groupedNames: Map<string, string[]> = new Map();
   private readonly flatMap: Map<string, Visualization.Constructor> = new Map();
   private cachedGroupNames: string[] | undefined;
-  
+
   public get groupNames() {
     if (this.cachedGroupNames === undefined) {
       this.cachedGroupNames = Array.from(this.groupedNames.keys());
@@ -41,7 +43,10 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
     return valueOrThrow(this.groupedNames.get(groupName));
   }
 
-  public createVisualization(visualizationName: string, config: Visualization.Config) {
+  public createVisualization(
+    visualizationName: string,
+    config: Visualization.Config
+  ) {
     const ctor = valueOrThrow(this.flatMap.get(visualizationName));
     return new ctor(config);
   }

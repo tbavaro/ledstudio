@@ -1,10 +1,7 @@
 import Scene from "../../scenes/Scene";
-
 import RowColumnLedMapper from "../visualizationUtils/RowColumnLedMapper";
 import { Signals } from "../visualizationUtils/SignalsHelper";
-
 import BeatController from "./BeatController";
-
 import ColorRow from "./ColorRow";
 import * as Colors from "./Colors";
 import FancyValue from "./FancyValue";
@@ -49,7 +46,7 @@ export interface Config {
 
   createTimeSeries: (attrs?: {
     // if `color` is not defined, will try to pick something reasonable
-    color?: Colors.Color
+    color?: Colors.Color;
   }) => TimeSeriesValue;
 
   createEasyTimeSeriesSet: () => EasyTimeSeriesValueSetters;
@@ -87,7 +84,7 @@ export interface Config {
 }
 
 export interface FrameContext {
-  elapsedMillis: number;  // deprecated
+  elapsedMillis: number; // deprecated
   elapsedSeconds: number;
 
   pianoState: PianoState;
@@ -116,7 +113,10 @@ export abstract class RowColumnMappedVisualization extends Visualization {
 
   constructor(config: Config) {
     super(config);
-    this.rowColumnMapper = new RowColumnLedMapper(config.scene.ledMetadatas, this.ledColors);
+    this.rowColumnMapper = new RowColumnLedMapper(
+      config.scene.ledMetadatas,
+      this.ledColors
+    );
     this.ledRowMetadatas = this.rowColumnMapper.rowLedMetadatas;
     this.ledRows = this.rowColumnMapper.ledRows;
   }
@@ -139,7 +139,10 @@ export abstract class SingleRowVisualization extends RowColumnMappedVisualizatio
     super(config);
 
     if (overrideLength === undefined) {
-      this.length = Math.max.apply(Math, this.ledRows.mapToArray(cr => cr.length));
+      this.length = Math.max.apply(
+        Math,
+        this.ledRows.mapToArray(cr => cr.length)
+      );
     } else {
       this.length = overrideLength;
     }
@@ -172,7 +175,9 @@ export class DerezVisualization extends Visualization {
 
   public render(context: FrameContext): void {
     this.delegate.render(context);
-    this.ledColors.copyFancy(this.delegate.ledColors, { derezAmount: this.derez });
+    this.ledColors.copyFancy(this.delegate.ledColors, {
+      derezAmount: this.derez
+    });
   }
 }
 

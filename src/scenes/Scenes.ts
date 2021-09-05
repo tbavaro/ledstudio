@@ -1,10 +1,10 @@
+import { promisify } from "util";
+
 import * as Three from "three";
 import { Vector2, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { promisify } from "util";
 
 import * as SimulationUtils from "../simulator/SimulationUtils";
-
 import * as Scene from "./Scene";
 
 const FLOOR_SIZE_DEFAULT = 10;
@@ -12,12 +12,12 @@ const FLOOR_MATERIAL = new Three.MeshLambertMaterial({
   color: 0x090909
 });
 
-const INCH = 1 / 100 * 2.54;
+const INCH = (1 / 100) * 2.54;
 const FOOT = INCH * 12;
 
 const LedSpacings = {
-  NEOPIXEL_30: (1 / 30),
-  NEOPIXEL_60: (1 / 60)
+  NEOPIXEL_30: 1 / 30,
+  NEOPIXEL_60: 1 / 60
 };
 
 const EXTRA_OBJECT_MATERIAL_GREEN = () => {
@@ -65,17 +65,25 @@ interface SceneDef {
 
 // creates a box with the bottom centered at (0,0,0)
 function boxHelper(attrs: {
-  width: number,
-  height: number,
-  depth: number,
-  translateBy?: Vector3,
-  material?: Three.Material,
+  width: number;
+  height: number;
+  depth: number;
+  translateBy?: Vector3;
+  material?: Three.Material;
 }): ExtraObjectFunc {
   return () => {
-    const geometry = new Three.BoxGeometry(attrs.width, attrs.height, attrs.depth);
+    const geometry = new Three.BoxGeometry(
+      attrs.width,
+      attrs.height,
+      attrs.depth
+    );
     geometry.translate(0, attrs.height / 2, 0);
     if (attrs.translateBy) {
-      geometry.translate(attrs.translateBy.x, attrs.translateBy.y, attrs.translateBy.z);
+      geometry.translate(
+        attrs.translateBy.x,
+        attrs.translateBy.y,
+        attrs.translateBy.z
+      );
     }
 
     const material = attrs.material || EXTRA_OBJECT_MATERIAL_DEFAULT();
@@ -122,7 +130,7 @@ class SceneImpl implements Scene.default {
         const loader = new GLTFLoader();
         loader.load(
           modelDef.url,
-          /*onLoad=*/(gltf) => {
+          /*onLoad=*/ gltf => {
             let model = gltf.scene;
             if (modelDef.scale !== undefined) {
               model = model.clone();
@@ -140,8 +148,8 @@ class SceneImpl implements Scene.default {
             }
             callback(null, model);
           },
-          /*onProgress=*/undefined,
-          /*onError*/(error) => {
+          /*onProgress=*/ undefined,
+          /*onError*/ error => {
             callback(new Error(`gltf error: ${error}`), null as any);
           }
         );
@@ -160,7 +168,10 @@ class SceneImpl implements Scene.default {
     // floor
     if (this.def.floorSizeOverride !== 0) {
       const floorSize = this.def.floorSizeOverride || FLOOR_SIZE_DEFAULT;
-      const floorGeometry = new Three.PlaneGeometry(floorSize, floorSize).rotateX(-1 * Math.PI / 2);
+      const floorGeometry = new Three.PlaneGeometry(
+        floorSize,
+        floorSize
+      ).rotateX((-1 * Math.PI) / 2);
       const floor = new Three.Mesh(floorGeometry, FLOOR_MATERIAL);
 
       // lower it ever-so-slightly to avoid collision with any semi-transparent things on the floor
@@ -184,7 +195,10 @@ class SceneImpl implements Scene.default {
   }
 
   public get cameraStartPosition(): Vector3 {
-    if (this.def.camera !== undefined && this.def.camera.startPosition !== undefined) {
+    if (
+      this.def.camera !== undefined &&
+      this.def.camera.startPosition !== undefined
+    ) {
       return this.def.camera.startPosition.clone();
     } else {
       return new Vector3(0, 0, -10);
@@ -208,7 +222,11 @@ class SceneImpl implements Scene.default {
 
   public get displayMessage(): string {
     if (this.cachedDisplayMessage === undefined) {
-      this.cachedDisplayMessage = Object.entries(this.initDisplayValuesIfNeeded()).map((entry) => `${entry[0]}=${entry[1]}`).join(" / ");
+      this.cachedDisplayMessage = Object.entries(
+        this.initDisplayValuesIfNeeded()
+      )
+        .map(entry => `${entry[0]}=${entry[1]}`)
+        .join(" / ");
     }
     return this.cachedDisplayMessage;
   }
@@ -278,9 +296,9 @@ function doLazy<T>(func: () => T): () => T {
 
 // table (https://www.target.com/p/6-folding-banquet-table-off-white-plastic-dev-group/-/A-14324329)
 function banquetTable(attrs: {
-  translateBy: Vector3,
-  riserHeight?: number,
-  rotateY?: number
+  translateBy: Vector3;
+  riserHeight?: number;
+  rotateY?: number;
 }) {
   const tableWidth = 6 * FOOT;
   const tableDepth = 30 * INCH;
@@ -289,12 +307,14 @@ function banquetTable(attrs: {
   const legInset = 6 * INCH;
 
   const object = new Three.Object3D();
-  object.add(boxHelper({
-    width: tableWidth,
-    height: tableThickness,
-    depth: tableDepth,
-    translateBy: new Vector3(0, legHeight, 0)
-  })());
+  object.add(
+    boxHelper({
+      width: tableWidth,
+      height: tableThickness,
+      depth: tableDepth,
+      translateBy: new Vector3(0, legHeight, 0)
+    })()
+  );
 
   const { riserHeight } = attrs;
 
@@ -303,17 +323,16 @@ function banquetTable(attrs: {
     height: legHeight,
     depth: 1 * INCH
   })();
-  [[-1, -1], [-1, 1], [1, 1], [1, -1]].forEach(([x, z]) => {
+  [
+    [-1, -1],
+    [-1, 1],
+    [1, 1],
+    [1, -1]
+  ].forEach(([x, z]) => {
     const thisLeg = leg.clone();
     const legX = x * (tableWidth * 0.5 - legInset);
     const legZ = z * (tableDepth * 0.5 - legInset);
-    thisLeg.position.copy(
-      new Vector3(
-        legX,
-        0,
-        legZ
-      )
-    );
+    thisLeg.position.copy(new Vector3(legX, 0, legZ));
     object.add(thisLeg);
 
     if (riserHeight) {
@@ -341,40 +360,50 @@ function banquetTable(attrs: {
 }
 
 // center is middle of front row of tables
-function djTables(attrs: {
-  translateBy: Vector3
-}) {
+function djTables(attrs: { translateBy: Vector3 }) {
   const scene = new Three.Object3D();
 
-  scene.add(banquetTable({
-    translateBy: new Vector3(-3.05 * FOOT, 0, 0)
-  }));
+  scene.add(
+    banquetTable({
+      translateBy: new Vector3(-3.05 * FOOT, 0, 0)
+    })
+  );
 
-  scene.add(banquetTable({
-    translateBy: new Vector3(3.05 * FOOT, 0, 0)
-  }));
+  scene.add(
+    banquetTable({
+      translateBy: new Vector3(3.05 * FOOT, 0, 0)
+    })
+  );
 
-  scene.add(banquetTable({
-    riserHeight: 6 * INCH,
-    translateBy: new Vector3(-3.05 * FOOT, 0, 0.7)
-  }));
+  scene.add(
+    banquetTable({
+      riserHeight: 6 * INCH,
+      translateBy: new Vector3(-3.05 * FOOT, 0, 0.7)
+    })
+  );
 
-  scene.add(banquetTable({
-    riserHeight: 6 * INCH,
-    translateBy: new Vector3(3.05 * FOOT, 0, 0.7)
-  }));
+  scene.add(
+    banquetTable({
+      riserHeight: 6 * INCH,
+      translateBy: new Vector3(3.05 * FOOT, 0, 0.7)
+    })
+  );
 
-  scene.add(banquetTable({
-    rotateY: Math.PI / 2,
-    riserHeight: 6 * INCH,
-    translateBy: new Vector3(7.45 * FOOT, 0, 1.25)
-  }));
+  scene.add(
+    banquetTable({
+      rotateY: Math.PI / 2,
+      riserHeight: 6 * INCH,
+      translateBy: new Vector3(7.45 * FOOT, 0, 1.25)
+    })
+  );
 
-  scene.add(banquetTable({
-    rotateY: Math.PI / 2,
-    riserHeight: 3 * INCH,
-    translateBy: new Vector3(-7.45 * FOOT, 0, 1.25)
-  }));
+  scene.add(
+    banquetTable({
+      rotateY: Math.PI / 2,
+      riserHeight: 3 * INCH,
+      translateBy: new Vector3(-7.45 * FOOT, 0, 1.25)
+    })
+  );
 
   scene.position.add(attrs.translateBy);
 
@@ -382,19 +411,22 @@ function djTables(attrs: {
 }
 
 function createBurrowVenue(attrs: {
-  keyboardInFront: boolean,
-  hideKeyboard?: boolean
+  keyboardInFront: boolean;
+  hideKeyboard?: boolean;
 }) {
-  const tablesTranslateZ = (attrs.keyboardInFront ? 1.5 : -1);
-  const keyboardTranslateZ = tablesTranslateZ + (attrs.keyboardInFront ? -1.5 : 1.35);
+  const tablesTranslateZ = attrs.keyboardInFront ? 1.5 : -1;
+  const keyboardTranslateZ =
+    tablesTranslateZ + (attrs.keyboardInFront ? -1.5 : 1.35);
   const shoulderHeight = 57 * INCH;
 
   return {
-    model: attrs.hideKeyboard ? undefined : {
-      url: "./keyboard.gltf",
-      scale: new Vector3(0.1, 0.1, 0.12),
-      translateBy: new Vector3(0, 0, keyboardTranslateZ)
-    },
+    model: attrs.hideKeyboard
+      ? undefined
+      : {
+          url: "./keyboard.gltf",
+          scale: new Vector3(0.1, 0.1, 0.12),
+          translateBy: new Vector3(0, 0, keyboardTranslateZ)
+        },
     extraObjects: [
       // piano size
       // boxHelper({
@@ -415,7 +447,11 @@ function createBurrowVenue(attrs: {
         width: 10 * INCH,
         height: 12 * INCH,
         depth: 10 * INCH,
-        translateBy: new Vector3(0, shoulderHeight + 1 * INCH, keyboardTranslateZ + 0.5),
+        translateBy: new Vector3(
+          0,
+          shoulderHeight + 1 * INCH,
+          keyboardTranslateZ + 0.5
+        ),
         material: EXTRA_OBJECT_MATERIAL_GREEN()
       })
     ]
@@ -436,13 +472,17 @@ function createRealWingsSceneDef(name: string) {
   const bottomHeight = 35 * INCH;
 
   const calculateLedPositions2d = () => {
-
     const makeRib = (attrs: {
-      start: Vector2,
-      toward: Vector2,
-      numLeds: number
+      start: Vector2;
+      toward: Vector2;
+      numLeds: number;
     }) => {
-      const end = attrs.toward.clone().sub(attrs.start).normalize().multiplyScalar(ledSpacing * ((attrs.numLeds - 1) + 0.1)).add(attrs.start);
+      const end = attrs.toward
+        .clone()
+        .sub(attrs.start)
+        .normalize()
+        .multiplyScalar(ledSpacing * (attrs.numLeds - 1 + 0.1))
+        .add(attrs.start);
       return SimulationUtils.pointsFromTo({
         start: attrs.start,
         end: end,
@@ -450,7 +490,8 @@ function createRealWingsSceneDef(name: string) {
       });
     };
 
-    const translateBy = (delta: Vector2) => (vs: Vector2[]) => vs.map(v => v.clone().add(delta));
+    const translateBy = (delta: Vector2) => (vs: Vector2[]) =>
+      vs.map(v => v.clone().add(delta));
 
     const smallLeftRibs = [
       makeRib({
@@ -496,7 +537,13 @@ function createRealWingsSceneDef(name: string) {
         toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
         numLeds: 53
       })
-    ].map(translateBy(new Vector2(-1 * (smallDeltaX + interTriangleSpacing + middleSpacing * 0.5))));
+    ].map(
+      translateBy(
+        new Vector2(
+          -1 * (smallDeltaX + interTriangleSpacing + middleSpacing * 0.5)
+        )
+      )
+    );
 
     const interleave = <T>(a: T[], b: T[]): T[] => {
       if (a.length !== b.length) {
@@ -525,12 +572,14 @@ function createRealWingsSceneDef(name: string) {
     const positions2d = calculateLedPositions2d();
     const ribLengths = positions2d.map(r => r.length);
 
-    const positions3d = positions2d.map(points2d => SimulationUtils.map2dTo3d({
-      points: points2d,
-      bottomLeft: new Vector3(0, bottomHeight, 1.25),
-      rightDirection: new Vector3(1, 0, 0),
-      upDirection: new Vector3(0, 1, 0)
-    }));
+    const positions3d = positions2d.map(points2d =>
+      SimulationUtils.map2dTo3d({
+        points: points2d,
+        bottomLeft: new Vector3(0, bottomHeight, 1.25),
+        rightDirection: new Vector3(1, 0, 0),
+        upDirection: new Vector3(0, 1, 0)
+      })
+    );
 
     const ledMetadatas: Scene.LedMetadata[] = [];
     positions3d.map((ribPositions, ribIndex) => {
@@ -557,18 +606,22 @@ function createRealWingsSceneDef(name: string) {
     keyboardInFront: false,
     hideKeyboard: true
   });
-  kbVenue.extraObjects.push(boxHelper({
-    width: 4 * INCH,
-    height: 65 * INCH,
-    depth: 4 * INCH,
-    translateBy: new Vector3(postPositionX, 0, 1.32 ),
-  }));
-  kbVenue.extraObjects.push(boxHelper({
-    width: 4 * INCH,
-    height: 65 * INCH,
-    depth: 4 * INCH,
-    translateBy: new Vector3(-1 * postPositionX, 0, 1.32),
-  }));
+  kbVenue.extraObjects.push(
+    boxHelper({
+      width: 4 * INCH,
+      height: 65 * INCH,
+      depth: 4 * INCH,
+      translateBy: new Vector3(postPositionX, 0, 1.32)
+    })
+  );
+  kbVenue.extraObjects.push(
+    boxHelper({
+      width: 4 * INCH,
+      height: 65 * INCH,
+      depth: 4 * INCH,
+      translateBy: new Vector3(-1 * postPositionX, 0, 1.32)
+    })
+  );
 
   const sceneDef: SceneDef = {
     ...kbVenue,
@@ -608,8 +661,8 @@ registerScenes([
       },
       {
         numLeds: 88,
-        startPoint: new Three.Vector3(-0.6, .71, -0.173),
-        endPoint: new Three.Vector3(0.6, .71, -0.173),
+        startPoint: new Three.Vector3(-0.6, 0.71, -0.173),
+        endPoint: new Three.Vector3(0.6, 0.71, -0.173),
         hardwareChannel: 3
       }
     ]),

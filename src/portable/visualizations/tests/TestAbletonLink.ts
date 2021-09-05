@@ -16,12 +16,15 @@ export default class TestAbletonLink extends Visualization.default {
   public render(context: Visualization.FrameContext): void {
     const { beatController } = context;
 
-    const duringBeat = beatController.timeSinceLastBeat() < 0.1 && (beatController.beatNumber() % 4 === 0);
+    const duringBeat =
+      beatController.timeSinceLastBeat() < 0.1 &&
+      beatController.beatNumber() % 4 === 0;
 
     this.ledColors.fill(duringBeat ? Colors.WHITE : Colors.BLACK);
 
     this.duringBeatTimeSeries.value = duringBeat ? 1 : 0;
-    this.progressToNextBeatTimeSeries.value = beatController.progressToNextBeat();
+    this.progressToNextBeatTimeSeries.value =
+      beatController.progressToNextBeat();
     this.timeSinceLastBeatTimeSeries.value = beatController.timeSinceLastBeat();
   }
 }

@@ -1,8 +1,6 @@
+import { UnorderedRecycledSet } from "../../../util/RecycledSet";
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
-
-import { UnorderedRecycledSet } from "../../../util/RecycledSet";
-
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
 const MIN_RADIUS = 10;
@@ -27,21 +25,32 @@ export default class PatternParticleFireVisualization extends AbstractVoronoiMap
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.particles = UnorderedRecycledSet.withObjectCreator(() => new Particle());
-    this.maxDistance = Math.max(this.canvas.width, this.canvas.height) / 2 + MAX_RADIUS;
+    this.particles = UnorderedRecycledSet.withObjectCreator(
+      () => new Particle()
+    );
+    this.maxDistance =
+      Math.max(this.canvas.width, this.canvas.height) / 2 + MAX_RADIUS;
     this.baseHue = Math.floor(Math.random() * 360);
   }
 
   protected renderToCanvas(context: Visualization.FrameContext) {
     // add particles
-    let numParticlesToAdd = this.numParticlesToAddRemainder + PARTICLES_PER_SECOND * context.elapsedSeconds;
+    let numParticlesToAdd =
+      this.numParticlesToAddRemainder +
+      PARTICLES_PER_SECOND * context.elapsedSeconds;
     while (numParticlesToAdd >= 1) {
       const particle: Particle = this.particles.add();
       particle.distance = 0;
-      particle.speed = Math.random() * (PARTICLE_MAX_SPEED - PARTICLE_MIN_SPEED) + PARTICLE_MIN_SPEED;
+      particle.speed =
+        Math.random() * (PARTICLE_MAX_SPEED - PARTICLE_MIN_SPEED) +
+        PARTICLE_MIN_SPEED;
       particle.radius = Math.random() * (MAX_RADIUS - MIN_RADIUS) + MIN_RADIUS;
       particle.angleRadians = Math.random() * Math.PI * 2;
-      particle.color = Colors.hsv(Math.pow(Math.random(), 2) * 60 + this.baseHue, 1, Math.random() * 0.3 + 0.7);
+      particle.color = Colors.hsv(
+        Math.pow(Math.random(), 2) * 60 + this.baseHue,
+        1,
+        Math.random() * 0.3 + 0.7
+      );
       numParticlesToAdd -= 1;
     }
     this.numParticlesToAddRemainder = numParticlesToAdd;

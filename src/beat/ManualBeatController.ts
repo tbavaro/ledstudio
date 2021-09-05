@@ -14,10 +14,14 @@ export default class ManualBeatController implements BeatController {
 
   public onTap() {
     const now = performance.now();
-    if (this.prevPressTime !== null && now - this.prevPressTime < (60000 / MIN_BPM)) {
+    if (
+      this.prevPressTime !== null &&
+      now - this.prevPressTime < 60000 / MIN_BPM
+    ) {
       this.tapsInSequence += 1;
       this.beatLengthMillis = now - this.prevPressTime;
-      this.firstBeatStartTime = now - this.beatLengthMillis * (this.tapsInSequence - 1);
+      this.firstBeatStartTime =
+        now - this.beatLengthMillis * (this.tapsInSequence - 1);
     } else {
       this.tapsInSequence = 1;
       this.firstBeatStartTime = now;
@@ -40,6 +44,6 @@ export default class ManualBeatController implements BeatController {
   }
 
   public progressToNextBeat(): number {
-    return this.timeSinceLastBeat() / this.beatLengthMillis * 1000;
+    return (this.timeSinceLastBeat() / this.beatLengthMillis) * 1000;
   }
 }

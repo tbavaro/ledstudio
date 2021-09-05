@@ -1,9 +1,9 @@
+import "./TimeseriesView.css";
+
 import * as React from "react";
 
 import * as Colors from "../portable/base/Colors";
 import * as TimeseriesData from "../portable/base/TimeseriesData";
-
-import "./TimeseriesView.css";
 
 interface Props {
   height: number;
@@ -25,13 +25,21 @@ class HeatmapDrawHelper {
     // this.ctx = ctx;
   }
 
-  public drawHeatmapColumn(targetContext: CanvasRenderingContext2D, heatmap: TimeseriesData.HeatmapDef) {
+  public drawHeatmapColumn(
+    targetContext: CanvasRenderingContext2D,
+    heatmap: TimeseriesData.HeatmapDef
+  ) {
     const targetCanvas = targetContext.canvas;
     const dy = targetCanvas.height / heatmap.values.length;
     const baseColor = heatmap.baseColor;
     heatmap.values.forEach((v, i) => {
       targetContext.fillStyle = Colors.cssColor(Colors.multiply(baseColor, v));
-      targetContext.fillRect(targetCanvas.width - 1, (heatmap.values.length - 1 - i) * dy, 1, dy);
+      targetContext.fillRect(
+        targetCanvas.width - 1,
+        (heatmap.values.length - 1 - i) * dy,
+        1,
+        dy
+      );
     });
   }
 }
@@ -60,9 +68,12 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
     }
     this.canvas = canvas;
     this.canvasContext = ctx;
-  }
+  };
 
-  public displayData(points: TimeseriesData.PointDef[], heatmap?: TimeseriesData.HeatmapDef) {
+  public displayData(
+    points: TimeseriesData.PointDef[],
+    heatmap?: TimeseriesData.HeatmapDef
+  ) {
     const canvas = this.canvas;
     const ctx = this.canvasContext;
     if (canvas === undefined || ctx === undefined) {
@@ -84,7 +95,12 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
       const p = points[i];
       if (!isNaN(p.value)) {
         ctx.fillStyle = Colors.cssColor(p.color);
-        ctx.fillRect(canvas.width - 1, (1 - p.value) * (canvas.height - POINT_VALUE_HEIGHT), 1, POINT_VALUE_HEIGHT);
+        ctx.fillRect(
+          canvas.width - 1,
+          (1 - p.value) * (canvas.height - POINT_VALUE_HEIGHT),
+          1,
+          POINT_VALUE_HEIGHT
+        );
       }
     }
   }

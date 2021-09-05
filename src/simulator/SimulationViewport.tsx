@@ -1,14 +1,13 @@
+import "./SimulationViewport.css";
+
 import * as React from "react";
 import * as Three from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import * as Colors from "../portable/base/Colors";
 import { SendableLedStrip } from "../portable/SendableLedStrip";
-
 import Scene from "../scenes/Scene";
 import VisualizationRunner from "../VisualizationRunner";
-
-import "./SimulationViewport.css";
 
 const CAMERA_FOV_DEG = 50;
 const CAMERA_NEAR_DISTANCE = 0.1;
@@ -46,7 +45,10 @@ class LedHelperFactory {
 
   constructor(renderScene: Three.Scene, ledRadius: number) {
     this.renderScene = renderScene;
-    this.ledGeometry = new Three.PlaneBufferGeometry(ledRadius * 2, ledRadius * 2);
+    this.ledGeometry = new Three.PlaneBufferGeometry(
+      ledRadius * 2,
+      ledRadius * 2
+    );
   }
 
   public createAt(position: Three.Vector3): LedHelper {
@@ -61,7 +63,11 @@ class LedHelperImpl implements LedHelper {
 
   private color: Three.Color;
 
-  constructor(renderScene: Three.Scene, geometry: Three.PlaneBufferGeometry, position: Three.Vector3) {
+  constructor(
+    renderScene: Three.Scene,
+    geometry: Three.PlaneBufferGeometry,
+    position: Three.Vector3
+  ) {
     const material = LedHelperImpl.MATERIAL.clone();
     this.color = material.color;
     const mesh = new Three.Mesh(geometry, material);
@@ -108,7 +114,7 @@ class LedSceneStrip implements SendableLedStrip {
     numLeds = Math.min(numLeds, this.size - startIndex);
 
     if (numLeds > 0) {
-      for (let i = startIndex; i < (startIndex + numLeds); ++i) {
+      for (let i = startIndex; i < startIndex + numLeds; ++i) {
         this.ledHelpers[i].setColor(color);
       }
     }
@@ -163,9 +169,15 @@ type State = {
 };
 
 export default class SimulationViewport extends React.Component<Props, State> {
-  private renderer = new Three.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false });
+  private renderer = new Three.WebGLRenderer({
+    antialias: true,
+    preserveDrawingBuffer: false
+  });
 
-  public static getDerivedStateFromProps(nextProps: Readonly<Props>, prevState: State): Partial<State> | null {
+  public static getDerivedStateFromProps(
+    nextProps: Readonly<Props>,
+    prevState: State
+  ): Partial<State> | null {
     const result: Partial<State> = {
       currentScene: nextProps.scene,
       currentLedScene: prevState.currentLedScene,
@@ -182,7 +194,11 @@ export default class SimulationViewport extends React.Component<Props, State> {
 
       nextProps.scene.loadModel().then(model => renderScene.add(model));
 
-      result.currentLedScene = new LedScene(nextProps.scene, renderScene, prevState.doRender);
+      result.currentLedScene = new LedScene(
+        nextProps.scene,
+        renderScene,
+        prevState.doRender
+      );
 
       // point at target
       prevState.camera.position.copy(nextProps.scene.cameraStartPosition);
@@ -194,7 +210,8 @@ export default class SimulationViewport extends React.Component<Props, State> {
       prevState.registeredVisualizationRunner.simulationLedStrip = undefined;
     }
     if (result.currentLedScene) {
-      nextProps.visualizationRunner.simulationLedStrip = result.currentLedScene.ledStrip;
+      nextProps.visualizationRunner.simulationLedStrip =
+        result.currentLedScene.ledStrip;
     }
 
     return result;
@@ -228,7 +245,11 @@ export default class SimulationViewport extends React.Component<Props, State> {
     window.removeEventListener("blur", this.onWindowBlur);
     window.removeEventListener("focus", this.onWindowFocus);
 
-    if (this.state.currentLedScene && this.props.visualizationRunner.simulationLedStrip === this.state.currentLedScene.ledStrip) {
+    if (
+      this.state.currentLedScene &&
+      this.props.visualizationRunner.simulationLedStrip ===
+        this.state.currentLedScene.ledStrip
+    ) {
       this.props.visualizationRunner.simulationLedStrip = undefined;
     }
 
@@ -243,13 +264,11 @@ export default class SimulationViewport extends React.Component<Props, State> {
 
   public render() {
     console.log("rendering viewport");
-    return (
-      <div className="SimulationViewport" ref={this.setRef} />
-    );
+    return <div className="SimulationViewport" ref={this.setRef} />;
   }
 
   private unsafeRef: HTMLDivElement | null = null;
-  private setRef = (newRef: HTMLDivElement) => this.unsafeRef = newRef;
+  private setRef = (newRef: HTMLDivElement) => (this.unsafeRef = newRef);
   private get ref() {
     if (this.unsafeRef === null) {
       throw new Error("ref not set");
@@ -265,16 +284,16 @@ export default class SimulationViewport extends React.Component<Props, State> {
     this.renderer.setSize(width, height);
     // this.renderer.setPixelRatio(window.devicePixelRatio);
     this.state.controls.update();
-  }
+  };
 
   private isWindowFocused = true;
-  private onWindowBlur = () => this.isWindowFocused = false;
-  private onWindowFocus = () => this.isWindowFocused = true;
+  private onWindowBlur = () => (this.isWindowFocused = false);
+  private onWindowFocus = () => (this.isWindowFocused = true);
 
   private initialState(): State {
     const camera = new Three.PerspectiveCamera(
       CAMERA_FOV_DEG,
-      /* aspect will get set in updateSizes */1,
+      /* aspect will get set in updateSizes */ 1,
       CAMERA_NEAR_DISTANCE,
       CAMERA_FAR_DISTANCE
     );

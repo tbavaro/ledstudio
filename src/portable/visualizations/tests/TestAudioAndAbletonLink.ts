@@ -4,7 +4,9 @@ import * as Visualization from "../../base/Visualization";
 import * as AudioWaveformSampler from "../../visualizationUtils/AudioWaveformSampler";
 
 export default class TestAudioAndAbletonLink extends Visualization.default {
-  private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
+  private readonly analyserHelpers: ReturnType<
+    typeof AudioWaveformSampler.createAnalyserHelpers
+  > | null;
   private readonly duringBeatTimeSeries: Visualization.TimeSeriesValue;
   private readonly loudnessTimeSeries: Visualization.TimeSeriesValue;
   private readonly currentRMSAmplitudeTimeSeries: Visualization.TimeSeriesValue;
@@ -14,16 +16,18 @@ export default class TestAudioAndAbletonLink extends Visualization.default {
 
     const audioSource = config.audioSource;
     if (audioSource !== null) {
-      this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(audioSource);
+      this.analyserHelpers =
+        AudioWaveformSampler.createAnalyserHelpers(audioSource);
     } else {
       this.analyserHelpers = null;
     }
 
     this.duringBeatTimeSeries = config.createTimeSeries();
     this.loudnessTimeSeries = config.createTimeSeries({ color: Colors.RED });
-    this.currentRMSAmplitudeTimeSeries = config.createTimeSeries({ color: Colors.GREEN });
+    this.currentRMSAmplitudeTimeSeries = config.createTimeSeries({
+      color: Colors.GREEN
+    });
   }
-
 
   public render(context: Visualization.FrameContext): void {
     if (this.analyserHelpers === null) {
@@ -39,6 +43,7 @@ export default class TestAudioAndAbletonLink extends Visualization.default {
 
     this.duringBeatTimeSeries.value = duringBeat ? 1 : 0;
     this.loudnessTimeSeries.value = loudness;
-    this.currentRMSAmplitudeTimeSeries.value = this.analyserHelpers.direct.currentRMSAmplitude;
+    this.currentRMSAmplitudeTimeSeries.value =
+      this.analyserHelpers.direct.currentRMSAmplitude;
   }
 }

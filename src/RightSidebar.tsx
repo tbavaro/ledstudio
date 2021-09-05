@@ -1,13 +1,11 @@
+import "./RightSidebar.css";
+
 import * as React from "react";
 
 import * as AudioIn from "./audioIn/AudioIn";
-
 import { MidiEventEmitter } from "./piano/MidiEventListener";
 import MidiEventsView from "./piano/MidiEventsView";
-
 import { identity, valueOrDefault } from "./util/Utils";
-
-import "./RightSidebar.css";
 
 export interface Actions {
   setPianoMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
@@ -76,7 +74,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: this.props.selectedSceneName,
       options: this.props.sceneNames,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setSelectedSceneName,
+      onChange: this.props.actions.setSelectedSceneName
     });
   }
 
@@ -86,7 +84,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: this.props.selectedVisualizationGroupName,
       options: this.props.visualizationGroupNames,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setSelectedVisualizationGroupName,
+      onChange: this.props.actions.setSelectedVisualizationGroupName
     });
   }
 
@@ -96,7 +94,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: this.props.selectedVisualizationName,
       options: this.props.visualizationNames,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setSelectedVisualizationName,
+      onChange: this.props.actions.setSelectedVisualizationName
     });
   }
 
@@ -111,9 +109,9 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Audio in",
       currentOption: this.props.selectedAudioInput,
       options: [null, ...audioInputs],
-      optionToValueFunc: (opt) => (opt === null ? "" : opt.id),
-      optionToLabelFunc: (opt) => (opt === null ? "<none>" : opt.name),
-      onChange: this.props.actions.setAudioInput,
+      optionToValueFunc: opt => (opt === null ? "" : opt.id),
+      optionToLabelFunc: opt => (opt === null ? "<none>" : opt.name),
+      onChange: this.props.actions.setAudioInput
     });
   }
 
@@ -122,7 +120,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Piano MIDI in",
       currentOption: this.props.selectedPianoMidiInput,
       options: this.props.midiInputs,
-      onChange: this.props.actions.setPianoMidiInput,
+      onChange: this.props.actions.setPianoMidiInput
     });
   }
 
@@ -131,7 +129,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Piano MIDI thru",
       currentOption: this.props.selectedPianoMidiThru,
       options: this.props.midiOutputs,
-      onChange: this.props.actions.setPianoMidiThru,
+      onChange: this.props.actions.setPianoMidiThru
     });
   }
 
@@ -140,7 +138,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: "Ctrl MIDI in",
       currentOption: this.props.selectedControllerMidiInput,
       options: this.props.midiInputs,
-      onChange: this.props.actions.setControllerMidiInput,
+      onChange: this.props.actions.setControllerMidiInput
     });
   }
 
@@ -154,7 +152,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: selectedBeatControllerType,
       options,
       optionToValueFunc: identity,
-      onChange: this.props.actions.setBeatControllerType,
+      onChange: this.props.actions.setBeatControllerType
     });
   }
 
@@ -170,10 +168,10 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       label: attrs.label,
       currentOption: attrs.currentOption,
       options: [null, ...attrs.options],
-      optionToValueFunc: (opt) => (opt === null ? "" : opt.id),
-      optionToLabelFunc: (opt) =>
+      optionToValueFunc: opt => (opt === null ? "" : opt.id),
+      optionToLabelFunc: opt =>
         opt === null ? "<none>" : valueOrDefault(opt.name, opt.id),
-      onChange: attrs.onChange,
+      onChange: attrs.onChange
     });
   }
 

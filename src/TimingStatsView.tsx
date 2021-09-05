@@ -1,6 +1,6 @@
-import * as React from "react";
-
 import "./TimingStatsView.css";
+
+import * as React from "react";
 
 const UPDATE_FREQ_MILLIS = 1000;
 const TARGET_FPS = 60;
@@ -74,8 +74,8 @@ export default class TimingStatsView extends React.Component<Props, State> {
         `v=${Math.round(vLoad * 100)}%`,
         `f=${Math.round(fLoad * 100)}%`,
         `r=${Math.round(rLoad * 100)}%`,
-        `t=${Math.round(load * 100)}%`,
-      ].join(" / "),
+        `t=${Math.round(load * 100)}%`
+      ].join(" / ")
     });
     this.lastUpdateTime = now;
   };

@@ -1,13 +1,16 @@
+import * as Utils from "../../../util/Utils";
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
-
-import * as Utils from "../../../util/Utils";
 
 const COLOR_PRESSED = Colors.WHITE;
 const COLOR_RELEASED = Colors.multiply(Colors.RED, 0.25);
 
 const PALETTE_SIZE = 64;
-const PALETTE: Colors.Color[] = Colors.createPaletteFadeLinear(COLOR_RELEASED, COLOR_PRESSED, PALETTE_SIZE);
+const PALETTE: Colors.Color[] = Colors.createPaletteFadeLinear(
+  COLOR_RELEASED,
+  COLOR_PRESSED,
+  PALETTE_SIZE
+);
 
 function colorForValue(v: number) {
   if (v < 0) {
@@ -34,7 +37,9 @@ export default class TestKeyFadeVisualization extends Visualization.SingleRowVis
 
     // decay
     const decayAmount = elapsedMillis * this.decayRate;
-    Utils.updateValues(this.values, (oldValue: number) => Math.max(0, oldValue - decayAmount));
+    Utils.updateValues(this.values, (oldValue: number) =>
+      Math.max(0, oldValue - decayAmount)
+    );
 
     // turn on newly-pressed keys
     pianoState.changedKeys.forEach(n => {

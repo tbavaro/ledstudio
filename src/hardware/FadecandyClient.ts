@@ -21,7 +21,7 @@ export default class FadecandyClient {
       this.ws.onopen = this.onWebSocketOpen;
       this.ws.onclose = this.onWebSocketClose;
     }
-  }
+  };
 
   private tryConnectSoon() {
     if (this.reconnectTimeout === null) {
@@ -37,7 +37,7 @@ export default class FadecandyClient {
 
   private onWebSocketOpen = () => {
     console.log("fadecandy websocket opened");
-  }
+  };
 
   private onWebSocketClose = (ev: CloseEvent) => {
     console.log("fadecandy websocket closed");
@@ -45,5 +45,5 @@ export default class FadecandyClient {
       this.ws = null;
       this.tryConnectSoon();
     }
-  }
+  };
 }

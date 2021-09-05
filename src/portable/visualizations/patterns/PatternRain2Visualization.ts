@@ -14,7 +14,7 @@ interface LedAddress {
 interface Sparkle {
   address: LedAddress;
   color: Colors.Color;
-  fadeRate: number;  // 0-1
+  fadeRate: number; // 0-1
   millisUntilFall: number;
 }
 
@@ -26,14 +26,21 @@ class DropHelper {
     // that is, the next row's nearest LEDs down and to the left/right of this one
     this.fallGraph = ledRows.map((ledRow, rowIndex) => {
       const nextRow: LedMetadata[] | undefined = ledRows[rowIndex + 1];
-      const makeAddress = (index: number) => ({ rowIndex: rowIndex + 1, index });
+      const makeAddress = (index: number) => ({
+        rowIndex: rowIndex + 1,
+        index
+      });
       return ledRow.map(led => {
         if (nextRow === undefined || nextRow.length === 0) {
           return [];
         }
         // find the index of the first LED in the next row that's further to the right (x dim) than this one
         let i: number;
-        for (i = 0; i < nextRow.length && nextRow[i].position.x < led.position.x; ++i) {
+        for (
+          i = 0;
+          i < nextRow.length && nextRow[i].position.x < led.position.x;
+          ++i
+        ) {
           // no-op
         }
         if (i === 0) {
@@ -48,7 +55,8 @@ class DropHelper {
   }
 
   public drop(address: LedAddress): LedAddress | null {
-    const targets = (this.fallGraph[address.rowIndex] || [])[address.index] || [];
+    const targets =
+      (this.fallGraph[address.rowIndex] || [])[address.index] || [];
     if (targets.length === 0) {
       return null;
     } else {
@@ -89,11 +97,19 @@ export default class PatternRain2Visualization extends Visualization.RowColumnMa
     deadSparkles.forEach(sparkle => this.sparkles.delete(sparkle));
 
     // new sparkles
-    let numLeds = this.numSparklesRemainder + elapsedSeconds * SPARKLES_PER_SECOND;
+    let numLeds =
+      this.numSparklesRemainder + elapsedSeconds * SPARKLES_PER_SECOND;
     while (numLeds >= 1) {
       const sparkle: Sparkle = {
-        address: { rowIndex: 0, index: Math.floor(Math.random() * this.ledRows.get(0).length) },
-        color: Colors.hsv(200 + Math.random() * 45, Math.pow(Math.random(), 0.2), Math.random() * 0.5 + 0.5),
+        address: {
+          rowIndex: 0,
+          index: Math.floor(Math.random() * this.ledRows.get(0).length)
+        },
+        color: Colors.hsv(
+          200 + Math.random() * 45,
+          Math.pow(Math.random(), 0.2),
+          Math.random() * 0.5 + 0.5
+        ),
         millisUntilFall: FALL_MILLIS,
         fadeRate: Math.pow(Math.random(), 0.2)
       };
@@ -104,12 +120,19 @@ export default class PatternRain2Visualization extends Visualization.RowColumnMa
 
     // render
 
-    const multiplier = Math.pow(0.5, elapsedSeconds / SPARKLE_HALF_LIFE_SECONDS);
-    this.ledRows.forEach(row => row.forEach((color, i) => row.set(i, Colors.multiply(color, multiplier))));
+    const multiplier = Math.pow(
+      0.5,
+      elapsedSeconds / SPARKLE_HALF_LIFE_SECONDS
+    );
+    this.ledRows.forEach(row =>
+      row.forEach((color, i) => row.set(i, Colors.multiply(color, multiplier)))
+    );
 
     // this.ledRows.forEach(ledRow => ledRow.fill(Colors.BLACK));
     this.sparkles.forEach(sparkle => {
-      this.ledRows.get(sparkle.address.rowIndex).add(sparkle.address.index, sparkle.color);
+      this.ledRows
+        .get(sparkle.address.rowIndex)
+        .add(sparkle.address.index, sparkle.color);
     });
   }
 }

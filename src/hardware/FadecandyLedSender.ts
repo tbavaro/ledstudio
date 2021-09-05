@@ -1,16 +1,16 @@
 import * as Colors from "../portable/base/Colors";
 import FixedArray from "../portable/base/FixedArray";
 import LedMetadata from "../portable/base/LedMetadata";
-
 import { MovingAverageHelper } from "../util/Utils";
-
 import FadecandyClient from "./FadecandyClient";
 
 const HEADER_LENGTH = 4;
 
 export default class FadecandyLedSender {
   private readonly client: FadecandyClient;
-  private readonly timingHelper: MovingAverageHelper = new MovingAverageHelper(20);
+  private readonly timingHelper: MovingAverageHelper = new MovingAverageHelper(
+    20
+  );
   private readonly channelToBufferMap: Map<number, Buffer>;
   private readonly leds: LedMetadata[];
 

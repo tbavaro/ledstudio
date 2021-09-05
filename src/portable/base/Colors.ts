@@ -26,7 +26,10 @@ export function hex2Color(hex: string): Color {
   }
   hex = hex.toLowerCase();
   const codes = [hex.substr(0, 2), hex.substr(2, 2), hex.substr(4, 2)];
-  return rgbUnchecked.apply(null, codes.map(code => parseInt(code, 16)));
+  return rgbUnchecked.apply(
+    null,
+    codes.map(code => parseInt(code, 16))
+  );
 }
 
 // h in [0., 360.0)
@@ -38,7 +41,7 @@ function hsvUnchecked(h: number, s: number, v: number): Color {
   let b: number;
   const sector = h / 60;
   const i = Math.floor(sector);
-  const f = sector - i;  // remainder part of h
+  const f = sector - i; // remainder part of h
   const p = v * (1 - s);
   const q = v * (1 - s * f);
   const t = v * (1 - s * (1 - f));
@@ -73,7 +76,8 @@ function hsvUnchecked(h: number, s: number, v: number): Color {
       b = v;
       break;
 
-    default: // (5)
+    default:
+      // (5)
       r = v;
       g = p;
       b = q;
@@ -96,7 +100,11 @@ export function rgb(r: number, g: number, b: number): Color {
 
 export function split(color: Color): [number, number, number] {
   const splitRgb = splitRGB(color);
-  return [splitRgb[0] / MAX_VALUE, splitRgb[1] / MAX_VALUE, splitRgb[2] / MAX_VALUE];
+  return [
+    splitRgb[0] / MAX_VALUE,
+    splitRgb[1] / MAX_VALUE,
+    splitRgb[2] / MAX_VALUE
+  ];
 }
 
 export function hsv(h: number, s: number, v: number): Color {
@@ -136,18 +144,23 @@ export function multiply(a: Color, factor: number): Color {
   );
 }
 
-function fadeLinearUnchecked(fromColor: Color, toColor: Color, v: number): Color {
-  return add(
-    multiply(fromColor, (1 - v)),
-    multiply(toColor, v)
-  );
+function fadeLinearUnchecked(
+  fromColor: Color,
+  toColor: Color,
+  v: number
+): Color {
+  return add(multiply(fromColor, 1 - v), multiply(toColor, v));
 }
 
 export function fadeLinear(fromColor: Color, toColor: Color, v: number): Color {
   return fadeLinearUnchecked(fromColor, toColor, bracket01(v));
 }
 
-export function createPaletteFadeLinear(fromColor: Color, toColor: Color, size: number): Color[] {
+export function createPaletteFadeLinear(
+  fromColor: Color,
+  toColor: Color,
+  size: number
+): Color[] {
   return Utils.fillArray(size, (i: number) => {
     const v = i / (size - 1);
     return fadeLinearUnchecked(fromColor, toColor, v);

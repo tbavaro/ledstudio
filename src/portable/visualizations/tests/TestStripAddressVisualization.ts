@@ -35,22 +35,36 @@ export default class TestStripAddressVisualization extends Visualization.default
   public render(context: Visualization.FrameContext): void {
     const { elapsedMillis } = context;
 
-    this.pulseLocationFloat = (this.pulseLocationFloat + PULSE_SPEED_LEDS_PER_SECOND * elapsedMillis / 1000) % PULSE_SEPARATION_LEDS;
+    this.pulseLocationFloat =
+      (this.pulseLocationFloat +
+        (PULSE_SPEED_LEDS_PER_SECOND * elapsedMillis) / 1000) %
+      PULSE_SEPARATION_LEDS;
     const pulseLocation = Math.floor(this.pulseLocationFloat);
 
     this.timeCounter = (this.timeCounter + elapsedMillis) % LED_ZERO_BLINK_TIME;
-    const flashBrightness = 2 * Math.abs(0.5 - this.timeCounter / LED_ZERO_BLINK_TIME);
+    const flashBrightness =
+      2 * Math.abs(0.5 - this.timeCounter / LED_ZERO_BLINK_TIME);
 
     for (let i = 0; i < this.ledColors.length; ++i) {
-      this.ledColors.set(i, this.colorForPixel(i, flashBrightness, pulseLocation));
+      this.ledColors.set(
+        i,
+        this.colorForPixel(i, flashBrightness, pulseLocation)
+      );
     }
   }
 
-  private colorForPixel(ledIndex: number, flashBrightness: number, pulseLocation: number): Colors.Color {
+  private colorForPixel(
+    ledIndex: number,
+    flashBrightness: number,
+    pulseLocation: number
+  ): Colors.Color {
     const ledMetadata = this.config.scene.ledMetadatas[ledIndex];
     const n = ledMetadata.hardwareIndex;
 
-    if (n >= SHOW_CHANNEL_NUMBER_AFTER_N_LEDS && n < (ledMetadata.hardwareChannel + SHOW_CHANNEL_NUMBER_AFTER_N_LEDS)) {
+    if (
+      n >= SHOW_CHANNEL_NUMBER_AFTER_N_LEDS &&
+      n < ledMetadata.hardwareChannel + SHOW_CHANNEL_NUMBER_AFTER_N_LEDS
+    ) {
       return Colors.multiply(CHANNEL_START_COLOR, flashBrightness);
     } else {
       const segmentNumber = ledMetadata.hardwareChannel;

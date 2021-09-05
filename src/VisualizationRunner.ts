@@ -1,21 +1,16 @@
+import FadecandyLedSender from "./hardware/FadecandyLedSender";
+import BeatController from "./portable/base/BeatController";
 import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
 import FixedArray from "./portable/base/FixedArray";
 import PianoEvent from "./portable/base/PianoEvent";
 import * as Visualization from "./portable/base/Visualization";
-import { VisualizationRegistry } from "./portable/VisualizationRegistry";
-
 import * as PianoHelpers from "./portable/PianoHelpers";
 import { SendableLedStrip } from "./portable/SendableLedStrip";
-
+import { VisualizationRegistry } from "./portable/VisualizationRegistry";
 import { SignalsHelper } from "./portable/visualizationUtils/SignalsHelper";
-
-import BeatController from "./portable/base/BeatController";
-
-import { bracket, MovingAverageHelper, valueOrDefault } from "./util/Utils";
-
-import FadecandyLedSender from "./hardware/FadecandyLedSender";
 import Scene from "./scenes/Scene";
+import { MovingAverageHelper, bracket, valueOrDefault } from "./util/Utils";
 
 class MyFrameContext implements Visualization.FrameContext {
   public elapsedMillis: number;
@@ -66,7 +61,7 @@ const DEFAULT_COLOR_ORDER = [
   Colors.ORANGE,
   Colors.CYAN,
   Colors.PURPLE,
-  Colors.CHARTREUSE,
+  Colors.CHARTREUSE
 ];
 
 class TimeSeriesHelper {
@@ -91,7 +86,7 @@ class TimeSeriesHelper {
   };
 
   private nextDefaultColor(): Colors.Color {
-    const color = DEFAULT_COLOR_ORDER.find((c) => !this.usedColors.includes(c));
+    const color = DEFAULT_COLOR_ORDER.find(c => !this.usedColors.includes(c));
     if (color === undefined) {
       throw new Error("all default colors were used");
     }
@@ -226,7 +221,7 @@ class ControllerStateHelper {
       controllerState: this.controllerState,
       dialNumber: dialNumber,
       minValue: minValue,
-      maxValue: maxValue,
+      maxValue: maxValue
     });
 
     helper.value = valueOrDefault(attrs.initialValue, minValue);
@@ -238,7 +233,7 @@ class ControllerStateHelper {
 
   private nextDialNumber(): number {
     const dialNumber = ASSIGNABLE_DIAL_NUMBERS.find(
-      (n) => !this.usedDialNumbers.includes(n)
+      n => !this.usedDialNumbers.includes(n)
     );
     if (dialNumber === undefined) {
       throw new Error("all dials were used");
@@ -261,13 +256,13 @@ class ControllerStateHelper {
 
     return new MyButtonControl({
       controllerState: this.controllerState,
-      buttonNumber: buttonNumber,
+      buttonNumber: buttonNumber
     });
   };
 
   private nextButtonNumber(): number {
     const buttonNumber = ASSIGNABLE_BUTTON_NUMBERS.find(
-      (n) => !this.usedButtonNumbers.includes(n)
+      n => !this.usedButtonNumbers.includes(n)
     );
     if (buttonNumber === undefined) {
       throw new Error("all buttons were used");
@@ -307,11 +302,11 @@ export default class VisualizationRunner {
     );
     this.brightnessDial = controllerStateHelper.createDialControl({
       dialNumber: 8,
-      initialValue: attrs.controllerState.dialValues[7],
+      initialValue: attrs.controllerState.dialValues[7]
     });
     this.derezDial = controllerStateHelper.createDialControl({
       dialNumber: 7,
-      initialValue: attrs.controllerState.dialValues[6],
+      initialValue: attrs.controllerState.dialValues[6]
     });
     this.signalsHelper = new SignalsHelper(attrs.audioSource);
     const visualizationConfig: Visualization.Config = {
@@ -325,19 +320,19 @@ export default class VisualizationRunner {
       createEasyTimeSeriesSet: () => {
         return {
           white: this.timeSeriesHelper.createTimeSeries({
-            color: Colors.WHITE,
+            color: Colors.WHITE
           }),
           blue: this.timeSeriesHelper.createTimeSeries({ color: Colors.BLUE }),
           red: this.timeSeriesHelper.createTimeSeries({ color: Colors.RED }),
           yellow: this.timeSeriesHelper.createTimeSeries({
-            color: Colors.YELLOW,
+            color: Colors.YELLOW
           }),
           green: this.timeSeriesHelper.createTimeSeries({
-            color: Colors.GREEN,
+            color: Colors.GREEN
           }),
           orange: this.timeSeriesHelper.createTimeSeries({
-            color: Colors.ORANGE,
-          }),
+            color: Colors.ORANGE
+          })
         };
       },
       reset: () => {
@@ -345,14 +340,14 @@ export default class VisualizationRunner {
         controllerStateHelper.reset();
         this.controllerState.reset();
         attrs.setVisualizerExtraDisplay(null);
-      },
+      }
     };
     this.visualization = attrs.visualizationRegistry.createVisualization(
       attrs.visualizationName,
       visualizationConfig
     );
     this.timingHelper = new MovingAverageHelper(20);
-    this.adjustedLeds = this.visualization.ledColors.map((_) => Colors.BLACK);
+    this.adjustedLeds = this.visualization.ledColors.map(_ => Colors.BLACK);
     this.frameContext = new MyFrameContext();
   }
 
@@ -384,7 +379,7 @@ export default class VisualizationRunner {
 
     return {
       frameHeatmapValues: frameHeatmapValues,
-      frameTimeseriesPoints: this.timeSeriesHelper.data,
+      frameTimeseriesPoints: this.timeSeriesHelper.data
     };
   }
 

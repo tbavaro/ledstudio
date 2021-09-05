@@ -22,7 +22,8 @@
     "eject": "react-scripts eject",
     "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
     "fcserver": "./fcserver/fcserver.sh",
-    "codegen": "tsc src/codegen/GenerateVisualizationRegistry.ts && node src/codegen/GenerateVisualizationRegistry.js"
+    "codegen": "tsc src/codegen/GenerateVisualizationRegistry.ts && node src/codegen/GenerateVisualizationRegistry.js",
+    "prettier": "prettier --write src/"
   },
   "eslintConfig": {
     "extends": [
@@ -51,8 +52,30 @@
     "@types/react-dom": "^17.0.9",
     "@types/webmidi": "^2.0.6",
     "handlebars": "^4.7.7",
+    "import-sort-style-module": "^6.0.0",
     "node": "^16.6.1",
+    "prettier": "^2.3.2",
+    "prettier-plugin-import-sort": "^0.0.7",
     "tsdevtools": "github:tbavaro/tsdevtools#dist",
     "typescript": "^4.4.2"
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "arrowParens": "avoid",
+    "singleQuote": false,
+    "overrides": [
+      {
+        "files": "*.hbs",
+        "options": {
+          "htmlWhitespaceSensitivity": "strict"
+        }
+      }
+    ]
+  },
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "style": "module",
+      "parser": "typescript"
+    }
   }
 }

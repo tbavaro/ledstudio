@@ -1,9 +1,9 @@
+import "./MidiEventsView.css";
+
 import * as React from "react";
 
 import MidiEvent from "./MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./MidiEventListener";
-
-import "./MidiEventsView.css";
 
 const MAX_EVENTS = 100;
 
@@ -13,7 +13,10 @@ interface Props {
   midiEventEmitters: MidiEventEmitter[];
 }
 
-export default class MidiEventsView extends React.Component<Props, {}> implements MidiEventListener {
+export default class MidiEventsView
+  extends React.Component<Props, {}>
+  implements MidiEventListener
+{
   private registeredMidiEventEmitters: MidiEventEmitter[] = [];
 
   public componentWillUnmount() {
@@ -26,7 +29,10 @@ export default class MidiEventsView extends React.Component<Props, {}> implement
   public render() {
     this.refreshMidiEventEmitters();
     return (
-      <div className={"MidiEventsView " + (this.props.className || "")} ref={this.setRef}/>
+      <div
+        className={"MidiEventsView " + (this.props.className || "")}
+        ref={this.setRef}
+      />
     );
   }
 
@@ -35,7 +41,9 @@ export default class MidiEventsView extends React.Component<Props, {}> implement
       return;
     }
 
-    const emitterIndex = this.props.midiEventEmitters.findIndex(e => e === emitter);
+    const emitterIndex = this.props.midiEventEmitters.findIndex(
+      e => e === emitter
+    );
     if (emitterIndex === -1) {
       throw new Error("couldn't find emitter");
     }
@@ -48,7 +56,7 @@ export default class MidiEventsView extends React.Component<Props, {}> implement
     const newElement = document.createElement("div");
     newElement.className = [
       "MidiEventsView-entry",
-      (this.props.entryClassName || ""),
+      this.props.entryClassName || "",
       `emitter${emitterIndex}`
     ].join(" ");
     newElement.innerText = event.toString();
@@ -63,7 +71,7 @@ export default class MidiEventsView extends React.Component<Props, {}> implement
   private unsafeRef: HTMLDivElement | null = null;
   private setRef = (newRef: HTMLDivElement) => {
     this.ref = newRef;
-  }
+  };
   private get ref(): HTMLDivElement {
     if (this.unsafeRef === null) {
       throw new Error("ref not set");

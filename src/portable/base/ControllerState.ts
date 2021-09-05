@@ -11,7 +11,7 @@ export default class ControllerState {
   public readonly buttonStates: ArrayOf8<boolean>;
   public readonly pressesSinceLastFrame: number[];
   public readonly releasesSinceLastFrame: number[];
-  public readonly dialValues: ArrayOf8<number>;  // 0 to 1, inclusive
+  public readonly dialValues: ArrayOf8<number>; // 0 to 1, inclusive
 
   constructor() {
     this.buttonStates = arrayOf8Values(false);
@@ -38,7 +38,7 @@ export default class ControllerState {
     this.dialValues.fill(0);
 
     // don't let a new visualization's derez be 1
-    this.dialValues[6 ] = Math.min(0.95, oldDerez);
+    this.dialValues[6] = Math.min(0.95, oldDerez);
 
     // don't let a new visualization's brightness be 0
     this.dialValues[7] = Math.max(0.05, oldBrightness);
@@ -53,7 +53,7 @@ export default class ControllerState {
     switch (statusByte) {
       case 0x8a: // button
       case 0x9a:
-        const isPress = (statusByte === 0x9a);
+        const isPress = statusByte === 0x9a;
         const buttonIndex = event.data[1] - 0x24;
         this.setButtonState(buttonIndex, isPress);
         break;
@@ -74,7 +74,9 @@ export default class ControllerState {
   public setButtonState(index: number, value: boolean) {
     if (index >= 0 && index < this.buttonStates.length) {
       this.buttonStates[index] = value;
-      (value ? this.pressesSinceLastFrame : this.releasesSinceLastFrame).push(index);
+      (value ? this.pressesSinceLastFrame : this.releasesSinceLastFrame).push(
+        index
+      );
     }
   }
 }

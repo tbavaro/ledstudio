@@ -1,5 +1,4 @@
 import { bracket01 } from "../../../util/Utils";
-
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
@@ -9,14 +8,13 @@ const MAX_SPARKLES_PER_SECOND = 5000;
 const DANCE_HALF_LIFE_SECONDS = 0.2;
 const NOT_DANCE_HALF_LIFE_SECONDS = 1.0;
 
-
 class LinearDecayingValue {
   public value: number;
   private readonly decayRate: number;
 
   constructor(
     initialValue: number,
-    decayRate: number  // units per second
+    decayRate: number // units per second
   ) {
     this.value = initialValue;
     this.decayRate = decayRate;
@@ -58,15 +56,24 @@ export default class SparklesAndFlashesVisualization extends Visualization.defau
     this.flashBrightness.decay(elapsedSeconds);
 
     const sparkleRateNormalized = 0; // bracket01(Math.pow(this.signals.audioValues.highRMSZScore20 / 4, 3));
-    this.flashBrightness.bump(bracket01(Math.pow(this.signals.audioValues.lowRMSZScore20 / 2, 5) * 1.25 - 0.25));
+    this.flashBrightness.bump(
+      bracket01(
+        Math.pow(this.signals.audioValues.lowRMSZScore20 / 2, 5) * 1.25 - 0.25
+      )
+    );
     // const sparkleRateNormalized = bracket01(Math.pow(this.signals.audioValues.highRMS * 2.5, 3));
     // this.flashBrightness.bump(bracket01(Math.pow(this.signals.audioValues.lowRMS * 3, 3) * 1.25 - 0.25));
 
-    const sparkleRate = sparkleRateNormalized * (MAX_SPARKLES_PER_SECOND - MIN_SPARKLES_PER_SECOND) + MIN_SPARKLES_PER_SECOND;
+    const sparkleRate =
+      sparkleRateNormalized *
+        (MAX_SPARKLES_PER_SECOND - MIN_SPARKLES_PER_SECOND) +
+      MIN_SPARKLES_PER_SECOND;
 
     // fade all pixels
-    const halfLife = this.signals.beatsSinceDrop < 16 || this.signals.soundsLikeDance
-      ? DANCE_HALF_LIFE_SECONDS : NOT_DANCE_HALF_LIFE_SECONDS;
+    const halfLife =
+      this.signals.beatsSinceDrop < 16 || this.signals.soundsLikeDance
+        ? DANCE_HALF_LIFE_SECONDS
+        : NOT_DANCE_HALF_LIFE_SECONDS;
     const multiplier = Math.pow(0.5, elapsedSeconds / halfLife);
     this.ledColors.multiplyAll(multiplier);
 

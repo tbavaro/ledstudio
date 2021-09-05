@@ -1,8 +1,7 @@
+import { bracket01, fillArray } from "../../../util/Utils";
 import * as Colors from "../../base/Colors";
 import FancyValue from "../../base/FancyValue";
 import * as Visualization from "../../base/Visualization";
-
-import { bracket01, fillArray } from "../../../util/Utils";
 
 const NUM_SAMPLES = 512;
 const NUM_SAMPLES_RENDERED = NUM_SAMPLES / 2;
@@ -22,7 +21,7 @@ export default class MyVisualization extends Visualization.default {
   constructor(config: Visualization.Config) {
     super(config);
 
-    const audioSource = config.audioSource || (new AudioContext().createGain());
+    const audioSource = config.audioSource || new AudioContext().createGain();
     const context = audioSource.context;
     const analyser = new AnalyserNode(context);
     analyser.fftSize = NUM_SAMPLES;
@@ -65,7 +64,10 @@ export default class MyVisualization extends Visualization.default {
     for (let i = 0; i < NUM_SAMPLES_RENDERED; ++i) {
       const v = this.buffer[i] / 255;
 
-      const value = Math.pow(bracket01((v - MIN_THRESHOLD) / (MAX_THRESHOLD - MIN_THRESHOLD)), 2);
+      const value = Math.pow(
+        bracket01((v - MIN_THRESHOLD) / (MAX_THRESHOLD - MIN_THRESHOLD)),
+        2
+      );
 
       this.values[i].decayLinearRate(DECAY_RATE, context.elapsedSeconds);
       this.values[i].bumpTo(value);
@@ -78,8 +80,8 @@ export default class MyVisualization extends Visualization.default {
       const freqPct = i / NUM_SAMPLES_RENDERED;
 
       const ledNum = this.bucketLocations[i];
-      
-      const hue = 360 - i / NUM_SAMPLES_RENDERED * 240;
+
+      const hue = 360 - (i / NUM_SAMPLES_RENDERED) * 240;
       const saturation = 1 - bracket01((v.value - 0.7) / 0.9);
       const value = bracket01(v.value / 0.7) * Math.pow(1 - freqPct, 0.25);
 

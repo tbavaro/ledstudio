@@ -14,8 +14,13 @@ export default class PatternSparklesVisualization extends Visualization.default 
   public render(context: Visualization.FrameContext): void {
     const { elapsedSeconds } = context;
 
-    const multiplier = Math.pow(0.5, elapsedSeconds / SPARKLE_HALF_LIFE_SECONDS);
-    this.ledColors.forEach((color, i) => this.ledColors.set(i, Colors.multiply(color, multiplier)));
+    const multiplier = Math.pow(
+      0.5,
+      elapsedSeconds / SPARKLE_HALF_LIFE_SECONDS
+    );
+    this.ledColors.forEach((color, i) =>
+      this.ledColors.set(i, Colors.multiply(color, multiplier))
+    );
 
     let numLeds = this.numLedsRemainder + elapsedSeconds * SPARKLES_PER_SECOND;
     while (numLeds >= 1) {

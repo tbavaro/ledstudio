@@ -1,7 +1,6 @@
+import { bracket } from "../../../util/Utils";
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
-
-import { bracket } from "../../../util/Utils";
 
 const FFT_SIZE = 128;
 const NUM_FREQUENCY_BINS = FFT_SIZE / 2;
@@ -51,7 +50,10 @@ export default class TestAudioPulseVisualization extends Visualization.RowColumn
 
   constructor(config: Visualization.Config) {
     super(config);
-    this.fft = (config.audioSource === null ? null : new BasicFFTHelper(config.audioSource));
+    this.fft =
+      config.audioSource === null
+        ? null
+        : new BasicFFTHelper(config.audioSource);
     this.pulseValueTimeSeries = config.createTimeSeries();
   }
 
@@ -63,7 +65,7 @@ export default class TestAudioPulseVisualization extends Visualization.RowColumn
     const frequencyData = this.fft.getFrequencyData();
 
     let total = 0;
-    frequencyData.forEach(v => total += v);
+    frequencyData.forEach(v => (total += v));
 
     // between 0 and 1
     const pulseValue = bracket(0, 1, total / frequencyData.length / 255);
@@ -73,14 +75,19 @@ export default class TestAudioPulseVisualization extends Visualization.RowColumn
       const midPoint = Math.floor(row.length / 2);
       const pulseWidth = pulseValue * row.length;
       const startIndex = Math.max(0, Math.floor(midPoint - pulseWidth / 2));
-      const endIndex = Math.min(row.length - 1, Math.floor(midPoint + pulseWidth / 2));
+      const endIndex = Math.min(
+        row.length - 1,
+        Math.floor(midPoint + pulseWidth / 2)
+      );
 
       for (let i = startIndex; i <= endIndex; ++i) {
         row.set(i, Colors.WHITE);
       }
     });
 
-    context.setFrameHeatmapValues(Array.from(frequencyData.values()).map(v => v / 255));
+    context.setFrameHeatmapValues(
+      Array.from(frequencyData.values()).map(v => v / 255)
+    );
     this.pulseValueTimeSeries.value = pulseValue;
   }
 }

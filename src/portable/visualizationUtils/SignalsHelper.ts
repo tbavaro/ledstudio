@@ -1,10 +1,8 @@
-import BeatController from "../base/BeatController";
-import FancyValue from "../base/FancyValue";
-
 import EMAHelper from "../../util/EMAHelper";
 import { bracket, bracket01, valueOrDefault } from "../../util/Utils";
 import { CircularQueue } from "../../util/WindowStats";
-
+import BeatController from "../base/BeatController";
+import FancyValue from "../base/FancyValue";
 import BasicAudioHelper from "./BasicAudioHelper";
 import { AudioValues } from "./BasicAudioHelper";
 
@@ -84,12 +82,12 @@ export class SignalsHelper implements Signals {
 
     this.lowDecaySignal = new LevelsHelper({
       minThreshold: 0.3,
-      maxThreshold: 5,
+      maxThreshold: 5
     });
 
     this.highDecaySignal = new LevelsHelper({
       minThreshold: 0.3,
-      maxThreshold: 5,
+      maxThreshold: 5
     });
   }
 
@@ -172,6 +170,6 @@ export class SignalsHelper implements Signals {
   }
 
   public get soundsLikeDance() {
-    return this.beatsWithBeats.sum((x) => x) > 6;
+    return this.beatsWithBeats.sum(x => x) > 6;
   }
 }

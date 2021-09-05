@@ -1,9 +1,9 @@
+import "./PianoView.css";
+
 import * as React from "react";
 
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./piano/MidiEventListener";
-
-import "./PianoView.css";
 
 const NUM_KEYS = 88;
 
@@ -55,7 +55,7 @@ export default class PianoView
   implements MidiEventListener
 {
   public state: State = {
-    keyState: defaultKeyState(),
+    keyState: defaultKeyState()
   };
 
   private registeredMidiEventEmitter: MidiEventEmitter | null = null;
@@ -112,7 +112,7 @@ export default class PianoView
             ? `${
                 (offset + 1) * WHITE_KEY_WIDTH_PCT - 0.5 * BLACK_KEY_WIDTH_PCT
               }%`
-            : `${offset * WHITE_KEY_WIDTH_PCT}%`,
+            : `${offset * WHITE_KEY_WIDTH_PCT}%`
         }}
         ref={this.setKeyRefs[n]}
       />
@@ -139,9 +139,7 @@ export default class PianoView
     const { keyState } = this.state;
     keyState[n] = isPressed;
     const keyRef = this.keyRefs[n];
-    const classNames = keyRef.className
-      .split(" ")
-      .filter((x) => x !== "pressed");
+    const classNames = keyRef.className.split(" ").filter(x => x !== "pressed");
     if (isPressed) {
       classNames.push("pressed");
     }
@@ -150,7 +148,7 @@ export default class PianoView
 
   public reset() {
     this.setState({
-      keyState: defaultKeyState(),
+      keyState: defaultKeyState()
     });
     this.forceUpdate();
   }

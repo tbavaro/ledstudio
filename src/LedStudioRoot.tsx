@@ -1,48 +1,39 @@
+import "./LedStudioRoot.css";
+
 import * as React from "react";
 
+import * as AudioIn from "./audioIn/AudioIn";
+import AbletonLinkConnect from "./beat/AbletonLinkConnect";
+import ManualBeatController from "./beat/ManualBeatController";
+import BeatControlView from "./BeatControlView";
+import ControlsView from "./ControlsView";
+import FadecandyClient from "./hardware/FadecandyClient";
+import FadecandyLedSender from "./hardware/FadecandyLedSender";
+import MidiEvent from "./piano/MidiEvent";
+import MidiEventListener, {
+  MidiEventEmitter,
+  QueuedMidiEventEmitter
+} from "./piano/MidiEventListener";
+import PianoView from "./PianoView";
 import BeatController from "./portable/base/BeatController";
 import * as Colors from "./portable/base/Colors";
 import ControllerState from "./portable/base/ControllerState";
-import { VisualizationRegistry } from "./portable/VisualizationRegistry";
-
 import * as PianoHelpers from "./portable/PianoHelpers";
-
-import {
-  first,
-  firstKey,
-  MovingAverageHelper,
-  valueOrThrow,
-} from "./util/Utils";
-
-import FadecandyClient from "./hardware/FadecandyClient";
-import FadecandyLedSender from "./hardware/FadecandyLedSender";
-
+import { VisualizationRegistry } from "./portable/VisualizationRegistry";
+import RightSidebarComponent, * as RightSidebar from "./RightSidebar";
 import Scene from "./scenes/Scene";
-
 import SimulationViewport from "./simulator/SimulationViewport";
 import * as SimulatorStickySettings from "./simulator/SimulatorStickySettings";
 import TimeseriesView from "./simulator/TimeseriesView";
 import VisualizerExtraDisplayContainer from "./simulator/VisualizerExtraDisplayContainer";
-
-import MidiEvent from "./piano/MidiEvent";
-import MidiEventListener, {
-  MidiEventEmitter,
-  QueuedMidiEventEmitter,
-} from "./piano/MidiEventListener";
-
-import * as AudioIn from "./audioIn/AudioIn";
-
-import BeatControlView from "./BeatControlView";
-import ControlsView from "./ControlsView";
-import PianoView from "./PianoView";
-import RightSidebarComponent, * as RightSidebar from "./RightSidebar";
 import TimingStatsView from "./TimingStatsView";
+import {
+  MovingAverageHelper,
+  first,
+  firstKey,
+  valueOrThrow
+} from "./util/Utils";
 import VisualizationRunner from "./VisualizationRunner";
-
-import AbletonLinkConnect from "./beat/AbletonLinkConnect";
-import ManualBeatController from "./beat/ManualBeatController";
-
-import "./LedStudioRoot.css";
 
 type MidiState =
   | {
@@ -98,7 +89,7 @@ function tryGetById<T extends { id: string }>(
     return null;
   }
 
-  return objs.find((obj) => obj.id === id);
+  return objs.find(obj => obj.id === id);
 }
 
 function createIsValidIdFunc<T extends { id: string }>(objs: ReadonlyArray<T>) {
@@ -124,7 +115,7 @@ function getByStickyIdKeyOrFirst<T extends { id: string }>(
   const idOrNull = SimulatorStickySettings.get({
     key: key,
     defaultValue: objs.length === 0 ? null : objs[0].id,
-    validateFunc: createIsValidIdFunc(objs),
+    validateFunc: createIsValidIdFunc(objs)
   });
 
   if (typeof idOrNull !== "string") {
@@ -171,12 +162,12 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     if (navigator.requestMIDIAccess) {
       navigator
         .requestMIDIAccess()
-        .then((webMidi) => {
+        .then(webMidi => {
           this.setState({
             midiState: {
               status: "loaded",
-              webMidi: webMidi,
-            },
+              webMidi: webMidi
+            }
           });
 
           const inputs = Array.from(webMidi.inputs.values());
@@ -199,21 +190,21 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
           webMidi.addEventListener("statechange", this.updateMidiDevices);
         })
-        .catch((reason) => {
+        .catch(reason => {
           console.log("exception requesting MIDI access", reason);
           this.setState({
             midiState: {
               status: "failed",
-              midiFailureReason: reason,
-            },
+              midiFailureReason: reason
+            }
           });
         });
     } else {
       this.setState({
         midiState: {
           status: "failed",
-          midiFailureReason: "MIDI access not supported on this browser",
-        },
+          midiFailureReason: "MIDI access not supported on this browser"
+        }
       });
     }
 
@@ -339,7 +330,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             selectedPianoMidiThru={this.state.midiOutput}
             midiEventEmitters={[
               this.midiEventEmitter,
-              this.midiControllerEventEmitter,
+              this.midiControllerEventEmitter
             ]}
             audioInputs={this.state.audioInputs}
             selectedAudioInput={this.state.selectedAudioInput}
@@ -390,7 +381,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
         );
       }
       this.setState({
-        midiControllerInput: newValue,
+        midiControllerInput: newValue
       });
       SimulatorStickySettings.set(
         "midiControllerInputId",
@@ -431,7 +422,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
     this.setState({
       midiInputs: Array.from(webMidi.inputs.values()),
-      midiOutputs: Array.from(webMidi.outputs.values()),
+      midiOutputs: Array.from(webMidi.outputs.values())
     });
   };
 
@@ -477,7 +468,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
         if (this._isMounted) {
           this.forceUpdate();
         }
-      },
+      }
     });
     runner.hardwareLedSender = new FadecandyLedSender(
       this.fadecandyClient,
@@ -488,7 +479,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       visualizationName: visualizationName,
       scene: scene,
       audioSource: audioSource,
-      visualizerExtraDisplay: newVisualizerExtraDisplay,
+      visualizerExtraDisplay: newVisualizerExtraDisplay
     };
     isInConfigure = false;
     if (!doNotSetState) {
@@ -542,10 +533,10 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     },
     setBeatControllerType: (newValue: RightSidebar.BeatControllerType) => {
       this.setState({
-        beatController: this.createBeatControllerType(newValue),
+        beatController: this.createBeatControllerType(newValue)
       });
       SimulatorStickySettings.set("beatControllerType", newValue);
-    },
+    }
   };
 
   private onMidiInputMessage = (message: WebMidi.MIDIMessageEvent) => {
@@ -572,7 +563,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
   private resetAllKeys = () => {
     this.midiEventEmitter.reset();
-    PianoHelpers.resetAllKeysMidiDatas().forEach((data) => {
+    PianoHelpers.resetAllKeysMidiDatas().forEach(data => {
       this.midiEventEmitter.fire(
         new MidiEvent(data, /*suppressDisplay=*/ true)
       );
@@ -585,7 +576,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       if (pianoEvent !== null) {
         this.state.visualizationRunner.onPianoEvent(pianoEvent);
       }
-    },
+    }
   };
 
   private animating = false;
@@ -631,7 +622,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       if (this.timeseriesViewRef) {
         this.timeseriesViewRef.displayData(frameTimeseriesPoints, {
           baseColor: Colors.RED,
-          values: frameHeatmapValues,
+          values: frameHeatmapValues
         });
       }
     }
@@ -648,7 +639,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       renderMillis: this.state.simulationEnabled
         ? this.renderTimingHelper.movingAverage
         : 0,
-      framesRenderedSinceLastCall: this.framesRenderedSinceLastTimingsCall,
+      framesRenderedSinceLastCall: this.framesRenderedSinceLastTimingsCall
     };
     this.framesRenderedSinceLastTimingsCall = 0;
     return result;
@@ -665,7 +656,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   private updateAudioInDevices = () => {
     const isInitialization = this.state.audioInputs === undefined;
     this.setState({
-      audioInputs: this.audioIn.inputDevices,
+      audioInputs: this.audioIn.inputDevices
     });
 
     if (isInitialization) {
@@ -690,7 +681,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     return SimulatorStickySettings.get({
       key: "visualizationGroupName",
       defaultValue: first(this.props.visualizations.groupNames),
-      validateFunc: (v) => this.props.visualizations.groupNames.includes(v),
+      validateFunc: v => this.props.visualizations.groupNames.includes(v)
     });
   }
 
@@ -703,10 +694,10 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     return SimulatorStickySettings.get({
       key: "visualizationName",
       defaultValue: defaultVisualizationName,
-      validateFunc: (v) =>
+      validateFunc: v =>
         this.props.visualizations
           .visualizationNamesInGroup(groupName)
-          .includes(v),
+          .includes(v)
     });
   }
 
@@ -714,7 +705,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     const name = SimulatorStickySettings.get({
       key: "sceneName",
       defaultValue: firstKey(this.props.scenes),
-      validateFunc: (v: string) => this.props.scenes.has(v),
+      validateFunc: (v: string) => this.props.scenes.has(v)
     });
     return valueOrThrow(this.props.scenes.get(name));
   }
@@ -723,7 +714,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     const id = SimulatorStickySettings.get({
       key: "audioInSourceId",
       defaultValue: this.audioIn.defaultDeviceId,
-      validateFunc: this.audioIn.isValidId,
+      validateFunc: this.audioIn.isValidId
     });
     return this.audioIn.inputDeviceById(id);
   }
@@ -734,7 +725,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     } else {
       return SimulatorStickySettings.get({
         key: "simulationEnabled",
-        defaultValue: true,
+        defaultValue: true
       });
     }
   }
@@ -742,7 +733,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   private initialBeatController(): BeatController {
     const type = SimulatorStickySettings.get({
       key: "beatControllerType",
-      defaultValue: "manual",
+      defaultValue: "manual"
     });
     return this.createBeatControllerType(type);
   }
@@ -759,7 +750,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
         /*doNotSetState=*/ true
       ),
       midiState: {
-        status: "initializing",
+        status: "initializing"
       },
       midiInput: null,
       midiControllerInput: null,
@@ -770,7 +761,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       selectedAudioInput: null,
       audioSource: null,
       simulationEnabled: this.initialSimulationEnabled(),
-      beatController: this.initialBeatController(),
+      beatController: this.initialBeatController()
     };
   })();
 }
@@ -792,7 +783,7 @@ export default class LedStudioRootWrapper extends React.PureComponent<
     return React.createElement(LedStudioRoot, {
       ...this.props,
       sceneNames: Array.from(this.props.scenes.keys()),
-      key,
+      key
     });
   }
 }

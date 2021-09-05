@@ -12,7 +12,10 @@ export default interface AudioWaveformSampler {
   listen(): void;
 }
 
-export type Implementation = new (audioSource: AudioNode, numSamples: number) => AudioWaveformSampler;
+export type Implementation = new (
+  audioSource: AudioNode,
+  numSamples: number
+) => AudioWaveformSampler;
 
 export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
   public readonly currentSamples: Float32Array;
@@ -84,9 +87,7 @@ export class AnalyserNodeAudioWaveformSampler implements AudioWaveformSampler {
   }
 }
 
-export function createAnalyserHelpers(
-  audioSource: AudioNode
-) {
+export function createAnalyserHelpers(audioSource: AudioNode) {
   const audioContext = audioSource.context;
   const numSamples = 1024;
 
@@ -102,7 +103,10 @@ export function createAnalyserHelpers(
       filteredAudioSource = audioSource;
     }
 
-    const sampler = new AnalyserNodeAudioWaveformSampler(filteredAudioSource, numSamples);
+    const sampler = new AnalyserNodeAudioWaveformSampler(
+      filteredAudioSource,
+      numSamples
+    );
     samplers.push(sampler);
 
     return sampler;
@@ -119,4 +123,3 @@ export function createAnalyserHelpers(
     sampleAll: () => samplers.forEach(s => s.sample())
   };
 }
-

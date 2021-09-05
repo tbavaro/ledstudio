@@ -31,11 +31,14 @@ export default class TestControllerDialVisualization extends Visualization.RowCo
 
       for (let i = 0; i < row.length; ++i) {
         const distance = Math.floor(Math.abs(midPoint - i));
-        row.set(i, Colors.rgb(
-          distance <= rDistance ? 1 : 0,
-          distance <= gDistance ? 1 : 0,
-          distance <= bDistance ? 1 : 0
-        ));
+        row.set(
+          i,
+          Colors.rgb(
+            distance <= rDistance ? 1 : 0,
+            distance <= gDistance ? 1 : 0,
+            distance <= bDistance ? 1 : 0
+          )
+        );
       }
     });
 

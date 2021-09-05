@@ -1,6 +1,5 @@
 // import * as Colors from "../base/Colors";
 import * as Visualization from "../../base/Visualization";
-
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
 const NUM_SAMPLES = 1024;

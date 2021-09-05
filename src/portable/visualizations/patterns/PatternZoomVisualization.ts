@@ -1,6 +1,5 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
-
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
 const ZOOM_SPEED = 2;
@@ -25,7 +24,9 @@ export default class PatternZoomVisualization extends AbstractVoronoiMapperVisua
 
   protected renderToCanvas(context: Visualization.FrameContext) {
     const now = Date.now();
-    this.phase = (this.phase + ZOOM_SPEED * RADIUS_STEP * context.elapsedSeconds) % (RADIUS_STEP * 2);
+    this.phase =
+      (this.phase + ZOOM_SPEED * RADIUS_STEP * context.elapsedSeconds) %
+      (RADIUS_STEP * 2);
 
     const canvas = this.canvas;
     const ctx = this.canvasContext;
@@ -34,8 +35,15 @@ export default class PatternZoomVisualization extends AbstractVoronoiMapperVisua
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     let i = 0;
-    for (let radius = this.phase + Math.max(canvas.width, canvas.height); radius > 0; radius -= RADIUS_STEP) {
-      this.drawCircle(radius, (i % 2 === 0 ? Colors.hsv(radius * 2 + now/80, 1, 1) : Colors.BLACK));
+    for (
+      let radius = this.phase + Math.max(canvas.width, canvas.height);
+      radius > 0;
+      radius -= RADIUS_STEP
+    ) {
+      this.drawCircle(
+        radius,
+        i % 2 === 0 ? Colors.hsv(radius * 2 + now / 80, 1, 1) : Colors.BLACK
+      );
       ++i;
     }
   }

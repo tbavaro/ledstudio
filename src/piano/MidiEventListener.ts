@@ -79,7 +79,7 @@ export class QueuedMidiEventEmitter extends MidiEventEmitter {
 
     this.nextTimeout = null;
     this.scheduleDequeueIfNeeded();
-  }
+  };
 
   public reset() {
     this.pendingEvents = [];

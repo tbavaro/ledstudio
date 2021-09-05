@@ -1,11 +1,9 @@
+import { bracket01 } from "../../../util/Utils";
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
-
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 import { Signals } from "../../visualizationUtils/SignalsHelper";
 import { randomPalette } from "../../visualizationUtils/Utils";
-
-import { bracket01 } from "../../../util/Utils";
 
 const MIN_RADIUS = 20;
 const MAX_RADIUS = 40;
@@ -23,14 +21,18 @@ export default class SplotchesVisualization extends AbstractVoronoiMapperVisuali
   }
 
   protected renderToCanvas(context: Visualization.FrameContext) {
-
-    if (Date.now() - this.lastPaletteSwap > 30000 && this.signals.soundsLikeStrongBeat) {
+    if (
+      Date.now() - this.lastPaletteSwap > 30000 &&
+      this.signals.soundsLikeStrongBeat
+    ) {
       this.swapPalettes();
     }
 
-
     const currentBeatsCount = Math.floor(context.beatController.beatNumber());
-    const newWholeBeatsSinceLastFrame = Math.max(0, currentBeatsCount - (this.lastFrameBeatsCount || currentBeatsCount));
+    const newWholeBeatsSinceLastFrame = Math.max(
+      0,
+      currentBeatsCount - (this.lastFrameBeatsCount || currentBeatsCount)
+    );
     this.lastFrameBeatsCount = currentBeatsCount;
 
     const canvas = this.canvas;
@@ -60,7 +62,9 @@ export default class SplotchesVisualization extends AbstractVoronoiMapperVisuali
   }
 
   private randomColor() {
-    return this.palette[Math.floor(Math.random() * (this.palette.length - 2)) + 2];
+    return this.palette[
+      Math.floor(Math.random() * (this.palette.length - 2)) + 2
+    ];
   }
 
   private swapPalettes() {

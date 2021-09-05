@@ -30,21 +30,29 @@ class PureWingFlapVisualization extends Visualization.RowColumnMappedVisualizati
     beatController.hz();
     // const period = 1 / beatController.hz();
     // const speed = Math.PI * period;
-    this.phase = (this.phase + elapsedSeconds * Math.PI * beatController.hz() / 2);
+    this.phase =
+      this.phase + (elapsedSeconds * Math.PI * beatController.hz()) / 2;
 
     const positionNormalized = Math.pow(Math.sin(this.phase), FLAPPINESS);
     const position = positionNormalized * (this.ledRows.length - 1);
 
     this.ledRows.forEach((leds, row) => {
-      const rowV = Math.pow(1 - (Math.abs(position - row) / (this.ledRows.length)), VERTICAL_SHARPNESS);
+      const rowV = Math.pow(
+        1 - Math.abs(position - row) / this.ledRows.length,
+        VERTICAL_SHARPNESS
+      );
       const rowColor = Colors.hsv(0, 0, rowV);
       for (let i = 0; i < leds.length; ++i) {
         // -1 on left, 0 in middle, 1 on right
         const x = (i - (leds.length - 1) / 2) / ((leds.length - 1) / 2);
 
         // 1 at the tips, 0 where tips "start"
-        const tippiness = Math.max(0, Math.abs(x) - TIP_DISTANCE) / (1 - TIP_DISTANCE);
-        const color = Colors.multiply(rowColor, Math.pow(1 - tippiness, TIP_FADE));
+        const tippiness =
+          Math.max(0, Math.abs(x) - TIP_DISTANCE) / (1 - TIP_DISTANCE);
+        const color = Colors.multiply(
+          rowColor,
+          Math.pow(1 - tippiness, TIP_FADE)
+        );
         leds.set(i, color);
       }
     });

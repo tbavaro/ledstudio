@@ -36,7 +36,12 @@ class FloatDataCanvasHelper {
 
     // clear
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width / CANVAS_SCALE, canvas.height / CANVAS_SCALE);
+    ctx.fillRect(
+      0,
+      0,
+      canvas.width / CANVAS_SCALE,
+      canvas.height / CANVAS_SCALE
+    );
 
     // render values
     ctx.strokeStyle = "white";
@@ -51,7 +56,9 @@ class FloatDataCanvasHelper {
 }
 
 export default class TestAudioWaveformVisualization extends Visualization.default {
-  private readonly analyserHelpers: ReturnType<typeof AudioWaveformSampler.createAnalyserHelpers> | null;
+  private readonly analyserHelpers: ReturnType<
+    typeof AudioWaveformSampler.createAnalyserHelpers
+  > | null;
   private readonly canvasHelper: FloatDataCanvasHelper | null;
 
   private readonly lowTimeSeries: Visualization.TimeSeriesValue;
@@ -62,8 +69,11 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
 
     const audioSource = config.audioSource;
     if (audioSource !== null) {
-      this.analyserHelpers = AudioWaveformSampler.createAnalyserHelpers(audioSource);
-      this.canvasHelper = new FloatDataCanvasHelper(this.analyserHelpers.direct.currentSamples);
+      this.analyserHelpers =
+        AudioWaveformSampler.createAnalyserHelpers(audioSource);
+      this.canvasHelper = new FloatDataCanvasHelper(
+        this.analyserHelpers.direct.currentSamples
+      );
       config.setExtraDisplay(this.canvasHelper.canvas);
     } else {
       this.analyserHelpers = null;

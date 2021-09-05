@@ -24,9 +24,12 @@ export class PlaylistVisualization extends Visualization.default {
   private secondsUntilSwitch: number;
   private button: Visualization.ButtonControl;
 
-  constructor(config: Visualization.Config, attrs: {
-    visualizations: PlaylistEntry[];
-  }) {
+  constructor(
+    config: Visualization.Config,
+    attrs: {
+      visualizations: PlaylistEntry[];
+    }
+  ) {
     super(config);
     this.entries = attrs.visualizations;
 
@@ -85,12 +88,15 @@ export class PlaylistVisualization extends Visualization.default {
   }
 
   private goToNextVisualization() {
-    this.switchToVisualization((this.currentVisualizationIndex + 1) % this.entries.length);
+    this.switchToVisualization(
+      (this.currentVisualizationIndex + 1) % this.entries.length
+    );
   }
 
   public render(context: Visualization.FrameContext) {
     this.secondsUntilSwitch -= context.elapsedSeconds;
-    const shouldSwitch = (this.secondsUntilSwitch < 0 || this.button.pressedSinceLastFrame);
+    const shouldSwitch =
+      this.secondsUntilSwitch < 0 || this.button.pressedSinceLastFrame;
     if (shouldSwitch) {
       this.goToNextVisualization();
     }

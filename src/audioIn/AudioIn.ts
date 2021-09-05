@@ -38,7 +38,7 @@ export default class AudioIn {
       return null;
     }
 
-    const i = this.inputDevicesInternal.findIndex((v) => v.id === id);
+    const i = this.inputDevicesInternal.findIndex(v => v.id === id);
     return i === -1 ? null : this.inputDevicesInternal[i];
   }
 
@@ -46,13 +46,13 @@ export default class AudioIn {
     if (id === null) {
       return true;
     } else {
-      return this.inputDevices.find((d) => d.id === id) !== undefined;
+      return this.inputDevices.find(d => d.id === id) !== undefined;
     }
   };
 
   public get defaultDeviceId(): string | null {
     const defaultDevice = this.inputDevicesInternal.find(
-      (d) => d.name === "Soundflower (2ch)"
+      d => d.name === "Soundflower (2ch)"
     );
     if (defaultDevice === undefined) {
       return null;
@@ -71,11 +71,11 @@ export default class AudioIn {
           autoGainControl: false,
           echoCancellation: false,
           noiseSuppression: false,
-          sampleRate: 44100,
+          sampleRate: 44100
         };
         navigator.mediaDevices
           .getUserMedia({ audio: audioConstraints })
-          .then((stream) => {
+          .then(stream => {
             // make sure this is still the stream I was trying to load
             if (deviceId === this.currentDeviceId) {
               const audioContext = new AudioContext();
@@ -121,12 +121,12 @@ export default class AudioIn {
 
   private setDevices = async (devices: MediaDeviceInfo[]) => {
     this.inputDevicesInternal = devices
-      .filter((d) => d.kind === "audioinput")
-      .map((d) => ({
+      .filter(d => d.kind === "audioinput")
+      .map(d => ({
         id: d.deviceId,
-        name: d.label || d.deviceId,
+        name: d.label || d.deviceId
       }));
-    this.deviceListChangedListeners.forEach((listener) => listener.call(this));
+    this.deviceListChangedListeners.forEach(listener => listener.call(this));
   };
 
   public addEventListener(

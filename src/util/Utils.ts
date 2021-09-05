@@ -42,13 +42,20 @@ export function bracket(min: number, max: number, v: number) {
   }
 }
 
-export function createBracketFunc(min: number, max: number): (v: number) => number {
+export function createBracketFunc(
+  min: number,
+  max: number
+): (v: number) => number {
   return (v: number) => bracket(min, max, v);
 }
 
 export const bracket01 = createBracketFunc(0, 1);
 
-export function ensureValidRange(startIndex: number, length: number, validLength: number): [number, number] {
+export function ensureValidRange(
+  startIndex: number,
+  length: number,
+  validLength: number
+): [number, number] {
   if (startIndex < 0) {
     length += startIndex;
     startIndex = 0;
@@ -76,7 +83,10 @@ export function removeAll<T>(arr: T[]) {
   arr.splice(0, arr.length);
 }
 
-export function forEachReverse<T>(arr: T[], func: (value: T, index: number) => void) {
+export function forEachReverse<T>(
+  arr: T[],
+  func: (value: T, index: number) => void
+) {
   for (let i = arr.length - 1; i >= 0; --i) {
     func(arr[i], i);
   }
@@ -100,7 +110,7 @@ export class MovingAverageHelper {
     if (this.numValues === this.values.length) {
       this.sum -= this.values[this.nextIndex];
     } else {
-      this.numValues ++;
+      this.numValues++;
     }
     this.values[this.nextIndex] = value;
     this.sum += value;
@@ -122,8 +132,11 @@ export function roundPlaces(v: number, numPlaces: number) {
   return Math.round(v * factor) / factor;
 }
 
-export function valueOrDefault<T>(valueOrUndefined: T | undefined, defaultValue: T): T {
-  return (valueOrUndefined === undefined ? defaultValue : valueOrUndefined);
+export function valueOrDefault<T>(
+  valueOrUndefined: T | undefined,
+  defaultValue: T
+): T {
+  return valueOrUndefined === undefined ? defaultValue : valueOrUndefined;
 }
 
 export function valueOrThrow<T>(valueOrUndefined: T | undefined): T {
@@ -150,7 +163,10 @@ export function identity<T>(v: T): T {
   return v;
 }
 
-export function getOrCreateMap<K1, K2, V>(outerMap: Map<K1, Map<K2, V>>, outerKey: K1): Map<K2, V> {
+export function getOrCreateMap<K1, K2, V>(
+  outerMap: Map<K1, Map<K2, V>>,
+  outerKey: K1
+): Map<K2, V> {
   let innerMap = outerMap.get(outerKey);
   if (innerMap === undefined) {
     innerMap = new Map();
@@ -159,8 +175,13 @@ export function getOrCreateMap<K1, K2, V>(outerMap: Map<K1, Map<K2, V>>, outerKe
   return innerMap;
 }
 
-export function forEachValueInSortedKeyOrder<V>(map: Map<string, V>, func: (value: V) => void) {
-  Array.from(map.keys()).sort().forEach(k => {
-    func(map.get(k) as V);
-  });
+export function forEachValueInSortedKeyOrder<V>(
+  map: Map<string, V>,
+  func: (value: V) => void
+) {
+  Array.from(map.keys())
+    .sort()
+    .forEach(k => {
+      func(map.get(k) as V);
+    });
 }

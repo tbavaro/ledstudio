@@ -1,6 +1,5 @@
 import * as Colors from "../../base/Colors";
 import * as Visualization from "../../base/Visualization";
-
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
 const RADIUS = 40;
@@ -11,7 +10,7 @@ export default class PatternDotVisualization extends AbstractVoronoiMapperVisual
   protected renderToCanvas(context: Visualization.FrameContext) {
     const degreesPerSecond = 90 * context.beatController.hz();
     this.phase = (this.phase + degreesPerSecond * context.elapsedSeconds) % 360;
-    const phaseRadians = this.phase / 180 * Math.PI;
+    const phaseRadians = (this.phase / 180) * Math.PI;
 
     const canvas = this.canvas;
     const ctx = this.canvasContext;

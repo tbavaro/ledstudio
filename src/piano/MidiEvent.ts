@@ -16,7 +16,7 @@ function describeStatusByte(n: number): string | null {
       return `NOTE_OFF(${n & 0xf})`;
 
     case 0x9: // note on
-    return `NOTE_ON(${n & 0xf})`;
+      return `NOTE_ON(${n & 0xf})`;
 
     default:
       return null;
@@ -36,11 +36,8 @@ export default class MidiEvent {
     } else {
       this.data = [...data];
     }
-    this.statusDescription = (
-      this.data.length === 0
-        ? null
-        : describeStatusByte(this.data[0])
-    );
+    this.statusDescription =
+      this.data.length === 0 ? null : describeStatusByte(this.data[0]);
     this.isNoteworthy = this.statusDescription !== null;
     this.pianoEvent = PianoHelpers.pianoEventFromMidiData(this.data);
     this.suppressDisplay = suppressDisplay || false;

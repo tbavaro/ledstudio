@@ -1,4 +1,6 @@
-function identity<T>(v: T): T { return v; }
+function identity<T>(v: T): T {
+  return v;
+}
 
 export class CircularQueue<T> {
   private readonly maxSize: number;
@@ -44,13 +46,15 @@ export class CircularQueue<T> {
 
   public reduce<U>(callbackfn: (prevAccum: U, v: T) => U, initialAccum: U): U {
     let accum = initialAccum;
-    this.forEach((currentValue: T) => accum = callbackfn(accum, currentValue));
+    this.forEach(
+      (currentValue: T) => (accum = callbackfn(accum, currentValue))
+    );
     return accum;
   }
 
   public sum(func: (v: T) => number): number {
     let accum = 0;
-    this.forEach(v => accum += func(v));
+    this.forEach(v => (accum += func(v)));
     return accum;
   }
 }
@@ -91,16 +95,21 @@ export default class WindowStats {
 
     if (this.cachedVariance === undefined) {
       switch (this.size) {
-        case 0: return NaN;
-        case 1: return 0;
-        default: break;
+        case 0:
+          return NaN;
+        case 1:
+          return 0;
+        default:
+          break;
       }
 
       const mean = this.mean;
-      this.cachedVariance = this.values.sum(v => {
-        const d = v - mean;
-        return d * d;
-      }) / (this.size - 1);
+      this.cachedVariance =
+        this.values.sum(v => {
+          const d = v - mean;
+          return d * d;
+        }) /
+        (this.size - 1);
     }
 
     return this.cachedVariance;

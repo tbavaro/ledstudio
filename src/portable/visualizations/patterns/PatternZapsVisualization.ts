@@ -5,7 +5,7 @@ const DECAY_RATE = 0.005; // per ms
 
 export default class PatternZapsVisualization extends Visualization.RowColumnMappedVisualization {
   private phase: number = 0;
-  private ribChannels: number[][];  // addressing is row -> column -> channel
+  private ribChannels: number[][]; // addressing is row -> column -> channel
   private channelValues: Map<number, Colors.Color>;
   private numRows: number;
   private numColumns: number;
@@ -46,9 +46,12 @@ export default class PatternZapsVisualization extends Visualization.RowColumnMap
     const color = Colors.hsv(Math.random() * 360, 0.6, 1);
 
     for (let column = 0; column < this.numColumns; ++column) {
-      const row = (column < (this.numColumns / 2) ? leftRow : rightRow);
+      const row = column < this.numColumns / 2 ? leftRow : rightRow;
       const channel = this.ribChannels[row][column];
-      this.channelValues.set(channel, Colors.add(this.channelValues.get(channel) || Colors.BLACK, color));
+      this.channelValues.set(
+        channel,
+        Colors.add(this.channelValues.get(channel) || Colors.BLACK, color)
+      );
     }
   }
 
@@ -63,7 +66,7 @@ export default class PatternZapsVisualization extends Visualization.RowColumnMap
 
     // do new zaps if needed
     this.phase += elapsedMillis;
-    const millisBetweenZaps = 1 / beatController.hz() * 1000;
+    const millisBetweenZaps = (1 / beatController.hz()) * 1000;
     while (this.phase > millisBetweenZaps) {
       this.doZap();
       this.phase -= millisBetweenZaps;
@@ -73,7 +76,10 @@ export default class PatternZapsVisualization extends Visualization.RowColumnMap
     this.ledRowMetadatas.forEach((rowLeds, rowIndex) => {
       const ledRow = this.ledRows.get(rowIndex);
       rowLeds.forEach((ledMetadata, index) => {
-        ledRow.set(index, this.channelValues.get(ledMetadata.hardwareChannel) || Colors.BLACK);
+        ledRow.set(
+          index,
+          this.channelValues.get(ledMetadata.hardwareChannel) || Colors.BLACK
+        );
       });
     });
   }

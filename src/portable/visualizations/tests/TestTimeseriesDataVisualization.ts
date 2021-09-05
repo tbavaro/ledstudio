@@ -21,6 +21,7 @@ export default class TestTimeseriesDataVisualization extends Visualization.defau
 
     this.aTimeSeries.value = (Math.sin(this.phase) + 1) / 2;
     this.bTimeSeries.value = (Math.cos(this.phase * 5) + 1) / 2;
-    this.cTimeSeries.value = ((this.phase * 10) % (Math.PI * 2) < Math.PI) ? 0.5 : NaN;
+    this.cTimeSeries.value =
+      (this.phase * 10) % (Math.PI * 2) < Math.PI ? 0.5 : NaN;
   }
 }

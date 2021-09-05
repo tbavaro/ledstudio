@@ -44,7 +44,7 @@ export default class RowColumnLedMapper {
     });
 
     // migrate to `groupedByRowClean` which starts at 0 and has at least an empty array for every row
-    const numRows = (maxRow - minRow + 1);
+    const numRows = maxRow - minRow + 1;
     const groupedByRowClean: LedMetadataAndIndex[][] = new Array(numRows);
     for (let i = 0; i < numRows; ++i) {
       const row = minRow + i;
@@ -60,7 +60,10 @@ export default class RowColumnLedMapper {
       return lmaisForRow.map(lmai => lmai.index);
     });
 
-    this.ledRows = new FixedArray(this.originalIndices.length, i => new ColorRow(this.originalIndices[i].length));
+    this.ledRows = new FixedArray(
+      this.originalIndices.length,
+      i => new ColorRow(this.originalIndices[i].length)
+    );
 
     this.originalLedColors = ledColors;
     this.originalLedMetadatas = ledMetadatas;

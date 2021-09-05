@@ -26,10 +26,13 @@ export default class ColorRow extends FixedArray<Colors.Color> {
     this.forEach((color, i) => this.set(i, Colors.multiply(color, factor)));
   }
 
-  public copyFancy(source: ColorRow, options?: {
-    derezAmount?: number;
-    multiplyBy?: number
-  }) {
+  public copyFancy(
+    source: ColorRow,
+    options?: {
+      derezAmount?: number;
+      multiplyBy?: number;
+    }
+  ) {
     if (options === undefined) {
       options = {};
     }
@@ -39,7 +42,10 @@ export default class ColorRow extends FixedArray<Colors.Color> {
     }
 
     for (let i = 0; i < source.length; ++i) {
-      if (options.derezAmount === undefined || Math.random() > options.derezAmount) {
+      if (
+        options.derezAmount === undefined ||
+        Math.random() > options.derezAmount
+      ) {
         let color = source.get(i);
         if (options.multiplyBy !== undefined) {
           color = Colors.multiply(color, options.multiplyBy);
@@ -49,4 +55,3 @@ export default class ColorRow extends FixedArray<Colors.Color> {
     }
   }
 }
-

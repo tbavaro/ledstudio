@@ -1,7 +1,6 @@
 import { Vector2, Vector3 } from "three";
 
 import * as Scene from "../../scenes/Scene";
-
 import ColorRow from "../base/ColorRow";
 import * as Colors from "../base/Colors";
 import * as Visualization from "../base/Visualization";
@@ -67,7 +66,11 @@ function getExtents(points: Vector2[]) {
   };
 }
 
-function closestIndex(ps: Vector2[], p: Vector2, maxDistance?: number): number | null {
+function closestIndex(
+  ps: Vector2[],
+  p: Vector2,
+  maxDistance?: number
+): number | null {
   if (ps.length === 0) {
     return null;
   }
@@ -90,7 +93,7 @@ function closestIndex(ps: Vector2[], p: Vector2, maxDistance?: number): number |
 }
 
 class VoronoiHelper {
-  private readonly pixelsForPoint: number[][];  // point index -> pixel indices (y*w+x, like imgData)
+  private readonly pixelsForPoint: number[][]; // point index -> pixel indices (y*w+x, like imgData)
   private readonly maxCount: number;
   private readonly height: number;
   private readonly width: number;
@@ -98,14 +101,17 @@ class VoronoiHelper {
   private readonly valuesR: number[];
   private readonly valuesG: number[];
   private readonly valuesB: number[];
-  public readonly ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => Vector2;
+  public readonly ledMapper: (
+    ledMetadata: Scene.LedMetadata,
+    vector?: Vector2
+  ) => Vector2;
 
   constructor(attrs: {
-    points: Vector2[],  // pixel coordinates
-    width: number,  // pixels
-    height: number,  // pixels
-    maxDistance: number,  // pixels
-    ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => Vector2
+    points: Vector2[]; // pixel coordinates
+    width: number; // pixels
+    height: number; // pixels
+    maxDistance: number; // pixels
+    ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => Vector2;
   }) {
     this.pixelsForPoint = attrs.points.map(_ => []);
     const counts = attrs.points.map(_ => 0);
@@ -134,7 +140,10 @@ class VoronoiHelper {
     this.ledMapper = attrs.ledMapper;
   }
 
-  public colorsFromCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): ColorRow {
+  public colorsFromCanvas(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ): ColorRow {
     if (canvas.height !== this.height || canvas.width !== this.width) {
       throw new Error("canvas isn't the right size");
     }
@@ -195,7 +204,10 @@ class VoronoiHelper {
   public drawDebugMapOnCanvas(canvas: HTMLCanvasElement) {
     const colors = new ColorRow(this.pixelsForPoint.length);
     for (let i = 0; i < this.pixelsForPoint.length; ++i) {
-      colors.set(i, Colors.hsv(Math.random() * 360, 0.7, Math.random() * 0.5 + 0.5));
+      colors.set(
+        i,
+        Colors.hsv(Math.random() * 360, 0.7, Math.random() * 0.5 + 0.5)
+      );
     }
     this.drawColorsOnCanvas(canvas, colors);
   }
@@ -211,7 +223,10 @@ interface InitializationValues {
 let cachedInitializationValues: InitializationValues | undefined;
 
 function initializeFor(scene: Scene.default): InitializationValues {
-  if (cachedInitializationValues && cachedInitializationValues.scene === scene) {
+  if (
+    cachedInitializationValues &&
+    cachedInitializationValues.scene === scene
+  ) {
     return cachedInitializationValues;
   }
 
@@ -225,18 +240,20 @@ function initializeFor(scene: Scene.default): InitializationValues {
   let canvasHeight: number;
   if (width > height) {
     canvasWidth = maxDimension;
-    canvasHeight = Math.ceil(maxDimension / width * height);
+    canvasHeight = Math.ceil((maxDimension / width) * height);
   } else {
     canvasHeight = maxDimension;
-    canvasWidth = Math.ceil(maxDimension / height * width);
+    canvasWidth = Math.ceil((maxDimension / height) * width);
   }
 
   const mapToCanvas = (wp: Vector2, vector?: Vector2) => {
     if (vector === undefined) {
       vector = new Vector2();
     }
-    const x = (1 - (wp.x - extents.minX + MAX_DISTANCE) / width) * (canvasWidth - 1);
-    const y = (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
+    const x =
+      (1 - (wp.x - extents.minX + MAX_DISTANCE) / width) * (canvasWidth - 1);
+    const y =
+      (1 - (wp.y - extents.minY + MAX_DISTANCE) / height) * (canvasHeight - 1);
     vector.set(x, y);
     return vector;
   };
@@ -254,7 +271,10 @@ function initializeFor(scene: Scene.default): InitializationValues {
     height: canvasHeight,
     maxDistance: maxDistancePixels,
     ledMapper: (ledMetadata: Scene.LedMetadata, vector?: Vector2) => {
-      return mapToCanvas(mapTo2DSingle(ledMetadata.position, ledMapperScratchVector), vector);
+      return mapToCanvas(
+        mapTo2DSingle(ledMetadata.position, ledMapperScratchVector),
+        vector
+      );
     }
   });
 
@@ -293,7 +313,10 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
 
   public render(context: Visualization.FrameContext): void {
     this.renderToCanvas(context);
-    const colors = this.helper.colorsFromCanvas(this.canvas, this.canvasContext);
+    const colors = this.helper.colorsFromCanvas(
+      this.canvas,
+      this.canvasContext
+    );
     colors.forEach((color, i) => this.ledColors.set(i, color));
   }
 
@@ -304,7 +327,10 @@ export default abstract class AbstractVoronoiMapperVisualization extends Visuali
   }
 
   protected randomLedPixelPosition(vector?: Vector2): Vector2 {
-    const ledMetadata = this.allLedMetadatas[Math.floor(Math.random() * this.allLedMetadatas.length)];
+    const ledMetadata =
+      this.allLedMetadatas[
+        Math.floor(Math.random() * this.allLedMetadatas.length)
+      ];
     return this.mapTo2d(ledMetadata, vector);
   }
 }

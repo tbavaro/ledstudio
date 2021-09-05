@@ -1,6 +1,7 @@
 import * as AudioWaveformSampler from "./AudioWaveformSampler";
 
-const AudioWaveformSamplerImplementation = AudioWaveformSampler.AnalyserNodeAudioWaveformSampler;
+const AudioWaveformSamplerImplementation =
+  AudioWaveformSampler.AnalyserNodeAudioWaveformSampler;
 const NUM_SAMPLES = 1024;
 
 export interface AudioValues {
@@ -46,15 +47,22 @@ export default class BasicAudioHelper {
         filteredAudioSource = audioSource;
       }
 
-      const sampler = new AudioWaveformSamplerImplementation(filteredAudioSource, NUM_SAMPLES);
+      const sampler = new AudioWaveformSamplerImplementation(
+        filteredAudioSource,
+        NUM_SAMPLES
+      );
       this.samplers.push(sampler);
 
       return sampler;
     };
 
     this.unfilteredSampler = createAnalyserHelper();
-    this.lowSampler = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "lowpass" }));
-    this.highSampler = createAnalyserHelper(() => new BiquadFilterNode(audioContext, { type: "highpass" }));
+    this.lowSampler = createAnalyserHelper(
+      () => new BiquadFilterNode(audioContext, { type: "lowpass" })
+    );
+    this.highSampler = createAnalyserHelper(
+      () => new BiquadFilterNode(audioContext, { type: "highpass" })
+    );
 
     this.reusedValues = {
       samples: this.unfilteredSampler.currentSamples,
@@ -88,7 +96,8 @@ export default class BasicAudioHelper {
     values.unfilteredRMS = this.unfilteredSampler.currentRMSAmplitude;
     values.unfilteredRMSZScore3 = this.unfilteredSampler.currentRmsEma3.zScore;
     values.unfilteredRMSEMA3 = this.unfilteredSampler.currentRmsEma3.ema;
-    values.unfilteredRMSZScore20 = this.unfilteredSampler.currentRmsEma20.zScore;
+    values.unfilteredRMSZScore20 =
+      this.unfilteredSampler.currentRmsEma20.zScore;
     values.unfilteredRMSEMA20 = this.unfilteredSampler.currentRmsEma20.ema;
     values.unfilteredPeak = this.unfilteredSampler.currentMaxAmplitude;
 

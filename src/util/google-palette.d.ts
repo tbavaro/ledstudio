@@ -1,1 +1,1 @@
-declare module 'google-palette';
+declare module "google-palette";

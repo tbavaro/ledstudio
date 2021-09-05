@@ -1,5 +1,4 @@
 import * as Visualization from "../../base/Visualization";
-
 import AbstractVoronoiMapperVisualization from "../../visualizationUtils/AbstractVoronoiMapperVisualization";
 
 const DEGREES_PER_SECOND = 180;
@@ -8,8 +7,9 @@ export default class PatternClockVisualization extends AbstractVoronoiMapperVisu
   private phase = 0;
 
   protected renderToCanvas(context: Visualization.FrameContext) {
-    this.phase = (this.phase + DEGREES_PER_SECOND * context.elapsedSeconds) % 360;
-    const phaseRadians = this.phase / 180 * Math.PI;
+    this.phase =
+      (this.phase + DEGREES_PER_SECOND * context.elapsedSeconds) % 360;
+    const phaseRadians = (this.phase / 180) * Math.PI;
 
     const canvas = this.canvas;
     const ctx = this.canvasContext;
@@ -26,7 +26,10 @@ export default class PatternClockVisualization extends AbstractVoronoiMapperVisu
     ctx.lineWidth = 50;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(phaseRadians) * clockHandSize, cy + Math.sin(phaseRadians) * clockHandSize);
+    ctx.lineTo(
+      cx + Math.cos(phaseRadians) * clockHandSize,
+      cy + Math.sin(phaseRadians) * clockHandSize
+    );
     ctx.stroke();
   }
 }
