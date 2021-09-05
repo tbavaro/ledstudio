@@ -44,6 +44,7 @@ import TestSignalsVisualization from "../portable/visualizations/tests/TestSigna
 import TestStripAddressVisualization from "../portable/visualizations/tests/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "../portable/visualizations/tests/TestTimeseriesDataVisualization";
 import TestVisualizerExtraDisplayVisualization from "../portable/visualizations/tests/TestVisualizerExtraDisplayVisualization";
+import TestWingTrianglesVisualization from "../portable/visualizations/tests/TestWingTrianglesVisualization";
 
 const registryBuilder = new VisualizationRegistryBuilder();
 
@@ -84,5 +85,6 @@ registryBuilder.add("tests", "TestSignals", TestSignalsVisualization);
 registryBuilder.add("tests", "TestStripAddress", TestStripAddressVisualization);
 registryBuilder.add("tests", "TestTimeseriesData", TestTimeseriesDataVisualization);
 registryBuilder.add("tests", "TestVisualizerExtraDisplay", TestVisualizerExtraDisplayVisualization);
+registryBuilder.add("tests", "TestWingTriangles", TestWingTrianglesVisualization);
 
 export const registry = registryBuilder.build();
