@@ -20,7 +20,7 @@
     "build": "npm run codegen && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
+    "publish": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
     "fcserver": "./fcserver/fcserver.sh",
     "codegen": "tsc src/codegen/GenerateVisualizationRegistry.ts && node src/codegen/GenerateVisualizationRegistry.js",
     "prettier": "prettier --write src/"
