@@ -1,4 +1,7 @@
-import { Vector2 } from "three";
+import { Vector2, Vector3 } from "three";
+import * as Three from "three";
+
+import { ExtraObjectFunc } from "./SceneDef";
 
 // makes a triangle from a vertical piece and two arms.
 // vertical piece starts at (0,0) and goes up (+y)
@@ -53,4 +56,39 @@ export function boundingBox2D(points: Vector2[]): [Vector2, Vector2] {
 export function width2D(points: Vector2[]): number {
   const bounds = boundingBox2D(points);
   return bounds[1].x - bounds[0].x;
+}
+
+const EXTRA_OBJECT_MATERIAL_DEFAULT = () => {
+  return new Three.MeshLambertMaterial({
+    color: 0x111111
+  });
+};
+
+// creates a box with the bottom centered at (0,0,0)
+export function boxHelper(attrs: {
+  width: number;
+  height: number;
+  depth: number;
+  translateBy?: Vector3;
+  material?: Three.Material;
+}): ExtraObjectFunc {
+  return () => {
+    const geometry = new Three.BoxGeometry(
+      attrs.width,
+      attrs.height,
+      attrs.depth
+    );
+    geometry.translate(0, attrs.height / 2, 0);
+    if (attrs.translateBy) {
+      geometry.translate(
+        attrs.translateBy.x,
+        attrs.translateBy.y,
+        attrs.translateBy.z
+      );
+    }
+
+    const material = attrs.material || EXTRA_OBJECT_MATERIAL_DEFAULT();
+    const mesh = new Three.Mesh(geometry, material);
+    return mesh;
+  };
 }

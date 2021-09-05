@@ -185,3 +185,16 @@ export function forEachValueInSortedKeyOrder<V>(
       func(map.get(k) as V);
     });
 }
+
+export function memoize<T>(func: () => T): () => T {
+  let ran = false;
+  let result: any;
+
+  return () => {
+    if (!ran) {
+      result = func();
+      ran = true;
+    }
+    return result;
+  };
+}
