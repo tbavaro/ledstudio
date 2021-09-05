@@ -32,8 +32,8 @@ export default class SpreadShootersAudioVisualization extends Visualization.RowC
   private ezTS: Visualization.EasyTimeSeriesValueSetters;
   private readonly reverseLedInfo: LedRowInfo[][];
   private signals: Signals;
-  private palette: number[];
-  private lastPaletteSwap: number;
+  private palette: number[] = [];
+  private lastPaletteSwap: number = -1;
 
   constructor(config: Visualization.Config) {
     super(config);

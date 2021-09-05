@@ -582,7 +582,7 @@ function createRealWingsSceneDef(name: string) {
     );
 
     const ledMetadatas: Scene.LedMetadata[] = [];
-    positions3d.map((ribPositions, ribIndex) => {
+    positions3d.forEach((ribPositions, ribIndex) => {
       const rowNum = Math.floor((ribIndex % 8) / 2);
       ribPositions.forEach((p, ledIndex) => {
         ledMetadatas.push({

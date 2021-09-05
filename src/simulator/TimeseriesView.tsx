@@ -13,18 +13,6 @@ const POINT_VALUE_HEIGHT = 2;
 
 // TODO could make this draw all the pixels and then scale so we don't miss values that get painted over
 class HeatmapDrawHelper {
-  // private canvas: HTMLCanvasElement;
-  // private ctx: CanvasRenderingContext2D;
-
-  constructor() {
-    // this.canvas = document.createElement("canvas");
-    // const ctx = this.canvas.getContext("2d");
-    // if (ctx === null) {
-    //   throw new Error("can't get 2d context");
-    // }
-    // this.ctx = ctx;
-  }
-
   public drawHeatmapColumn(
     targetContext: CanvasRenderingContext2D,
     heatmap: TimeseriesData.HeatmapDef
@@ -45,8 +33,8 @@ class HeatmapDrawHelper {
 }
 
 export default class TimeseriesView extends React.PureComponent<Props, {}> {
-  private canvas: HTMLCanvasElement | undefined = undefined;
-  private canvasContext: CanvasRenderingContext2D | undefined = undefined;
+  private canvas: HTMLCanvasElement | null = null;
+  private canvasContext: CanvasRenderingContext2D | null = null;
 
   private heatmapDrawHelper = new HeatmapDrawHelper();
 
@@ -61,13 +49,18 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
     );
   }
 
-  private setRef = (canvas: HTMLCanvasElement) => {
-    const ctx = canvas.getContext("2d");
-    if (ctx === null) {
-      throw new Error("couldn't get canvas context");
-    }
+  private setRef = (canvas: HTMLCanvasElement | null) => {
     this.canvas = canvas;
-    this.canvasContext = ctx;
+
+    if (canvas === null) {
+      this.canvasContext = null;
+    } else {
+      const ctx = canvas.getContext("2d");
+      if (ctx === null) {
+        throw new Error("couldn't get canvas context");
+      }
+      this.canvasContext = ctx;
+    }
   };
 
   public displayData(
@@ -76,7 +69,7 @@ export default class TimeseriesView extends React.PureComponent<Props, {}> {
   ) {
     const canvas = this.canvas;
     const ctx = this.canvasContext;
-    if (canvas === undefined || ctx === undefined) {
+    if (canvas === null || ctx === null) {
       return;
     }
 

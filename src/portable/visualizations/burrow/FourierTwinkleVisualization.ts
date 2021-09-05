@@ -14,7 +14,7 @@ const MAX_THRESHOLD = 0.7;
 export default class MyVisualization extends Visualization.default {
   private readonly analyser: AnalyserNode;
   private readonly buffer: Uint8Array;
-  private bucketLocations: number[];
+  private bucketLocations: number[] = [];
   private prevBeatNumber: number | undefined;
   private values: FancyValue[];
 

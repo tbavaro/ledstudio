@@ -20,6 +20,7 @@ export default class MyVisualization extends AbstractVoronoiMapperVisualization 
       this.buffer = new Uint8Array(this.analyser.frequencyBinCount);
     } else {
       this.analyser = null;
+      this.buffer = new Uint8Array(0);
     }
   }
 

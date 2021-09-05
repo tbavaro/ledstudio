@@ -10,23 +10,6 @@ export interface VisualizationRegistry {
   ): Visualization.default;
 }
 
-export class VisualizationRegistryBuilder {
-  private readonly registry = new VisualizationRegistryImpl();
-  private built = false;
-
-  public build(): VisualizationRegistry {
-    this.built = true;
-    return this.registry;
-  }
-
-  public add(groupName: string, name: string, ctor: Visualization.Constructor) {
-    if (this.built) {
-      throw new Error("can't add after registry has been built");
-    }
-    this.registry.add(groupName, name, ctor);
-  }
-}
-
 class VisualizationRegistryImpl implements VisualizationRegistry {
   private readonly groupedNames: Map<string, string[]> = new Map();
   private readonly flatMap: Map<string, Visualization.Constructor> = new Map();
@@ -70,5 +53,22 @@ class VisualizationRegistryImpl implements VisualizationRegistry {
 
     // add
     this.flatMap.set(name, ctor);
+  }
+}
+
+export class VisualizationRegistryBuilder {
+  private readonly registry = new VisualizationRegistryImpl();
+  private built = false;
+
+  public build(): VisualizationRegistry {
+    this.built = true;
+    return this.registry;
+  }
+
+  public add(groupName: string, name: string, ctor: Visualization.Constructor) {
+    if (this.built) {
+      throw new Error("can't add after registry has been built");
+    }
+    this.registry.add(groupName, name, ctor);
   }
 }

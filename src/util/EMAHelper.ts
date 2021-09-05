@@ -1,8 +1,8 @@
 export default class EMAHelper {
   private readonly alpha: number;
-  private emaValue: number | null;
-  private emvValue: number | null;
-  private zScoreValue: number | null;
+  private emaValue: number | null = null;
+  private emvValue: number | null = null;
+  private zScoreValue: number | null = null;
 
   constructor(alpha: number) {
     this.alpha = alpha;

@@ -14,15 +14,17 @@ export interface PlaylistEntry {
   duration: number;
 }
 
+const UNSET: any = "<unset>";
+
 export class PlaylistVisualization extends Visualization.default {
   private readonly entries: PlaylistEntry[];
   private lastVisualization: Visualization.default | null = null;
-  private currentVisualization: Visualization.default;
-  private currentVisualizationIndex: number;
-  private currentBranchedAudioNode: AudioNode;
-  private timeAtSwitch: number;
-  private secondsUntilSwitch: number;
-  private button: Visualization.ButtonControl;
+  private currentVisualization: Visualization.default = UNSET;
+  private currentVisualizationIndex: number = UNSET;
+  private currentBranchedAudioNode: AudioNode = UNSET;
+  private timeAtSwitch: number = UNSET;
+  private secondsUntilSwitch: number = UNSET;
+  private button: Visualization.ButtonControl = UNSET;
 
   constructor(
     config: Visualization.Config,

@@ -10,8 +10,8 @@ const MAX_RADIUS = 40;
 
 export default class SplotchesVisualization extends AbstractVoronoiMapperVisualization {
   private lastFrameBeatsCount: number | undefined;
-  private palette: number[];
-  private lastPaletteSwap: number;
+  private palette: number[] = [];
+  private lastPaletteSwap: number = -1;
   private signals: Signals;
 
   constructor(config: Visualization.Config) {

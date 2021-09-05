@@ -6,14 +6,14 @@ import { Signals } from "../../visualizationUtils/SignalsHelper";
 import { randomPalette } from "../../visualizationUtils/Utils";
 
 export default class ExpandingDashesVisualization extends Visualization.RowColumnMappedVisualization {
-  private regularPalette: Colors.Color[];
-  private dropPalette: Colors.Color[];
+  private regularPalette: Colors.Color[] = [];
+  private dropPalette: Colors.Color[] = [];
   private readonly wingDashPaires: number[];
   private readonly wingDashPairRatioes: number[];
   private readonly ezTS: Visualization.EasyTimeSeriesValueSetters;
   private readonly signals: Signals;
   private readonly colorOffset: number;
-  private lastPaletteSwap: number;
+  private lastPaletteSwap: number = -1;
 
   constructor(config: Visualization.Config) {
     super(config);

@@ -2,6 +2,7 @@ import "./SimulationViewport.css";
 
 import * as React from "react";
 import * as Three from "three";
+import { GammaEncoding } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import * as Colors from "../portable/base/Colors";
@@ -222,12 +223,13 @@ export default class SimulationViewport extends React.Component<Props, State> {
       super.componentDidMount();
     }
 
-    this.renderer.gammaOutput = true;
+    this.renderer.outputEncoding = GammaEncoding;
     this.renderer.gammaFactor = 2.2;
 
     this.ref.appendChild(this.renderer.domElement);
-    this.state.controls.domElement = this.ref;
-    this.state.controls.update();
+    const { controls } = this.state;
+    controls.domElement = this.ref;
+    controls.update();
 
     this.updateSizes();
 
@@ -279,8 +281,10 @@ export default class SimulationViewport extends React.Component<Props, State> {
   private updateSizes = () => {
     const width = this.ref.clientWidth;
     const height = this.ref.clientHeight;
-    this.state.camera.aspect = width / height;
-    this.state.camera.updateProjectionMatrix();
+
+    const { camera } = this.state;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
     // this.renderer.setPixelRatio(window.devicePixelRatio);
     this.state.controls.update();

@@ -20,6 +20,7 @@ export default class MyVisualization extends AbstractVoronoiMapperVisualization 
       this.buffer = new Float32Array(this.analyser.fftSize);
     } else {
       this.analyser = null;
+      this.buffer = new Float32Array(0);
     }
   }
 

@@ -7,10 +7,6 @@ const SPARKLE_HALF_LIFE_SECONDS = 0.2;
 export default class PatternSparklesVisualization extends Visualization.default {
   private numLedsRemainder = 0;
 
-  constructor(config: Visualization.Config) {
-    super(config);
-  }
-
   public render(context: Visualization.FrameContext): void {
     const { elapsedSeconds } = context;
 

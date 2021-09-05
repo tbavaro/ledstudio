@@ -28,7 +28,7 @@ export function hex2Color(hex: string): Color {
   const codes = [hex.substr(0, 2), hex.substr(2, 2), hex.substr(4, 2)];
   return rgbUnchecked.apply(
     null,
-    codes.map(code => parseInt(code, 16))
+    codes.map(code => parseInt(code, 16)) as [number, number, number]
   );
 }
 
