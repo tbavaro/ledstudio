@@ -94,7 +94,7 @@ function closestIndex(
 
 class VoronoiHelper {
   private readonly pixelsForPoint: number[][]; // point index -> pixel indices (y*w+x, like imgData)
-  private readonly maxCount: number;
+  // private readonly maxCount: number;
   private readonly height: number;
   private readonly width: number;
   private readonly colors: ColorRow;
@@ -130,7 +130,7 @@ class VoronoiHelper {
       }
       ++p.y;
     }
-    this.maxCount = Math.max.apply(Math, counts);
+    // this.maxCount = Math.max.apply(Math, counts);
     this.colors = new ColorRow(attrs.points.length);
     this.valuesR = new Array(attrs.points.length).fill(0);
     this.valuesG = new Array(attrs.points.length).fill(0);
@@ -157,15 +157,16 @@ class VoronoiHelper {
       let rTotal = 0;
       let gTotal = 0;
       let bTotal = 0;
-      pixelIndexes.forEach(pixelIndex => {
+      for (const pixelIndex of pixelIndexes) {
         rTotal += imgData.data[pixelIndex * 4];
         gTotal += imgData.data[pixelIndex * 4 + 1];
         bTotal += imgData.data[pixelIndex * 4 + 2];
-      });
+      }
+      const count = pixelIndexes.length;
       const color = Colors.rgbUnchecked(
-        Math.round(rTotal / this.maxCount),
-        Math.round(gTotal / this.maxCount),
-        Math.round(bTotal / this.maxCount)
+        Math.round(rTotal / count),
+        Math.round(gTotal / count),
+        Math.round(bTotal / count)
       );
       this.colors.set(pointIndex, color);
     });

@@ -62,16 +62,15 @@ class LedHelperImpl implements LedHelper {
     side: Three.DoubleSide
   });
 
-  private color: Three.Color;
+  private readonly material: typeof LedHelperImpl.MATERIAL;
 
   constructor(
     renderScene: Three.Scene,
     geometry: Three.PlaneBufferGeometry,
     position: Three.Vector3
   ) {
-    const material = LedHelperImpl.MATERIAL.clone();
-    this.color = material.color;
-    const mesh = new Three.Mesh(geometry, material);
+    this.material = LedHelperImpl.MATERIAL.clone();
+    const mesh = new Three.Mesh(geometry, this.material);
     mesh.position.copy(position);
     mesh.castShadow = false;
     mesh.receiveShadow = false;
@@ -82,7 +81,7 @@ class LedHelperImpl implements LedHelper {
   }
 
   public setColor(color: Colors.Color) {
-    this.color.set(color);
+    this.material.color.set(color);
   }
 
   public readonly removeFromScene: () => void;
