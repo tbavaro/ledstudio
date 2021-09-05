@@ -211,3 +211,25 @@ export function resolveMMV<T extends MemoizableValue>(
     return v;
   }
 }
+
+export function interleave<T>(a: T[], b: T[]): T[] {
+  if (a.length !== b.length) {
+    throw new Error("must be same length");
+  }
+
+  const output: T[] = [];
+
+  a.forEach((ai, i) => {
+    output.push(ai);
+    output.push(b[i]);
+  });
+
+  return output;
+}
+
+export function last<T>(arr: ReadonlyArray<T>): T {
+  if (arr.length === 0) {
+    throw new Error("no items");
+  }
+  return arr[arr.length - 1];
+}

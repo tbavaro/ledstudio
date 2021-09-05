@@ -1,4 +1,5 @@
 import { INCH, METER } from "src/util/Units";
+import { fillArray, interleave } from "src/util/Utils";
 import { Vector2, Vector3 } from "three";
 
 import * as SimulationUtils from "../simulator/SimulationUtils";
@@ -7,6 +8,8 @@ import Scene, { SceneLedMetadata } from "./Scene";
 import { boxHelper } from "./SceneUtils";
 
 const LED_SPACING = METER / 30;
+const SMALL_TRIANGLE_LED_COUNTS = [23, 20, 22, 26];
+const LARGE_TRIANGLE_LED_COUNTS = [46, 44, 44, 53];
 
 // measurements
 const middleSpacing = 1.5 * INCH;
@@ -17,21 +20,6 @@ const smallDeltaY = 19.5 * INCH;
 const largeDeltaX = 57 * INCH;
 const largeDeltaY = 48.25 * INCH;
 const bottomHeight = 35 * INCH;
-
-function interleave<T>(a: T[], b: T[]): T[] {
-  if (a.length !== b.length) {
-    throw new Error("must be same length");
-  }
-
-  const output: T[] = [];
-
-  a.forEach((ai, i) => {
-    output.push(ai);
-    output.push(b[i]);
-  });
-
-  return output;
-}
 
 function createVenue() {
   const postPositionX = smallDeltaX + 0.5 * interTriangleSpacing;
@@ -60,73 +48,46 @@ function createVenue() {
   return venue;
 }
 
-function calculateLedPositions2d() {
-  const makeRib = (attrs: {
-    start: Vector2;
-    toward: Vector2;
-    numLeds: number;
-  }) => {
-    const end = attrs.toward
-      .clone()
-      .sub(attrs.start)
-      .normalize()
-      .multiplyScalar(LED_SPACING * (attrs.numLeds - 1 + 0.1))
-      .add(attrs.start);
-    return SimulationUtils.pointsFromTo({
-      start: attrs.start,
-      end: end,
-      spacing: LED_SPACING
-    });
-  };
+function makeRib(attrs: { start: Vector2; toward: Vector2; numLeds: number }) {
+  const end = attrs.toward
+    .clone()
+    .sub(attrs.start)
+    .normalize()
+    .multiplyScalar(LED_SPACING * (attrs.numLeds - 1 + 0.1))
+    .add(attrs.start);
+  return SimulationUtils.pointsFromTo({
+    start: attrs.start,
+    end: end,
+    spacing: LED_SPACING
+  });
+}
 
+export function createTrianglePositions2d(
+  type: "small" | "large"
+): Vector2[][] {
+  const deltaX = type === "small" ? smallDeltaX : -1 * largeDeltaX;
+  const deltaY = type === "small" ? smallDeltaY : largeDeltaY;
+  const ledCounts =
+    type === "small" ? SMALL_TRIANGLE_LED_COUNTS : LARGE_TRIANGLE_LED_COUNTS;
+
+  return fillArray(4, i =>
+    makeRib({
+      start: new Vector2(0, (3 - i) * startSpacing),
+      toward: new Vector2(deltaX, deltaY),
+      numLeds: ledCounts[i]
+    })
+  );
+}
+
+function calculateLedPositions2d() {
   const translateBy = (delta: Vector2) => (vs: Vector2[]) =>
     vs.map(v => v.clone().add(delta));
 
-  const smallLeftRibs = [
-    makeRib({
-      start: new Vector2(0, 3 * startSpacing),
-      toward: new Vector2(smallDeltaX, smallDeltaY),
-      numLeds: 23
-    }),
-    makeRib({
-      start: new Vector2(0, 2 * startSpacing),
-      toward: new Vector2(smallDeltaX, smallDeltaY),
-      numLeds: 20
-    }),
-    makeRib({
-      start: new Vector2(0, 1 * startSpacing),
-      toward: new Vector2(smallDeltaX, smallDeltaY),
-      numLeds: 22
-    }),
-    makeRib({
-      start: new Vector2(0, 0 * startSpacing),
-      toward: new Vector2(smallDeltaX, smallDeltaY),
-      numLeds: 26
-    })
-  ].map(translateBy(new Vector2(-1 * (smallDeltaX + middleSpacing * 0.5))));
+  const smallLeftRibs = createTrianglePositions2d("small").map(
+    translateBy(new Vector2(-1 * (smallDeltaX + middleSpacing * 0.5)))
+  );
 
-  const largeLeftRibs = [
-    makeRib({
-      start: new Vector2(0, 3 * startSpacing),
-      toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
-      numLeds: 46
-    }),
-    makeRib({
-      start: new Vector2(0, 2 * startSpacing),
-      toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
-      numLeds: 44
-    }),
-    makeRib({
-      start: new Vector2(0, 1 * startSpacing),
-      toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
-      numLeds: 44
-    }),
-    makeRib({
-      start: new Vector2(0, 0 * startSpacing),
-      toward: new Vector2(-1 * largeDeltaX, largeDeltaY),
-      numLeds: 53
-    })
-  ].map(
+  const largeLeftRibs = createTrianglePositions2d("large").map(
     translateBy(
       new Vector2(
         -1 * (smallDeltaX + interTriangleSpacing + middleSpacing * 0.5)
@@ -142,7 +103,7 @@ function calculateLedPositions2d() {
   return [...allLeftRibs, ...allRightRibs];
 }
 
-export default class RealWingsScene extends Scene {
+export default class BurrowRealWingsScene extends Scene {
   public constructor(name: string) {
     const positions2d = calculateLedPositions2d();
     const ribLengths = positions2d.map(r => r.length);

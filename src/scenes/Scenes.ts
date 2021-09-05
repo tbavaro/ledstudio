@@ -1,5 +1,6 @@
+import BurrowRealWingsScene from "./BurrowRealWingsScene";
+import GarageRealWingsScene from "./GarageRealWingsScene";
 import PianoThreeStripesScene from "./PianoThreeStripesScene";
-import RealWingsScene from "./RealWingsScene";
 import Scene from "./Scene";
 
 export const registry = new Map<string, Scene>();
@@ -16,5 +17,6 @@ function registerScenes(defs: ReadonlyArray<Scene>) {
 
 registerScenes([
   new PianoThreeStripesScene("keyboard:3stripes"),
-  new RealWingsScene("burrow:wings30x4-real")
+  new BurrowRealWingsScene("burrow:wings30x4-real"),
+  new GarageRealWingsScene("garage:wings30x4-real")
 ]);
