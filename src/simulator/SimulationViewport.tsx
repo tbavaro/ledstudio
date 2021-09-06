@@ -2,8 +2,11 @@ import "./SimulationViewport.css";
 
 import * as React from "react";
 import * as Three from "three";
-import { sRGBEncoding } from "three";
+import { Vector2, sRGBEncoding } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 
 import * as Colors from "../portable/base/Colors";
 import { SendableLedStrip } from "../portable/SendableLedStrip";
@@ -156,11 +159,15 @@ interface Props {
   scene: Scene;
   visualizationRunner: VisualizationRunner;
   frameDidRender: (renderMillis: number) => void;
+  enableBloom?: boolean;
 }
 
 type State = {
   renderScene: Three.Scene;
+  readonly composer: EffectComposer;
+  readonly bloomPass: UnrealBloomPass;
   readonly camera: Three.PerspectiveCamera;
+  renderPass?: RenderPass;
   readonly controls: OrbitControls;
   registeredVisualizationRunner?: VisualizationRunner;
   currentScene?: Scene;
@@ -169,7 +176,7 @@ type State = {
 };
 
 export default class SimulationViewport extends React.Component<Props, State> {
-  private renderer = new Three.WebGLRenderer({
+  private readonly renderer = new Three.WebGLRenderer({
     antialias: true,
     preserveDrawingBuffer: false
   });
@@ -184,13 +191,19 @@ export default class SimulationViewport extends React.Component<Props, State> {
       registeredVisualizationRunner: nextProps.visualizationRunner
     };
 
+    let renderPass = prevState.renderPass;
+    let renderScene = prevState.renderScene;
+
     if (nextProps.scene !== prevState.currentScene) {
       if (prevState.currentLedScene !== undefined) {
         prevState.currentLedScene.remove();
       }
 
-      const renderScene = initializeScene();
+      renderScene = initializeScene();
       result.renderScene = renderScene;
+
+      // this forces it to get reset later
+      renderPass = undefined;
 
       nextProps.scene.loadModel().then(model => renderScene.add(model));
 
@@ -214,7 +227,15 @@ export default class SimulationViewport extends React.Component<Props, State> {
         result.currentLedScene.ledStrip;
     }
 
-    return result;
+    if (renderPass === undefined && renderScene !== undefined) {
+      const { composer, bloomPass } = prevState;
+      renderPass = new RenderPass(renderScene, prevState.camera);
+      composer.reset();
+      composer.addPass(renderPass);
+      composer.addPass(bloomPass);
+    }
+
+    return { ...result, renderPass };
   }
 
   public componentDidMount() {
@@ -276,10 +297,18 @@ export default class SimulationViewport extends React.Component<Props, State> {
     const width = this.ref.clientWidth;
     const height = this.ref.clientHeight;
 
-    const { camera } = this.state;
+    const { camera, bloomPass, renderPass, composer } = this.state;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+
+    // renderPass?.setSize(width * 3, height * 3);
+
+    composer.reset();
+    // bloomPass.setSize(width * 3, height * 3);
+    composer.addPass(renderPass!);
+    composer.addPass(bloomPass);
+
     // this.renderer.setPixelRatio(window.devicePixelRatio);
     this.state.controls.update();
   };
@@ -299,12 +328,19 @@ export default class SimulationViewport extends React.Component<Props, State> {
     return {
       renderScene: initializeScene(),
       camera: camera,
+      composer: new EffectComposer(this.renderer),
+      bloomPass: new UnrealBloomPass(new Vector2(1000, 1000), 1.0, 0.2, 0.4),
       controls: new OrbitControls(camera, this.renderer.domElement),
       doRender: () => {
         // render 3d scene
         const startTime = performance.now();
         if (this.isWindowFocused) {
-          this.renderer.render(this.state.renderScene, this.state.camera);
+          // this.renderer.render(this.state.renderScene, this.state.camera);
+          if (this.props.enableBloom) {
+            this.state.composer.render();
+          } else {
+            this.renderer.render(this.state.renderScene, this.state.camera);
+          }
         }
         const renderMillis = performance.now() - startTime;
         this.props.frameDidRender(renderMillis);
