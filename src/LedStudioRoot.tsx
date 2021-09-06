@@ -247,6 +247,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
                 scene={this.state.scene}
                 visualizationRunner={this.state.visualizationRunner}
                 frameDidRender={this.simulationFrameDidRender}
+                enableBloom={true}
               />
             ) : null}
             {this.state.visualizerExtraDisplay === null ? null : (

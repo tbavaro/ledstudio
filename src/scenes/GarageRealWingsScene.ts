@@ -15,7 +15,7 @@ const largeSeparation = 4.25 * INCH;
 
 const WALL_MATERIAL = () => {
   return new MeshBasicMaterial({
-    color: 0x070707,
+    color: 0x030303,
     transparent: true,
     // opacity: 0.2,
     side: DoubleSide

@@ -167,7 +167,7 @@ type State = {
   readonly composer: EffectComposer;
   readonly bloomPass: UnrealBloomPass;
   readonly camera: Three.PerspectiveCamera;
-  renderPass?: RenderPass;
+  readonly renderPass: RenderPass;
   readonly controls: OrbitControls;
   registeredVisualizationRunner?: VisualizationRunner;
   currentScene?: Scene;
@@ -203,7 +203,9 @@ export default class SimulationViewport extends React.Component<Props, State> {
       result.renderScene = renderScene;
 
       // this forces it to get reset later
-      renderPass = undefined;
+      if (renderPass !== undefined) {
+        renderPass.scene = renderScene;
+      }
 
       nextProps.scene.loadModel().then(model => renderScene.add(model));
 
@@ -227,15 +229,7 @@ export default class SimulationViewport extends React.Component<Props, State> {
         result.currentLedScene.ledStrip;
     }
 
-    if (renderPass === undefined && renderScene !== undefined) {
-      const { composer, bloomPass } = prevState;
-      renderPass = new RenderPass(renderScene, prevState.camera);
-      composer.reset();
-      composer.addPass(renderPass);
-      composer.addPass(bloomPass);
-    }
-
-    return { ...result, renderPass };
+    return { ...result };
   }
 
   public componentDidMount() {
@@ -243,9 +237,14 @@ export default class SimulationViewport extends React.Component<Props, State> {
 
     this.renderer.outputEncoding = sRGBEncoding;
 
-    this.ref.appendChild(this.renderer.domElement);
+    const container = this.ref.current;
+    if (container === null) {
+      throw new Error("ref not set");
+    }
+
+    container.appendChild(this.renderer.domElement);
     const { controls } = this.state;
-    controls.domElement = this.ref;
+    controls.domElement = container;
     controls.update();
 
     this.updateSizes();
@@ -275,39 +274,41 @@ export default class SimulationViewport extends React.Component<Props, State> {
     super.componentWillUnmount?.();
   }
 
-  public shouldComponentUpdate() {
-    return false;
-  }
-
   public render() {
-    console.log("rendering viewport");
-    return <div className="SimulationViewport" ref={this.setRef} />;
+    return <div className="SimulationViewport" ref={this.ref} />;
   }
 
-  private unsafeRef: HTMLDivElement | null = null;
-  private setRef = (newRef: HTMLDivElement) => (this.unsafeRef = newRef);
-  private get ref() {
-    if (this.unsafeRef === null) {
-      throw new Error("ref not set");
-    }
-    return this.unsafeRef;
-  }
+  private readonly ref = React.createRef<HTMLDivElement>();
 
   private updateSizes = () => {
-    const width = this.ref.clientWidth;
-    const height = this.ref.clientHeight;
+    const container = this.ref.current;
+    if (container === null) {
+      return;
+    }
 
-    const { camera, bloomPass, renderPass, composer } = this.state;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const pixelRatio = window.devicePixelRatio || 1;
+
+    const speedupFactor = 0;
+    const effectivePixelRatio = pixelRatio / (1 + speedupFactor);
+
+    const { camera, bloomPass, /* renderPass, */ composer } = this.state;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
 
     // renderPass?.setSize(width * 3, height * 3);
 
-    composer.reset();
-    // bloomPass.setSize(width * 3, height * 3);
-    composer.addPass(renderPass!);
-    composer.addPass(bloomPass);
+    // composer.reset();
+    composer.setSize(width, height);
+    composer.setPixelRatio(effectivePixelRatio);
+    bloomPass.setSize(
+      width * effectivePixelRatio,
+      height * effectivePixelRatio
+    );
+    // composer.addPass(renderPass!);
+    // composer.addPass(bloomPass);
 
     // this.renderer.setPixelRatio(window.devicePixelRatio);
     this.state.controls.update();
@@ -325,11 +326,20 @@ export default class SimulationViewport extends React.Component<Props, State> {
       CAMERA_FAR_DISTANCE
     );
 
+    const renderScene = initializeScene();
+
+    const composer = new EffectComposer(this.renderer);
+    const renderPass = new RenderPass(renderScene, camera);
+    const bloomPass = new UnrealBloomPass(new Vector2(10, 10), 2, 0.4, 0.7);
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
+
     return {
-      renderScene: initializeScene(),
-      camera: camera,
-      composer: new EffectComposer(this.renderer),
-      bloomPass: new UnrealBloomPass(new Vector2(1000, 1000), 1.0, 0.2, 0.4),
+      renderScene,
+      camera,
+      renderPass,
+      composer,
+      bloomPass,
       controls: new OrbitControls(camera, this.renderer.domElement),
       doRender: () => {
         // render 3d scene
