@@ -2,7 +2,7 @@ import "./SimulationViewport.css";
 
 import * as React from "react";
 import * as Three from "three";
-import { GammaEncoding } from "three";
+import { sRGBEncoding } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import * as Colors from "../portable/base/Colors";
@@ -218,12 +218,9 @@ export default class SimulationViewport extends React.Component<Props, State> {
   }
 
   public componentDidMount() {
-    if (super.componentDidMount) {
-      super.componentDidMount();
-    }
+    super.componentDidMount?.();
 
-    this.renderer.outputEncoding = GammaEncoding;
-    this.renderer.gammaFactor = 2.2;
+    this.renderer.outputEncoding = sRGBEncoding;
 
     this.ref.appendChild(this.renderer.domElement);
     const { controls } = this.state;
@@ -238,10 +235,6 @@ export default class SimulationViewport extends React.Component<Props, State> {
   }
 
   public componentWillUnmount() {
-    if (super.componentWillUnmount) {
-      super.componentWillUnmount();
-    }
-
     window.removeEventListener("resize", this.updateSizes);
     window.removeEventListener("blur", this.onWindowBlur);
     window.removeEventListener("focus", this.onWindowFocus);
@@ -257,6 +250,8 @@ export default class SimulationViewport extends React.Component<Props, State> {
     if (this.state.currentLedScene) {
       this.state.currentLedScene.remove();
     }
+
+    super.componentWillUnmount?.();
   }
 
   public shouldComponentUpdate() {
