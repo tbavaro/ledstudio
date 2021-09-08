@@ -1,6 +1,5 @@
 import "./SimulationViewport.css";
 
-import * as React from "react";
 import * as Three from "three";
 import { Vector2, sRGBEncoding } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -155,44 +154,31 @@ class LedScene {
   }
 }
 
-interface Props {
-  scene: Scene;
-  visualizationRunner: VisualizationRunner;
-  frameDidRender: (renderMillis: number) => void;
-  enableBloom?: boolean;
-}
-
-type State = {
-  renderScene: Three.Scene;
-  readonly composer: EffectComposer;
-  readonly bloomPass: UnrealBloomPass;
-  readonly camera: Three.PerspectiveCamera;
-  readonly renderPass: RenderPass;
-  readonly controls: OrbitControls;
-  registeredVisualizationRunner?: VisualizationRunner;
-  currentScene?: Scene;
-  currentLedScene?: LedScene;
-  doRender: () => void;
-};
-
 export default class SimulationRenderer {
   private readonly renderer: Three.WebGLRenderer;
   private readonly camera: Three.PerspectiveCamera;
   private readonly controls: OrbitControls;
   private readonly bloomPass: UnrealBloomPass;
   private readonly composer: EffectComposer;
-  private readonly renderScene: Three.Scene;
+
+  private readonly visualizationRunner: VisualizationRunner;
+
+  private renderScene: Three.Scene;
+  private renderPass: RenderPass;
 
   private readonly frameDidRender?: (renderMillis: number) => void;
 
   private container: HTMLDivElement | null = null;
 
-  public active = true;
+  private active = true;
   public enableBloom = true;
 
-  public constructor(attrs?: {
+  public constructor(attrs: {
+    visualizationRunner: VisualizationRunner;
     frameDidRender?: (renderMillis: number) => void;
   }) {
+    this.visualizationRunner = attrs.visualizationRunner;
+
     this.renderer = new Three.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: false
@@ -211,12 +197,12 @@ export default class SimulationRenderer {
     this.renderScene = initializeScene();
 
     this.composer = new EffectComposer(this.renderer);
-    const renderPass = new RenderPass(this.renderScene, this.camera);
+    this.renderPass = new RenderPass(this.renderScene, this.camera);
     this.bloomPass = new UnrealBloomPass(new Vector2(10, 10), 2, 0.4, 0.7);
-    this.composer.addPass(renderPass);
+    this.composer.addPass(this.renderPass);
     this.composer.addPass(this.bloomPass);
 
-    this.frameDidRender = attrs?.frameDidRender;
+    this.frameDidRender = attrs.frameDidRender;
   }
 
   public setContainer(container: HTMLDivElement | null) {
@@ -246,7 +232,7 @@ export default class SimulationRenderer {
     }
   }
 
-  public doRender() {
+  public readonly doRender = () => {
     // render 3d scene
     const startTime = performance.now();
     if (this.active) {
@@ -260,78 +246,67 @@ export default class SimulationRenderer {
     const renderMillis = performance.now() - startTime;
 
     this.frameDidRender?.(renderMillis);
+  };
+
+  private scene?: Scene;
+  private ledScene?: LedScene;
+
+  public setScene(newScene: Scene) {
+    if (newScene === this.scene) {
+      return;
+    }
+
+    this.scene = newScene;
+
+    if (this.ledScene !== undefined) {
+      this.ledScene.remove();
+      this.ledScene = undefined;
+    }
+
+    const newRenderScene = initializeScene();
+    this.renderScene = newRenderScene;
+
+    if (this.renderPass !== undefined) {
+      this.renderPass.scene = this.renderScene;
+    }
+
+    newScene.loadModel().then(model => {
+      if (this.renderScene === newRenderScene) {
+        this.renderScene.add(model);
+      }
+    });
+
+    this.ledScene = new LedScene(newScene, this.renderScene, this.doRender);
+
+    // point at target
+    this.camera.position.copy(newScene.cameraStartPosition);
+    this.controls.target = newScene.cameraTarget;
+    this.controls.update();
+
+    this.visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
   }
 
-  public static getDerivedStateFromProps(
-    nextProps: Readonly<Props>,
-    prevState: State
-  ): Partial<State> | null {
-    const result: Partial<State> = {
-      currentScene: nextProps.scene,
-      currentLedScene: prevState.currentLedScene,
-      registeredVisualizationRunner: nextProps.visualizationRunner
-    };
-
-    let renderPass = prevState.renderPass;
-    let renderScene = prevState.renderScene;
-
-    if (nextProps.scene !== prevState.currentScene) {
-      if (prevState.currentLedScene !== undefined) {
-        prevState.currentLedScene.remove();
-      }
-
-      renderScene = initializeScene();
-      result.renderScene = renderScene;
-
-      // this forces it to get reset later
-      if (renderPass !== undefined) {
-        renderPass.scene = renderScene;
-      }
-
-      nextProps.scene.loadModel().then(model => renderScene.add(model));
-
-      result.currentLedScene = new LedScene(
-        nextProps.scene,
-        renderScene,
-        prevState.doRender
-      );
-
-      // point at target
-      prevState.camera.position.copy(nextProps.scene.cameraStartPosition);
-      prevState.controls.target = nextProps.scene.cameraTarget;
-      prevState.controls.update();
-    }
-
-    if (prevState.registeredVisualizationRunner) {
-      prevState.registeredVisualizationRunner.simulationLedStrip = undefined;
-    }
-    if (result.currentLedScene) {
-      nextProps.visualizationRunner.simulationLedStrip =
-        result.currentLedScene.ledStrip;
-    }
-
-    return { ...result };
-  }
-
-  public componentWillUnmount() {
-    window.removeEventListener("resize", this.updateSizes);
-    window.removeEventListener("blur", this.onWindowBlur);
-    window.removeEventListener("focus", this.onWindowFocus);
-
+  public destroy() {
     if (
-      this.state.currentLedScene &&
-      this.props.visualizationRunner.simulationLedStrip ===
-        this.state.currentLedScene.ledStrip
+      this.ledScene &&
+      this.visualizationRunner.simulationLedStrip === this.ledScene.ledStrip
     ) {
-      this.props.visualizationRunner.simulationLedStrip = undefined;
+      this.visualizationRunner.simulationLedStrip = undefined;
     }
 
-    if (this.state.currentLedScene) {
-      this.state.currentLedScene.remove();
+    if (this.ledScene) {
+      this.ledScene.remove();
+      this.ledScene = undefined;
     }
+
+    this.setContainer(null);
   }
 
-  private readonly updateSizes = () => {
+  public setActive(value: boolean) {
+    this.active = value;
+  }
+
+  public readonly updateSizes = () => {
     const container = this.container;
     if (container === null) {
       return;
