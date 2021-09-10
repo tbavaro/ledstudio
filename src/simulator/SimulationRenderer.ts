@@ -16,6 +16,10 @@ const CAMERA_FOV_DEG = 50;
 const CAMERA_NEAR_DISTANCE = 0.1;
 const CAMERA_FAR_DISTANCE = 1000;
 
+const BLOOM_STRENGTH = 1;
+const BLOOM_RADIUS = 0.1;
+const BLOOM_THRESHOLD = 0.1;
+
 function initializeScene() {
   const renderScene = new Three.Scene();
   // renderScene.background = new Three.Color(.1, .1, .1);
@@ -154,8 +158,6 @@ class LedScene {
   }
 }
 
-type FrameDidRenderFunc = (renderMillis: number) => void;
-
 export default class SimulationRenderer {
   private readonly renderer: Three.WebGLRenderer;
   private readonly camera: Three.PerspectiveCamera;
@@ -163,18 +165,18 @@ export default class SimulationRenderer {
   private readonly bloomPass: UnrealBloomPass;
   private readonly composer: EffectComposer;
 
-  private scene?: Scene;
+  private _scene?: Scene;
   private ledScene?: LedScene;
-  private visualizationRunner?: VisualizationRunner;
+  private _visualizationRunner?: VisualizationRunner;
 
   private renderScene: Three.Scene;
   private renderPass: RenderPass;
 
-  private frameDidRender?: FrameDidRenderFunc;
+  public frameDidRender?: (renderMillis: number) => void;
 
-  private container: HTMLDivElement | null = null;
+  private _container: HTMLDivElement | null = null;
 
-  private active = true;
+  private _active = true;
   public enableBloom = true;
 
   public constructor() {
@@ -197,13 +199,18 @@ export default class SimulationRenderer {
 
     this.composer = new EffectComposer(this.renderer);
     this.renderPass = new RenderPass(this.renderScene, this.camera);
-    this.bloomPass = new UnrealBloomPass(new Vector2(50, 10), 1, 0.1, 0.1);
+    this.bloomPass = new UnrealBloomPass(
+      new Vector2(),
+      BLOOM_STRENGTH,
+      BLOOM_RADIUS,
+      BLOOM_THRESHOLD
+    );
     this.composer.addPass(this.renderPass);
     this.composer.addPass(this.bloomPass);
   }
 
-  public setContainer(container: HTMLDivElement | null) {
-    const oldContainer = this.container;
+  public set container(container: HTMLDivElement | null) {
+    const oldContainer = this._container;
 
     if (container === oldContainer) {
       // no change
@@ -222,7 +229,7 @@ export default class SimulationRenderer {
     }
     this.controls.update();
 
-    this.container = container;
+    this._container = container;
 
     if (container !== null) {
       this.updateSizes();
@@ -232,7 +239,7 @@ export default class SimulationRenderer {
   public readonly doRender = () => {
     // render 3d scene
     const startTime = performance.now();
-    if (this.active) {
+    if (this._active) {
       // this.renderer.render(this.state.renderScene, this.state.camera);
       if (this.enableBloom) {
         this.composer.render();
@@ -245,12 +252,12 @@ export default class SimulationRenderer {
     this.frameDidRender?.(renderMillis);
   };
 
-  public setScene(newScene: Scene) {
-    if (newScene === this.scene) {
+  public set scene(newScene: Scene) {
+    if (newScene === this._scene) {
       return;
     }
 
-    this.scene = newScene;
+    this._scene = newScene;
 
     if (this.ledScene !== undefined) {
       this.ledScene.remove();
@@ -277,39 +284,35 @@ export default class SimulationRenderer {
     this.controls.target = newScene.cameraTarget;
     this.controls.update();
 
-    if (this.visualizationRunner) {
-      this.visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
+    if (this._visualizationRunner) {
+      this._visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
     }
   }
 
-  public setVisualizationRunner(newVisualizationRunner: VisualizationRunner) {
-    if (newVisualizationRunner === this.visualizationRunner) {
+  public set visualizationRunner(newVisualizationRunner: VisualizationRunner) {
+    if (newVisualizationRunner === this._visualizationRunner) {
       return;
     }
 
-    if (this.visualizationRunner) {
-      this.visualizationRunner.simulationLedStrip = undefined;
-      this.visualizationRunner = undefined;
+    if (this._visualizationRunner) {
+      this._visualizationRunner.simulationLedStrip = undefined;
+      this._visualizationRunner = undefined;
     }
 
-    this.visualizationRunner = newVisualizationRunner;
+    this._visualizationRunner = newVisualizationRunner;
 
     if (this.ledScene) {
-      this.visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
+      this._visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
     }
-  }
-
-  public setFrameDidRender(newFrameDidRender: FrameDidRenderFunc | undefined) {
-    this.frameDidRender = newFrameDidRender;
   }
 
   public destroy() {
     if (
       this.ledScene &&
-      this.visualizationRunner &&
-      this.visualizationRunner.simulationLedStrip === this.ledScene.ledStrip
+      this._visualizationRunner &&
+      this._visualizationRunner.simulationLedStrip === this.ledScene.ledStrip
     ) {
-      this.visualizationRunner.simulationLedStrip = undefined;
+      this._visualizationRunner.simulationLedStrip = undefined;
     }
 
     if (this.ledScene) {
@@ -317,15 +320,15 @@ export default class SimulationRenderer {
       this.ledScene = undefined;
     }
 
-    this.setContainer(null);
+    this.container = null;
   }
 
-  public setActive(value: boolean) {
-    this.active = value;
+  public set active(value: boolean) {
+    this._active = value;
   }
 
   public readonly updateSizes = () => {
-    const container = this.container;
+    const container = this._container;
     if (container === null) {
       return;
     }

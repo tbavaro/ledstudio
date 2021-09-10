@@ -37,20 +37,19 @@ export default class SimulationViewport extends React.Component<Props> {
   public render() {
     const { props, simulationRenderer } = this;
 
-    simulationRenderer.setScene(props.scene);
-    simulationRenderer.setVisualizationRunner(props.visualizationRunner);
-    simulationRenderer.setFrameDidRender(props.frameDidRender);
+    simulationRenderer.scene = props.scene;
+    simulationRenderer.visualizationRunner = props.visualizationRunner;
+    simulationRenderer.frameDidRender = props.frameDidRender;
     simulationRenderer.enableBloom = props.enableBloom ?? false;
 
     return <div className="SimulationViewport" ref={this.setContainer} />;
   }
 
   private readonly setContainer = (container: HTMLDivElement | null) => {
-    this.simulationRenderer.setContainer(container);
+    this.simulationRenderer.container = container;
   };
 
   private updateSizes = () => this.simulationRenderer.updateSizes();
-
-  private onWindowBlur = () => this.simulationRenderer.setActive(false);
-  private onWindowFocus = () => this.simulationRenderer.setActive(true);
+  private onWindowBlur = () => (this.simulationRenderer.active = false);
+  private onWindowFocus = () => (this.simulationRenderer.active = true);
 }
