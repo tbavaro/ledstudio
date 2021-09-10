@@ -154,6 +154,8 @@ class LedScene {
   }
 }
 
+type FrameDidRenderFunc = (renderMillis: number) => void;
+
 export default class SimulationRenderer {
   private readonly renderer: Three.WebGLRenderer;
   private readonly camera: Three.PerspectiveCamera;
@@ -161,24 +163,21 @@ export default class SimulationRenderer {
   private readonly bloomPass: UnrealBloomPass;
   private readonly composer: EffectComposer;
 
-  private readonly visualizationRunner: VisualizationRunner;
+  private scene?: Scene;
+  private ledScene?: LedScene;
+  private visualizationRunner?: VisualizationRunner;
 
   private renderScene: Three.Scene;
   private renderPass: RenderPass;
 
-  private readonly frameDidRender?: (renderMillis: number) => void;
+  private frameDidRender?: FrameDidRenderFunc;
 
   private container: HTMLDivElement | null = null;
 
   private active = true;
   public enableBloom = true;
 
-  public constructor(attrs: {
-    visualizationRunner: VisualizationRunner;
-    frameDidRender?: (renderMillis: number) => void;
-  }) {
-    this.visualizationRunner = attrs.visualizationRunner;
-
+  public constructor() {
     this.renderer = new Three.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: false
@@ -201,8 +200,6 @@ export default class SimulationRenderer {
     this.bloomPass = new UnrealBloomPass(new Vector2(50, 10), 1, 0.1, 0.1);
     this.composer.addPass(this.renderPass);
     this.composer.addPass(this.bloomPass);
-
-    this.frameDidRender = attrs.frameDidRender;
   }
 
   public setContainer(container: HTMLDivElement | null) {
@@ -248,9 +245,6 @@ export default class SimulationRenderer {
     this.frameDidRender?.(renderMillis);
   };
 
-  private scene?: Scene;
-  private ledScene?: LedScene;
-
   public setScene(newScene: Scene) {
     if (newScene === this.scene) {
       return;
@@ -283,12 +277,36 @@ export default class SimulationRenderer {
     this.controls.target = newScene.cameraTarget;
     this.controls.update();
 
-    this.visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
+    if (this.visualizationRunner) {
+      this.visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
+    }
+  }
+
+  public setVisualizationRunner(newVisualizationRunner: VisualizationRunner) {
+    if (newVisualizationRunner === this.visualizationRunner) {
+      return;
+    }
+
+    if (this.visualizationRunner) {
+      this.visualizationRunner.simulationLedStrip = undefined;
+      this.visualizationRunner = undefined;
+    }
+
+    this.visualizationRunner = newVisualizationRunner;
+
+    if (this.ledScene) {
+      this.visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
+    }
+  }
+
+  public setFrameDidRender(newFrameDidRender: FrameDidRenderFunc | undefined) {
+    this.frameDidRender = newFrameDidRender;
   }
 
   public destroy() {
     if (
       this.ledScene &&
+      this.visualizationRunner &&
       this.visualizationRunner.simulationLedStrip === this.ledScene.ledStrip
     ) {
       this.visualizationRunner.simulationLedStrip = undefined;
