@@ -198,7 +198,7 @@ export default class SimulationRenderer {
 
     this.composer = new EffectComposer(this.renderer);
     this.renderPass = new RenderPass(this.renderScene, this.camera);
-    this.bloomPass = new UnrealBloomPass(new Vector2(10, 10), 2, 0.4, 0.7);
+    this.bloomPass = new UnrealBloomPass(new Vector2(50, 10), 1, 0.1, 0.1);
     this.composer.addPass(this.renderPass);
     this.composer.addPass(this.bloomPass);
 
@@ -323,8 +323,7 @@ export default class SimulationRenderer {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
-
-    // renderPass?.setSize(width * 3, height * 3);
+    this.renderer.setPixelRatio(effectivePixelRatio);
 
     // composer.reset();
     composer.setSize(width, height);
@@ -333,10 +332,7 @@ export default class SimulationRenderer {
       width * effectivePixelRatio,
       height * effectivePixelRatio
     );
-    // composer.addPass(renderPass!);
-    // composer.addPass(bloomPass);
 
-    // this.renderer.setPixelRatio(window.devicePixelRatio);
     this.controls.update();
   };
 }
