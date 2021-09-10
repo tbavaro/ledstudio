@@ -41,41 +41,19 @@ function initializeScene() {
   return renderScene;
 }
 
-interface LedHelper {
-  setColor(color: Colors.Color): void;
-  removeFromScene(): void;
-}
-
-class LedHelperFactory {
-  private readonly renderScene: Three.Scene;
-  private readonly ledGeometry: Three.PlaneBufferGeometry;
-
-  constructor(renderScene: Three.Scene, ledRadius: number) {
-    this.renderScene = renderScene;
-    this.ledGeometry = new Three.PlaneBufferGeometry(
-      ledRadius * 2,
-      ledRadius * 2
-    );
-  }
-
-  public createAt(position: Three.Vector3): LedHelper {
-    return new LedHelperImpl(this.renderScene, this.ledGeometry, position);
-  }
-}
-
-class LedHelperImpl implements LedHelper {
+class LedMesh {
   private static readonly MATERIAL = new Three.MeshBasicMaterial({
     side: Three.DoubleSide
   });
 
-  private readonly material: typeof LedHelperImpl.MATERIAL;
+  private readonly material: typeof LedMesh.MATERIAL;
 
   constructor(
     renderScene: Three.Scene,
     geometry: Three.PlaneBufferGeometry,
     position: Three.Vector3
   ) {
-    this.material = LedHelperImpl.MATERIAL.clone();
+    this.material = LedMesh.MATERIAL.clone();
     const mesh = new Three.Mesh(geometry, this.material);
     mesh.position.copy(position);
     mesh.castShadow = false;
@@ -93,21 +71,38 @@ class LedHelperImpl implements LedHelper {
   public readonly removeFromScene: () => void;
 }
 
+class LedMeshFactory {
+  private readonly renderScene: Three.Scene;
+  private readonly ledGeometry: Three.PlaneBufferGeometry;
+
+  constructor(renderScene: Three.Scene, ledRadius: number) {
+    this.renderScene = renderScene;
+    this.ledGeometry = new Three.PlaneBufferGeometry(
+      ledRadius * 2,
+      ledRadius * 2
+    );
+  }
+
+  public createAt(position: Three.Vector3): LedMesh {
+    return new LedMesh(this.renderScene, this.ledGeometry, position);
+  }
+}
+
 class LedSceneStrip implements SendableLedStrip {
   public readonly size: number;
-  private readonly ledHelpers: LedHelper[];
+  private readonly ledMeshes: LedMesh[];
   private readonly onSend: () => void;
 
-  constructor(ledHelpers: LedHelper[], onSend: () => void) {
-    this.size = ledHelpers.length;
-    this.ledHelpers = ledHelpers;
+  constructor(ledMeshes: LedMesh[], onSend: () => void) {
+    this.size = ledMeshes.length;
+    this.ledMeshes = ledMeshes;
     this.onSend = onSend;
     this.reset();
   }
 
   public setColor(n: number, color: Colors.Color) {
-    if (n >= 0 && n < this.ledHelpers.length) {
-      this.ledHelpers[n].setColor(color);
+    if (n >= 0 && n < this.ledMeshes.length) {
+      this.ledMeshes[n].setColor(color);
     }
   }
 
@@ -121,7 +116,7 @@ class LedSceneStrip implements SendableLedStrip {
 
     if (numLeds > 0) {
       for (let i = startIndex; i < startIndex + numLeds; ++i) {
-        this.ledHelpers[i].setColor(color);
+        this.ledMeshes[i].setColor(color);
       }
     }
   }
@@ -140,21 +135,22 @@ class LedSceneStrip implements SendableLedStrip {
 class LedScene {
   public readonly scene: Scene;
   public readonly ledStrip: SendableLedStrip;
-  private ledHelpers: LedHelper[] = [];
+  private ledMeshes: LedMesh[] = [];
 
   constructor(scene: Scene, renderScene: Three.Scene, doRender: () => void) {
-    const ledHelperFactory = new LedHelperFactory(renderScene, scene.ledRadius);
+    const factory = new LedMeshFactory(renderScene, scene.ledRadius);
 
     this.scene = scene;
-    scene.ledMetadatas.forEach(led => {
-      this.ledHelpers.push(ledHelperFactory.createAt(led.position));
-    });
 
-    this.ledStrip = new LedSceneStrip(this.ledHelpers, doRender);
+    for (const led of scene.ledMetadatas) {
+      this.ledMeshes.push(factory.createAt(led.position));
+    }
+
+    this.ledStrip = new LedSceneStrip(this.ledMeshes, doRender);
   }
 
   public remove() {
-    this.ledHelpers.forEach(helper => helper.removeFromScene());
+    this.ledMeshes.forEach(m => m.removeFromScene());
   }
 }
 
