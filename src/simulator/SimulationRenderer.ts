@@ -156,23 +156,22 @@ class LedScene {
 
 export default class SimulationRenderer {
   private readonly renderer: Three.WebGLRenderer;
+  private readonly composer: EffectComposer;
+  private readonly renderPass: RenderPass;
+  private readonly bloomPass: UnrealBloomPass;
   private readonly camera: Three.PerspectiveCamera;
   private readonly controls: OrbitControls;
-  private readonly bloomPass: UnrealBloomPass;
-  private readonly composer: EffectComposer;
 
-  private _scene?: Scene;
-  private ledScene?: LedScene;
-  private _visualizationRunner?: VisualizationRunner;
+  #scene?: Scene;
+  #visualizationRunner?: VisualizationRunner;
+  #container: HTMLDivElement | null = null;
+  #active = true;
 
   private renderScene: Three.Scene;
-  private renderPass: RenderPass;
+  private ledScene?: LedScene;
 
   public frameDidRender?: (renderMillis: number) => void;
 
-  private _container: HTMLDivElement | null = null;
-
-  private _active = true;
   public enableBloom = true;
 
   public constructor() {
@@ -206,7 +205,7 @@ export default class SimulationRenderer {
   }
 
   public set container(container: HTMLDivElement | null) {
-    const oldContainer = this._container;
+    const oldContainer = this.#container;
 
     if (container === oldContainer) {
       // no change
@@ -225,7 +224,7 @@ export default class SimulationRenderer {
     }
     this.controls.update();
 
-    this._container = container;
+    this.#container = container;
 
     if (container !== null) {
       this.updateSizes();
@@ -235,7 +234,7 @@ export default class SimulationRenderer {
   public readonly doRender = () => {
     // render 3d scene
     const startTime = performance.now();
-    if (this._active) {
+    if (this.#active) {
       // this.renderer.render(this.state.renderScene, this.state.camera);
       if (this.enableBloom) {
         this.composer.render();
@@ -249,11 +248,11 @@ export default class SimulationRenderer {
   };
 
   public set scene(newScene: Scene) {
-    if (newScene === this._scene) {
+    if (newScene === this.#scene) {
       return;
     }
 
-    this._scene = newScene;
+    this.#scene = newScene;
 
     if (this.ledScene !== undefined) {
       this.ledScene.remove();
@@ -280,35 +279,35 @@ export default class SimulationRenderer {
     this.controls.target = newScene.cameraTarget;
     this.controls.update();
 
-    if (this._visualizationRunner) {
-      this._visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
+    if (this.#visualizationRunner) {
+      this.#visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
     }
   }
 
   public set visualizationRunner(newVisualizationRunner: VisualizationRunner) {
-    if (newVisualizationRunner === this._visualizationRunner) {
+    if (newVisualizationRunner === this.#visualizationRunner) {
       return;
     }
 
-    if (this._visualizationRunner) {
-      this._visualizationRunner.simulationLedStrip = undefined;
-      this._visualizationRunner = undefined;
+    if (this.#visualizationRunner) {
+      this.#visualizationRunner.simulationLedStrip = undefined;
+      this.#visualizationRunner = undefined;
     }
 
-    this._visualizationRunner = newVisualizationRunner;
+    this.#visualizationRunner = newVisualizationRunner;
 
     if (this.ledScene) {
-      this._visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
+      this.#visualizationRunner.simulationLedStrip = this.ledScene.ledStrip;
     }
   }
 
   public destroy() {
     if (
       this.ledScene &&
-      this._visualizationRunner &&
-      this._visualizationRunner.simulationLedStrip === this.ledScene.ledStrip
+      this.#visualizationRunner &&
+      this.#visualizationRunner.simulationLedStrip === this.ledScene.ledStrip
     ) {
-      this._visualizationRunner.simulationLedStrip = undefined;
+      this.#visualizationRunner.simulationLedStrip = undefined;
     }
 
     if (this.ledScene) {
@@ -320,11 +319,11 @@ export default class SimulationRenderer {
   }
 
   public set active(value: boolean) {
-    this._active = value;
+    this.#active = value;
   }
 
   public readonly updateSizes = () => {
-    const container = this._container;
+    const container = this.#container;
     if (container === null) {
       return;
     }
