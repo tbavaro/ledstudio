@@ -69,7 +69,7 @@ export default class PianoView
 
   public render() {
     this.refreshMidiEventEmitter();
-    console.log("rendering piano");
+    // console.log("rendering piano");
     const whiteKeys: JSX.Element[] = [];
     const blackKeys: JSX.Element[] = [];
     let offset = -1;

@@ -36,11 +36,11 @@ export default class FadecandyClient {
   }
 
   private onWebSocketOpen = () => {
-    console.log("fadecandy websocket opened");
+    // console.log("fadecandy websocket opened");
   };
 
   private onWebSocketClose = (ev: CloseEvent) => {
-    console.log("fadecandy websocket closed");
+    // console.log("fadecandy websocket closed");
     if (ev.target === this.ws) {
       this.ws = null;
       this.tryConnectSoon();

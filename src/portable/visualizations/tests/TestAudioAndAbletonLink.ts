@@ -15,7 +15,7 @@ export default class TestAudioAndAbletonLink extends Visualization.default {
     super(config);
 
     const audioSource = config.audioSource;
-    if (audioSource !== null) {
+    if (audioSource !== undefined) {
       this.analyserHelpers =
         AudioWaveformSampler.createAnalyserHelpers(audioSource);
     } else {

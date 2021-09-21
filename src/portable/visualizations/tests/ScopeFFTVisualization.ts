@@ -11,7 +11,7 @@ export default class MyVisualization extends AbstractVoronoiMapperVisualization 
   constructor(config: Visualization.Config) {
     super(config);
 
-    if (config.audioSource !== null) {
+    if (config.audioSource !== undefined) {
       const context = config.audioSource.context;
       const analyser = new AnalyserNode(context);
       analyser.fftSize = NUM_SAMPLES;

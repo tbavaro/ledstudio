@@ -51,7 +51,7 @@ export default class TestAudioPulseVisualization extends Visualization.RowColumn
   constructor(config: Visualization.Config) {
     super(config);
     this.fft =
-      config.audioSource === null
+      config.audioSource === undefined
         ? null
         : new BasicFFTHelper(config.audioSource);
     this.pulseValueTimeSeries = config.createTimeSeries();

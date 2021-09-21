@@ -68,7 +68,7 @@ export default class TestAudioWaveformVisualization extends Visualization.defaul
     super(config);
 
     const audioSource = config.audioSource;
-    if (audioSource !== null) {
+    if (audioSource !== undefined) {
       this.analyserHelpers =
         AudioWaveformSampler.createAnalyserHelpers(audioSource);
       this.canvasHelper = new FloatDataCanvasHelper(

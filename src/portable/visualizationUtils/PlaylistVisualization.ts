@@ -1,9 +1,13 @@
 import * as Visualization from "../base/Visualization";
 
-function branchAudioNode(audioNode: AudioNode) {
-  const newNode = new GainNode(audioNode.context);
-  audioNode.connect(newNode);
-  return newNode;
+function branchAudioNode(audioNode?: AudioNode) {
+  if (audioNode === undefined) {
+    return undefined;
+  } else {
+    const newNode = new GainNode(audioNode.context);
+    audioNode.connect(newNode);
+    return newNode;
+  }
 }
 
 const BASE_TRANSITION_TIME_MS = 5000;
@@ -14,17 +18,15 @@ export interface PlaylistEntry {
   duration: number;
 }
 
-const UNSET: any = "<unset>";
-
 export class PlaylistVisualization extends Visualization.default {
   private readonly entries: PlaylistEntry[];
-  private lastVisualization: Visualization.default | null = null;
-  private currentVisualization: Visualization.default = UNSET;
-  private currentVisualizationIndex: number = UNSET;
-  private currentBranchedAudioNode: AudioNode = UNSET;
-  private timeAtSwitch: number = UNSET;
-  private secondsUntilSwitch: number = UNSET;
-  private button: Visualization.ButtonControl = UNSET;
+  private lastVisualization?: Visualization.default;
+  private currentVisualization?: Visualization.default;
+  private currentVisualizationIndex: number = 0;
+  private currentBranchedAudioNode?: AudioNode;
+  private timeAtSwitch: number = 0;
+  private secondsUntilSwitch: number = 0;
+  private button?: Visualization.ButtonControl;
 
   constructor(
     config: Visualization.Config,
@@ -85,8 +87,6 @@ export class PlaylistVisualization extends Visualization.default {
     this.currentVisualization = vis;
     this.timeAtSwitch = Date.now();
     this.secondsUntilSwitch = entry.duration;
-
-    console.log("switched to", vis);
   }
 
   private goToNextVisualization() {
@@ -98,21 +98,24 @@ export class PlaylistVisualization extends Visualization.default {
   public render(context: Visualization.FrameContext) {
     this.secondsUntilSwitch -= context.elapsedSeconds;
     const shouldSwitch =
-      this.secondsUntilSwitch < 0 || this.button.pressedSinceLastFrame;
+      this.secondsUntilSwitch < 0 ||
+      (this.button && this.button.pressedSinceLastFrame);
     if (shouldSwitch) {
       this.goToNextVisualization();
     }
 
     const now = Date.now();
     if (now - this.timeAtSwitch > BASE_TRANSITION_TIME_MS) {
-      this.lastVisualization = null;
+      this.lastVisualization = undefined;
     }
 
     const vis = this.currentVisualization;
-    vis.render(context);
-    vis.ledColors.copy(this.ledColors);
+    if (vis !== undefined) {
+      vis.render(context);
+      vis.ledColors.copy(this.ledColors);
+    }
 
-    if (this.lastVisualization != null) {
+    if (this.lastVisualization !== undefined) {
       this.lastVisualization.render(context);
       const alpha = (now - this.timeAtSwitch) / BASE_TRANSITION_TIME_MS;
       this.lastVisualization.ledColors.forEach((color, ledIdx) => {

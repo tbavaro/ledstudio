@@ -70,17 +70,23 @@ export default class PulsingRainVisualization extends Visualization.RowColumnMap
   private readonly dropHelper: DropHelper;
   private readonly sparkles: Set<Sparkle>;
   private numSparklesRemainder = 0;
-  private signals: SignalsHelper;
+  private signals?: SignalsHelper;
 
   constructor(config: Visualization.Config) {
     super(config);
     this.dropHelper = new DropHelper(this.ledRowMetadatas);
     this.sparkles = new Set();
 
-    this.signals = new SignalsHelper(config.audioSource);
+    this.signals = config.audioSource
+      ? new SignalsHelper(config.audioSource)
+      : undefined;
   }
 
   public renderRows(context: Visualization.FrameContext): void {
+    if (this.signals === undefined) {
+      return;
+    }
+
     const { elapsedSeconds, beatController } = context;
     const now = Date.now() / 1000;
     this.signals.update(elapsedSeconds / 1000, beatController);

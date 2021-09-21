@@ -58,8 +58,6 @@ function moveToPositionAndRotate(
 }
 
 function calculateLedPositions2d() {
-  console.log("small", createTrianglePositions2d("small"));
-
   const smallLeftRibs = moveToPositionAndRotate(
     createTrianglePositions2d("small"),
     0,

@@ -80,7 +80,7 @@ export default class TestBandsVisualization extends Visualization.RowColumnMappe
   private readonly highTS: Visualization.TimeSeriesValue;
   private readonly low2TS: Visualization.TimeSeriesValue;
   private readonly high2TS: Visualization.TimeSeriesValue;
-  private readonly helper: MultiLevelHelper;
+  private readonly helper?: MultiLevelHelper;
   private readonly signals: Signals;
   // private readonly lowBand: TimeSeriesBandHelper;
 
@@ -96,10 +96,16 @@ export default class TestBandsVisualization extends Visualization.RowColumnMappe
 
     this.signals = config.signals;
 
-    this.helper = new MultiLevelHelper(config.audioSource);
+    this.helper = config.audioSource
+      ? new MultiLevelHelper(config.audioSource)
+      : undefined;
   }
 
   public renderRows(context: Visualization.FrameContext): void {
+    if (this.helper === undefined) {
+      return;
+    }
+
     this.helper.sample(context.elapsedMillis);
 
     this.lowTS.value = this.helper.lowLevel;
