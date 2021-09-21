@@ -1,7 +1,6 @@
-import "./BeatControlView.scss";
-
 import * as React from "react";
 
+import styles from "./BeatControlView.module.scss";
 import BeatController from "./portable/base/BeatController";
 import * as Colors from "./portable/base/Colors";
 
@@ -18,18 +17,18 @@ export default class BeatControlView extends React.Component<Props, {}> {
   }
 
   public render() {
-    return <div className="BeatControlView">{this.renderButton()}</div>;
+    return <div className={styles.root}>{this.renderButton()}</div>;
   }
 
   private renderButton() {
     return (
       <div
-        className="BeatControlView-button"
+        className={styles.button}
         onMouseDown={this.onMouseDown}
         ref={this.setButtonRef}
       >
-        <div className="BeatControlView-buttonLabel" ref={this.setLabelRef} />
-        <div className="BeatControlView-buttonLabel2" ref={this.setLabel2Ref} />
+        <div ref={this.setLabelRef} />
+        <div ref={this.setLabel2Ref} />
       </div>
     );
   }

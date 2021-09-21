@@ -1,0 +1,28 @@
+@use "./theme/sizes.scss";
+
+.root {
+  flex-shrink: 0;
+  font-size: sizes.$controlsFontSize;
+  padding-left: 10px;
+  color: gray;
+  display: flex;
+}
+
+.button {
+  flex: 1;
+  width: 24px;
+  border: 1px solid #666;
+  border-radius: sizes.$controlsBorderRadius;
+  background-color: black;
+  margin: 1px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0;
+  text-align: center;
+  justify-content: space-between;
+  &.pressed {
+    background-color: red;
+  }
+}

@@ -1,6 +1,8 @@
+@use "./theme/sizes.scss";
+
 .ControlsView {
   flex-shrink: 0;
-  font-size: 0.25em;
+  font-size: sizes.$controlsFontSize;
   padding-left: 10px;
   color: gray;
 }
@@ -18,7 +20,7 @@
 .ControlsView-button {
   flex: 1;
   border: 1px solid #666;
-  border-radius: 4px;
+  border-radius: sizes.$controlsBorderRadius;
   background-color: black;
   margin: 1px;
   padding-top: 1px;
