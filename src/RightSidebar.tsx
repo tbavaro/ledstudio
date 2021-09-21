@@ -4,7 +4,6 @@ import * as React from "react";
 
 import * as AudioIn from "./audioIn/AudioIn";
 import { MidiEventEmitter } from "./piano/MidiEventListener";
-import MidiEventsView from "./piano/MidiEventsView";
 import { identity, valueOrDefault } from "./util/Utils";
 
 export interface Actions {
@@ -56,11 +55,6 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           {this.renderBeatControllerDevices()}
           <p />
         </div>
-        <MidiEventsView
-          className="RightSidebar-midiEventsView"
-          entryClassName="RightSidebar-midiEventEntry"
-          midiEventEmitters={this.props.midiEventEmitters}
-        />
         <div className="RightSidebar-appVersion">
           v{process.env.REACT_APP_VERSION}
         </div>
