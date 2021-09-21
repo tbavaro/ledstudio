@@ -130,6 +130,20 @@ class VoronoiHelper {
       }
       ++p.y;
     }
+
+    let min = this.pixelsForPoint[0].length;
+    let max = min;
+    this.pixelsForPoint.forEach(vs => {
+      const count = vs.length;
+      if (count < min) {
+        min = count;
+      } else if (count > max) {
+        max = count;
+      }
+    });
+
+    console.log("voronoi stats", { min, max });
+
     // this.maxCount = Math.max.apply(Math, counts);
     this.colors = new ColorRow(attrs.points.length);
     this.valuesR = new Array(attrs.points.length).fill(0);
@@ -236,7 +250,7 @@ function initializeFor(scene: Scene): InitializationValues {
   const extents = getExtents(leds2d);
   const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
   const height = MAX_DISTANCE * 2 + (extents.maxY - extents.minY);
-  const maxDimension = 300;
+  const maxDimension = scene.voronoiMaxDimension;
   let canvasWidth: number;
   let canvasHeight: number;
   if (width > height) {

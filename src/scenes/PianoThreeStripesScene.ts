@@ -65,7 +65,8 @@ export default class PianoThreeStripesScene extends Scene {
           hardwareChannel: 3
         }
       ]),
-      ledRadius: 0.0035
+      ledRadius: 0.0035,
+      voronoiMaxDimension: 150
     });
   }
 }

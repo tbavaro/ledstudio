@@ -37,6 +37,7 @@ export interface SceneDef {
   extraObjects?: ExtraObjectFunc[];
   leds: SceneLedMetadata[];
   ledRadius: number;
+  voronoiMaxDimension: number;
 }
 
 export default class Scene {
@@ -170,5 +171,9 @@ export default class Scene {
         .join(" / ");
     }
     return this.cachedDisplayMessage;
+  }
+
+  public get voronoiMaxDimension() {
+    return this.def.voronoiMaxDimension;
   }
 }

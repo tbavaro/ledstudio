@@ -120,7 +120,8 @@ export default class GarageRealWingsScene extends Scene {
       ledRadius: 0.007,
       initialDisplayValues: {
         l: JSON.stringify(ribLengths)
-      }
+      },
+      voronoiMaxDimension: 130
     });
   }
 }
