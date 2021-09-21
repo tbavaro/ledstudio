@@ -1,9 +1,10 @@
-import "./PianoView.scss";
-
 import * as React from "react";
 
 import MidiEvent from "./piano/MidiEvent";
 import MidiEventListener, { MidiEventEmitter } from "./piano/MidiEventListener";
+import styles from "./PianoView.module.scss";
+import { cm } from "./util/CSSUtils";
+import { fillArray } from "./util/Utils";
 
 const NUM_KEYS = 88;
 
@@ -36,14 +37,41 @@ const WHITE_KEY_WIDTH_PCT_STR = `${WHITE_KEY_WIDTH_PCT}%`;
 const BLACK_KEY_WIDTH_PCT = WHITE_KEY_WIDTH_PCT * 0.6;
 const BLACK_KEY_WIDTH_PCT_STR = `${BLACK_KEY_WIDTH_PCT}%`;
 
-interface State {
-  keyState: boolean[];
+interface KeyProps {
+  offset: number;
+  isBlack: boolean;
 }
 
-function defaultKeyState(): boolean[] {
-  const arr: boolean[] = [];
-  arr.fill(false, 0, NUM_KEYS);
-  return arr;
+interface KeyState {
+  isPressed: boolean;
+}
+
+class PianoKey extends React.PureComponent<KeyProps, KeyState> {
+  public state: KeyState = { isPressed: false };
+
+  public render() {
+    const { isBlack, offset } = this.props;
+    const { isPressed } = this.state;
+    return (
+      <div
+        className={cm(styles, isBlack ? "blackKey" : "whiteKey", {
+          pressed: isPressed
+        })}
+        style={{
+          width: isBlack ? BLACK_KEY_WIDTH_PCT_STR : WHITE_KEY_WIDTH_PCT_STR,
+          left: isBlack
+            ? `${
+                (offset + 1) * WHITE_KEY_WIDTH_PCT - 0.5 * BLACK_KEY_WIDTH_PCT
+              }%`
+            : `${offset * WHITE_KEY_WIDTH_PCT}%`
+        }}
+      />
+    );
+  }
+
+  public setIsPressed(isPressed: boolean) {
+    this.setState({ isPressed });
+  }
 }
 
 interface Props {
@@ -51,21 +79,14 @@ interface Props {
 }
 
 export default class PianoView
-  extends React.PureComponent<Props, State>
+  extends React.PureComponent<Props>
   implements MidiEventListener
 {
-  public state: State = {
-    keyState: defaultKeyState()
-  };
-
   private registeredMidiEventEmitter: MidiEventEmitter | null = null;
 
-  public componentWillUnmount() {
-    if (super.componentWillUnmount) {
-      super.componentWillUnmount();
-    }
-    this.unregisterMidiEventEmitter();
-  }
+  private readonly keyRefs = fillArray(NUM_KEYS, () =>
+    React.createRef<PianoKey>()
+  );
 
   public render() {
     this.refreshMidiEventEmitter();
@@ -79,13 +100,18 @@ export default class PianoView
         offset++;
       }
       (isBlack ? blackKeys : whiteKeys).push(
-        this.renderKey(n, offset, isBlack, this.state.keyState[n])
+        <PianoKey
+          key={n}
+          offset={offset}
+          isBlack={isBlack}
+          ref={this.keyRefs[n]}
+        />
       );
     }
 
     return (
-      <div className="PianoView">
-        <div className="PianoView-piano">
+      <div className={styles.root}>
+        <div className={styles.piano}>
           {whiteKeys}
           {blackKeys}
         </div>
@@ -93,42 +119,10 @@ export default class PianoView
     );
   }
 
-  private renderKey(
-    n: number,
-    offset: number,
-    isBlack: boolean,
-    isPressed: boolean
-  ) {
-    return (
-      <div
-        key={n}
-        className={
-          (isBlack ? "PianoView-blackKey" : "PianoView-whiteKey") +
-          (isPressed ? " pressed" : "")
-        }
-        style={{
-          width: isBlack ? BLACK_KEY_WIDTH_PCT_STR : WHITE_KEY_WIDTH_PCT_STR,
-          left: isBlack
-            ? `${
-                (offset + 1) * WHITE_KEY_WIDTH_PCT - 0.5 * BLACK_KEY_WIDTH_PCT
-              }%`
-            : `${offset * WHITE_KEY_WIDTH_PCT}%`
-        }}
-        ref={this.setKeyRefs[n]}
-      />
-    );
+  public componentWillUnmount() {
+    this.unregisterMidiEventEmitter();
+    super.componentWillUnmount?.();
   }
-
-  private keyRefs: HTMLDivElement[] = [];
-  private setKeyRefs = (() => {
-    const funcs: Array<(newRef: HTMLDivElement) => void> = [];
-    for (let n = 0; n < NUM_KEYS; ++n) {
-      funcs.push((newRef: HTMLDivElement) => {
-        this.keyRefs[n] = newRef;
-      });
-    }
-    return funcs;
-  })();
 
   private setKeyPressed(n: number, isPressed: boolean) {
     if (n < 0 || n >= NUM_KEYS) {
@@ -136,21 +130,12 @@ export default class PianoView
       return;
     }
 
-    const { keyState } = this.state;
-    keyState[n] = isPressed;
-    const keyRef = this.keyRefs[n];
-    const classNames = keyRef.className.split(" ").filter(x => x !== "pressed");
-    if (isPressed) {
-      classNames.push("pressed");
-    }
-    keyRef.className = classNames.join(" ");
+    const ref = this.keyRefs[n];
+    ref.current?.setIsPressed(isPressed);
   }
 
   public reset() {
-    this.setState({
-      keyState: defaultKeyState()
-    });
-    this.forceUpdate();
+    this.keyRefs.forEach(ref => ref.current?.setIsPressed(false));
   }
 
   public onMidiEvent(event: MidiEvent) {

@@ -1,8 +1,11 @@
-.PianoView {
+.root {
   flex: 1;
+  .pressed {
+    background-color: red;
+  }
 }
 
-.PianoView-piano {
+.piano {
   margin-left: auto;
   margin-right: auto;
   position: relative;
@@ -13,7 +16,7 @@
   box-sizing: border-box;
 }
 
-.PianoView-whiteKey {
+.whiteKey {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -23,15 +26,11 @@
   background-color: white;
 }
 
-.PianoView-blackKey {
+.blackKey {
   position: absolute;
   top: 0;
   height: 66%;
   border: 1px solid gray;
   box-sizing: border-box;
   background-color: black;
-}
-
-.PianoView .pressed {
-  background-color: red;
 }
