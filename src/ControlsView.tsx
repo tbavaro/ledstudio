@@ -1,4 +1,4 @@
-import "./ControlsView.css";
+import "./ControlsView.scss";
 
 import * as React from "react";
 

@@ -1,4 +1,4 @@
-import "./VisualizerExtraDisplayContainer.css";
+import "./VisualizerExtraDisplayContainer.scss";
 
 import * as React from "react";
 

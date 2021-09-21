@@ -1,4 +1,4 @@
-import "./MidiEventsView.css";
+import "./MidiEventsView.scss";
 
 import * as React from "react";
 

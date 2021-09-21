@@ -1,4 +1,4 @@
-import "./SimulationViewport.css";
+import "./SimulationViewport.scss";
 
 import * as React from "react";
 

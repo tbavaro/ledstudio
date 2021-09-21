@@ -1,4 +1,4 @@
-import "./PianoView.css";
+import "./PianoView.scss";
 
 import * as React from "react";
 

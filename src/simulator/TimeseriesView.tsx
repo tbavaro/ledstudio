@@ -1,4 +1,4 @@
-import "./TimeseriesView.css";
+import "./TimeseriesView.scss";
 
 import * as React from "react";
 

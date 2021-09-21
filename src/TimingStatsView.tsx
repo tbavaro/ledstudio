@@ -1,4 +1,4 @@
-import "./TimingStatsView.css";
+import "./TimingStatsView.scss";
 
 import * as React from "react";
 

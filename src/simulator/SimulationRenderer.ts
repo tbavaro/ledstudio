@@ -1,4 +1,4 @@
-import "./SimulationViewport.css";
+import "./SimulationViewport.scss";
 
 import * as Three from "three";
 import { Vector2, sRGBEncoding } from "three";

@@ -1,4 +1,4 @@
-import "./LedStudioRoot.css";
+import "./LedStudioRoot.scss";
 
 import * as React from "react";
 

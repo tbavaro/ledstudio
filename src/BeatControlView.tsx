@@ -1,4 +1,4 @@
-import "./BeatControlView.css";
+import "./BeatControlView.scss";
 
 import * as React from "react";
 

@@ -1,4 +1,4 @@
-import "./RightSidebar.css";
+import "./RightSidebar.scss";
 
 import * as React from "react";
 
