@@ -41,6 +41,7 @@ import TestControllerDialVisualization from "../portable/visualizations/tests/Te
 import TestKeyFadeVisualization from "../portable/visualizations/tests/TestKeyFadeVisualization";
 import TestKeyVisualization from "../portable/visualizations/tests/TestKeyVisualization";
 import TestLevelsVisualization from "../portable/visualizations/tests/TestLevelsVisualization";
+import TestMappedCanvasVisualization from "../portable/visualizations/tests/TestMappedCanvasVisualization";
 import TestSignalsVisualization from "../portable/visualizations/tests/TestSignalsVisualization";
 import TestStripAddressVisualization from "../portable/visualizations/tests/TestStripAddressVisualization";
 import TestTimeseriesDataVisualization from "../portable/visualizations/tests/TestTimeseriesDataVisualization";
@@ -83,6 +84,7 @@ registryBuilder.add("tests", "TestControllerDial", TestControllerDialVisualizati
 registryBuilder.add("tests", "TestKey", TestKeyVisualization);
 registryBuilder.add("tests", "TestKeyFade", TestKeyFadeVisualization);
 registryBuilder.add("tests", "TestLevels", TestLevelsVisualization);
+registryBuilder.add("tests", "TestMappedCanvas", TestMappedCanvasVisualization);
 registryBuilder.add("tests", "TestSignals", TestSignalsVisualization);
 registryBuilder.add("tests", "TestStripAddress", TestStripAddressVisualization);
 registryBuilder.add("tests", "TestTimeseriesData", TestTimeseriesDataVisualization);

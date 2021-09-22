@@ -34,14 +34,14 @@ const initializeFor = _.memoize((scene: Scene) => {
     scene,
     canvasWidth,
     canvasHeight,
-    ledPixelIndexes: leds2d.map(wp => {
+    ledDataOffsets: leds2d.map(wp => {
       const x = Math.round(
         (1 - (wp.x - extents.minX) / physicalWidth) * (canvasWidth - 1)
       );
       const y = Math.round(
         (1 - (wp.y - extents.minY) / physicalHeight) * (canvasHeight - 1)
       );
-      return y * canvasWidth + x;
+      return (y * canvasWidth + x) * 4;
     })
   };
 });
@@ -57,7 +57,7 @@ export default abstract class MappedCanvasVisualization extends Visualization.de
   constructor(config: Visualization.Config) {
     super(config);
 
-    const { canvasWidth, canvasHeight, ledPixelIndexes } = initializeFor(
+    const { canvasWidth, canvasHeight, ledDataOffsets } = initializeFor(
       config.scene
     );
 
@@ -69,7 +69,7 @@ export default abstract class MappedCanvasVisualization extends Visualization.de
     this.canvasContext = ctx;
     config.setExtraDisplay(this.canvas);
 
-    this.ledDataOffsets = ledPixelIndexes;
+    this.ledDataOffsets = ledDataOffsets;
   }
 
   public render(context: Visualization.FrameContext): void {
@@ -81,6 +81,7 @@ export default abstract class MappedCanvasVisualization extends Visualization.de
       this.canvas.width,
       this.canvas.height
     ).data;
+
     this.ledDataOffsets.forEach((dataOffset, ledIndex) =>
       this.ledColors.set(
         ledIndex,
