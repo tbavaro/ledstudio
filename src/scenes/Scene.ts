@@ -60,6 +60,10 @@ export default class Scene {
     return this.def.name;
   }
 
+  public toString() {
+    return `<scene:${this.name}>`;
+  }
+
   public async loadModel(): Promise<Three.Object3D> {
     if (this.lazyModelPromise === undefined) {
       this.lazyModelPromise = promisify<Three.Object3D>(callback => {

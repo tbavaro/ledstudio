@@ -1,3 +1,4 @@
+import { getExtents2 } from "src/util/VectorUtils";
 import { Vector2, Vector3 } from "three";
 
 import Scene, { SceneLedMetadata } from "../../scenes/Scene";
@@ -31,39 +32,6 @@ function createCanvas(width: number, height: number): HTMLCanvasElement {
   canvas.width = width;
   canvas.height = height;
   return canvas;
-}
-
-function getExtents(points: Vector2[]) {
-  if (points.length === 0) {
-    throw new Error("need at least one point");
-  }
-
-  let minX = points[0].x;
-  let maxX = points[0].x;
-  let minY = points[0].y;
-  let maxY = points[0].y;
-
-  points.forEach(p => {
-    if (p.x < minX) {
-      minX = p.x;
-    }
-    if (p.x > maxX) {
-      maxX = p.x;
-    }
-    if (p.y < minY) {
-      minY = p.y;
-    }
-    if (p.y > maxY) {
-      maxY = p.y;
-    }
-  });
-
-  return {
-    minX,
-    maxX,
-    minY,
-    maxY
-  };
 }
 
 function closestIndex(
@@ -142,7 +110,7 @@ class VoronoiHelper {
       }
     });
 
-    console.log("voronoi stats", { min, max });
+    // console.log("voronoi stats", { min, max });
 
     // this.maxCount = Math.max.apply(Math, counts);
     this.colors = new ColorRow(attrs.points.length);
@@ -247,7 +215,7 @@ function initializeFor(scene: Scene): InitializationValues {
 
   const allLeds = scene.ledMetadatas;
   const leds2d = mapTo2D(allLeds.map(led => led.position));
-  const extents = getExtents(leds2d);
+  const extents = getExtents2(leds2d);
   const width = MAX_DISTANCE * 2 + (extents.maxX - extents.minX);
   const height = MAX_DISTANCE * 2 + (extents.maxY - extents.minY);
   const maxDimension = scene.voronoiMaxDimension;
@@ -306,10 +274,10 @@ function initializeFor(scene: Scene): InitializationValues {
 }
 
 export default abstract class AbstractVoronoiMapperVisualization extends Visualization.default {
-  private helper: VoronoiHelper;
+  private readonly helper: VoronoiHelper;
   protected canvas: HTMLCanvasElement;
   protected canvasContext: CanvasRenderingContext2D;
-  private allLedMetadatas: SceneLedMetadata[];
+  private readonly allLedMetadatas: readonly SceneLedMetadata[];
 
   constructor(config: Visualization.Config) {
     super(config);
