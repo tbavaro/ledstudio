@@ -19,6 +19,7 @@ import SpreadShootersAudioVisualization from "../portable/visualizations/burrow/
 import PatternClockVisualization from "../portable/visualizations/patterns/PatternClockVisualization";
 import PatternDotVisualization from "../portable/visualizations/patterns/PatternDotVisualization";
 import PatternFlagVisualization from "../portable/visualizations/patterns/PatternFlagVisualization";
+import PatternMarquee2Visualization from "../portable/visualizations/patterns/PatternMarquee2Visualization";
 import PatternMarqueeVisualization from "../portable/visualizations/patterns/PatternMarqueeVisualization";
 import PatternOwlEyesVisualization from "../portable/visualizations/patterns/PatternOwlEyesVisualization";
 import PatternParticleFireVisualization from "../portable/visualizations/patterns/PatternParticleFireVisualization";
@@ -61,6 +62,7 @@ registryBuilder.add("patterns", "PatternClock", PatternClockVisualization);
 registryBuilder.add("patterns", "PatternDot", PatternDotVisualization);
 registryBuilder.add("patterns", "PatternFlag", PatternFlagVisualization);
 registryBuilder.add("patterns", "PatternMarquee", PatternMarqueeVisualization);
+registryBuilder.add("patterns", "PatternMarquee2", PatternMarquee2Visualization);
 registryBuilder.add("patterns", "PatternOwlEyes", PatternOwlEyesVisualization);
 registryBuilder.add("patterns", "PatternParticleFire", PatternParticleFireVisualization);
 registryBuilder.add("patterns", "PatternRain2", PatternRain2Visualization);
