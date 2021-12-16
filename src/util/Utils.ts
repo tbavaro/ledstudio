@@ -93,7 +93,7 @@ export function forEachReverse<T>(
 }
 
 export class MovingAverageHelper {
-  private readonly values: number[];
+  private values: number[];
   private numValues: number = 0;
   private sum: number = 0;
   private nextIndex: number = 0;
@@ -124,6 +124,12 @@ export class MovingAverageHelper {
     } finally {
       this.addValue(performance.now() - startTime);
     }
+  }
+
+  public reset() {
+    this.sum = 0;
+    this.nextIndex = 0;
+    this.numValues = 0;
   }
 }
 
