@@ -56,7 +56,7 @@ class FloatDataCanvasHelper {
   }
 }
 
-const NUM_SAMPLES = 32768;
+const NUM_SAMPLES = 2048;
 
 export function findMaxValue(arr: Float32Array) {
   return arr.reduce((acc, v) => (v > acc ? v : acc), Number.MIN_VALUE);
@@ -134,12 +134,13 @@ const noteColors = noteHues.map(h => Colors.hsv(h, 1, 1));
 
 export default class TestPitchVisualization extends Visualization.default {
   private readonly canvasHelper: FloatDataCanvasHelper;
+  private readonly rawFreqTimeSeries: Visualization.TimeSeriesValue;
   private readonly freqTimeSeries: Visualization.TimeSeriesValue;
   private readonly amplitudeTimeSeries: Visualization.TimeSeriesValue;
   private readonly analyser?: AnalyserNode;
   private readonly currentSamples: Float32Array;
   private readonly sampleRate: number = 0;
-  private readonly maHelper = new MovingAverageHelper(15);
+  private readonly maHelper = new MovingAverageHelper(5);
 
   constructor(config: Visualization.Config) {
     super(config);
@@ -148,7 +149,7 @@ export default class TestPitchVisualization extends Visualization.default {
     this.currentSamples = new Float32Array(NUM_SAMPLES);
     if (audioSource !== undefined) {
       this.analyser = audioSource.context.createAnalyser();
-      this.analyser.smoothingTimeConstant = 1;
+      // this.analyser.smoothingTimeConstant = 1;
       audioSource.connect(this.analyser);
       this.sampleRate = audioSource.context.sampleRate;
     }
@@ -157,6 +158,9 @@ export default class TestPitchVisualization extends Visualization.default {
     config.setExtraDisplay(this.canvasHelper.canvas);
 
     this.freqTimeSeries = config.createTimeSeries({ color: Colors.BLUE });
+    this.rawFreqTimeSeries = config.createTimeSeries({
+      color: Colors.YELLOW
+    });
     this.amplitudeTimeSeries = config.createTimeSeries({ color: Colors.RED });
   }
 
@@ -183,6 +187,8 @@ export default class TestPitchVisualization extends Visualization.default {
           distanceBetweenPeaks === 0
             ? undefined
             : this.sampleRate / distanceBetweenPeaks;
+
+        this.rawFreqTimeSeries.value = Math.min(1, (sampledFreq ?? 0) / 800);
 
         if (sampledFreq === undefined) {
           this.maHelper.reset();
