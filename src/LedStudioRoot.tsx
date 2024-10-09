@@ -68,6 +68,7 @@ interface State {
   midiState: Readonly<MidiState>;
   midiInput: WebMidi.MIDIInput | null;
   midiControllerInput: WebMidi.MIDIInput | null;
+  midiController64Input: WebMidi.MIDIInput | null;
   midiOutput: WebMidi.MIDIOutput | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
@@ -108,13 +109,13 @@ function getById<T extends { id: string }>(
   return obj;
 }
 
-function getByStickyIdKeyOrFirst<T extends { id: string }>(
+function getByStickyIdKeyOrNull<T extends { id: string }>(
   objs: ReadonlyArray<T>,
   key: keyof SimulatorStickySettings.Settings
 ): T | null {
   const idOrNull = SimulatorStickySettings.get({
     key: key,
-    defaultValue: objs.length === 0 ? null : objs[0].id,
+    defaultValue: null,
     validateFunc: createIsValidIdFunc(objs)
   });
 
@@ -133,6 +134,7 @@ function createDummyAudioNode() {
 class LedStudioRoot extends React.Component<InnerProps, State> {
   private readonly midiEventEmitter = new QueuedMidiEventEmitter();
   private readonly midiControllerEventEmitter = new MidiEventEmitter();
+  private readonly midiController64EventEmitter = new MidiEventEmitter();
   private readonly fadecandyClient = new FadecandyClient();
   public readonly audioIn = new AudioIn.default(
     (newAudioSource: AudioNode | null) => {
@@ -171,19 +173,17 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
           });
 
           const inputs = Array.from(webMidi.inputs.values());
-          const defaultInput = getByStickyIdKeyOrFirst(inputs, "midiInputId");
+          const defaultInput = getByStickyIdKeyOrNull(inputs, "midiInputId");
           this.setMidiInput(defaultInput);
-          const defaultControllerInput = getByStickyIdKeyOrFirst(
-            inputs,
-            "midiControllerInputId"
+          this.setMidiControllerInput(
+            getByStickyIdKeyOrNull(inputs, "midiControllerInputId")
           );
-          this.setMidiControllerInput(defaultControllerInput);
+          this.setMidiController64Input(
+            getByStickyIdKeyOrNull(inputs, "midiController64InputId")
+          );
 
           const outputs = Array.from(webMidi.outputs.values());
-          const defaultOutput = getByStickyIdKeyOrFirst(
-            outputs,
-            "midiOutputId"
-          );
+          const defaultOutput = getByStickyIdKeyOrNull(outputs, "midiOutputId");
           this.setMidiOutput(defaultOutput);
 
           this.updateMidiDevices();
@@ -327,6 +327,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             midiInputs={this.state.midiInputs}
             selectedPianoMidiInput={this.state.midiInput}
             selectedControllerMidiInput={this.state.midiControllerInput}
+            selectedController64MidiInput={this.state.midiController64Input}
             midiOutputs={this.state.midiOutputs}
             selectedPianoMidiThru={this.state.midiOutput}
             midiEventEmitters={[
@@ -386,6 +387,31 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       });
       SimulatorStickySettings.set(
         "midiControllerInputId",
+        newValue === null ? null : newValue.id
+      );
+    }
+  };
+
+  private setMidiController64Input = (newValue: WebMidi.MIDIInput | null) => {
+    if (newValue !== this.state.midiController64Input) {
+      if (this.state.midiController64Input) {
+        this.state.midiController64Input.removeEventListener(
+          "midimessage",
+          this.onMidiController64InputMessage as EventListener
+        );
+        this.resetAllKeys();
+      }
+      if (newValue) {
+        newValue.addEventListener(
+          "midimessage",
+          this.onMidiController64InputMessage
+        );
+      }
+      this.setState({
+        midiController64Input: newValue
+      });
+      SimulatorStickySettings.set(
+        "midiController64InputId",
         newValue === null ? null : newValue.id
       );
     }
@@ -503,6 +529,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   private actionManager: AllActions = {
     setPianoMidiInput: this.setMidiInput,
     setControllerMidiInput: this.setMidiControllerInput,
+    setController64MidiInput: this.setMidiController64Input,
     setPianoMidiThru: this.setMidiOutput,
     setSelectedSceneName: (name: string) => {
       if (name !== this.state.scene.name) {
@@ -558,6 +585,15 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
   ) => {
     const event = new MidiEvent(message.data);
     this.midiControllerEventEmitter.fire(event);
+    this.controllerState.handleEvent(event);
+    this.updateControlsView();
+  };
+
+  private onMidiController64InputMessage = (
+    message: WebMidi.MIDIMessageEvent
+  ) => {
+    const event = new MidiEvent(message.data);
+    this.midiController64EventEmitter.fire(event);
     this.controllerState.handleEvent(event);
     this.updateControlsView();
   };
@@ -755,6 +791,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       },
       midiInput: null,
       midiControllerInput: null,
+      midiController64Input: null,
       midiOutput: null,
       midiInputs: [],
       midiOutputs: [],

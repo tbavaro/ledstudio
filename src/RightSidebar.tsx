@@ -10,6 +10,7 @@ export interface Actions {
   setPianoMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setPianoMidiThru: (newValue: WebMidi.MIDIOutput | null) => void;
   setControllerMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
+  setController64MidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setBeatControllerType: (newValue: BeatControllerType) => void;
   setSelectedSceneName: (newValue: string) => void;
   setSelectedVisualizationGroupName: (newValue: string) => void;
@@ -30,6 +31,7 @@ interface Props {
   midiInputs: WebMidi.MIDIInput[];
   selectedPianoMidiInput: WebMidi.MIDIInput | null;
   selectedControllerMidiInput: WebMidi.MIDIInput | null;
+  selectedController64MidiInput: WebMidi.MIDIInput | null;
   midiOutputs: WebMidi.MIDIOutput[];
   selectedPianoMidiThru: WebMidi.MIDIOutput | null;
   midiEventEmitters: MidiEventEmitter[];
@@ -52,6 +54,7 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           {this.renderPianoMidiInputDevices()}
           {this.renderPianoMidiThruDevices()}
           {this.renderControllerMidiDevices()}
+          {this.renderController64MidiDevices()}
           {this.renderBeatControllerDevices()}
           <p />
         </div>
@@ -133,6 +136,15 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
       currentOption: this.props.selectedControllerMidiInput,
       options: this.props.midiInputs,
       onChange: this.props.actions.setControllerMidiInput
+    });
+  }
+
+  private renderController64MidiDevices() {
+    return this.renderMidiDropDownOption({
+      label: "Ctrl64 MIDI in",
+      currentOption: this.props.selectedController64MidiInput,
+      options: this.props.midiInputs,
+      onChange: this.props.actions.setController64MidiInput
     });
   }
 
