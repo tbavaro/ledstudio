@@ -1,0 +1,22 @@
+.root {
+  border-top: 1px solid black;
+  color: greenyellow;
+  padding-top: 4px;
+}
+
+.button {
+  display: inline-block;
+  background-color: white;
+  color: black;
+  padding: 5px;
+  margin-top: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ddd;
+  }
+
+  &:active {
+    background-color: #999;
+  }
+}

@@ -69,6 +69,7 @@ interface State {
   midiInput: WebMidi.MIDIInput | null;
   midiControllerInput: WebMidi.MIDIInput | null;
   midiController64Input: WebMidi.MIDIInput | null;
+  midiController64Output: WebMidi.MIDIOutput | null;
   midiOutput: WebMidi.MIDIOutput | null;
   midiInputs: WebMidi.MIDIInput[];
   midiOutputs: WebMidi.MIDIOutput[];
@@ -163,7 +164,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
     if (navigator.requestMIDIAccess) {
       navigator
-        .requestMIDIAccess()
+        .requestMIDIAccess({ sysex: true })
         .then(webMidi => {
           this.setState({
             midiState: {
@@ -173,6 +174,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
           });
 
           const inputs = Array.from(webMidi.inputs.values());
+          const outputs = Array.from(webMidi.outputs.values());
           const defaultInput = getByStickyIdKeyOrNull(inputs, "midiInputId");
           this.setMidiInput(defaultInput);
           this.setMidiControllerInput(
@@ -181,8 +183,10 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
           this.setMidiController64Input(
             getByStickyIdKeyOrNull(inputs, "midiController64InputId")
           );
+          this.setMidiController64Output(
+            getByStickyIdKeyOrNull(outputs, "midiController64OutputId")
+          );
 
-          const outputs = Array.from(webMidi.outputs.values());
           const defaultOutput = getByStickyIdKeyOrNull(outputs, "midiOutputId");
           this.setMidiOutput(defaultOutput);
 
@@ -314,30 +318,33 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
             : "ableton";
         const { visualizationGroupName } = this.state;
         return (
-          <RightSidebarComponent
-            actions={this.actionManager}
-            sceneNames={this.props.sceneNames}
-            selectedSceneName={this.state.scene.name}
-            visualizationGroupNames={this.props.visualizations.groupNames}
-            selectedVisualizationGroupName={visualizationGroupName}
-            visualizationNames={this.props.visualizations.visualizationNamesInGroup(
-              visualizationGroupName
-            )}
-            selectedVisualizationName={this.state.visualizationName}
-            midiInputs={this.state.midiInputs}
-            selectedPianoMidiInput={this.state.midiInput}
-            selectedControllerMidiInput={this.state.midiControllerInput}
-            selectedController64MidiInput={this.state.midiController64Input}
-            midiOutputs={this.state.midiOutputs}
-            selectedPianoMidiThru={this.state.midiOutput}
-            midiEventEmitters={[
-              this.midiEventEmitter,
-              this.midiControllerEventEmitter
-            ]}
-            audioInputs={this.state.audioInputs}
-            selectedAudioInput={this.state.selectedAudioInput}
-            selectedBeatControllerType={beatControllerType}
-          />
+          <>
+            <RightSidebarComponent
+              actions={this.actionManager}
+              sceneNames={this.props.sceneNames}
+              selectedSceneName={this.state.scene.name}
+              visualizationGroupNames={this.props.visualizations.groupNames}
+              selectedVisualizationGroupName={visualizationGroupName}
+              visualizationNames={this.props.visualizations.visualizationNamesInGroup(
+                visualizationGroupName
+              )}
+              selectedVisualizationName={this.state.visualizationName}
+              midiInputs={this.state.midiInputs}
+              selectedPianoMidiInput={this.state.midiInput}
+              selectedControllerMidiInput={this.state.midiControllerInput}
+              selectedController64MidiInput={this.state.midiController64Input}
+              selectedController64MidiOutput={this.state.midiController64Output}
+              midiOutputs={this.state.midiOutputs}
+              selectedPianoMidiThru={this.state.midiOutput}
+              midiEventEmitters={[
+                this.midiEventEmitter,
+                this.midiControllerEventEmitter
+              ]}
+              audioInputs={this.state.audioInputs}
+              selectedAudioInput={this.state.selectedAudioInput}
+              selectedBeatControllerType={beatControllerType}
+            />
+          </>
         );
 
       case "failed":
@@ -394,24 +401,23 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
 
   private setMidiController64Input = (newValue: WebMidi.MIDIInput | null) => {
     if (newValue !== this.state.midiController64Input) {
-      if (this.state.midiController64Input) {
-        this.state.midiController64Input.removeEventListener(
-          "midimessage",
-          this.onMidiController64InputMessage as EventListener
-        );
-        this.resetAllKeys();
-      }
-      if (newValue) {
-        newValue.addEventListener(
-          "midimessage",
-          this.onMidiController64InputMessage
-        );
-      }
       this.setState({
         midiController64Input: newValue
       });
       SimulatorStickySettings.set(
         "midiController64InputId",
+        newValue === null ? null : newValue.id
+      );
+    }
+  };
+
+  private setMidiController64Output = (newValue: WebMidi.MIDIOutput | null) => {
+    if (newValue !== this.state.midiController64Input) {
+      this.setState({
+        midiController64Output: newValue
+      });
+      SimulatorStickySettings.set(
+        "midiController64OutputId",
         newValue === null ? null : newValue.id
       );
     }
@@ -530,6 +536,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
     setPianoMidiInput: this.setMidiInput,
     setControllerMidiInput: this.setMidiControllerInput,
     setController64MidiInput: this.setMidiController64Input,
+    setController64MidiOutput: this.setMidiController64Output,
     setPianoMidiThru: this.setMidiOutput,
     setSelectedSceneName: (name: string) => {
       if (name !== this.state.scene.name) {
@@ -792,6 +799,7 @@ class LedStudioRoot extends React.Component<InnerProps, State> {
       midiInput: null,
       midiControllerInput: null,
       midiController64Input: null,
+      midiController64Output: null,
       midiOutput: null,
       midiInputs: [],
       midiOutputs: [],

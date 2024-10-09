@@ -45,6 +45,8 @@
   background-color: #333333;
   color: lightgray;
   font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
 }
 
 .LedStudioRoot-simulationToggleSwitch {

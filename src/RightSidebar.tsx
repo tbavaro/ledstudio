@@ -3,6 +3,7 @@ import "./RightSidebar.scss";
 import * as React from "react";
 
 import * as AudioIn from "./audioIn/AudioIn";
+import Ctrl64MidiView from "./Ctrl64MidiView";
 import { MidiEventEmitter } from "./piano/MidiEventListener";
 import { identity, valueOrDefault } from "./util/Utils";
 
@@ -11,6 +12,7 @@ export interface Actions {
   setPianoMidiThru: (newValue: WebMidi.MIDIOutput | null) => void;
   setControllerMidiInput: (newValue: WebMidi.MIDIInput | null) => void;
   setController64MidiInput: (newValue: WebMidi.MIDIInput | null) => void;
+  setController64MidiOutput: (newValue: WebMidi.MIDIOutput | null) => void;
   setBeatControllerType: (newValue: BeatControllerType) => void;
   setSelectedSceneName: (newValue: string) => void;
   setSelectedVisualizationGroupName: (newValue: string) => void;
@@ -32,6 +34,7 @@ interface Props {
   selectedPianoMidiInput: WebMidi.MIDIInput | null;
   selectedControllerMidiInput: WebMidi.MIDIInput | null;
   selectedController64MidiInput: WebMidi.MIDIInput | null;
+  selectedController64MidiOutput: WebMidi.MIDIOutput | null;
   midiOutputs: WebMidi.MIDIOutput[];
   selectedPianoMidiThru: WebMidi.MIDIOutput | null;
   midiEventEmitters: MidiEventEmitter[];
@@ -54,9 +57,12 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
           {this.renderPianoMidiInputDevices()}
           {this.renderPianoMidiThruDevices()}
           {this.renderControllerMidiDevices()}
-          {this.renderController64MidiDevices()}
           {this.renderBeatControllerDevices()}
           <p />
+          {this.renderController64MidiInputDevices()}
+          {this.renderController64MidiOutputDevices()}
+          <p />
+          {this.renderCtrl64MidiView()}
         </div>
         <div className="RightSidebar-appVersion">
           v{process.env.REACT_APP_VERSION}
@@ -139,12 +145,21 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
     });
   }
 
-  private renderController64MidiDevices() {
+  private renderController64MidiInputDevices() {
     return this.renderMidiDropDownOption({
       label: "Ctrl64 MIDI in",
       currentOption: this.props.selectedController64MidiInput,
       options: this.props.midiInputs,
       onChange: this.props.actions.setController64MidiInput
+    });
+  }
+
+  private renderController64MidiOutputDevices() {
+    return this.renderMidiDropDownOption({
+      label: "Ctrl64 MIDI out",
+      currentOption: this.props.selectedController64MidiOutput,
+      options: this.props.midiOutputs,
+      onChange: this.props.actions.setController64MidiOutput
     });
   }
 
@@ -227,5 +242,15 @@ export default class RightSidebar extends React.PureComponent<Props, {}> {
         </div>
       </div>
     );
+  }
+
+  private renderCtrl64MidiView() {
+    const input = this.props.selectedController64MidiInput;
+    const output = this.props.selectedController64MidiOutput;
+    if (input === null || output === null) {
+      return null;
+    }
+
+    return <Ctrl64MidiView input={input} output={output} />;
   }
 }
